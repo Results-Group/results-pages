@@ -155,7 +155,7 @@ const BUCKET = 'landing-pages'
 export async function uploadFile(filePath: string, buffer: Buffer, contentType = 'text/html') {
   const { error } = await supabase.storage
     .from(BUCKET)
-    .upload(filePath, buffer, { contentType, upsert: true })
+    .upload(filePath, buffer, { contentType, upsert: true, cacheControl: 'no-cache' })
   if (error) throw error
 }
 
