@@ -57,10 +57,10 @@ export default function AdminDashboard() {
     !search || p.title.includes(search) || p.slug.includes(search) || p.client.includes(search)
   )
 
-  function getStatus(page: PageItem): { label: string; color: string; bg: string } {
-    if (!page.active) return { label: 'מושבת', color: 'rgba(255,255,255,0.5)', bg: 'rgba(255,255,255,0.06)' }
-    if (page.expiresAt && new Date(page.expiresAt) < new Date()) return { label: 'פג תוקף', color: '#f87171', bg: 'rgba(248,113,113,0.1)' }
-    return { label: 'פעיל', color: '#4ade80', bg: 'rgba(74,222,128,0.1)' }
+  function getStatus(page: PageItem): { label: string; colorVar: string; bgVar: string } {
+    if (!page.active) return { label: 'מושבת', colorVar: 'var(--admin-disabled-text)', bgVar: 'var(--admin-disabled-bg)' }
+    if (page.expiresAt && new Date(page.expiresAt) < new Date()) return { label: 'פג תוקף', colorVar: 'var(--admin-danger)', bgVar: 'var(--admin-danger-bg)' }
+    return { label: 'פעיל', colorVar: 'var(--admin-success)', bgVar: 'var(--admin-success-bg)' }
   }
 
   return (
@@ -69,9 +69,9 @@ export default function AdminDashboard() {
         <h2 className="text-2xl font-black" style={{ color: 'var(--admin-text-primary)' }}>דפים</h2>
         <Link
           href="/admin/upload"
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200"
-          style={{ background: '#F3D56D', color: '#050505' }}
-          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px rgba(243,213,109,0.4)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+          className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-200"
+          style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
+          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px var(--admin-accent-glow)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
           onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
         >
           <Plus className="w-4 h-4" />
@@ -153,7 +153,7 @@ export default function AdminDashboard() {
                         rel="noopener noreferrer"
                         className="text-xs px-2.5 py-1 rounded-lg hover:underline"
                         dir="ltr"
-                        style={{ background: 'var(--admin-bg-elevated)', color: '#22D3EE' }}
+                        style={{ background: 'var(--admin-bg-elevated)', color: 'var(--admin-link)' }}
                       >
                         /{page.client}/{page.slug}
                       </a>
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
                     <td className="px-5 py-4">
                       <span
                         className="text-xs px-3 py-1 rounded-full font-bold"
-                        style={{ color: status.color, background: status.bg }}
+                        style={{ color: status.colorVar, background: status.bgVar }}
                       >
                         {status.label}
                       </span>
@@ -179,7 +179,7 @@ export default function AdminDashboard() {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="p-1.5 rounded-lg transition-colors"
-                          style={{ color: '#34d399' }}
+                          style={{ color: 'var(--admin-view)' }}
                           title="צפייה בדף"
                           onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
@@ -189,7 +189,7 @@ export default function AdminDashboard() {
                         <button
                           onClick={() => { setPreviewPage(page); setPreviewMode('desktop') }}
                           className="p-1.5 rounded-lg transition-colors"
-                          style={{ color: '#a78bfa' }}
+                          style={{ color: 'var(--admin-info)' }}
                           title="תצוגה מקדימה"
                           onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
@@ -199,7 +199,7 @@ export default function AdminDashboard() {
                         <Link
                           href={`/admin/pages/${page.id}`}
                           className="p-1.5 rounded-lg transition-colors"
-                          style={{ color: '#22D3EE' }}
+                          style={{ color: 'var(--admin-link)' }}
                           title="עריכה"
                           onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
@@ -209,7 +209,7 @@ export default function AdminDashboard() {
                         <button
                           onClick={() => handleToggle(page.id, page.active)}
                           className="p-1.5 rounded-lg transition-colors"
-                          style={{ color: '#F3D56D' }}
+                          style={{ color: 'var(--admin-accent)' }}
                           title={page.active ? 'השבת' : 'הפעל'}
                           onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
@@ -218,9 +218,11 @@ export default function AdminDashboard() {
                         </button>
                         <button
                           onClick={() => handleDelete(page.id, page.title)}
-                          className="p-1.5 rounded-lg transition-colors hover:bg-red-500/10"
-                          style={{ color: '#f87171' }}
+                          className="p-1.5 rounded-lg transition-colors"
+                          style={{ color: 'var(--admin-danger)' }}
                           title="מחיקה"
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-danger-bg)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -255,7 +257,7 @@ export default function AdminDashboard() {
                 <h3 className="text-sm font-bold" style={{ color: 'var(--admin-text-primary)' }}>
                   תצוגה מקדימה: {previewPage.title}
                 </h3>
-                <span className="text-xs px-2.5 py-1 rounded-lg" dir="ltr" style={{ background: 'var(--admin-bg)', color: '#22D3EE' }}>
+                <span className="text-xs px-2.5 py-1 rounded-lg" dir="ltr" style={{ background: 'var(--admin-bg)', color: 'var(--admin-link)' }}>
                   /{previewPage.client}/{previewPage.slug}
                 </span>
               </div>
@@ -266,8 +268,8 @@ export default function AdminDashboard() {
                     onClick={() => setPreviewMode('desktop')}
                     className="flex items-center gap-2 px-4 py-2 text-xs font-bold transition-all duration-200"
                     style={{
-                      background: previewMode === 'desktop' ? '#22D3EE' : 'transparent',
-                      color: previewMode === 'desktop' ? '#050505' : 'var(--admin-text-muted)',
+                      background: previewMode === 'desktop' ? 'var(--admin-link)' : 'transparent',
+                      color: previewMode === 'desktop' ? 'var(--admin-accent-text)' : 'var(--admin-text-muted)',
                     }}
                   >
                     <Monitor className="w-4 h-4" />
@@ -277,8 +279,8 @@ export default function AdminDashboard() {
                     onClick={() => setPreviewMode('mobile')}
                     className="flex items-center gap-2 px-4 py-2 text-xs font-bold transition-all duration-200"
                     style={{
-                      background: previewMode === 'mobile' ? '#22D3EE' : 'transparent',
-                      color: previewMode === 'mobile' ? '#050505' : 'var(--admin-text-muted)',
+                      background: previewMode === 'mobile' ? 'var(--admin-link)' : 'transparent',
+                      color: previewMode === 'mobile' ? 'var(--admin-accent-text)' : 'var(--admin-text-muted)',
                     }}
                   >
                     <Smartphone className="w-4 h-4" />
@@ -290,7 +292,7 @@ export default function AdminDashboard() {
                   onClick={() => setPreviewPage(null)}
                   className="p-2 rounded-xl transition-colors"
                   style={{ color: 'var(--admin-text-muted)' }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-hover-bg)'; e.currentTarget.style.color = '#f87171' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-hover-bg)'; e.currentTarget.style.color = 'var(--admin-danger)' }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
                   title="סגירה"
                 >
@@ -300,7 +302,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Iframe Container */}
-            <div className="flex-1 flex items-center justify-center overflow-hidden p-4" style={{ background: '#1a1a2e' }}>
+            <div className="flex-1 flex items-center justify-center overflow-hidden p-4" style={{ background: 'var(--admin-preview-bg)' }}>
               <div
                 className="h-full transition-all duration-300 ease-in-out"
                 style={{
@@ -308,8 +310,8 @@ export default function AdminDashboard() {
                   maxWidth: previewMode === 'desktop' ? '1280px' : '375px',
                   ...(previewMode === 'mobile' ? {
                     borderRadius: '2rem',
-                    border: '8px solid #2a2a3e',
-                    boxShadow: '0 0 40px rgba(34,211,238,0.08), inset 0 0 0 2px #3a3a4e',
+                    border: '8px solid var(--admin-preview-frame)',
+                    boxShadow: '0 0 40px rgba(34,211,238,0.08), inset 0 0 0 2px var(--admin-preview-frame-inner)',
                   } : {
                     borderRadius: '0.75rem',
                     border: '1px solid var(--admin-border)',

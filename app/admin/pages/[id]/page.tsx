@@ -105,7 +105,7 @@ export default function EditPage() {
         style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}
       >
         <p className="text-xs font-bold mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>URL</p>
-        <code className="text-sm" dir="ltr" style={{ color: '#22D3EE' }}>/pages/{client}/{slug}</code>
+        <code className="text-sm" dir="ltr" style={{ color: 'var(--admin-link)' }}>/pages/{client}/{slug}</code>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
@@ -117,7 +117,7 @@ export default function EditPage() {
             onChange={e => setTitle(e.target.value)}
             className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
             style={inputStyle}
-            onFocus={e => e.currentTarget.style.borderColor = '#F3D56D'}
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
         </div>
@@ -131,7 +131,7 @@ export default function EditPage() {
             dir="ltr"
             className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
             style={inputStyle}
-            onFocus={e => e.currentTarget.style.borderColor = '#F3D56D'}
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
         </div>
@@ -145,7 +145,7 @@ export default function EditPage() {
             dir="ltr"
             className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
             style={inputStyle}
-            onFocus={e => e.currentTarget.style.borderColor = '#F3D56D'}
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
         </div>
@@ -159,7 +159,7 @@ export default function EditPage() {
             dir="ltr"
             className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
             style={inputStyle}
-            onFocus={e => e.currentTarget.style.borderColor = '#F3D56D'}
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
         </div>
@@ -169,7 +169,7 @@ export default function EditPage() {
             type="button"
             onClick={() => setActive(!active)}
             className="relative w-11 h-6 rounded-full transition-colors duration-200"
-            style={{ background: active ? '#4ade80' : 'var(--admin-border-input)' }}
+            style={{ background: active ? 'var(--admin-success)' : 'var(--admin-border-input)' }}
           >
             <span
               className="absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200"
@@ -181,15 +181,15 @@ export default function EditPage() {
           </span>
         </div>
 
-        {error && <p className="text-red-400 text-sm">{error}</p>}
+        {error && <p className="text-sm" style={{ color: 'var(--admin-danger)' }}>{error}</p>}
 
         <div className="flex gap-3 pt-2">
           <button
             type="submit"
             disabled={saving}
             className="flex-1 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-40"
-            style={{ background: '#F3D56D', color: '#050505' }}
-            onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px rgba(243,213,109,0.4)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+            style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
+            onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px var(--admin-accent-glow)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
             onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
           >
             {saving ? 'שומר...' : 'שמירה'}
@@ -197,8 +197,10 @@ export default function EditPage() {
           <button
             type="button"
             onClick={handleDelete}
-            className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-red-500/10"
-            style={{ color: '#f87171', border: '1px solid rgba(248,113,113,0.2)' }}
+            className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold transition-all duration-200"
+            style={{ color: 'var(--admin-danger)', border: '1px solid var(--admin-danger-border)' }}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-danger-bg)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
             <Trash2 className="w-4 h-4" />
             מחיקה

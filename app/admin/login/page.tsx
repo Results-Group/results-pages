@@ -63,24 +63,24 @@ export default function LoginPage() {
                 border: '1px solid var(--admin-border-input)',
                 color: 'var(--admin-text-primary)',
               }}
-              onFocus={e => e.currentTarget.style.borderColor = '#F3D56D'}
+              onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
               onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border-input)'}
             />
           </div>
 
           {error && (
-            <p className="text-red-400 text-sm mb-4 text-center">{error}</p>
+            <p className="text-sm mb-4 text-center" style={{ color: 'var(--admin-danger)' }}>{error}</p>
           )}
 
           <button
             type="submit"
             disabled={loading || !password}
-            className="w-full py-3 rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-40"
+            className="w-full py-3.5 rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-40"
             style={{
-              background: '#F3D56D',
-              color: '#050505',
+              background: 'var(--admin-accent)',
+              color: 'var(--admin-accent-text)',
             }}
-            onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px rgba(243,213,109,0.4)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+            onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px var(--admin-accent-glow)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
             onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
           >
             {loading ? '...' : 'כניסה'}

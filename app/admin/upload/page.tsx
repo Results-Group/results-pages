@@ -70,8 +70,8 @@ export default function UploadPage() {
           <div
             className="rounded-2xl p-10 text-center cursor-pointer transition-all duration-200"
             style={{
-              border: `2px dashed ${dragOver ? '#F3D56D' : 'var(--admin-border)'}`,
-              background: dragOver ? 'rgba(243,213,109,0.04)' : 'var(--admin-bg-elevated)',
+              border: `2px dashed ${dragOver ? 'var(--admin-accent)' : 'var(--admin-border)'}`,
+              background: dragOver ? 'var(--admin-accent-subtle)' : 'var(--admin-bg-elevated)',
             }}
             onDragOver={e => { e.preventDefault(); setDragOver(true) }}
             onDragLeave={() => setDragOver(false)}
@@ -80,7 +80,7 @@ export default function UploadPage() {
           >
             {file ? (
               <div className="flex items-center justify-center gap-2">
-                <FileUp className="w-5 h-5" style={{ color: '#F3D56D' }} />
+                <FileUp className="w-5 h-5" style={{ color: 'var(--admin-accent)' }} />
                 <p className="text-sm font-bold" style={{ color: 'var(--admin-text-primary)' }}>
                   {file.name} <span style={{ color: 'var(--admin-text-muted)' }}>({(file.size / 1024).toFixed(0)} KB)</span>
                 </p>
@@ -112,7 +112,7 @@ export default function UploadPage() {
             dir="ltr"
             className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
             style={inputStyle}
-            onFocus={e => e.currentTarget.style.borderColor = '#F3D56D'}
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
         </div>
@@ -127,7 +127,7 @@ export default function UploadPage() {
             placeholder="דוח קמפיינים מאי 2026"
             className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
             style={inputStyle}
-            onFocus={e => e.currentTarget.style.borderColor = '#F3D56D'}
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
         </div>
@@ -143,7 +143,7 @@ export default function UploadPage() {
             dir="ltr"
             className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
             style={inputStyle}
-            onFocus={e => e.currentTarget.style.borderColor = '#F3D56D'}
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
           {slug && client && (
@@ -163,19 +163,19 @@ export default function UploadPage() {
             className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
             style={inputStyle}
             dir="ltr"
-            onFocus={e => e.currentTarget.style.borderColor = '#F3D56D'}
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
         </div>
 
-        {error && <p className="text-red-400 text-sm">{error}</p>}
+        {error && <p className="text-sm" style={{ color: 'var(--admin-danger)' }}>{error}</p>}
 
         <button
           type="submit"
           disabled={uploading}
           className="w-full py-3.5 rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-40"
-          style={{ background: '#F3D56D', color: '#050505' }}
-          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px rgba(243,213,109,0.4)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+          style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
+          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px var(--admin-accent-glow)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
           onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
         >
           {uploading ? 'מעלה...' : 'העלאה'}

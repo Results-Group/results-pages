@@ -90,9 +90,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 ${active ? 'border-r-3 border-[#F3D56D]' : ''}`}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 ${active ? 'border-r-3' : ''}`}
               style={active
-                ? { color: '#F3D56D', background: 'var(--sidebar-active-bg)' }
+                ? { color: 'var(--sidebar-accent)', background: 'var(--sidebar-active-bg)', borderColor: 'var(--sidebar-accent-border)' }
                 : { color: 'var(--sidebar-text-secondary)' }
               }
               onMouseEnter={(e) => {
@@ -135,8 +135,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </button>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 w-full"
+          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 w-full"
           style={{ color: 'var(--sidebar-text-muted)' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'var(--admin-danger-bg)'
+            e.currentTarget.style.color = 'var(--admin-danger)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent'
+            e.currentTarget.style.color = 'var(--sidebar-text-muted)'
+          }}
         >
           <LogOut className="w-5 h-5" />
           התנתקות
