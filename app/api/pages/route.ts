@@ -1,21 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { getPages, createPage } from '@/lib/db'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
-  const client = searchParams.get('client')
-  const search = searchParams.get('search')
+  const client = searchParams.get('client') || undefined
+  const search = searchParams.get('search') || undefined
 
-  const where: Record<string, unknown> = {}
-  if (client) where.client = client
-  if (search) where.title = { contains: search }
-
-  const pages = await prisma.page.findMany({
-    where,
-    include: { _count: { select: { views: true } } },
-    orderBy: { createdAt: 'desc' },
-  })
-
+  const pages = await getPages({ client, search })
   return NextResponse.json(pages)
 }
 
@@ -23,14 +14,12 @@ export async function POST(req: NextRequest) {
   const body = await req.json()
   const { client, slug, title, filePath, expiresAt } = body
 
-  const page = await prisma.page.create({
-    data: {
-      client,
-      slug,
-      title,
-      filePath,
-      expiresAt: expiresAt ? new Date(expiresAt) : null,
-    },
+  const page = await createPage({
+    client,
+    slug,
+    title,
+    file_path: filePath,
+    expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
   })
 
   return NextResponse.json(page, { status: 201 })

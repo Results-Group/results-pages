@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
-import { existsSync } from 'fs'
+import { getPageByClientSlug, createPage, uploadFile } from '@/lib/db'
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData()
@@ -20,30 +17,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'ניתן להעלות קבצי HTML בלבד' }, { status: 400 })
   }
 
-  // Check for duplicates
-  const existing = await prisma.page.findUnique({ where: { client_slug: { client, slug } } })
+  const existing = await getPageByClientSlug(client, slug)
   if (existing) {
     return NextResponse.json({ error: `דף "${slug}" כבר קיים עבור ${client}` }, { status: 409 })
   }
 
-  // Save file
-  const dir = join(process.cwd(), 'public', 'pages', client)
-  if (!existsSync(dir)) await mkdir(dir, { recursive: true })
-
-  const filePath = `pages/${client}/${slug}.html`
-  const fullPath = join(process.cwd(), 'public', filePath)
+  const filePath = `${client}/${slug}.html`
   const buffer = Buffer.from(await file.arrayBuffer())
-  await writeFile(fullPath, buffer)
+  await uploadFile(filePath, buffer)
 
-  // Save to DB
-  const page = await prisma.page.create({
-    data: {
-      client,
-      slug,
-      title,
-      filePath,
-      expiresAt: expiresAt ? new Date(expiresAt) : null,
-    },
+  const page = await createPage({
+    client,
+    slug,
+    title,
+    file_path: filePath,
+    expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
   })
 
   return NextResponse.json(page, { status: 201 })

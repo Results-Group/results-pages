@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
-import { readFile } from 'fs/promises'
-import { join } from 'path'
-import { existsSync } from 'fs'
+import { getPageByClientSlug, createPageView, downloadFile } from '@/lib/db'
 
 interface Ctx { params: Promise<{ path: string[] }> }
 
@@ -16,10 +13,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
   const client = path[0]
   const slug = path.slice(1).join('/')
 
-  // Look up in database
-  const page = await prisma.page.findUnique({
-    where: { client_slug: { client, slug } },
-  })
+  const page = await getPageByClientSlug(client, slug)
 
   if (!page) {
     return new NextResponse(expiredPage('הדף לא נמצא'), {
@@ -28,7 +22,6 @@ export async function GET(req: NextRequest, { params }: Ctx) {
     })
   }
 
-  // Check if disabled
   if (!page.active) {
     return new NextResponse(expiredPage('הדף אינו זמין כרגע'), {
       status: 403,
@@ -36,17 +29,15 @@ export async function GET(req: NextRequest, { params }: Ctx) {
     })
   }
 
-  // Check expiration
-  if (page.expiresAt && new Date(page.expiresAt) < new Date()) {
+  if (page.expires_at && new Date(page.expires_at) < new Date()) {
     return new NextResponse(expiredPage('תוקף הדף פג'), {
       status: 410,
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     })
   }
 
-  // Serve the file
-  const filePath = join(process.cwd(), 'public', page.filePath)
-  if (!existsSync(filePath)) {
+  const html = await downloadFile(page.file_path)
+  if (!html) {
     return new NextResponse(expiredPage('הקובץ לא נמצא'), {
       status: 404,
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
@@ -56,11 +47,8 @@ export async function GET(req: NextRequest, { params }: Ctx) {
   // Track view (fire and forget)
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
   const userAgent = req.headers.get('user-agent') || ''
-  prisma.pageView.create({
-    data: { pageId: page.id, ip, userAgent },
-  }).catch(() => {})
+  createPageView({ page_id: page.id, ip, user_agent: userAgent }).catch(() => {})
 
-  const html = await readFile(filePath, 'utf-8')
   return new NextResponse(html, {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
