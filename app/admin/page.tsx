@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Plus, Search, Eye, ExternalLink, Pencil, ToggleLeft, ToggleRight, Trash2, Monitor, Smartphone, X } from 'lucide-react'
+import { Plus, Search, Eye, ExternalLink, Pencil, ToggleLeft, ToggleRight, Trash2, Monitor, Smartphone, X, Copy, MessageCircle } from 'lucide-react'
 
 interface PageItem {
   id: string
@@ -41,6 +41,23 @@ export default function AdminDashboard() {
     if (!confirm(`למחוק את "${title}"?`)) return
     await fetch(`/api/pages/${id}`, { method: 'DELETE' })
     fetchPages()
+  }
+
+  async function handleDuplicate(id: string, title: string) {
+    if (!confirm(`לשכפל את "${title}"?`)) return
+    const res = await fetch(`/api/pages/${id}/duplicate`, { method: 'POST' })
+    if (res.ok) {
+      fetchPages()
+    } else {
+      const err = await res.json()
+      alert(`שגיאה בשכפול: ${err.error || 'Unknown error'}`)
+    }
+  }
+
+  function handleWhatsApp(page: PageItem) {
+    const fullUrl = `https://results-pages.vercel.app/pages/${page.client}/${page.slug}`
+    const message = `${page.title}\n${fullUrl}`
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank')
   }
 
   async function handleToggle(id: string, currentActive: boolean) {
@@ -215,6 +232,26 @@ export default function AdminDashboard() {
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         >
                           {page.active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
+                        </button>
+                        <button
+                          onClick={() => handleDuplicate(page.id, page.title)}
+                          className="p-1.5 rounded-lg transition-colors"
+                          style={{ color: 'var(--admin-link)' }}
+                          title="שכפול"
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleWhatsApp(page)}
+                          className="p-1.5 rounded-lg transition-colors"
+                          style={{ color: '#25D366' }}
+                          title="שליחה בוואטסאפ"
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <MessageCircle className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(page.id, page.title)}
