@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Plus, Search, Eye, ExternalLink, Pencil, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react'
+import { Plus, Search, Eye, ExternalLink, Pencil, ToggleLeft, ToggleRight, Trash2, Monitor, Smartphone, X } from 'lucide-react'
 
 interface PageItem {
   id: string
@@ -20,6 +20,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('')
   const [search, setSearch] = useState('')
+  const [previewPage, setPreviewPage] = useState<PageItem | null>(null)
+  const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop')
 
   useEffect(() => {
     fetchPages()
@@ -184,6 +186,16 @@ export default function AdminDashboard() {
                         >
                           <ExternalLink className="w-4 h-4" />
                         </a>
+                        <button
+                          onClick={() => { setPreviewPage(page); setPreviewMode('desktop') }}
+                          className="p-1.5 rounded-lg transition-colors"
+                          style={{ color: '#a78bfa' }}
+                          title="תצוגה מקדימה"
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
                         <Link
                           href={`/admin/pages/${page.id}`}
                           className="p-1.5 rounded-lg transition-colors"
@@ -219,6 +231,102 @@ export default function AdminDashboard() {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {previewPage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.85)' }}
+          onClick={() => setPreviewPage(null)}
+        >
+          <div
+            className="relative w-[95vw] h-[92vh] rounded-2xl overflow-hidden flex flex-col"
+            style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div
+              className="flex items-center justify-between px-6 py-4 shrink-0"
+              style={{ borderBottom: '1px solid var(--admin-border)', background: 'var(--admin-bg-elevated)' }}
+            >
+              <div className="flex items-center gap-4">
+                <h3 className="text-sm font-bold" style={{ color: 'var(--admin-text-primary)' }}>
+                  תצוגה מקדימה: {previewPage.title}
+                </h3>
+                <span className="text-xs px-2.5 py-1 rounded-lg" dir="ltr" style={{ background: 'var(--admin-bg)', color: '#22D3EE' }}>
+                  /{previewPage.client}/{previewPage.slug}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                {/* Device Toggle */}
+                <div className="flex items-center rounded-xl overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
+                  <button
+                    onClick={() => setPreviewMode('desktop')}
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold transition-all duration-200"
+                    style={{
+                      background: previewMode === 'desktop' ? '#22D3EE' : 'transparent',
+                      color: previewMode === 'desktop' ? '#050505' : 'var(--admin-text-muted)',
+                    }}
+                  >
+                    <Monitor className="w-4 h-4" />
+                    דסקטופ
+                  </button>
+                  <button
+                    onClick={() => setPreviewMode('mobile')}
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold transition-all duration-200"
+                    style={{
+                      background: previewMode === 'mobile' ? '#22D3EE' : 'transparent',
+                      color: previewMode === 'mobile' ? '#050505' : 'var(--admin-text-muted)',
+                    }}
+                  >
+                    <Smartphone className="w-4 h-4" />
+                    מובייל
+                  </button>
+                </div>
+                {/* Close Button */}
+                <button
+                  onClick={() => setPreviewPage(null)}
+                  className="p-2 rounded-xl transition-colors"
+                  style={{ color: 'var(--admin-text-muted)' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-hover-bg)'; e.currentTarget.style.color = '#f87171' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
+                  title="סגירה"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Iframe Container */}
+            <div className="flex-1 flex items-center justify-center overflow-hidden p-4" style={{ background: '#1a1a2e' }}>
+              <div
+                className="h-full transition-all duration-300 ease-in-out"
+                style={{
+                  width: previewMode === 'desktop' ? '100%' : '375px',
+                  maxWidth: previewMode === 'desktop' ? '1280px' : '375px',
+                  ...(previewMode === 'mobile' ? {
+                    borderRadius: '2rem',
+                    border: '8px solid #2a2a3e',
+                    boxShadow: '0 0 40px rgba(34,211,238,0.08), inset 0 0 0 2px #3a3a4e',
+                  } : {
+                    borderRadius: '0.75rem',
+                    border: '1px solid var(--admin-border)',
+                  }),
+                }}
+              >
+                <iframe
+                  src={`/pages/${previewPage.client}/${previewPage.slug}`}
+                  className="w-full h-full"
+                  style={{
+                    borderRadius: previewMode === 'mobile' ? '1.5rem' : '0.75rem',
+                    background: '#fff',
+                  }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
