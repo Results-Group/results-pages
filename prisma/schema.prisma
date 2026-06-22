@@ -1,0 +1,33 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = []
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Page {
+  id        String   @id @default(cuid())
+  client    String
+  slug      String
+  title     String
+  filePath  String
+  active    Boolean  @default(true)
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  views     PageView[]
+
+  @@unique([client, slug])
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  pageId    String
+  page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  viewedAt  DateTime @default(now())
+  ip        String?
+  userAgent String?
+}

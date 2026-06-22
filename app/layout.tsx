@@ -1,15 +1,15 @@
 import type { Metadata } from 'next'
+import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Results Group',
-  description: 'Reports & Landing Pages',
-  icons: { icon: '/favicon.ico' },
+  title: 'Results Pages',
+  description: 'Landing pages & reports management',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="he" dir="rtl">
-      <body style={{ margin: 0, padding: 0 }}>{children}</body>
+      <body className="bg-gray-50 text-gray-900 antialiased">{children}</body>
     </html>
   )
 }

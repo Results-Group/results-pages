@@ -8,9 +8,16 @@
     "start": "next start"
   },
   "dependencies": {
+    "@libsql/client": "^0.17.4",
+    "@prisma/adapter-libsql": "^7.8.0",
+    "@prisma/client": "^6.19.3",
+    "@tailwindcss/postcss": "^4.3.1",
     "next": "latest",
+    "postcss": "^8.5.15",
+    "prisma": "^6.19.3",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "tailwindcss": "^4.3.1"
   },
   "devDependencies": {
     "@types/node": "latest",
