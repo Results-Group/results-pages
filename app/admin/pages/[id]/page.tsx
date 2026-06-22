@@ -169,7 +169,7 @@ export default function EditPage() {
             type="button"
             onClick={() => setActive(!active)}
             className="relative w-11 h-6 rounded-full transition-colors duration-200"
-            style={{ background: active ? '#4ade80' : 'rgba(255,255,255,0.15)' }}
+            style={{ background: active ? '#4ade80' : 'var(--admin-border-input)' }}
           >
             <span
               className="absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200"

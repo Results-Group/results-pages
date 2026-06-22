@@ -171,17 +171,21 @@ export default function AdminDashboard() {
                       <div className="flex items-center gap-3">
                         <Link
                           href={`/admin/pages/${page.id}`}
-                          className="p-1.5 rounded-lg transition-colors hover:bg-white/5"
+                          className="p-1.5 rounded-lg transition-colors"
                           style={{ color: '#22D3EE' }}
                           title="עריכה"
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         >
                           <Pencil className="w-4 h-4" />
                         </Link>
                         <button
                           onClick={() => handleToggle(page.id, page.active)}
-                          className="p-1.5 rounded-lg transition-colors hover:bg-white/5"
+                          className="p-1.5 rounded-lg transition-colors"
                           style={{ color: '#F3D56D' }}
                           title={page.active ? 'השבת' : 'הפעל'}
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         >
                           {page.active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                         </button>

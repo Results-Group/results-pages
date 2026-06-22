@@ -30,7 +30,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen" style={{ background: '#050505' }}>
+    <div className="flex items-center justify-center min-h-screen" style={{ background: 'var(--login-bg)' }}>
       <div className="w-full max-w-sm px-4">
         <form
           onSubmit={handleSubmit}

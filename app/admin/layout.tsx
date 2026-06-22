@@ -9,6 +9,8 @@ import {
   LogOut,
   Menu,
   X,
+  Sun,
+  Moon,
 } from 'lucide-react'
 
 const navItems = [
@@ -20,6 +22,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+
+  useEffect(() => {
+    const saved = localStorage.getItem('theme') as 'dark' | 'light' | null
+    if (saved === 'light' || saved === 'dark') {
+      setTheme(saved)
+    }
+  }, [])
+
+  function toggleTheme() {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    localStorage.setItem('theme', next)
+    if (next === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light')
+    } else {
+      document.documentElement.removeAttribute('data-theme')
+    }
+    document.documentElement.classList.add('theme-transition')
+    setTimeout(() => document.documentElement.classList.remove('theme-transition'), 350)
+  }
 
   useEffect(() => {
     setMobileOpen(false)
@@ -92,7 +115,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         })}
       </nav>
 
-      <div className="p-4" style={{ borderTop: '1px solid var(--sidebar-border)' }}>
+      <div className="p-4 space-y-1" style={{ borderTop: '1px solid var(--sidebar-border)' }}>
+        <button
+          onClick={toggleTheme}
+          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 w-full"
+          style={{ color: 'var(--sidebar-text-secondary)' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'var(--sidebar-hover-bg)'
+            e.currentTarget.style.color = 'var(--sidebar-text)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent'
+            e.currentTarget.style.color = 'var(--sidebar-text-secondary)'
+          }}
+          title={theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'}
+        >
+          {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          {theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'}
+        </button>
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 w-full"
