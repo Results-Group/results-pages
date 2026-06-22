@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { Plus, Search, Eye, Pencil, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react'
 
 interface PageItem {
   id: string
@@ -54,34 +55,56 @@ export default function AdminDashboard() {
     !search || p.title.includes(search) || p.slug.includes(search) || p.client.includes(search)
   )
 
-  function getStatus(page: PageItem): { label: string; color: string } {
-    if (!page.active) return { label: 'מושבת', color: 'bg-gray-200 text-gray-700' }
-    if (page.expiresAt && new Date(page.expiresAt) < new Date()) return { label: 'פג תוקף', color: 'bg-red-100 text-red-700' }
-    return { label: 'פעיל', color: 'bg-green-100 text-green-700' }
+  function getStatus(page: PageItem): { label: string; color: string; bg: string } {
+    if (!page.active) return { label: 'מושבת', color: 'rgba(255,255,255,0.5)', bg: 'rgba(255,255,255,0.06)' }
+    if (page.expiresAt && new Date(page.expiresAt) < new Date()) return { label: 'פג תוקף', color: '#f87171', bg: 'rgba(248,113,113,0.1)' }
+    return { label: 'פעיל', color: '#4ade80', bg: 'rgba(74,222,128,0.1)' }
   }
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">דפים</h2>
-        <Link href="/admin/upload" className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors">
-          + העלאת דף
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-2xl font-black" style={{ color: 'var(--admin-text-primary)' }}>דפים</h2>
+        <Link
+          href="/admin/upload"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200"
+          style={{ background: '#F3D56D', color: '#050505' }}
+          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px rgba(243,213,109,0.4)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+          onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
+        >
+          <Plus className="w-4 h-4" />
+          העלאת דף
         </Link>
       </div>
 
       {/* Filters */}
-      <div className="flex gap-3 mb-4">
-        <input
-          type="text"
-          placeholder="חיפוש..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="px-3 py-2 border border-gray-200 rounded-lg text-sm flex-1 max-w-xs"
-        />
+      <div className="flex gap-3 mb-6">
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--admin-text-muted)' }} />
+          <input
+            type="text"
+            placeholder="חיפוש..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full pr-10 pl-4 py-2.5 rounded-xl text-sm outline-none transition-colors"
+            style={{
+              background: 'var(--admin-bg-elevated)',
+              border: '1px solid var(--admin-border)',
+              color: 'var(--admin-text-primary)',
+            }}
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-border-input)'}
+            onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
+          />
+        </div>
         <select
           value={filter}
           onChange={e => setFilter(e.target.value)}
-          className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+          className="px-4 py-2.5 rounded-xl text-sm outline-none"
+          style={{
+            background: 'var(--admin-bg-elevated)',
+            border: '1px solid var(--admin-border)',
+            color: 'var(--admin-text-primary)',
+          }}
         >
           <option value="">כל הלקוחות</option>
           {clients.map(c => <option key={c} value={c}>{c}</option>)}
@@ -89,53 +112,86 @@ export default function AdminDashboard() {
       </div>
 
       {loading ? (
-        <p className="text-gray-500 text-sm">טוען...</p>
+        <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>טוען...</p>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
-          <p className="text-lg">אין דפים</p>
-          <p className="text-sm mt-1">לחץ &quot;העלאת דף&quot; להתחיל</p>
+        <div className="text-center py-20" style={{ color: 'var(--admin-text-muted)' }}>
+          <p className="text-lg font-bold mb-1">אין דפים</p>
+          <p className="text-sm">לחץ &quot;העלאת דף&quot; להתחיל</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-start px-4 py-3 font-medium text-gray-600">לקוח</th>
-                <th className="text-start px-4 py-3 font-medium text-gray-600">כותרת</th>
-                <th className="text-start px-4 py-3 font-medium text-gray-600">URL</th>
-                <th className="text-start px-4 py-3 font-medium text-gray-600">סטטוס</th>
-                <th className="text-start px-4 py-3 font-medium text-gray-600">צפיות</th>
-                <th className="text-start px-4 py-3 font-medium text-gray-600">פעולות</th>
+            <thead>
+              <tr style={{ background: 'var(--admin-bg-elevated)', borderBottom: '1px solid var(--admin-border)' }}>
+                <th className="text-start px-5 py-3.5 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--admin-text-muted)' }}>לקוח</th>
+                <th className="text-start px-5 py-3.5 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--admin-text-muted)' }}>כותרת</th>
+                <th className="text-start px-5 py-3.5 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--admin-text-muted)' }}>URL</th>
+                <th className="text-start px-5 py-3.5 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--admin-text-muted)' }}>סטטוס</th>
+                <th className="text-start px-5 py-3.5 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--admin-text-muted)' }}>צפיות</th>
+                <th className="text-start px-5 py-3.5 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--admin-text-muted)' }}>פעולות</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map(page => {
                 const status = getStatus(page)
                 return (
-                  <tr key={page.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium">{page.client}</td>
-                    <td className="px-4 py-3">{page.title}</td>
-                    <td className="px-4 py-3">
-                      <code className="text-xs bg-gray-100 px-2 py-0.5 rounded" dir="ltr">
+                  <tr
+                    key={page.id}
+                    className="transition-colors duration-150"
+                    style={{ borderBottom: '1px solid var(--admin-border)' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <td className="px-5 py-4 font-bold" style={{ color: 'var(--admin-text-primary)' }}>{page.client}</td>
+                    <td className="px-5 py-4" style={{ color: 'var(--admin-text-secondary)' }}>{page.title}</td>
+                    <td className="px-5 py-4">
+                      <code
+                        className="text-xs px-2.5 py-1 rounded-lg"
+                        dir="ltr"
+                        style={{ background: 'var(--admin-bg-elevated)', color: '#22D3EE' }}
+                      >
                         /{page.client}/{page.slug}
                       </code>
                     </td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${status.color}`}>
+                    <td className="px-5 py-4">
+                      <span
+                        className="text-xs px-3 py-1 rounded-full font-bold"
+                        style={{ color: status.color, background: status.bg }}
+                      >
                         {status.label}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{page._count.views}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2">
-                        <Link href={`/admin/pages/${page.id}`} className="text-blue-600 hover:underline text-xs">
-                          עריכה
+                    <td className="px-5 py-4" style={{ color: 'var(--admin-text-muted)' }}>
+                      <span className="flex items-center gap-1.5">
+                        <Eye className="w-3.5 h-3.5" />
+                        {page._count.views}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <Link
+                          href={`/admin/pages/${page.id}`}
+                          className="p-1.5 rounded-lg transition-colors hover:bg-white/5"
+                          style={{ color: '#22D3EE' }}
+                          title="עריכה"
+                        >
+                          <Pencil className="w-4 h-4" />
                         </Link>
-                        <button onClick={() => handleToggle(page.id, page.active)} className="text-yellow-600 hover:underline text-xs">
-                          {page.active ? 'השבת' : 'הפעל'}
+                        <button
+                          onClick={() => handleToggle(page.id, page.active)}
+                          className="p-1.5 rounded-lg transition-colors hover:bg-white/5"
+                          style={{ color: '#F3D56D' }}
+                          title={page.active ? 'השבת' : 'הפעל'}
+                        >
+                          {page.active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                         </button>
-                        <button onClick={() => handleDelete(page.id, page.title)} className="text-red-600 hover:underline text-xs">
-                          מחק
+                        <button
+                          onClick={() => handleDelete(page.id, page.title)}
+                          className="p-1.5 rounded-lg transition-colors hover:bg-red-500/10"
+                          style={{ color: '#f87171' }}
+                          title="מחיקה"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>

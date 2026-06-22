@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { Eye, Trash2, ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 
 interface PageData {
   id: string
@@ -66,90 +68,139 @@ export default function EditPage() {
     router.push('/admin')
   }
 
-  if (!page) return <p className="text-gray-500">טוען...</p>
+  const inputStyle = {
+    background: 'var(--admin-bg-elevated)',
+    border: '1px solid var(--admin-border)',
+    color: 'var(--admin-text-primary)',
+  }
+
+  if (!page) return <p style={{ color: 'var(--admin-text-muted)' }}>טוען...</p>
 
   return (
     <div className="max-w-lg">
-      <h2 className="text-2xl font-bold mb-2">עריכת דף</h2>
-      <p className="text-sm text-gray-500 mb-6">{page._count.views} צפיות • נוצר {new Date(page.createdAt).toLocaleDateString('he-IL')}</p>
+      <Link
+        href="/admin"
+        className="inline-flex items-center gap-1.5 text-sm font-bold mb-6 transition-colors"
+        style={{ color: 'var(--admin-text-muted)' }}
+        onMouseEnter={e => e.currentTarget.style.color = 'var(--admin-text-primary)'}
+        onMouseLeave={e => e.currentTarget.style.color = 'var(--admin-text-muted)'}
+      >
+        <ArrowRight className="w-4 h-4" />
+        חזרה לדפים
+      </Link>
 
-      <div className="mb-6 p-4 bg-white border border-gray-200 rounded-xl">
-        <p className="text-xs text-gray-400 mb-1">URL</p>
-        <code className="text-sm" dir="ltr">/pages/{client}/{slug}</code>
+      <h2 className="text-2xl font-black mb-2" style={{ color: 'var(--admin-text-primary)' }}>עריכת דף</h2>
+      <div className="flex items-center gap-3 mb-8">
+        <span className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--admin-text-muted)' }}>
+          <Eye className="w-3.5 h-3.5" />
+          {page._count.views} צפיות
+        </span>
+        <span className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>
+          נוצר {new Date(page.createdAt).toLocaleDateString('he-IL')}
+        </span>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-5">
+      <div
+        className="mb-8 p-5 rounded-2xl"
+        style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}
+      >
+        <p className="text-xs font-bold mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>URL</p>
+        <code className="text-sm" dir="ltr" style={{ color: '#22D3EE' }}>/pages/{client}/{slug}</code>
+      </div>
+
+      <form onSubmit={handleSave} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium mb-1.5">כותרת</label>
+          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>כותרת</label>
           <input
             type="text"
             value={title}
             onChange={e => setTitle(e.target.value)}
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm"
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            style={inputStyle}
+            onFocus={e => e.currentTarget.style.borderColor = '#F3D56D'}
+            onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1.5">לקוח</label>
+          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>לקוח</label>
           <input
             type="text"
             value={client}
             onChange={e => setClient(e.target.value)}
             dir="ltr"
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm"
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            style={inputStyle}
+            onFocus={e => e.currentTarget.style.borderColor = '#F3D56D'}
+            onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1.5">Slug</label>
+          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>Slug</label>
           <input
             type="text"
             value={slug}
             onChange={e => setSlug(e.target.value)}
             dir="ltr"
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm"
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            style={inputStyle}
+            onFocus={e => e.currentTarget.style.borderColor = '#F3D56D'}
+            onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1.5">תאריך תוקף</label>
+          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>תאריך תוקף</label>
           <input
             type="date"
             value={expiresAt}
             onChange={e => setExpiresAt(e.target.value)}
             dir="ltr"
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm"
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            style={inputStyle}
+            onFocus={e => e.currentTarget.style.borderColor = '#F3D56D'}
+            onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
         </div>
 
         <div className="flex items-center gap-3">
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={active}
-              onChange={e => setActive(e.target.checked)}
-              className="sr-only peer"
+          <button
+            type="button"
+            onClick={() => setActive(!active)}
+            className="relative w-11 h-6 rounded-full transition-colors duration-200"
+            style={{ background: active ? '#4ade80' : 'rgba(255,255,255,0.15)' }}
+          >
+            <span
+              className="absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200"
+              style={{ transform: active ? 'translateX(-2px)' : 'translateX(-22px)' }}
             />
-            <div className="w-9 h-5 bg-gray-200 peer-checked:bg-green-500 rounded-full transition-colors after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full" />
-          </label>
-          <span className="text-sm">{active ? 'פעיל' : 'מושבת'}</span>
+          </button>
+          <span className="text-sm font-bold" style={{ color: 'var(--admin-text-secondary)' }}>
+            {active ? 'פעיל' : 'מושבת'}
+          </span>
         </div>
 
-        {error && <p className="text-red-600 text-sm">{error}</p>}
+        {error && <p className="text-red-400 text-sm">{error}</p>}
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 pt-2">
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+            className="flex-1 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-40"
+            style={{ background: '#F3D56D', color: '#050505' }}
+            onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px rgba(243,213,109,0.4)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+            onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
           >
             {saving ? 'שומר...' : 'שמירה'}
           </button>
           <button
             type="button"
             onClick={handleDelete}
-            className="px-6 py-3 bg-red-50 text-red-600 rounded-lg font-medium hover:bg-red-100 transition-colors"
+            className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-red-500/10"
+            style={{ color: '#f87171', border: '1px solid rgba(248,113,113,0.2)' }}
           >
+            <Trash2 className="w-4 h-4" />
             מחיקה
           </button>
         </div>

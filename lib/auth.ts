@@ -1,12 +1,8 @@
 import { cookies } from 'next/headers'
-import { createHash, randomBytes } from 'crypto'
+import { randomBytes } from 'crypto'
 
 const SESSION_COOKIE = 'rp_session'
-const SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
-
-function hashPassword(password: string): string {
-  return createHash('sha256').update(password).digest('hex')
-}
+export const SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
 
 export function verifyPassword(input: string): boolean {
   const stored = process.env.ADMIN_PASSWORD
@@ -14,17 +10,8 @@ export function verifyPassword(input: string): boolean {
   return input === stored
 }
 
-export async function createSession(): Promise<string> {
-  const token = randomBytes(32).toString('hex')
-  const cookieStore = await cookies()
-  cookieStore.set(SESSION_COOKIE, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: SESSION_MAX_AGE,
-    path: '/',
-  })
-  return token
+export function generateSessionToken(): string {
+  return randomBytes(32).toString('hex')
 }
 
 export async function getSession(): Promise<string | null> {

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Upload, FileUp } from 'lucide-react'
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null)
@@ -11,6 +12,7 @@ export default function UploadPage() {
   const [expiresAt, setExpiresAt] = useState('')
   const [error, setError] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [dragOver, setDragOver] = useState(false)
   const router = useRouter()
 
   function handleFileChange(f: File | null) {
@@ -51,24 +53,43 @@ export default function UploadPage() {
     router.push('/admin')
   }
 
+  const inputStyle = {
+    background: 'var(--admin-bg-elevated)',
+    border: '1px solid var(--admin-border)',
+    color: 'var(--admin-text-primary)',
+  }
+
   return (
     <div className="max-w-lg">
-      <h2 className="text-2xl font-bold mb-6">העלאת דף חדש</h2>
+      <h2 className="text-2xl font-black mb-8" style={{ color: 'var(--admin-text-primary)' }}>העלאת דף חדש</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* File upload */}
         <div>
-          <label className="block text-sm font-medium mb-1.5">קובץ HTML</label>
+          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>קובץ HTML</label>
           <div
-            className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-gray-400 transition-colors cursor-pointer"
-            onDragOver={e => e.preventDefault()}
-            onDrop={e => { e.preventDefault(); handleFileChange(e.dataTransfer.files[0] || null) }}
+            className="rounded-2xl p-10 text-center cursor-pointer transition-all duration-200"
+            style={{
+              border: `2px dashed ${dragOver ? '#F3D56D' : 'var(--admin-border)'}`,
+              background: dragOver ? 'rgba(243,213,109,0.04)' : 'var(--admin-bg-elevated)',
+            }}
+            onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={e => { e.preventDefault(); setDragOver(false); handleFileChange(e.dataTransfer.files[0] || null) }}
             onClick={() => document.getElementById('file-input')?.click()}
           >
             {file ? (
-              <p className="text-sm font-medium">{file.name} <span className="text-gray-400">({(file.size / 1024).toFixed(0)} KB)</span></p>
+              <div className="flex items-center justify-center gap-2">
+                <FileUp className="w-5 h-5" style={{ color: '#F3D56D' }} />
+                <p className="text-sm font-bold" style={{ color: 'var(--admin-text-primary)' }}>
+                  {file.name} <span style={{ color: 'var(--admin-text-muted)' }}>({(file.size / 1024).toFixed(0)} KB)</span>
+                </p>
+              </div>
             ) : (
-              <p className="text-gray-400 text-sm">גרור קובץ HTML לכאן או לחץ לבחירה</p>
+              <div>
+                <Upload className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--admin-text-muted)' }} />
+                <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>גרור קובץ HTML לכאן או לחץ לבחירה</p>
+              </div>
             )}
           </div>
           <input
@@ -82,42 +103,51 @@ export default function UploadPage() {
 
         {/* Client */}
         <div>
-          <label className="block text-sm font-medium mb-1.5">לקוח (שם תיקייה)</label>
+          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>לקוח (שם תיקייה)</label>
           <input
             type="text"
             value={client}
             onChange={e => setClient(e.target.value)}
             placeholder="medera"
             dir="ltr"
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm"
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            style={inputStyle}
+            onFocus={e => e.currentTarget.style.borderColor = '#F3D56D'}
+            onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
         </div>
 
         {/* Title */}
         <div>
-          <label className="block text-sm font-medium mb-1.5">כותרת</label>
+          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>כותרת</label>
           <input
             type="text"
             value={title}
             onChange={e => setTitle(e.target.value)}
             placeholder="דוח קמפיינים מאי 2026"
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm"
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            style={inputStyle}
+            onFocus={e => e.currentTarget.style.borderColor = '#F3D56D'}
+            onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
         </div>
 
         {/* Slug */}
         <div>
-          <label className="block text-sm font-medium mb-1.5">Slug (חלק ב-URL)</label>
+          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>Slug (חלק ב-URL)</label>
           <input
             type="text"
             value={slug}
             onChange={e => setSlug(e.target.value)}
             placeholder="campaign-report-may26"
             dir="ltr"
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm"
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            style={inputStyle}
+            onFocus={e => e.currentTarget.style.borderColor = '#F3D56D'}
+            onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
           {slug && client && (
-            <p className="text-xs text-gray-400 mt-1" dir="ltr">
+            <p className="text-xs mt-2" dir="ltr" style={{ color: 'var(--admin-text-muted)' }}>
               URL: /pages/{client}/{slug}
             </p>
           )}
@@ -125,22 +155,28 @@ export default function UploadPage() {
 
         {/* Expiration */}
         <div>
-          <label className="block text-sm font-medium mb-1.5">תאריך תוקף (אופציונלי)</label>
+          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>תאריך תוקף (אופציונלי)</label>
           <input
             type="date"
             value={expiresAt}
             onChange={e => setExpiresAt(e.target.value)}
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm"
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            style={inputStyle}
             dir="ltr"
+            onFocus={e => e.currentTarget.style.borderColor = '#F3D56D'}
+            onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
         </div>
 
-        {error && <p className="text-red-600 text-sm">{error}</p>}
+        {error && <p className="text-red-400 text-sm">{error}</p>}
 
         <button
           type="submit"
           disabled={uploading}
-          className="w-full py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+          className="w-full py-3.5 rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-40"
+          style={{ background: '#F3D56D', color: '#050505' }}
+          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px rgba(243,213,109,0.4)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+          onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
         >
           {uploading ? 'מעלה...' : 'העלאה'}
         </button>

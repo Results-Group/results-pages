@@ -1,1 +1,141 @@
 @import "tailwindcss";
+
+@font-face {
+  font-family: 'Ping';
+  src: url('/fonts/ping-regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Ping';
+  src: url('/fonts/ping-bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Ping';
+  src: url('/fonts/ping-heavy.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --color-black: #050505;
+  --color-yellow: #F3D56D;
+  --color-yellow-glow: rgba(243, 213, 109, 0.4);
+  --color-cyan: #22D3EE;
+  --color-cyan-glow: rgba(34, 211, 238, 0.4);
+  --color-white: #ffffff;
+  --color-text-gray: #d1d1d1;
+
+  --sidebar-bg: #0a0a0a;
+  --sidebar-text: #ffffff;
+  --sidebar-text-secondary: #d1d1d1;
+  --sidebar-text-muted: rgba(255,255,255,0.4);
+  --sidebar-border: rgba(255,255,255,0.06);
+  --sidebar-hover-bg: rgba(255,255,255,0.04);
+  --sidebar-elevated: rgba(255,255,255,0.04);
+  --sidebar-active-bg: rgba(243,213,109,0.06);
+
+  --admin-bg: #0a0a0a;
+  --admin-bg-card: #0f0f0f;
+  --admin-bg-elevated: rgba(255,255,255,0.04);
+  --admin-text-primary: #ffffff;
+  --admin-text-secondary: #d1d1d1;
+  --admin-text-muted: rgba(255,255,255,0.4);
+  --admin-border: rgba(255,255,255,0.08);
+  --admin-border-input: rgba(255,255,255,0.15);
+  --admin-hover-bg: rgba(255,255,255,0.04);
+  --admin-input-bg: transparent;
+}
+
+@theme inline {
+  --color-background: #050505;
+  --color-foreground: #ffffff;
+  --color-brand-yellow: #F3D56D;
+  --color-brand-cyan: #22D3EE;
+  --color-brand-black: #050505;
+  --font-sans: 'Ping', sans-serif;
+}
+
+body {
+  font-family: 'Ping', sans-serif;
+  min-height: 100vh;
+  background: #050505;
+  color: #ffffff;
+}
+
+h1, h2, h3 {
+  font-weight: 900;
+  font-family: 'Ping', sans-serif;
+}
+
+h4, h5, h6 {
+  font-weight: 700;
+  font-family: 'Ping', sans-serif;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.15);
+  border-radius: 3px;
+}
+
+select {
+  color-scheme: dark;
+}
+
+@layer base {
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+@layer utilities {
+  .admin-content {
+    background: var(--admin-bg);
+    color: var(--admin-text-primary);
+  }
+}
+
+@media (max-width: 1024px) {
+  .admin-content {
+    overflow-x: hidden;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-content {
+    padding: 12px;
+    padding-top: 56px;
+  }
+
+  .admin-content table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
