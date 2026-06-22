@@ -1,0 +1,2530 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>מרפאת הוד | הפתרון המערכתי לתפקוד מיני</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+
+    <style>
+@font-face {
+    font-family: 'Ping HL';
+    src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Ping HL';
+    src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-bold.woff2') format('woff2');
+    font-weight: 600;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Ping HL';
+    src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-heavy.woff2') format('woff2');
+    font-weight: 800;
+    font-display: swap;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+    font-family: 'Ping HL', Arial, sans-serif;
+    background: #FFFFFF;
+    color: #081D2E;
+    line-height: 1.6;
+    direction: rtl;
+}
+
+input, select, button, textarea {
+    font-family: 'Ping HL', Arial, sans-serif !important;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+a { text-decoration: none; color: inherit; }
+
+.hod-container {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+@keyframes fadeInHero {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeInHero {
+    animation: fadeInHero 0.8s ease-out forwards;
+    opacity: 0;
+}
+
+/* ============================================
+   SECTION 1 & 9: Hero / Bottom CTA (Dark)
+   ============================================ */
+.hero-section,
+.bottom-cta-section {
+    position: relative;
+    background: linear-gradient(to left, #081D2E, #0B4167);
+    padding: 60px 0 70px;
+    overflow: hidden;
+}
+
+.hero-bg-image {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: url('https://static.wixstatic.com/media/515225_2e48e1b1edc0439ab4c68510b65e1ab0~mv2.jpeg') center/cover no-repeat;
+    opacity: 0.05;
+    pointer-events: none;
+}
+
+.hero-grid {
+    display: grid;
+    grid-template-columns: 55% 45%;
+    gap: 40px;
+    align-items: start;
+}
+
+.hero-content {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}
+
+.hero-logo {
+    max-width: 180px;
+    height: auto;
+    margin-bottom: 24px;
+}
+
+.hero-content h1 {
+    font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+    font-weight: 800;
+    color: #FFFFFF;
+    line-height: 1.2;
+    margin-bottom: 12px;
+}
+
+.hero-content h2 {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    font-weight: 400;
+    color: #A0BBD2;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.trust-bar {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.trust-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #FFFFFF;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.trust-item svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.hero-desc {
+    font-size: 0.95rem;
+    color: #A0BBD2;
+    line-height: 1.7;
+    max-width: 540px;
+}
+
+/* Form wrapper */
+.form-wrapper {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 28px 24px;
+    position: relative;
+}
+
+.form-wrapper h3 {
+    color: #FFFFFF;
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+    text-align: right;
+}
+
+.form-wrapper .form-subtitle {
+    color: #A0BBD2;
+    font-size: 0.85rem;
+    margin-bottom: 18px;
+    text-align: right;
+}
+
+.step-indicator {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #A0BBD2;
+    margin-bottom: 14px;
+}
+
+.form-step {
+    display: none;
+}
+
+.form-step.active {
+    display: block;
+}
+
+.form-field {
+    margin-bottom: 14px;
+}
+
+.form-field label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 6px;
+}
+
+.form-field input,
+.form-field select {
+    width: 100%;
+    padding: 12px 0;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    color: #FFFFFF;
+    font-size: 16px;
+    text-align: right;
+    transition: border-color 0.3s;
+    border-radius: 0;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.form-field select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A0BBD2' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: left 4px center;
+    background-size: 16px;
+    padding-left: 28px;
+    cursor: pointer;
+}
+
+.form-field select option {
+    background: #081D2E;
+    color: #FFFFFF;
+}
+
+.form-field input:focus,
+.form-field select:focus {
+    outline: none;
+    border-bottom-color: #FE6900;
+}
+
+.form-field input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.form-field input.touched:invalid,
+.form-field select.touched:invalid {
+    border-bottom-color: #ef4444;
+}
+
+.form-btn {
+    width: 100%;
+    padding: 14px;
+    background: #FE6900;
+    color: #FFFFFF;
+    font-size: 1rem;
+    font-weight: 800;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    margin-top: 8px;
+}
+
+.form-btn:hover {
+    background: #e55e00;
+    transform: translateY(-1px);
+}
+
+.form-back-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #A0BBD2;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 8px;
+    transition: border-color 0.3s;
+}
+
+.form-back-btn:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.form-microcopy {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 14px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.form-microcopy svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.success-screen,
+.disqualified-screen {
+    display: none;
+    text-align: center;
+    padding: 20px 0;
+}
+
+.success-screen.active,
+.disqualified-screen.active {
+    display: block;
+}
+
+.success-screen .success-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.success-screen h4 {
+    color: #FFFFFF;
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.success-screen p {
+    color: #A0BBD2;
+    font-size: 0.9rem;
+}
+
+.disqualified-screen h4 {
+    color: #FFFFFF;
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.disqualified-screen p {
+    color: #A0BBD2;
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+.mobile-bottom-content {
+    display: none;
+}
+
+/* ============================================
+   SECTION 2: Scientific Approach (Light)
+   ============================================ */
+.scientific-section {
+    background: #FFFFFF;
+    padding: 70px 0;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.section-header h2 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+
+.section-header p {
+    font-size: 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.7;
+}
+
+.dark-section .section-header h2 { color: #FFFFFF; }
+.dark-section .section-header p { color: #A0BBD2; }
+.light-section .section-header h2 { color: #081D2E; }
+.light-section .section-header p { color: #4A5568; }
+
+.science-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.science-card {
+    background: #F8F9FA;
+    border-radius: 12px;
+    padding: 32px 24px;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.science-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+.science-card .card-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.science-card .card-icon svg {
+    width: 48px;
+    height: 48px;
+}
+
+.science-card h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #081D2E;
+    margin-bottom: 8px;
+}
+
+.science-card p {
+    font-size: 0.9rem;
+    color: #4A5568;
+    line-height: 1.6;
+}
+
+.section-conclusion {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto;
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+.light-section .section-conclusion { color: #4A5568; }
+.dark-section .section-conclusion { color: #A0BBD2; }
+
+/* ============================================
+   SECTION 3: Testimonials (Dark)
+   ============================================ */
+.testimonials-section {
+    background: #061A2B;
+    padding: 70px 0;
+}
+
+.testimonials-swiper {
+    padding-bottom: 48px;
+}
+
+.testimonial-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    height: auto;
+}
+
+.testimonial-card.video-card .video-thumb-wrap {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    background: #000;
+    cursor: pointer;
+}
+
+.testimonial-card.video-card .video-thumb-wrap img {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+}
+
+.testimonial-card.video-card .play-btn {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 56px;
+    height: 56px;
+    background: rgba(254, 105, 0, 0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s;
+    border: none;
+}
+
+.testimonial-card.video-card .play-btn:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.testimonial-card.video-card .play-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: #FFFFFF;
+    margin-right: -2px;
+}
+
+.testimonial-card.video-card video {
+    width: 100%;
+    display: none;
+}
+
+.testimonial-card .card-body {
+    padding: 20px;
+}
+
+.testimonial-card .card-body .quote-icon svg {
+    width: 24px;
+    height: 24px;
+    fill: #FE6900;
+    opacity: 0.6;
+    margin-bottom: 12px;
+}
+
+.testimonial-card .card-body .quote-text {
+    color: #FFFFFF;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    font-style: italic;
+}
+
+.testimonial-card .card-body .author {
+    color: #A0BBD2;
+    font-size: 0.8rem;
+}
+
+.testimonial-card .card-body .testimonial-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #FE6900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.testimonial-card .card-body .testimonial-desc {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.5;
+    margin-top: 8px;
+}
+
+.testimonials-swiper .swiper-pagination-bullet {
+    background: rgba(255, 255, 255, 0.3);
+    opacity: 1;
+}
+
+.testimonials-swiper .swiper-pagination-bullet-active {
+    background: #FE6900;
+}
+
+.testimonials-swiper .swiper-button-next,
+.testimonials-swiper .swiper-button-prev {
+    color: #FE6900;
+}
+
+.testimonials-swiper .swiper-button-next::after,
+.testimonials-swiper .swiper-button-prev::after {
+    font-size: 20px;
+}
+
+/* ============================================
+   SECTION 4: Comparison Table (Light)
+   ============================================ */
+.comparison-section {
+    background: #F8F9FA;
+    padding: 70px 0;
+}
+
+.comparison-table {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    border-collapse: collapse;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #FFFFFF;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.comparison-table thead th {
+    padding: 18px 20px;
+    font-size: 1rem;
+    font-weight: 800;
+    text-align: center;
+}
+
+.comparison-table thead th:first-child {
+    text-align: right;
+    background: #FFFFFF;
+    color: #4A5568;
+}
+
+.comparison-table thead th:nth-child(2) {
+    background: #FFF5EC;
+    color: #FE6900;
+}
+
+.comparison-table thead th:nth-child(3) {
+    background: #FFFFFF;
+    color: #4A5568;
+}
+
+.comparison-table tbody td {
+    padding: 16px 20px;
+    font-size: 0.9rem;
+    border-top: 1px solid #F0F0F0;
+    text-align: center;
+    vertical-align: middle;
+    color: #4A5568;
+}
+
+.comparison-table tbody td:first-child {
+    text-align: right;
+    font-weight: 600;
+    color: #081D2E;
+}
+
+.comparison-table tbody td:nth-child(2) {
+    background: #FFF5EC;
+    color: #081D2E;
+    font-weight: 600;
+}
+
+.comparison-conclusion {
+    text-align: center;
+    margin-top: 32px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 0.95rem;
+    color: #4A5568;
+    line-height: 1.7;
+}
+.cmp-check, .cmp-x {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    margin-left: 4px;
+    display: inline;
+}
+
+/* ============================================
+   SECTION 5: Process Steps (Light)
+   ============================================ */
+.process-section {
+    background: #FFFFFF;
+    padding: 70px 0;
+}
+
+.process-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.process-grid::before {
+    content: '';
+    position: absolute;
+    top: 40px;
+    right: 16.66%;
+    left: 16.66%;
+    height: 2px;
+    border-top: 2px dashed #FE6900;
+    opacity: 0.3;
+    z-index: 0;
+}
+
+.process-step {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.step-number {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #FE6900;
+    color: #FFFFFF;
+    font-size: 1.5rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    box-shadow: 0 0 0 8px rgba(254, 105, 0, 0.12);
+}
+
+.process-step h3 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #081D2E;
+    margin-bottom: 8px;
+}
+
+.process-step p {
+    font-size: 0.85rem;
+    color: #4A5568;
+    line-height: 1.6;
+}
+
+/* ============================================
+   SECTION 6: Emotional Hook (Dark)
+   ============================================ */
+.reframe-section {
+    background: #061A2B;
+    padding: 70px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.reframe-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.reframe-pair {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.reframe-thought {
+    color: #6B7A8D;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    text-underline-offset: 4px;
+    text-decoration-color: rgba(255, 255, 255, 0.2);
+}
+
+.reframe-truth {
+    color: #FFFFFF;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    padding-right: 16px;
+    border-right: 3px solid #FE6900;
+}
+
+/* ============================================
+   SECTION 7: Advantages (Light)
+   ============================================ */
+.advantages-section {
+    background: #FFFFFF;
+    padding: 70px 0;
+}
+
+.advantages-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+}
+
+.advantages-content {
+    text-align: right;
+}
+
+.advantages-content h2 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 800;
+    color: #081D2E;
+    margin-bottom: 16px;
+}
+
+.advantages-content .adv-intro {
+    font-size: 0.95rem;
+    color: #4A5568;
+    line-height: 1.7;
+    margin-bottom: 24px;
+}
+
+.advantage-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.advantage-item svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.advantage-item h4 {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #081D2E;
+    margin-bottom: 4px;
+}
+
+.advantage-item p {
+    font-size: 0.85rem;
+    color: #4A5568;
+    line-height: 1.6;
+}
+
+.advantages-image {
+    border-radius: 12px;
+    overflow: hidden;
+    max-height: 480px;
+}
+
+.advantages-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+/* ============================================
+   SECTION 8: Video Slider (Light Gray)
+   ============================================ */
+.videos-section {
+    background: #F8F9FA;
+    padding: 70px 0;
+}
+
+.videos-swiper {
+    padding-bottom: 48px;
+}
+
+.video-slide-card {
+    border-radius: 12px;
+    overflow: hidden;
+    background: #FFFFFF;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.video-slide-card video {
+    width: 100%;
+    display: block;
+    border-radius: 12px 12px 0 0;
+    background: #000;
+}
+
+.video-slide-card .video-hidden-content {
+    display: none;
+}
+
+.videos-swiper .swiper-pagination-bullet {
+    background: #081D2E;
+    opacity: 0.25;
+}
+
+.videos-swiper .swiper-pagination-bullet-active {
+    background: #FE6900;
+    opacity: 1;
+}
+
+.videos-swiper .swiper-button-next,
+.videos-swiper .swiper-button-prev {
+    color: #FE6900;
+}
+
+.videos-swiper .swiper-button-next::after,
+.videos-swiper .swiper-button-prev::after {
+    font-size: 20px;
+}
+
+/* ============================================
+   NEW: Normalization Section (You're Not Alone)
+   ============================================ */
+.normalize-section {
+    background: #FFFFFF;
+    padding: 70px 0;
+    text-align: center;
+}
+.normalize-section .section-header {
+    margin-bottom: 48px;
+}
+.normalize-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 900px;
+    margin: 0 auto 40px;
+}
+.normalize-stat {
+    padding: 32px 20px;
+    border-radius: 16px;
+    background: #F8FAFC;
+    border: 1px solid #EEF2F7;
+}
+.normalize-stat .stat-number {
+    font-size: clamp(2.2rem, 4vw, 3rem);
+    font-weight: 900;
+    color: #FE6900;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+.normalize-stat .stat-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #081D2E;
+    margin-bottom: 4px;
+}
+.normalize-stat .stat-sub {
+    font-size: 0.82rem;
+    color: #6B7C8F;
+    line-height: 1.5;
+}
+.normalize-closing {
+    font-size: 1.05rem;
+    color: #4A5568;
+    line-height: 1.7;
+    max-width: 640px;
+    margin: 0 auto;
+}
+.normalize-closing strong { color: #081D2E; }
+
+/* ============================================
+   NEW: Discretion / Privacy Section (Dark)
+   ============================================ */
+.discretion-section {
+    background: linear-gradient(135deg, #081D2E 0%, #0B3A5C 100%);
+    color: #fff;
+    padding: 70px 0;
+    text-align: center;
+}
+.discretion-section .section-header h2 { color: #fff; }
+.discretion-section .section-header p { color: #A0BBD2; }
+.discretion-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 900px;
+    margin: 0 auto 32px;
+}
+.discretion-card {
+    padding: 32px 24px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    text-align: right;
+}
+.discretion-card .disc-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(254,105,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+.discretion-card .disc-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke: #FE6900;
+}
+.discretion-card h4 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+.discretion-card p {
+    font-size: 0.9rem;
+    color: #A0BBD2;
+    line-height: 1.6;
+}
+.discretion-closing {
+    font-size: 0.95rem;
+    color: #A0BBD2;
+    line-height: 1.7;
+    max-width: 600px;
+    margin: 0 auto;
+    font-style: italic;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 24px;
+}
+
+/* ============================================
+   NEW: Results in Numbers Section
+   ============================================ */
+.results-section {
+    background: #FFFFFF;
+    padding: 70px 0;
+    text-align: center;
+}
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    max-width: 950px;
+    margin: 0 auto;
+}
+.results-card {
+    padding: 28px 16px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #FFF7F0 0%, #FFFFFF 100%);
+    border: 1px solid #FEEBD6;
+}
+.results-card .rc-number {
+    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+    font-weight: 900;
+    color: #FE6900;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+.results-card .rc-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #081D2E;
+    margin-bottom: 4px;
+}
+.results-card .rc-sub {
+    font-size: 0.78rem;
+    color: #6B7C8F;
+    line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+    .normalize-stats { grid-template-columns: 1fr; gap: 16px; }
+    .normalize-stat { padding: 24px 16px; }
+    .normalize-stat .stat-number { font-size: 2rem; }
+    .normalize-stat .stat-label { font-size: 0.9rem; }
+    .normalize-closing { font-size: 0.92rem; padding: 0 8px; }
+    .discretion-grid { grid-template-columns: 1fr; gap: 16px; }
+    .discretion-card { padding: 24px 16px; }
+    .results-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .results-card { padding: 20px 12px; }
+    .results-card .rc-number { font-size: 1.6rem; }
+    .normalize-section,
+    .discretion-section,
+    .results-section { padding: 45px 0; }
+}
+
+/* ============================================
+   SECTION 10: FAQ + Footer (Light)
+   ============================================ */
+.faq-section {
+    background: #FFFFFF;
+    padding: 70px 0 40px;
+}
+
+.faq-list {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.faq-item {
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.faq-question {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 20px 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: right;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #081D2E;
+    gap: 12px;
+}
+
+.faq-question .faq-icon {
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: #FE6900;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.faq-item.active .faq-icon {
+    transform: rotate(45deg);
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out;
+}
+
+.faq-answer-inner {
+    padding: 0 0 20px;
+    font-size: 0.9rem;
+    color: #4A5568;
+    line-height: 1.7;
+}
+
+.hod-footer {
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
+    padding: 24px;
+    text-align: center;
+}
+
+.hod-footer a {
+    font-size: 0.8rem;
+    color: #999;
+    transition: color 0.3s;
+}
+
+.hod-footer a:hover {
+    color: #FE6900;
+}
+
+/* ============================================
+   Mobile Table Cards
+   ============================================ */
+@media (max-width: 768px) {
+    .comparison-table thead { display: none; }
+    .comparison-table,
+    .comparison-table tbody,
+    .comparison-table tr,
+    .comparison-table td {
+        display: block;
+        width: 100%;
+    }
+    .comparison-table tr {
+        margin-bottom: 16px;
+        background: #FFFFFF;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+    .comparison-table td {
+        text-align: right;
+        padding: 12px 16px;
+        border-top: 1px solid #F0F0F0;
+        position: relative;
+    }
+    .comparison-table td:first-child {
+        background: #F8F9FA;
+        font-weight: 800;
+        border-top: none;
+    }
+    .comparison-table td:nth-child(2) {
+        background: #FFF5EC;
+    }
+    .comparison-table td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #A0BBD2;
+        margin-bottom: 4px;
+    }
+    .comparison-table td:first-child::before {
+        display: none;
+    }
+}
+
+/* ============================================
+   Responsive – 992px
+   ============================================ */
+@media (max-width: 992px) {
+    .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+    .hero-content {
+        text-align: center;
+        align-items: center;
+    }
+    .hero-logo {
+        max-width: 85px;
+    }
+    .trust-bar {
+        justify-content: center;
+    }
+    .hero-desc {
+        text-align: center;
+        margin: 0 auto;
+    }
+    .desktop-only-content {
+        display: none !important;
+    }
+    .mobile-bottom-content {
+        display: block;
+        text-align: center;
+        margin-top: 24px;
+    }
+    .mobile-bottom-content .trust-bar {
+        justify-content: center;
+    }
+    .mobile-bottom-content .hero-desc {
+        text-align: center;
+        margin: 0 auto;
+    }
+    .science-grid {
+        grid-template-columns: 1fr;
+    }
+    .process-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+    .process-grid::before {
+        display: none;
+    }
+    .reframe-grid {
+        grid-template-columns: 1fr;
+    }
+    .advantages-grid {
+        grid-template-columns: 1fr;
+    }
+    .advantages-image {
+        order: -1;
+        max-height: 300px;
+    }
+    .bottom-cta-section .hero-grid {
+        grid-template-columns: 1fr;
+    }
+    .bottom-cta-section .hero-content {
+        text-align: center;
+        align-items: center;
+    }
+}
+
+/* ============================================
+   Responsive – 768px
+   ============================================ */
+@media (max-width: 768px) {
+    .testimonials-swiper .swiper-button-next,
+    .testimonials-swiper .swiper-button-prev,
+    .videos-swiper .swiper-button-next,
+    .videos-swiper .swiper-button-prev {
+        display: none;
+    }
+    .reframe-truth {
+        border-right: none;
+        border-top: 3px solid #FE6900;
+        padding-right: 0;
+        padding-top: 12px;
+    }
+}
+
+/* ============================================
+   Responsive – 480px
+   ============================================ */
+@media (max-width: 480px) {
+    .hero-section,
+    .bottom-cta-section {
+        padding: 40px 0 50px;
+    }
+    .hero-logo {
+        max-width: 85px;
+    }
+    .scientific-section,
+    .testimonials-section,
+    .comparison-section,
+    .process-section,
+    .reframe-section,
+    .advantages-section,
+    .videos-section,
+    .faq-section {
+        padding: 50px 0;
+    }
+    .hod-container {
+        padding: 0 16px;
+    }
+    .form-wrapper {
+        padding: 20px 16px;
+    }
+    .trust-item {
+        font-size: 0.8rem;
+    }
+}
+
+/* ============================================
+   CRO: Mobile Text & Spacing Reduction
+   ============================================ */
+@media (max-width: 768px) {
+    .hero-section,
+    .bottom-cta-section {
+        padding: 35px 0 40px;
+    }
+    .hero-section h1 { font-size: clamp(1.5rem, 5vw, 1.8rem); }
+    .hero-section h2,
+    .bottom-cta-section h2 { font-size: clamp(0.9rem, 3vw, 1.05rem); }
+    .hero-desc { font-size: 0.88rem; line-height: 1.55; }
+    .scientific-section,
+    .testimonials-section,
+    .comparison-section,
+    .process-section,
+    .reframe-section,
+    .advantages-section,
+    .videos-section,
+    .faq-section {
+        padding: 40px 0;
+    }
+    .section-header h2 { font-size: clamp(1.3rem, 4.5vw, 1.7rem); }
+    .section-header p { font-size: 0.9rem; }
+    .science-card h3 { font-size: 1rem; }
+    .science-card p { font-size: 0.85rem; }
+    .section-conclusion { font-size: 0.88rem; }
+    .comparison-conclusion { font-size: 0.85rem; }
+    .process-step h3 { font-size: 1rem; }
+    .process-step p { font-size: 0.85rem; }
+    .reframe-thought { font-size: 0.95rem; }
+    .reframe-truth { font-size: 0.85rem; }
+    .advantages-content h2 { font-size: 1.4rem; }
+    .adv-intro { font-size: 0.88rem; }
+    .advantage-item p { font-size: 0.85rem; }
+    .advantage-item h4 { font-size: 0.95rem; }
+    .faq-question { font-size: 0.95rem; }
+    .faq-answer { font-size: 0.85rem; }
+    .inline-cta-strip { padding: 24px 16px; }
+    .inline-cta-strip p { font-size: 0.9rem; }
+    .inline-cta-btn { padding: 12px 24px; font-size: 0.9rem; }
+}
+
+/* ============================================
+   CRO: Sticky Mobile CTA
+   ============================================ */
+.sticky-cta {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    padding: 12px 16px;
+    background: linear-gradient(to top, rgba(8,29,46,0.98) 60%, rgba(8,29,46,0));
+    pointer-events: none;
+}
+.sticky-cta.visible { display: block; }
+.sticky-cta-btn {
+    pointer-events: all;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 16px 24px;
+    background: #FE6900;
+    color: #FFFFFF;
+    font-size: 1.1rem;
+    font-weight: 800;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(254,105,0,0.4);
+}
+@media (min-width: 993px) { .sticky-cta { display: none !important; } }
+
+/* ============================================
+   CRO: Visual Progress Bar
+   ============================================ */
+.form-progress {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+.form-progress-step {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 4px;
+    transition: background 0.4s ease;
+}
+.form-progress-step.filled { background: #FE6900; }
+.form-progress-step.current { background: rgba(254,105,0,0.5); }
+
+
+/* ============================================
+   Inline CTA Banners
+   ============================================ */
+.inline-cta-strip {
+    background: #F8FAFC;
+    border-top: 1px solid #EEF2F7;
+    border-bottom: 1px solid #EEF2F7;
+    padding: 36px 20px;
+    text-align: center;
+}
+.inline-cta-strip p {
+    color: #4A5568;
+    font-size: 0.95rem;
+    margin: 0 0 16px 0;
+    font-weight: 400;
+    line-height: 1.5;
+}
+.inline-cta-strip strong { color: #081D2E; font-weight: 700; }
+.inline-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    background: #FE6900;
+    color: #fff;
+    font-family: 'Ping HL', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 16px rgba(254,105,0,0.2);
+}
+.inline-cta-btn:hover { background: #e55e00; transform: translateY(-1px); }
+.inline-cta-btn svg { width: 14px; height: 14px; }
+
+    </style>
+</head>
+<body>
+
+<!-- ============================================
+     SECTION 1: Hero (Dark)
+     ============================================ -->
+<section class="hero-section">
+    <div class="hero-bg-image"></div>
+    <div class="hod-container">
+        <div class="hero-grid">
+            <div class="hero-content animate-fadeInHero">
+                <img src="https://static.wixstatic.com/media/bb1f28_2c1f3722d3f44eb7971b48be7857bced~mv2.png" alt="מרפאת הוד" class="hero-logo">
+                <h1>להחזיר את התפקוד המיני למצבו הטבעי. <br> ללא כדורים. ללא תלות.</h1>
+                <h2>אבחון רפואי מעמיק שמאתר את מקור הבעיה – <br> ותוכנית טיפול אישית שמשיבה לך את הביטחון.</h2>
+
+                <div class="desktop-only-content">
+                    <div class="trust-bar">
+                        <div class="trust-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#FE6900" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            <span>אבחון רפואי מקיף</span>
+                        </div>
+                        <div class="trust-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#FE6900" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            <span>למעלה מ-4,000 מטופלים בשנה</span>
+                        </div>
+                        <div class="trust-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#FE6900" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                            <span>פתרון לשורש הבעיה</span>
+                        </div>
+                    </div>
+                    <p class="hero-desc">ברוב המוחלט של המקרים, הקושי בתפקוד נובע מסיבות פיזיולוגיות כגון חוסר איזון הורמונלי או זרימת דם לקויה. המומחיות שלנו היא לאתר את המקור המדויק ולהתאים תוכנית טיפולית שמסייעת לגוף לשקם את יכולתו הטבעית.</p>
+                </div>
+            </div>
+
+            <div class="animate-fadeInHero" style="animation-delay: 0.2s;">
+                <div class="form-wrapper">
+                    <div id="heroForm">
+                        <h3>תיאום שיחת ייעוץ ואבחון התאמה</h3>
+                        <div class="form-subtitle" style="color: #A0BBD2; font-size: 0.85rem; margin-bottom: 18px; text-align: right;">התהליך ללא עלות, ללא התחייבות ובדיסקרטיות מלאה</div>
+
+                        <div class="form-progress" data-form="hero">
+                            <div class="form-progress-step filled"></div>
+                            <div class="form-progress-step"></div>
+                        </div>
+
+                        <input type="hidden" id="hero_utm_source" name="utm_source" value="">
+                        <input type="hidden" id="hero_utm_campaign" name="utm_campaign" value="">
+                        <input type="hidden" id="hero_utm_content" name="utm_content" value="">
+
+                        <!-- Step 1 -->
+                        <div class="form-step active" data-step="1">
+                            <div class="step-indicator">שלב 1 מתוך 2</div>
+                            <div class="form-field">
+                                <input type="text" id="hero_name" placeholder="שם מלא" required>
+                            </div>
+                            <div class="form-field">
+                                <input type="tel" id="hero_phone" placeholder="טלפון (10 ספרות)" maxlength="10" pattern="\d{10}" title="אנא הזן 10 ספרות בלבד" required>
+                            </div>
+                            <div class="form-field">
+                                <select id="hero_age" required>
+                                    <option value="" disabled selected>מהו גילך?</option>
+                                    <option value="עד 35">עד 35</option>
+                                    <option value="35-55">35-55</option>
+                                    <option value="56-76">56-76</option>
+                                    <option value="מעל 77">מעל 77</option>
+                                </select>
+                            </div>
+                            <button type="button" class="form-btn" data-action="next">המשך לשלב הבא</button>
+                            <div class="form-microcopy">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                <span>ללא עלות · ללא התחייבות · חיסיון מלא</span>
+                            </div>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div class="form-step" data-step="2">
+                            <div class="step-indicator">שלב 2 מתוך 2</div>
+                            <h3>שאלה אחרונה לפני שנשוחח</h3>
+                            <div class="form-field">
+                                <label for="hero_medical" style="font-size: 0.9rem; color: rgba(255,255,255,0.85); line-height: 1.5; margin-bottom: 10px;">האם ברקע הרפואי שלך קיימת התמודדות מורכבת, כגון השתלת איבר, אי־ספיקת לב/כליות/ריאות, טיפולי דיאליזה או טיפולים אונקולוגיים?</label>
+                                <select id="hero_medical" required>
+                                    <option value="" disabled selected>בחר תשובה</option>
+                                    <option value="לא">לא</option>
+                                    <option value="כן">כן</option>
+                                </select>
+                            </div>
+                            <button type="button" class="form-btn" data-action="submit">סיום וקביעת שיחת ייעוץ</button>
+                            <button type="button" class="form-back-btn" data-action="back">חזרה לשלב הקודם</button>
+                        </div>
+
+                        <!-- Success -->
+                        <div class="success-screen">
+                            <div class="success-icon">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <h4>תודה על פנייתך!<br>מנחים אותך כעת להמשך...</h4>
+                        </div>
+
+                        <!-- Disqualified -->
+                        <div class="disqualified-screen">
+                            <h4>לצערנו, לא נוכל לסייע בשלב זה.</h4>
+                            <p>הטיפולים במרפאה מותאמים לפרופיל רפואי ולאזורי שירות ספציפיים, ולכן אינם מתאימים במקרה שלך.<br><br>אנו מאחלים לך המון בריאות והצלחה בהמשך.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mobile-bottom-content">
+            <div class="trust-bar">
+                <div class="trust-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#FE6900" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    <span>אבחון רפואי מקיף</span>
+                </div>
+                <div class="trust-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#FE6900" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span>למעלה מ-4,000 מטופלים בשנה</span>
+                </div>
+                <div class="trust-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#FE6900" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                    <span>פתרון לשורש הבעיה</span>
+                </div>
+            </div>
+            <p class="hero-desc" style="margin-top: 16px;">ברוב המוחלט של המקרים, הקושי נובע מסיבות פיזיולוגיות. המומחיות שלנו היא לאתר את המקור המדויק ולהתאים תוכנית טיפולית שמסייעת לגוף לשקם את יכולתו הטבעית.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     NEW SECTION: You're Not Alone (Normalization)
+     ============================================ -->
+<section class="normalize-section light-section">
+    <div class="hod-container">
+        <div class="section-header">
+            <h2>חשוב שתדע: אתה ממש לא לבד בזה. <br>וזה בטוח לא הכל "בראש".</h2>
+            <p>קושי בתפקוד המיני הוא עניין רפואי רווח מאוד בקרב גברים מכל קבוצות הגיל. בניגוד למה שנהוג לחשוב, המקור לרוב הוא גופני ולא נפשי. ההבנה הזו היא הצעד הראשון והחשוב ביותר בדרך לפתרון אמיתי.</p>
+        </div>
+        <div class="normalize-stats">
+            <div class="normalize-stat">
+                <div class="stat-number">52%</div>
+                <div class="stat-label">מהגברים מעל גיל 40</div>
+                <div class="stat-sub">מתמודדים עם רמה כזו או אחרת של קושי בתפקוד, כך עולה ממחקרים קליניים בעולם.</div>
+            </div>
+            <div class="normalize-stat">
+                <div class="stat-number">70%</div>
+                <div class="stat-label">מקור הבעיה הוא פיזיולוגי</div>
+                <div class="stat-sub">במרבית המקרים, מדובר בירידה ברמות הטסטוסטרון או בהיחלשות של זרימת הדם.</div>
+            </div>
+            <div class="normalize-stat">
+                <div class="stat-number">85%</div>
+                <div class="stat-label">שיעור הצלחה בטיפול שורשי</div>
+                <div class="stat-sub">כאשר מאבחנים את המקור ומתאימים לו טיפול רפואי מדויק, התוצאות ניכרות ונשמרות לאורך זמן.</div>
+            </div>
+        </div>
+        <p class="normalize-closing">גברים רבים שפונים אלינו נשאו את המועקה הזו לבדם, לעתים במשך שנים. <strong>הבחירה לפנות לייעוץ מקצועי מעידה על עוצמה – והיא הצעד הנכון עבורך.</strong></p>
+    </div>
+</section>
+
+<!-- ============================================
+     SECTION 2: Scientific Approach (Light)
+     ============================================ -->
+<section class="scientific-section light-section">
+    <div class="hod-container">
+        <div class="section-header">
+            <h2>הגישה המערכתית של מרפאת הוד: <br> מאבחנים את השורש, לא מטשטשים סימפטומים</h2>
+            <p>כדור הוא פתרון רגעי שלא פותר את הבעיה מהיסוד. אנו דוגלים בגישה רפואית מתקדמת: אבחון מקיף של המערכות שאחראיות לתפקוד המיני וטיפול יסודי במקור הבעיה, במטרה לשקם את יכולתו הטבעית של הגוף ללא תלות עתידית בתרופות.</p>
+        </div>
+        <div class="science-grid">
+            <div class="science-card">
+                <div class="card-icon">
+                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M24 4C24 4 20 12 20 18C20 22 22 26 24 30C26 26 28 22 28 18C28 12 24 4 24 4Z" stroke="#FE6900" stroke-width="2" fill="none"/>
+                        <path d="M24 30C24 30 20 34 20 38C20 41 22 44 24 44C26 44 28 41 28 38C28 34 24 30 24 30Z" stroke="#FE6900" stroke-width="2" fill="none"/>
+                        <circle cx="24" cy="18" r="3" fill="#FE6900" opacity="0.3"/>
+                        <circle cx="24" cy="38" r="3" fill="#FE6900" opacity="0.3"/>
+                        <line x1="24" y1="22" x2="24" y2="30" stroke="#FE6900" stroke-width="1.5" stroke-dasharray="3 2"/>
+                    </svg>
+                </div>
+                <h3>איזון הורמונלי</h3>
+                <p>המערכת ההורמונלית מהווה את התשתית החיונית לחשק ולתפקוד הגברי. אנו עורכים אבחון קפדני ומתאימים טיפול ממוקד שנועד להשיב את האיזון הטבעי והחיוניות למערכות הגוף.</p>
+            </div>
+            <div class="science-card">
+                <div class="card-icon">
+                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 24C12 24 16 16 24 16C32 16 36 24 36 24C36 24 32 32 24 32C16 32 12 24 12 24Z" stroke="#FE6900" stroke-width="2" fill="none"/>
+                        <path d="M8 20C10 18 14 14 20 14" stroke="#FE6900" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+                        <path d="M40 28C38 30 34 34 28 34" stroke="#FE6900" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+                        <circle cx="24" cy="24" r="4" fill="#FE6900" opacity="0.3"/>
+                        <path d="M20 24C20 21.8 21.8 20 24 20" stroke="#FE6900" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h3>שיפור זרימת הדם</h3>
+                <p>זרימת דם איתנה היא תנאי הכרחי לתפקוד מלא. באמצעות דיקור רפואי ייעודי, אנו ממריצים את מנגנוני הריפוי הטבעיים של הגוף, מסייעים בסירקולציה ומחזירים אספקת דם בריאה ומלאה.</p>
+            </div>
+            <div class="science-card">
+                <div class="card-icon">
+                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="24" cy="24" r="16" stroke="#FE6900" stroke-width="2" fill="none"/>
+                        <circle cx="24" cy="24" r="8" stroke="#FE6900" stroke-width="1.5" fill="none" stroke-dasharray="4 3"/>
+                        <path d="M24 8V14" stroke="#FE6900" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M24 34V40" stroke="#FE6900" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M8 24H14" stroke="#FE6900" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M34 24H40" stroke="#FE6900" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="24" cy="24" r="3" fill="#FE6900" opacity="0.3"/>
+                    </svg>
+                </div>
+                <h3>חידוש כלי דם</h3>
+                <p>בעזרת טכנולוגיית גלי הלם חדשנית, אנו מעודדים יצירה של רשת כלי דם חדשה (Neovascularization). תהליך פיזיולוגי זה משקם כלי דם חסומים ומייצר כלי דם חדשים, לשיפור דרמטי בתפקוד.</p>
+            </div>
+        </div>
+        <p class="section-conclusion">השילוב המדויק בין איזון הורמונלי, המרצת זרימת הדם ושיקום רשת כלי הדם, הוא זה שמאפשר מעבר מהקלה זמנית אל שיקום עמוק ויכולת טבעית לאורך זמן.</p>
+    </div>
+</section>
+
+<!-- ============================================
+     SECTION 3: Testimonials (Dark)
+     ============================================ -->
+<section class="testimonials-section dark-section">
+    <div class="hod-container">
+        <div class="section-header">
+            <h2>גם הם התלבטו בהתחלה. היום הם בוחרים לשתף.</h2>
+            <p>כל מטופל שנכנס בדלתנו עובר מסע אישי – מההיסוס הטבעי ועד לרגע שבו הביטחון שב אליו. הסיפורים הללו הם עדות חיה לאנשים שהיו בדיוק במקום בו אתה נמצא היום, ובחרו לעשות שינוי.</p>
+        </div>
+        <div class="swiper testimonials-swiper">
+            <div class="swiper-wrapper">
+
+                <!-- Video 1 -->
+                <div class="swiper-slide">
+                    <div class="testimonial-card video-card">
+                        <div class="video-thumb-wrap" onclick="playMp4(this.closest('.testimonial-card'))">
+                            <img src="https://static.wixstatic.com/media/515225_d5924e4874d64568a5e33aeed52b92d9~mv2.png" alt="עדות מטופל">
+                            <button class="play-btn" aria-label="נגן וידאו"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"></polygon></svg></button>
+                        </div>
+                        <video controls playsinline preload="metadata">
+                            <source src="https://video.wixstatic.com/video/515225_95a6e032d9ca4b84b8546077e51f8eab/1080p/mp4/file.mp4" type="video/mp4">
+                        </video>
+                        <div class="card-body">
+                            <span class="testimonial-label">סיפור הצלחה</span>
+                            <p class="quote-text">"השיפור מבחינתי היה כמעט מיידי!"</p>
+                            <p class="testimonial-desc">"אני חייב לציין שהצוות כאן יוצא דופן, הרגשתי בנוח והיה לי נעים להגיע לכל מפגש."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video 2 -->
+                <div class="swiper-slide">
+                    <div class="testimonial-card video-card">
+                        <div class="video-thumb-wrap" onclick="playMp4(this.closest('.testimonial-card'))">
+                            <img src="https://static.wixstatic.com/media/515225_bd970cc3635b4ffd8b1f96fe8d87001f~mv2.png" alt="עדות מטופל">
+                            <button class="play-btn" aria-label="נגן וידאו"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"></polygon></svg></button>
+                        </div>
+                        <video controls playsinline preload="metadata">
+                            <source src="https://video.wixstatic.com/video/515225_95b6150701e54f6fbc1b2947f204d0d6/1080p/mp4/file.mp4" type="video/mp4">
+                        </video>
+                        <div class="card-body">
+                            <div class="quote-icon"><svg viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg></div>
+                            <p class="quote-text">"הענקתם לי תחושת ביטחון. כבר בטיפולים הראשונים הרגשתי שיפור משמעותי במצב."</p>
+                            <p class="testimonial-desc">מטופל משתף על הליווי האישי והמקצועי שחווה בקליניקה.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text 1: Moshe -->
+                <div class="swiper-slide">
+                    <div class="testimonial-card">
+                        <div class="card-body">
+                            <div class="quote-icon"><svg viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg></div>
+                            <p class="quote-text">"למען האמת, הייתי סקפטי. הייתי תלוי בכדורים כל כך הרבה שנים שכבר השלמתי עם המצב. הגעתי בזכות דחיפה מאשתי. היום אני מבין כמה זמן יקר בזבזתי. הספונטניות חזרה לחיינו, וזו תחושה שאין לה מחיר."</p>
+                            <p class="author">משה, בן 58, אזור המרכז</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text 2: Dani -->
+                <div class="swiper-slide">
+                    <div class="testimonial-card">
+                        <div class="card-body">
+                            <div class="quote-icon"><svg viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg></div>
+                            <p class="quote-text">"דחיתי את הפנייה במשך חודשים בגלל מבוכה. פחדתי מתהליך חודרני או מורכב. להפתעתי, מהרגע הראשון זכיתי ליחס כל כך אנושי, רגיש ומקצועי, שפשוט הרגשתי בידיים טובות."</p>
+                            <p class="author">דני, בן 62, אזור הדרום</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text 3: Avi -->
+                <div class="swiper-slide">
+                    <div class="testimonial-card">
+                        <div class="card-body">
+                            <div class="quote-icon"><svg viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg></div>
+                            <p class="quote-text">"במקומות אחרים מיהרו מיד לרשום לי מרשמים. כאן, בפעם הראשונה, ישבו, הקשיבו באמת, וניסו להבין *למה* זה קורה לי. זה הבדל של שמיים וארץ בגישה הרפואית."</p>
+                            <p class="author">אבי, בן 55, ירושלים</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text 4: Ronen -->
+                <div class="swiper-slide">
+                    <div class="testimonial-card">
+                        <div class="card-body">
+                            <div class="quote-icon"><svg viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg></div>
+                            <p class="quote-text">"הייתי על סף ייאוש. אחרי שהכדורים הפסיקו להשפיע ונאלצתי לעבור לזריקות, הרגשתי שאני מאבד שליטה. הטיפול כאן הציע משהו אחר לחלוטין. אני חודשיים מסיום התהליך, והתפקוד הטבעי חזר אליי."</p>
+                            <p class="author">רונן, בן 60, באר שבע</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Inline CTA after Testimonials -->
+<div class="inline-cta-strip">
+    <p><strong>מעוניין לבדוק אם הטיפול מותאם עבורך?</strong> נשמח לתאם עבורך שיחת אבחון אישית ודיסקרטית, ללא עלות וללא התחייבות.</p>
+    <button class="inline-cta-btn" onclick="scrollToForm()">
+        לתיאום שיחת ייעוץ
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+</div>
+
+<!-- ============================================
+     SECTION 4: Comparison Table (Light)
+     ============================================ -->
+<section class="comparison-section light-section">
+    <div class="hod-container">
+        <div class="section-header">
+            <h2>מה ההבדל בין פתרון רגעי לבין טיפול רפואי יסודי?</h2>
+            <p>כדור מעניק הקלה מלאכותית למספר שעות. טיפול שורשי משקם את תפקוד הגוף ומוביל לתוצאה הנשמרת לאורך זמן.</p>
+        </div>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>מאפיין</th>
+                    <th>מרפאת הוד</th>
+                    <th>פתרון נקודתי (כדורים)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>מטרה</td>
+                    <td data-label="מרפאת הוד"><svg class="cmp-check" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> ריפוי שורש הבעיה</td>
+                    <td data-label="פתרון נקודתי"><svg class="cmp-x" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> טשטוש הסימפטום</td>
+                </tr>
+                <tr>
+                    <td>משך השפעה</td>
+                    <td data-label="מרפאת הוד"><svg class="cmp-check" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> תוצאה יציבה וארוכת טווח</td>
+                    <td data-label="פתרון נקודתי"><svg class="cmp-x" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> זמני (שעות בודדות)</td>
+                </tr>
+                <tr>
+                    <td>ספונטניות</td>
+                    <td data-label="מרפאת הוד"><svg class="cmp-check" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> חוזרת במלואה</td>
+                    <td data-label="פתרון נקודתי"><svg class="cmp-x" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> מחייב תכנון ותזמון</td>
+                </tr>
+                <tr>
+                    <td>תלות</td>
+                    <td data-label="מרפאת הוד"><svg class="cmp-check" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> תפקוד עצמאי ללא תלות</td>
+                    <td data-label="פתרון נקודתי"><svg class="cmp-x" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> תלות גופנית ופסיכולוגית</td>
+                </tr>
+                <tr>
+                    <td>תופעות לוואי</td>
+                    <td data-label="מרפאת הוד"><svg class="cmp-check" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> טיפול טבעי ובטוח</td>
+                    <td data-label="פתרון נקודתי"><svg class="cmp-x" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> שכיחות (כאבי ראש, סומק)</td>
+                </tr>
+                <tr>
+                    <td>ביטחון עצמי</td>
+                    <td data-label="מרפאת הוד"><svg class="cmp-check" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> משתקם במלואו</td>
+                    <td data-label="פתרון נקודתי"><svg class="cmp-x" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> נותר תלוי בכדור</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="comparison-conclusion">הבחירה היא בין תלות ממושכת בפתרון רגעי – לבין תהליך רפואי שמשיב לך את תפקודך הטבעי והבריא.</p>
+    </div>
+</section>
+
+<!-- ============================================
+     SECTION 5: Process Steps (Light)
+     ============================================ -->
+<section class="process-section light-section">
+    <div class="hod-container">
+        <div class="section-header">
+            <h2>איך זה עובד? תהליך סדור ב-3 שלבים.</h2>
+            <p>אנו מקפידים על יושרה מקצועית: הטיפול מתחיל אך ורק לאחר אבחון רפואי, ובמידה וזיהינו פוטנציאל הצלחה מובהק למקרה שלך.</p>
+        </div>
+        <div class="process-grid">
+            <div class="process-step">
+                <div class="step-number">1</div>
+                <h3>שיחת ייעוץ דיסקרטית</h3>
+                <p>הצעד הראשון הוא שיחה טלפונית אישית תחת חיסיון מלא. נבין את הרקע הרפואי והקושי שאתה חווה, ונענה על שאלותיך באופן מקצועי ובגובה העיניים.</p>
+            </div>
+            <div class="process-step">
+                <div class="step-number">2</div>
+                <h3>אבחון קליני מעמיק</h3>
+                <p>בפגישה במרפאה נבצע תשאול יסודי, נבחן פרופיל הורמונלי ונבצע הדמיית זרימת דם (דופלר), כדי לאתר במדויק את המקור הפיזיולוגי לבעיה.</p>
+            </div>
+            <div class="process-step">
+                <div class="step-number">3</div>
+                <h3>פענוח ותוכנית אישית</h3>
+                <p>ננתח את מכלול הנתונים ונשקף לך את הממצאים בשקיפות מלאה. במידה ותימצא התאמה, נרכיב עבורך תוכנית טיפולית מדויקת המיועדת להשגת תוצאות מרביות.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     NEW SECTION: Full Discretion Promise
+     ============================================ -->
+<section class="discretion-section">
+    <div class="hod-container">
+        <div class="section-header">
+            <h2>מרחב רפואי בטוח ודיסקרטי</h2>
+            <p>אנו מודעים לרגישות הנושא. לכן, יצרנו עבורך סביבה טיפולית המעניקה כבוד, פרטיות ודיסקרטיות מוחלטת בכל שלב.</p>
+        </div>
+        <div class="discretion-grid">
+            <div class="discretion-card">
+                <div class="disc-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <h4>חיסיון רפואי מלא ומוחלט</h4>
+                <p>המידע שלך נשמר בסודיות קפדנית תחת חסיון רפואי. התיק מנוהל באופן פנימי ואף גורם חיצוני אינו רשאי או יכול להיחשף אליו.</p>
+            </div>
+            <div class="discretion-card">
+                <div class="disc-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <h4>צוות רפואי גברי</h4>
+                <p>לאורך כל התהליך ילווה אותך צוות גברי, מקצועי ומיומן, מתוך הבנה עמוקה של הצרכים שלך ורצון לאפשר לך נוחות מרבית.</p>
+            </div>
+            <div class="discretion-card">
+                <div class="disc-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <h4>אמפתיה נטולת שיפוטיות</h4>
+                <p>הגעתך למרפאה היא צעד של אחריות אישית. אנו כאן כדי לספק הקשבה, מענה רפואי מתקדם ותמיכה מלאה – ללא לחץ וללא שיפוטיות.</p>
+            </div>
+        </div>
+        <p class="discretion-closing">"דחיתי את הפנייה במשך חודשים בגלל מבוכה. מהרגע הראשון כאן, פשוט הרגשתי בידיים טובות." – דני, בן 62</p>
+    </div>
+</section>
+
+<!-- ============================================
+     SECTION 6: Emotional Hook / Reframing (Dark)
+     ============================================ -->
+<section class="reframe-section dark-section">
+    <div class="hod-container">
+        <div class="section-header">
+            <h2>מחשבות מעכבות? בוא נבחן אותן יחד.</h2>
+            <p>מרבית המטופלים שלנו התמודדו בדיוק עם אותן תפיסות שגויות. הנה המציאות הרפואית שמאחוריהן:</p>
+        </div>
+        <div class="reframe-grid">
+            <div class="reframe-pair">
+                <div class="reframe-thought">"זה בטוח קשור לגיל, פשוט צריך להשלים עם זה."</div>
+                <div class="reframe-truth"><strong>זוהי הנחה שגויה מיסודה.</strong> הקושי נובע לרוב משינויים פיזיולוגיים הניתנים לטיפול (כמו זרימת דם או פרופיל הורמונלי) – ורפואה מתקדמת מציעה לכך פתרון בכל גיל.</div>
+            </div>
+            <div class="reframe-pair">
+                <div class="reframe-thought">"התנסיתי בכדורים ושום דבר לא באמת החזיק מעמד."</div>
+                <div class="reframe-truth"><strong>מפני שהכדור אינו מרפא את המקור.</strong> הוא מספק מענה רגעי ומייצר תלות. תהליך רפואי יסודי מאתר את הבעיה ומטפל בה מהשורש אל עבר עצמאות תפקודית.</div>
+            </div>
+            <div class="reframe-pair">
+                <div class="reframe-thought">"הנושא פשוט מביך מדי מכדי שאדבר עליו."</div>
+                <div class="reframe-truth"><strong>אנחנו מבינים זאת היטב.</strong> בדיוק משום כך יצרנו מרחב רפואי לגברים בלבד, המעניק 100% חיסיון, כבוד הדדי ותחושת ביטחון מהשנייה הראשונה.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Inline CTA after Reframe -->
+<div class="inline-cta-strip">
+    <p><strong>השינוי מתחיל בשיחה אחת.</strong> אצלנו היא מתקיימת באווירה אישית, בדיסקרטיות מלאה וללא עלות.</p>
+    <button class="inline-cta-btn" onclick="scrollToForm()">
+        לתיאום שיחת ייעוץ
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+</div>
+
+<!-- ============================================
+     SECTION 7: Advantages (Light)
+     ============================================ -->
+<section class="advantages-section light-section">
+    <div class="hod-container">
+        <div class="advantages-grid">
+            <div class="advantages-content">
+                <h2>היתרון הרפואי של מרפאת הוד</h2>
+                <p class="adv-intro">אנו גאים להיות המרכז הרפואי המוביל בישראל שמשלב אבחון קליני מקיף, מכשור טכנולוגי מתקדם ורפואה טבעית ליצירת פתרון שורשי ומתמשך.</p>
+
+                <div class="advantage-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#FE6900" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+                    <div>
+                        <h4>סינרגיה של קדמה ומסורת טיפולית</h4>
+                        <p>שילוב מדויק הממקסם את תוצאות הטיפול: טכנולוגיות פורצות דרך (דוגמת גלי הלם) לצד רפואה טבעית מבוססת מחקר (כמו דיקור רפואי ואיזון הורמונלי).</p>
+                    </div>
+                </div>
+
+                <div class="advantage-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#FE6900" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+                    <div>
+                        <h4>ניסיון קליני חסר תקדים</h4>
+                        <p>עם מעל ל-4,000 מטופלים מדי שנה, רכשנו ידע מעשי ויכולת דיוק יוצאת דופן בהתאמת פורמולות ופרוטוקולים טיפוליים לכל אדם ואדם.</p>
+                    </div>
+                </div>
+
+                <div class="advantage-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#FE6900" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+                    <div>
+                        <h4>יושרה מקצועית כערך עליון</h4>
+                        <p>אנו לא מתפשרים על האמת. במידה ותהליך האבחון יעיד על סבירות נמוכה להצלחת הטיפול, נשקף זאת באופן ברור ומכבד ולא נמליץ על התערבות במרפאתנו.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="advantages-image">
+                <img src="https://static.wixstatic.com/media/515225_2e48e1b1edc0439ab4c68510b65e1ab0~mv2.jpeg" alt="מרפאת הוד">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     NEW SECTION: Results in Numbers
+     ============================================ -->
+<section class="results-section light-section">
+    <div class="hod-container">
+        <div class="section-header">
+            <h2>הנתונים הקליניים שלנו</h2>
+            <p>הסטטיסטיקה הרפואית של מרפאת הוד מבוססת על מעקב מתמשך אחר אלפי גברים. הנתונים הבאים הם העדות המובהקת ליעילות הגישה שלנו.</p>
+        </div>
+        <div class="results-grid">
+            <div class="results-card">
+                <div class="rc-number">4,000+</div>
+                <div class="rc-label">מטופלים מדי שנה</div>
+                <div class="rc-sub">המקבלים מענה מותאם אישית בפריסה ארצית.</div>
+            </div>
+            <div class="results-card">
+                <div class="rc-number">87%</div>
+                <div class="rc-label">שיפור תפקודי מובהק</div>
+                <div class="rc-sub">שיפור המורגש ומדווח כבר בשלבים הראשונים של התהליך.</div>
+            </div>
+            <div class="results-card">
+                <div class="rc-number">93%</div>
+                <div class="rc-label">שביעות רצון מלאה</div>
+                <div class="rc-sub">הבעת אמון מוחלטת בצוות, בליווי, בתוצאות ובמרחב הבטוח.</div>
+            </div>
+            <div class="results-card">
+                <div class="rc-number">12+</div>
+                <div class="rc-label">שנות מומחיות וניסיון</div>
+                <div class="rc-sub">התמחות עקבית ומובילה בשיקום התפקוד המיני הגברי בישראל.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     SECTION 8: Video Slider (Light Gray)
+     ============================================ -->
+<section class="videos-section light-section">
+    <div class="hod-container">
+        <div class="section-header">
+            <h2>הצוות המקצועי שלנו מסביר</h2>
+            <p>שקיפות רפואית היא ערך עליון עבורנו. אנו מזמינים אותך לצפות בצוות המומחים של מרפאת הוד – מסבירים בגובה העיניים על הגישה, על פרוטוקול הטיפול, ועל הדרך אל ההצלחה.</p>
+        </div>
+        <div class="swiper videos-swiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                    <div class="video-slide-card">
+                        <video controls playsinline preload="metadata"><source src="https://video.wixstatic.com/video/bb1f28_8cef5c54c4714bf8a481c6063fab7d19/1080p/mp4/file.mp4" type="video/mp4"></video>
+                        <div class="video-hidden-content"><h4>סרטון 1</h4><p>תוכן מקצועי מהצוות</p></div>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="video-slide-card">
+                        <video controls playsinline preload="metadata"><source src="https://video.wixstatic.com/video/bb1f28_03ba2e14103140beb03a3b358a8081bc/1080p/mp4/file.mp4" type="video/mp4"></video>
+                        <div class="video-hidden-content"><h4>סרטון 2</h4><p>תוכן מקצועי מהצוות</p></div>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="video-slide-card">
+                        <video controls playsinline preload="metadata"><source src="https://video.wixstatic.com/video/bb1f28_ffa6e7eb8cbc4201b8977b08c3fb95a5/1080p/mp4/file.mp4" type="video/mp4"></video>
+                        <div class="video-hidden-content"><h4>סרטון 3</h4><p>תוכן מקצועי מהצוות</p></div>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="video-slide-card">
+                        <video controls playsinline preload="metadata"><source src="https://video.wixstatic.com/video/bb1f28_0f6d555676654a77976491e095d1afd9/720p/mp4/file.mp4" type="video/mp4"></video>
+                        <div class="video-hidden-content"><h4>סרטון 4</h4><p>תוכן מקצועי מהצוות</p></div>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="video-slide-card">
+                        <video controls playsinline preload="metadata"><source src="https://video.wixstatic.com/video/bb1f28_6079d473101a40c4b108bec131988dc4/1080p/mp4/file.mp4" type="video/mp4"></video>
+                        <div class="video-hidden-content"><h4>סרטון 5</h4><p>תוכן מקצועי מהצוות</p></div>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="video-slide-card">
+                        <video controls playsinline preload="metadata"><source src="https://video.wixstatic.com/video/bb1f28_63a74d96e38b4968a047deb4b9acc786/1080p/mp4/file.mp4" type="video/mp4"></video>
+                        <div class="video-hidden-content"><h4>סרטון 6</h4><p>תוכן מקצועי מהצוות</p></div>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="video-slide-card">
+                        <video controls playsinline preload="metadata"><source src="https://video.wixstatic.com/video/bb1f28_3e1e03fb92514c66a71d1aa6ec1c5808/1080p/mp4/file.mp4" type="video/mp4"></video>
+                        <div class="video-hidden-content"><h4>סרטון 7</h4><p>תוכן מקצועי מהצוות</p></div>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="video-slide-card">
+                        <video controls playsinline preload="metadata"><source src="https://video.wixstatic.com/video/bb1f28_160ff63a79cb4ddc973a1dd659407f95/1080p/mp4/file.mp4" type="video/mp4"></video>
+                        <div class="video-hidden-content"><h4>סרטון 8</h4><p>תוכן מקצועי מהצוות</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     SECTION 9: Bottom CTA / Second Hero (Dark)
+     ============================================ -->
+<section class="bottom-cta-section">
+    <div class="hero-bg-image"></div>
+    <div class="hod-container">
+        <div class="hero-grid">
+            <div class="hero-content animate-fadeInHero">
+                <h1>מוכן לעשות את הצעד הראשון?</h1>
+                <h2>שיחת הייעוץ מבוצעת באווירה אישית, דיסקרטית לחלוטין וללא עלות. <br>אנחנו כאן כדי להקשיב ולהעריך יחד את מידת ההתאמה לטיפול.</h2>
+                <p style="color: #A0BBD2; font-size: 0.95rem; max-width: 540px;">המסע לשיקום התפקוד מתחיל באבחון מדויק ובשקיפות מלאה.<br>רק במידה ונזהה סיכויי הצלחה מובהקים – נתאים עבורך תוכנית טיפולית.</p>
+            </div>
+
+            <div class="animate-fadeInHero" style="animation-delay: 0.2s;">
+                <div class="form-wrapper">
+                    <div id="bottomForm">
+                        <h3>תיאום שיחת ייעוץ ואבחון התאמה</h3>
+                        <div class="form-subtitle" style="color: #A0BBD2; font-size: 0.85rem; margin-bottom: 18px; text-align: right;">התהליך ללא עלות, ללא התחייבות ובדיסקרטיות מלאה</div>
+
+                        <div class="form-progress" data-form="bottom">
+                            <div class="form-progress-step filled"></div>
+                            <div class="form-progress-step"></div>
+                        </div>
+
+                        <input type="hidden" id="bottom_utm_source" name="utm_source" value="">
+                        <input type="hidden" id="bottom_utm_campaign" name="utm_campaign" value="">
+                        <input type="hidden" id="bottom_utm_content" name="utm_content" value="">
+
+                        <!-- Step 1 -->
+                        <div class="form-step active" data-step="1">
+                            <div class="step-indicator">שלב 1 מתוך 2</div>
+                            <div class="form-field">
+                                <input type="text" id="bottom_name" placeholder="שם מלא" required>
+                            </div>
+                            <div class="form-field">
+                                <input type="tel" id="bottom_phone" placeholder="טלפון (10 ספרות)" maxlength="10" pattern="\d{10}" title="אנא הזן 10 ספרות בלבד" required>
+                            </div>
+                            <div class="form-field">
+                                <select id="bottom_age" required>
+                                    <option value="" disabled selected>מהו גילך?</option>
+                                    <option value="עד 35">עד 35</option>
+                                    <option value="35-55">35-55</option>
+                                    <option value="56-76">56-76</option>
+                                    <option value="מעל 77">מעל 77</option>
+                                </select>
+                            </div>
+                            <button type="button" class="form-btn" data-action="next">המשך לשלב הבא</button>
+                            <div class="form-microcopy">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                <span>ללא עלות · ללא התחייבות · חיסיון מלא</span>
+                            </div>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div class="form-step" data-step="2">
+                            <div class="step-indicator">שלב 2 מתוך 2</div>
+                            <h3>שאלה אחרונה לפני שנשוחח</h3>
+                            <div class="form-field">
+                                <label for="bottom_medical" style="font-size: 0.9rem; color: rgba(255,255,255,0.85); line-height: 1.5; margin-bottom: 10px;">האם ברקע הרפואי שלך קיימת התמודדות מורכבת, כגון השתלת איבר, אי־ספיקת לב/כליות/ריאות, טיפולי דיאליזה או טיפולים אונקולוגיים?</label>
+                                <select id="bottom_medical" required>
+                                    <option value="" disabled selected>בחר תשובה</option>
+                                    <option value="לא">לא</option>
+                                    <option value="כן">כן</option>
+                                </select>
+                            </div>
+                            <button type="button" class="form-btn" data-action="submit">סיום וקביעת שיחת ייעוץ</button>
+                            <button type="button" class="form-back-btn" data-action="back">חזרה לשלב הקודם</button>
+                        </div>
+
+                        <!-- Success -->
+                        <div class="success-screen">
+                            <div class="success-icon">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <h4>תודה על פנייתך!<br>מנחים אותך כעת להמשך...</h4>
+                        </div>
+
+                        <!-- Disqualified -->
+                        <div class="disqualified-screen">
+                            <h4>לצערנו, לא נוכל לסייע בשלב זה.</h4>
+                            <p>הטיפולים במרפאה מותאמים לפרופיל רפואי ולאזורי שירות ספציפיים, ולכן אינם מתאימים במקרה שלך.<br><br>אנו מאחלים לך המון בריאות והצלחה בהמשך.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     SECTION 10: FAQ + Footer (Light)
+     ============================================ -->
+<section class="faq-section light-section">
+    <div class="hod-container">
+        <div class="section-header">
+            <h2>שאלות נפוצות לפני קבלת החלטה</h2>
+            <p>ריכזנו עבורך תשובות שקופות לשאלות החשובות שעשויות לעלות. אנו מאמינים שידע מקצועי מסייע בקבלת החלטה מושכלת.</p>
+        </div>
+        <div class="faq-list">
+            <div class="faq-item">
+                <button class="faq-question">
+                    <span>האם הטיפול באמצעות גלי הלם כרוך בכאב?</span>
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">הטיפול אינו כואב. הוא מתבצע בעוצמה מבוקרת וממוקדת, כאשר רוב המטופלים מתארים תחושת עקצוץ קלה בלבד. אין צורך בהרדמה והחזרה לשגרה היא מיידית.</div>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">
+                    <span>האם צפויות תופעות לוואי?</span>
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">לא. בניגוד לטיפולים תרופתיים, הפרוטוקול הטיפולי במרפאת הוד מבוסס על האצת מנגנוני הריפוי הטבעיים של הגוף (כגון חידוש כלי דם ואיזון הורמונלי). ככזה, הוא נטול תופעות לוואי.</div>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">
+                    <span>בתוך כמה זמן מורגשות התוצאות?</span>
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">מכיוון שמדובר בריפוי עמוק ולא בפתרון זמני קסום, הגוף דורש זמן לשיקום. עם זאת, מטופלים רבים מדווחים על שיפור ראשוני כבר תוך שבועות ספורים. התוצאה המלאה והיציבה מתגבשת בהדרגה לאורך סדרת הטיפולים.</div>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">
+                    <span>מה אם יימצא שהטיפול אינו מתאים עבורי?</span>
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">זהו עיקרון ברזל מבחינתנו. יושרה רפואית קודמת לכל. במידה וממצאי האבחון יצביעו על התאמה נמוכה או סיכויי הצלחה שאינם מספקים, נשקף לך זאת בשקיפות מלאה ולא נתחיל בטיפול.</div>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">
+                    <span>האם הפרטיות שלי נשמרת במלואה?</span>
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">בהחלט. אנו ערים לרגישות הגבוהה ומחויבים לחיסיון רפואי אבסולוטי. כלל המפגשים – מהייעוץ הראשוני ועד לטיפול האחרון – נערכים בדיסקרטיות מלאה ובסביבה מקבלת ומכבדת.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sticky Mobile CTA -->
+<div class="sticky-cta" id="stickyCta">
+    <button class="sticky-cta-btn" onclick="scrollToForm()">
+        לתיאום ייעוץ אישי – ללא עלות
+    </button>
+</div>
+
+
+<footer class="hod-footer">
+    <a href="https://www.resultsdigital.org/" target="_blank" rel="noopener noreferrer" dir="ltr">Proudly created by RESULTS GROUP</a>
+</footer>
+
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<script>
+(function() {
+    'use strict';
+
+    /* ==========================================
+       UTM Handling
+       ========================================== */
+    function getUtmParams(urlStr) {
+        try {
+            var url = new URL(urlStr);
+            return {
+                utm_source: url.searchParams.get('utm_source') || '',
+                utm_campaign: url.searchParams.get('utm_campaign') || '',
+                utm_content: url.searchParams.get('utm_content') || ''
+            };
+        } catch (e) { return null; }
+    }
+
+    function applyUtm(params) {
+        if (!params) return;
+        var prefixes = ['hero_', 'bottom_'];
+        var fields = ['utm_source', 'utm_campaign', 'utm_content'];
+        prefixes.forEach(function(prefix) {
+            fields.forEach(function(f) {
+                var el = document.getElementById(prefix + f);
+                if (el && params[f]) el.value = params[f];
+            });
+        });
+    }
+
+    var urlUtm = getUtmParams(window.location.href);
+    var pendingUtm = urlUtm;
+
+    window.addEventListener('message', function(e) {
+        if (typeof e.data === 'string') {
+            var parsed = getUtmParams(e.data);
+            if (!parsed) {
+                try { parsed = getUtmParams('https://dummy.com' + e.data); } catch(ex) {}
+            }
+            if (parsed && (parsed.utm_source || parsed.utm_campaign || parsed.utm_content)) {
+                pendingUtm = parsed;
+                applyUtm(parsed);
+            }
+        }
+    });
+
+    /* ==========================================
+       Video Play (Testimonials)
+       ========================================== */
+    function playMp4(container) {
+        var thumbWrap = container.querySelector('.video-thumb-wrap');
+        var video = container.querySelector('video');
+        if (thumbWrap) thumbWrap.style.display = 'none';
+        if (video) {
+            video.style.display = 'block';
+            video.play();
+        }
+    }
+    window.playMp4 = playMp4;
+
+    /* ==========================================
+       Multi-step Form Logic
+       ========================================== */
+    function initMultiStepForm(config) {
+        var wrapper = document.getElementById(config.formId);
+        if (!wrapper) return;
+
+        var steps = wrapper.querySelectorAll('.form-step');
+        var successScreen = wrapper.querySelector('.success-screen');
+        var disqualifiedScreen = wrapper.querySelector('.disqualified-screen');
+        var currentStep = 1;
+
+        function showStep(n) {
+            steps.forEach(function(s) { s.classList.remove('active'); });
+            var target = wrapper.querySelector('.form-step[data-step="' + n + '"]');
+            if (target) target.classList.add('active');
+            currentStep = n;
+            updateProgressBar(config.formId, n);
+            postIframeHeight();
+        }
+
+        function showDisqualified() {
+            steps.forEach(function(s) { s.classList.remove('active'); });
+            if (disqualifiedScreen) disqualifiedScreen.classList.add('active');
+            postIframeHeight();
+        }
+
+        function showSuccess() {
+            steps.forEach(function(s) { s.classList.remove('active'); });
+            if (successScreen) successScreen.classList.add('active');
+            postIframeHeight();
+        }
+
+        var phoneInput = document.getElementById(config.prefix + 'phone');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^\d]/g, '');
+            });
+        }
+
+        wrapper.addEventListener('click', function(e) {
+            var btn = e.target.closest('button[data-action]');
+            if (!btn) return;
+            var action = btn.getAttribute('data-action');
+
+            if (action === 'back') {
+                showStep(currentStep - 1);
+                return;
+            }
+
+            if (action === 'next' || action === 'submit') {
+                if (currentStep === 1) {
+                    var name = document.getElementById(config.prefix + 'name');
+                    var phone = document.getElementById(config.prefix + 'phone');
+                    var age = document.getElementById(config.prefix + 'age');
+                    var valid = true;
+
+                    [name, phone, age].forEach(function(el) { if (el) el.classList.add('touched'); });
+
+                    if (!name.value.trim()) valid = false;
+                    var phoneVal = phone.value.replace(/[- ]/g, '');
+                    if (phoneVal.length !== 10 || !/^\d{10}$/.test(phoneVal)) valid = false;
+                    if (!age.value) valid = false;
+                    if (!valid) return;
+
+                    showStep(2);
+                }
+                else if (currentStep === 2 && action === 'submit') {
+                    var medical = document.getElementById(config.prefix + 'medical');
+                    if (medical) medical.classList.add('touched');
+                    if (!medical.value) return;
+
+                    if (medical.value === 'כן') {
+                        showDisqualified();
+                        return;
+                    }
+
+                    var formData = new FormData();
+                    formData.append('name', document.getElementById(config.prefix + 'name').value.trim());
+                    formData.append('phone', document.getElementById(config.prefix + 'phone').value.replace(/[- ]/g, ''));
+                    formData.append('age', document.getElementById(config.prefix + 'age').value);
+                    formData.append('medical', medical.value);
+                    formData.append('utm_source', document.getElementById(config.prefix + 'utm_source').value);
+                    formData.append('utm_campaign', document.getElementById(config.prefix + 'utm_campaign').value);
+                    formData.append('utm_content', document.getElementById(config.prefix + 'utm_content').value);
+                    formData.append('form_location', config.formId);
+
+                    btn.disabled = true;
+                    btn.textContent = '...שולח';
+
+                    fetch('https://hook.eu2.make.com/4hnh78sukfwyuevudkw8wkrylu6rymod', {
+                        method: 'POST',
+                        body: formData,
+                        mode: 'no-cors'
+                    }).then(function() {
+                        showSuccess();
+                        setTimeout(function() {
+                            try { window.top.location.href = 'https://lp.hodclinic.co.il/thanks'; }
+                            catch(ex) { window.location.href = 'https://lp.hodclinic.co.il/thanks'; }
+                        }, 1500);
+                    }).catch(function() {
+                        showSuccess();
+                        setTimeout(function() {
+                            try { window.top.location.href = 'https://lp.hodclinic.co.il/thanks'; }
+                            catch(ex) { window.location.href = 'https://lp.hodclinic.co.il/thanks'; }
+                        }, 1500);
+                    });
+                }
+            }
+        });
+    }
+
+    /* ==========================================
+       FAQ Accordion
+       ========================================== */
+    function initFaqAccordion() {
+        var items = document.querySelectorAll('.faq-item');
+        items.forEach(function(item) {
+            var btn = item.querySelector('.faq-question');
+            var answer = item.querySelector('.faq-answer');
+            if (!btn || !answer) return;
+
+            btn.addEventListener('click', function() {
+                var isActive = item.classList.contains('active');
+
+                items.forEach(function(i) {
+                    i.classList.remove('active');
+                    var a = i.querySelector('.faq-answer');
+                    if (a) a.style.maxHeight = null;
+                });
+
+                if (!isActive) {
+                    item.classList.add('active');
+                    answer.style.maxHeight = answer.scrollHeight + 'px';
+                }
+                postIframeHeight();
+            });
+        });
+    }
+
+    /* ==========================================
+       Swiper Initialization
+       ========================================== */
+    function initSwipers() {
+        if (typeof Swiper === 'undefined') return;
+
+        new Swiper('.testimonials-swiper', {
+            slidesPerView: 1,
+            spaceBetween: 20,
+            loop: false,
+            pagination: { el: '.testimonials-swiper .swiper-pagination', clickable: true },
+            navigation: { nextEl: '.testimonials-swiper .swiper-button-next', prevEl: '.testimonials-swiper .swiper-button-prev' },
+            breakpoints: {
+                640: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 }
+            }
+        });
+
+        new Swiper('.videos-swiper', {
+            slidesPerView: 1,
+            spaceBetween: 20,
+            loop: true,
+            autoplay: { delay: 7000, disableOnInteraction: false },
+            pagination: { el: '.videos-swiper .swiper-pagination', clickable: true },
+            navigation: { nextEl: '.videos-swiper .swiper-button-next', prevEl: '.videos-swiper .swiper-button-prev' },
+            breakpoints: {
+                640: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 }
+            }
+        });
+    }
+
+    /* ==========================================
+       postIframeHeight
+       ========================================== */
+    function postIframeHeight() {
+        var h = document.documentElement.scrollHeight;
+        window.parent.postMessage(h, '*');
+        window.parent.postMessage(JSON.stringify({ type: 'resize', height: h }), '*');
+    }
+    window.postIframeHeight = postIframeHeight;
+
+    window.addEventListener('load', postIframeHeight);
+    window.addEventListener('resize', postIframeHeight);
+    if (typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(postIframeHeight).observe(document.body);
+    }
+    setInterval(postIframeHeight, 1000);
+
+    /* ==========================================
+       CRO: Progress Bar Updates
+       ========================================== */
+    function updateProgressBar(formId, step) {
+        var prefix = formId === 'heroForm' ? 'hero' : 'bottom';
+        var bars = document.querySelectorAll('.form-progress[data-form="' + prefix + '"] .form-progress-step');
+        bars.forEach(function(bar, i) {
+            bar.classList.remove('filled', 'current');
+            if (i < step - 1) bar.classList.add('filled');
+            else if (i === step - 1) bar.classList.add('filled');
+        });
+    }
+
+    /* ==========================================
+       CRO: Sticky Mobile CTA
+       ========================================== */
+    function initStickyCta() {
+        var sticky = document.getElementById('stickyCta');
+        if (!sticky) return;
+        var heroForm = document.getElementById('heroForm');
+        if (!heroForm) return;
+        var stickyReady = false;
+
+        setTimeout(function() { stickyReady = true; }, 2000);
+
+        function checkVisibility() {
+            if (!stickyReady) return;
+            var rect = heroForm.getBoundingClientRect();
+            var isFormVisible = rect.top < window.innerHeight && rect.bottom > 0;
+            if (isFormVisible) {
+                sticky.classList.remove('visible');
+            } else {
+                sticky.classList.add('visible');
+            }
+        }
+
+        window.addEventListener('scroll', checkVisibility, { passive: true });
+        window.addEventListener('resize', checkVisibility);
+        setInterval(checkVisibility, 500);
+    }
+
+    function scrollToForm() {
+        var heroForm = document.getElementById('heroForm');
+        if (heroForm) {
+            heroForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            var firstInput = heroForm.querySelector('input[type="text"]');
+            if (firstInput) setTimeout(function() { firstInput.focus(); }, 600);
+        }
+        window.parent.postMessage(JSON.stringify({ type: 'scrollToTop' }), '*');
+    }
+    window.scrollToForm = scrollToForm;
+
+
+    /* ==========================================
+       DOMContentLoaded
+       ========================================== */
+    document.addEventListener('DOMContentLoaded', function() {
+        if (pendingUtm) applyUtm(pendingUtm);
+
+        initMultiStepForm({ formId: 'heroForm', prefix: 'hero_' });
+        initMultiStepForm({ formId: 'bottomForm', prefix: 'bottom_' });
+        initFaqAccordion();
+        initSwipers();
+        initStickyCta();
+        postIframeHeight();
+    });
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl" class="light-mode">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>if(localStorage.getItem('ebookpro-theme')==='dark'){document.documentElement.classList.remove('light-mode');}</script>
+    <script>
+    function iframeScrollTo(el) {
+        if (!el) return;
+        var y = el.offsetTop;
+        try { window.parent.postMessage(JSON.stringify({ type: 'scrollTo', y: y }), '*'); } catch(e) {}
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    </script>
+    <title>עשה ואל תעשה – המדריך המעשי לסופר הישראלי | eBookPro</title>
+
+    <style>
+        @font-face {
+            font-family: 'Polin';
+            src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/Polin/Polin-Regular.woff2') format('woff2');
+            font-weight: 400; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Polin';
+            src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/Polin/Polin-Medium.woff2') format('woff2');
+            font-weight: 500; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Polin';
+            src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/Polin/Polin-Bold.woff2') format('woff2');
+            font-weight: 700; font-display: swap;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --orange:      #F47C20;
+            --orange-dark: #D46A15;
+            --blue:        #2B6AB0;
+            --dark:        #0D0D0D;
+            --dark-2:      #131313;
+            --dark-3:      #1A1A1A;
+            --dark-card:   #1E1E1E;
+            --border:      rgba(255,255,255,0.07);
+            --border-o:    rgba(244,124,32,0.22);
+            --white:       #FFFFFF;
+            --gray-light:  #CCCCCC;
+            --gray:        #888888;
+            --gray-dark:   #555555;
+            --r-sm: 10px; --r-md: 16px; --r-lg: 24px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Polin', 'Arial Hebrew', Arial, sans-serif;
+            background: var(--dark);
+            color: var(--white);
+            direction: rtl;
+            text-align: right;
+            line-height: 1.75;
+            overflow-x: hidden;
+            overflow: hidden;
+            width: 100%;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #progress-bar {
+            position: fixed;
+            top: 0; left: 0;
+            height: 3px;
+            background: var(--orange);
+            width: 0%;
+            z-index: 10000;
+            transition: width 0.1s linear;
+        }
+
+        .nav {
+            position: sticky;
+            top: 0; width: 100%;
+            z-index: 999;
+            background: rgba(13,13,13,0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(244,124,32,0.1);
+            height: 62px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+        }
+
+        .nav-logo {
+            text-decoration: none;
+            display: flex; align-items: center;
+        }
+        .nav-logo img { height: 36px; width: auto; object-fit: contain; display: block; }
+
+        .nav-chapters {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-ch {
+            color: var(--gray);
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 5px 12px;
+            border-radius: 50px;
+            transition: all 0.18s;
+            white-space: nowrap;
+        }
+        .nav-ch:hover, .nav-ch.active {
+            background: rgba(244,124,32,0.12);
+            color: var(--orange);
+        }
+
+        .nav-cta {
+            background: var(--orange);
+            color: var(--white);
+            text-decoration: none;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .nav-cta:hover { background: var(--orange-dark); }
+
+        .nav-theme-btn {
+            display: flex;
+            align-items: center; justify-content: center;
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            border: 1px solid var(--border-o);
+            background: rgba(244,124,32,0.08);
+            color: var(--orange);
+            cursor: pointer;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .nav-theme-btn:hover { background: rgba(244,124,32,0.18); }
+        .nav-theme-btn .icon-sun { display: block; }
+        .nav-theme-btn .icon-moon { display: none; }
+        html.light-mode .nav-theme-btn .icon-moon { display: block; }
+        html.light-mode .nav-theme-btn .icon-sun { display: none; }
+        html.light-mode .nav-theme-btn {
+            background: rgba(244,124,32,0.08);
+            border-color: rgba(244,124,32,0.3);
+        }
+
+        /* ═══════════════ GATEWAY SECTION ═══════════════ */
+        .gateway {
+            min-height: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 40px;
+            background:
+                radial-gradient(ellipse at 50% 40%, rgba(244,124,32,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(43,106,176,0.06) 0%, transparent 50%),
+                var(--dark);
+            position: relative;
+            text-align: center;
+        }
+
+        .gateway-inner {
+            max-width: 680px;
+        }
+
+        .gateway-logo {
+            margin-bottom: 32px;
+        }
+        .gateway-logo img {
+            height: 52px;
+            width: auto;
+            object-fit: contain;
+            opacity: 0.95;
+        }
+
+        .gateway-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(244,124,32,0.1);
+            border: 1px solid rgba(244,124,32,0.25);
+            color: var(--orange);
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            margin-bottom: 28px;
+        }
+
+        .gateway-title {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 700;
+            line-height: 1.18;
+            margin-bottom: 16px;
+        }
+        .gateway-title .orange { color: var(--orange); }
+
+        .gateway-desc {
+            font-size: clamp(0.95rem, 1.8vw, 1.12rem);
+            color: var(--gray-light);
+            line-height: 1.7;
+            margin-bottom: 40px;
+            max-width: 560px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .gateway-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .gateway-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--orange);
+            color: #fff;
+            text-decoration: none;
+            padding: 18px 48px;
+            border-radius: 50px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            box-shadow: 0 10px 36px rgba(244,124,32,0.35);
+            transition: all 0.22s;
+        }
+        .gateway-download:hover {
+            background: var(--orange-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 16px 44px rgba(244,124,32,0.45);
+        }
+        .gateway-download svg { flex-shrink: 0; }
+
+        .gateway-or {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: var(--gray);
+            font-size: 0.82rem;
+            width: 100%;
+            max-width: 300px;
+        }
+        .gateway-or::before,
+        .gateway-or::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .gateway-scroll {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--gray-light);
+            text-decoration: none;
+            font-size: 0.92rem;
+            font-weight: 500;
+            transition: color 0.2s;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: inherit;
+        }
+        .gateway-scroll:hover { color: var(--orange); }
+
+        .gateway-scroll-arrow {
+            width: 36px;
+            height: 36px;
+            border: 1.5px solid rgba(244,124,32,0.35);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: bounce-down 2s ease-in-out infinite;
+        }
+        .gateway-scroll-arrow svg { color: var(--orange); }
+
+        @keyframes bounce-down {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(6px); }
+        }
+
+        .gateway-toc {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-o);
+            border-radius: var(--r-lg);
+            padding: 28px 32px;
+            display: inline-flex;
+            flex-direction: column;
+            gap: 0;
+            text-align: right;
+            min-width: 360px;
+            margin-top: 12px;
+        }
+
+        .gateway-meta {
+            margin-top: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 28px;
+            flex-wrap: wrap;
+        }
+
+        .gateway-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+        .gateway-meta-item svg { color: var(--orange); flex-shrink: 0; }
+
+        /* ═══════════════ END GATEWAY ═══════════════ */
+
+        .toc-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--orange);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .toc-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            text-decoration: none;
+            color: var(--gray-light);
+            font-size: 0.9rem;
+            transition: color 0.18s;
+        }
+        .toc-item:last-child { border-bottom: none; }
+        .toc-item:hover { color: var(--orange); }
+
+        .toc-n {
+            width: 28px; height: 28px;
+            background: rgba(244,124,32,0.12);
+            border: 1px solid rgba(244,124,32,0.3);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.72rem; font-weight: 700;
+            color: var(--orange); flex-shrink: 0;
+        }
+
+        .intro-section {
+            padding: 80px 40px;
+            background: var(--dark-2);
+        }
+
+        .content-wrap {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .section-kicker {
+            display: inline-block;
+            color: var(--orange);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .intro-letter {
+            background: var(--dark-card);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            padding: 48px 52px;
+            position: relative;
+        }
+
+        .intro-letter::before {
+            content: '"';
+            position: absolute;
+            top: -20px; right: 40px;
+            font-size: 8rem;
+            color: var(--orange);
+            opacity: 0.12;
+            line-height: 1;
+            font-family: Georgia, serif;
+        }
+
+        .intro-letter p {
+            font-size: 1.02rem;
+            color: var(--gray-light);
+            line-height: 1.85;
+            margin-bottom: 20px;
+        }
+        .intro-letter p:last-child { margin-bottom: 0; }
+
+        .intro-letter strong { color: var(--white); font-weight: 700; }
+
+        .intro-signature {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            display: flex; align-items: center; gap: 14px;
+        }
+
+        .sig-avatar {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, var(--orange), #c85a00);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.95rem; color: white;
+            flex-shrink: 0;
+        }
+
+        .sig-name { font-size: 1rem; font-weight: 700; }
+        .sig-title { font-size: 0.8rem; color: var(--gray); }
+
+        .chapter {
+            padding: 90px 40px;
+        }
+        .chapter:nth-child(odd) { background: var(--dark); }
+        .chapter:nth-child(even) { background: var(--dark-2); }
+
+        .chapter-header {
+            max-width: 760px;
+            margin: 0 auto 52px;
+        }
+
+        .chapter-num-badge {
+            display: inline-flex;
+            align-items: center; gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .ch-num {
+            width: 44px; height: 44px;
+            background: var(--orange);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; font-weight: 700; color: white;
+        }
+
+        .ch-label {
+            font-size: 0.78rem; font-weight: 600;
+            color: var(--orange); letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .chapter-title {
+            font-size: clamp(1.7rem, 3.5vw, 2.4rem);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 8px;
+        }
+
+        .chapter-tagline {
+            font-size: 1.05rem;
+            color: var(--gray);
+            font-weight: 400;
+        }
+
+        .chapter-body {
+            max-width: 760px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 36px;
+        }
+
+        .body-text {
+            font-size: 1.02rem;
+            color: var(--gray-light);
+            line-height: 1.88;
+        }
+        .body-text strong { color: var(--white); font-weight: 700; }
+
+        .subheading {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: -16px;
+            padding-right: 14px;
+            border-right: 3px solid var(--orange);
+        }
+
+        .do-card {
+            background: rgba(34,100,60,0.12);
+            border: 1px solid rgba(42,157,92,0.3);
+            border-radius: var(--r-md);
+            padding: 28px 28px 28px 24px;
+        }
+
+        .do-card .card-label {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: rgba(42,157,92,0.15);
+            color: #4ade80;
+            font-size: 0.75rem; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            padding: 4px 12px; border-radius: 50px;
+            margin-bottom: 14px;
+        }
+
+        .dont-card {
+            background: rgba(120,30,30,0.12);
+            border: 1px solid rgba(200,60,60,0.28);
+            border-radius: var(--r-md);
+            padding: 28px 28px 28px 24px;
+        }
+
+        .dont-card .card-label {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: rgba(200,60,60,0.15);
+            color: #f87171;
+            font-size: 0.75rem; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            padding: 4px 12px; border-radius: 50px;
+            margin-bottom: 14px;
+        }
+
+        .tip-card {
+            background: rgba(244,124,32,0.07);
+            border: 1px solid rgba(244,124,32,0.22);
+            border-radius: var(--r-md);
+            padding: 28px 28px 28px 24px;
+        }
+
+        .tip-card .card-label {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: rgba(244,124,32,0.15);
+            color: var(--orange);
+            font-size: 0.75rem; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            padding: 4px 12px; border-radius: 50px;
+            margin-bottom: 14px;
+        }
+
+        .icon-svg {
+            width: 1em; height: 1em;
+            flex-shrink: 0;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .cta-card-icon { margin-bottom: 12px; display: block; }
+        .cta-card-icon .icon-svg {
+            width: 2.2rem; height: 2.2rem;
+            stroke: var(--orange);
+            stroke-width: 1.8;
+        }
+
+        .blockquote {
+            border-right: 4px solid var(--orange);
+            padding: 6px 22px 6px 0;
+            font-size: 1.05rem;
+            color: var(--gray-light);
+            font-style: italic;
+            line-height: 1.8;
+        }
+
+        .checklist {
+            list-style: none;
+            display: flex; flex-direction: column; gap: 12px;
+        }
+        .checklist li {
+            display: flex; align-items: flex-start; gap: 12px;
+            font-size: 0.97rem; color: var(--gray-light);
+        }
+        .check-bullet {
+            width: 22px; height: 22px;
+            background: rgba(244,124,32,0.14);
+            border: 1px solid rgba(244,124,32,0.35);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.65rem; font-weight: 700;
+            color: var(--orange); flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .highlight-box {
+            background: var(--dark-card);
+            border: 1px solid var(--border);
+            border-radius: var(--r-md);
+            padding: 24px 28px;
+        }
+        .highlight-box .hb-title {
+            font-size: 0.95rem; font-weight: 700;
+            color: var(--orange); margin-bottom: 8px;
+        }
+        .highlight-box p {
+            font-size: 0.9rem; color: var(--gray);
+            line-height: 1.7;
+        }
+
+        .inline-stat {
+            display: inline-block;
+            background: rgba(244,124,32,0.12);
+            border: 1px solid rgba(244,124,32,0.25);
+            color: var(--orange);
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-size: 0.95em;
+        }
+
+        .ch-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-o), transparent);
+            margin: 0;
+        }
+
+        .summary-section {
+            padding: 90px 40px;
+            background: #0A0A0A;
+        }
+
+        .summary-inner {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .summary-text {
+            font-size: 1.08rem;
+            color: var(--gray-light);
+            line-height: 1.9;
+            margin-bottom: 24px;
+        }
+        .summary-text strong { color: var(--white); }
+
+        .cta-section {
+            padding: 100px 40px;
+            background:
+                radial-gradient(ellipse at 50% 0%, rgba(244,124,32,0.14) 0%, transparent 55%),
+                #0f0800;
+            text-align: center;
+        }
+
+        .cta-inner { max-width: 680px; margin: 0 auto; }
+
+        .cta-title {
+            font-size: clamp(1.9rem, 4.5vw, 3rem);
+            font-weight: 700; line-height: 1.2;
+            margin-bottom: 20px;
+        }
+        .cta-title .orange { color: var(--orange); }
+
+        .cta-sub {
+            font-size: 1.08rem;
+            color: var(--gray-light);
+            line-height: 1.75;
+            margin-bottom: 44px;
+        }
+
+        .cta-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 44px;
+            text-align: right;
+        }
+
+        .cta-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: var(--r-md);
+            padding: 24px 22px;
+        }
+        .cta-card-icon { font-size: 1.6rem; margin-bottom: 10px; display: block; }
+        .cta-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+        .cta-card p { font-size: 0.84rem; color: var(--gray); line-height: 1.6; }
+
+        .btn-main {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: var(--orange);
+            color: var(--white);
+            text-decoration: none;
+            padding: 18px 44px;
+            border-radius: 50px;
+            font-size: 1.1rem; font-weight: 700;
+            box-shadow: 0 10px 32px rgba(244,124,32,0.35);
+            transition: all 0.22s;
+        }
+        .btn-main:hover {
+            background: var(--orange-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 16px 44px rgba(244,124,32,0.45);
+        }
+
+        .cta-note {
+            margin-top: 20px;
+            font-size: 0.82rem;
+            color: var(--gray-dark);
+        }
+
+        footer {
+            background: #070707;
+            padding: 40px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+        .footer-logo { margin-bottom: 16px; }
+        .footer-logo img { height: 44px; width: auto; object-fit: contain; opacity: 0.9; }
+        .footer-text { color: var(--gray-dark); font-size: 0.82rem; line-height: 1.7; }
+        .footer-line { width: 36px; height: 2px; background: var(--orange); border-radius: 2px; margin: 16px auto; }
+
+        @media (max-width: 900px) {
+            /* ── Nav ── */
+            .nav { padding: 0 16px; height: 46px; justify-content: space-between; }
+            .nav-logo { position: absolute; left: 50%; transform: translateX(-50%); }
+            .nav-logo img { height: 22px; }
+            .nav-chapters { display: none; }
+            .nav-cta { display: none; }
+
+            /* ── Gateway ── */
+            .gateway { min-height: auto; padding: 40px 20px; }
+            .gateway-logo { display: none; }
+            .gateway-badge { font-size: 0.68rem; padding: 5px 14px; margin-bottom: 18px; }
+            .gateway-title { font-size: 1.6rem; margin-bottom: 12px; }
+            .gateway-desc { font-size: 0.88rem; margin-bottom: 28px; }
+            .gateway-download { padding: 14px 32px; font-size: 0.95rem; gap: 10px; }
+            .gateway-download svg { width: 18px; height: 18px; }
+            .gateway-meta { gap: 12px 20px; margin-top: 28px; }
+            .gateway-meta-item { font-size: 0.72rem; gap: 4px; }
+            .gateway-meta-item svg { width: 12px; height: 12px; }
+            .gateway-toc { min-width: auto; width: 100%; padding: 14px 16px; border-radius: 12px; }
+
+            /* ── Global: remove max-width constraints ── */
+            .content-wrap, .chapter-header, .chapter-body, .summary-inner, .cta-inner {
+                max-width: 100%;
+                padding: 0;
+            }
+
+            .toc-label { font-size: 0.62rem; margin-bottom: 8px; padding-bottom: 6px; }
+            .toc-item { font-size: 0.78rem; padding: 6px 0; gap: 8px; }
+            .toc-n { width: 20px; height: 20px; font-size: 0.58rem; }
+
+            /* ── Intro ── */
+            .intro-section { padding: 28px 16px; }
+            .section-kicker { font-size: 0.65rem; margin-bottom: 8px; }
+            .intro-section h2, .intro-section h2[style] { font-size: 1.15rem !important; margin-bottom: 16px !important; }
+            .intro-letter { padding: 18px 16px; border-radius: 12px; }
+            .intro-letter::before { font-size: 4rem; top: -8px; right: 14px; }
+            .intro-letter p { font-size: 0.82rem; line-height: 1.7; margin-bottom: 10px; }
+            .intro-signature { margin-top: 14px; padding-top: 12px; gap: 10px; }
+            .sig-avatar { width: 32px; height: 32px; font-size: 0.72rem; }
+            .sig-name { font-size: 0.82rem; }
+            .sig-title { font-size: 0.7rem; }
+
+            /* ── Chapters ── */
+            .chapter { padding: 28px 16px; }
+            .chapter-header { margin: 0 auto 18px; }
+            .chapter-num-badge { margin-bottom: 8px; gap: 6px; }
+            .ch-num { width: 28px; height: 28px; font-size: 0.78rem; }
+            .ch-label { font-size: 0.62rem; }
+            .chapter-title { font-size: 1.15rem; line-height: 1.28; }
+            .chapter-tagline { font-size: 0.8rem; line-height: 1.5; }
+            .chapter-body { gap: 16px; }
+            .body-text { font-size: 0.82rem; line-height: 1.7; }
+            .subheading { font-size: 0.9rem; padding-right: 10px; margin-bottom: -6px; }
+
+            /* ── Blockquotes ── */
+            .blockquote { font-size: 0.82rem; line-height: 1.65; padding: 4px 14px 4px 0; border-right-width: 3px; }
+
+            /* ── Cards ── */
+            .do-card, .dont-card, .tip-card { padding: 16px; border-radius: 10px; }
+            .do-card .card-label, .dont-card .card-label, .tip-card .card-label {
+                font-size: 0.62rem; padding: 3px 8px; margin-bottom: 8px;
+            }
+            .do-card p, .dont-card p, .tip-card p,
+            .chapter-body p[style], .script-block p[style] {
+                font-size: 0.82rem !important; line-height: 1.7 !important;
+            }
+
+            /* ── Checklists: bullet above text ── */
+            .checklist { gap: 12px; }
+            .checklist li {
+                flex-direction: column;
+                font-size: 0.82rem; gap: 4px; line-height: 1.7;
+            }
+            .check-bullet { width: 18px; height: 18px; font-size: 0.52rem; margin-top: 0; }
+
+            /* ── Two-col & Highlight boxes: always single column ── */
+            .two-col { grid-template-columns: 1fr; gap: 10px; }
+            .highlight-box { padding: 16px; border-radius: 10px; }
+            .highlight-box .hb-title { font-size: 0.82rem; margin-bottom: 4px; }
+            .highlight-box p { font-size: 0.8rem; line-height: 1.65; }
+
+            /* ── Inline stats ── */
+            .inline-stat { font-size: 0.8em; padding: 2px 8px; border-radius: 5px; }
+
+            /* ── Summary ── */
+            .summary-section { padding: 28px 16px; }
+            .summary-section h2, .summary-section h2[style] { font-size: 1.15rem !important; margin-bottom: 14px !important; }
+            .summary-text { font-size: 0.82rem; line-height: 1.7; margin-bottom: 12px; }
+
+            /* ── CTA: single column cards ── */
+            .cta-section { padding: 32px 16px; }
+            .cta-title { font-size: 1.2rem; margin-bottom: 10px; line-height: 1.25; }
+            .cta-sub { font-size: 0.82rem; margin-bottom: 20px; line-height: 1.6; }
+            .cta-cards { grid-template-columns: 1fr; gap: 8px; margin-bottom: 22px; }
+            .cta-card { padding: 14px 16px; border-radius: 10px; display: flex; align-items: center; gap: 12px; }
+            .cta-card-icon { margin-bottom: 0; }
+            .cta-card-icon .icon-svg { width: 1.4rem; height: 1.4rem; }
+            .cta-card h4 { font-size: 0.82rem; margin-bottom: 2px; }
+            .cta-card p { font-size: 0.72rem; line-height: 1.5; }
+            .btn-main { padding: 12px 28px; font-size: 0.88rem; gap: 8px; box-shadow: 0 6px 20px rgba(244,124,32,0.3); }
+            .btn-main svg { width: 16px; height: 16px; }
+            .cta-note { font-size: 0.72rem; margin-top: 12px; }
+
+            /* ── Script section ── */
+            .script-section { padding: 28px 16px; }
+            .script-section h2[style] { font-size: 1.05rem !important; margin-bottom: 16px !important; }
+            .script-block { padding: 16px; border-radius: 10px; margin-bottom: 12px; }
+            .script-block .script-label { font-size: 0.62rem; padding: 3px 8px; margin-bottom: 8px; }
+            .script-block p { font-size: 0.82rem !important; line-height: 1.7 !important; }
+            .script-version-title { font-size: 0.88rem; margin-bottom: 12px; padding-bottom: 8px; }
+            .ch-divider[style] { margin: 24px 0 !important; }
+
+            /* ── Footer ── */
+            footer { padding: 24px 16px; }
+            .footer-logo img { height: 28px; }
+            .footer-text { font-size: 0.72rem; line-height: 1.6; }
+
+            /* ── TOC sidebar ── */
+            .toc-toggle { padding: 8px 6px; gap: 5px; border-radius: 8px 0 0 8px; }
+            .toc-btn-icon { width: 14px; height: 14px; }
+            .toc-toggle-label { font-size: 0.5rem; }
+            .toc-panel { width: 220px; right: -240px; }
+            .toc-head { padding: 14px 16px; }
+            .toc-head-title { font-size: 0.82rem; }
+            .toc-link { font-size: 0.75rem; padding: 8px 12px; }
+            .toc-badge { width: 18px; height: 18px; font-size: 0.58rem; }
+
+            /* ── PDF button ── */
+            .pdf-download-btn { width: 38px; height: 38px; bottom: 14px; right: 14px; }
+            .pdf-download-btn svg { width: 16px; height: 16px; }
+        }
+
+        .toc-toggle {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 997;
+            background: var(--orange);
+            border: none;
+            cursor: pointer;
+            padding: 15px 9px;
+            border-radius: 10px 0 0 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            box-shadow: -3px 0 18px rgba(0,0,0,0.45);
+            transition: background 0.2s;
+        }
+        .toc-toggle:hover { background: var(--orange-dark); }
+        .toc-btn-icon { width: 18px; height: 18px; stroke: #fff; flex-shrink: 0; }
+        .toc-toggle-label {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-family: 'Polin', Arial, sans-serif;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            color: #fff;
+            white-space: nowrap;
+        }
+
+        .toc-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.28s;
+        }
+        .toc-overlay.open { opacity: 1; pointer-events: all; }
+
+        .toc-panel {
+            position: fixed;
+            right: -290px;
+            top: 0;
+            height: 100%;
+            width: 270px;
+            background: var(--dark-3);
+            border-left: 1px solid var(--border-o);
+            z-index: 1001;
+            transition: right 0.3s cubic-bezier(.4,0,.2,1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .toc-panel.open { right: 0; }
+
+        .toc-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 18px;
+            height: 62px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            background: var(--dark-2);
+        }
+        .toc-head-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: var(--orange);
+            text-transform: uppercase;
+        }
+        .toc-close-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--gray);
+            padding: 7px;
+            border-radius: 7px;
+            transition: color 0.2s, background 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .toc-close-btn:hover { color: var(--white); background: rgba(255,255,255,0.07); }
+        .toc-close-btn svg { width: 16px; height: 16px; stroke: currentColor; }
+
+        .toc-links {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0 24px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--gray-dark) transparent;
+        }
+        .toc-links::-webkit-scrollbar { width: 4px; }
+        .toc-links::-webkit-scrollbar-thumb { background: var(--gray-dark); border-radius: 4px; }
+
+        .toc-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 18px;
+            color: var(--gray-light);
+            text-decoration: none;
+            font-size: 0.83rem;
+            line-height: 1.35;
+            transition: all 0.18s;
+            border-right: 3px solid transparent;
+        }
+        .toc-link:hover {
+            color: var(--white);
+            background: rgba(255,255,255,0.04);
+            border-right-color: rgba(244,124,32,0.35);
+        }
+        .toc-link.toc-active {
+            color: var(--orange);
+            background: rgba(244,124,32,0.07);
+            border-right-color: var(--orange);
+            font-weight: 600;
+        }
+        .toc-intro-link {
+            color: var(--gray);
+            font-size: 0.79rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 6px;
+            padding-bottom: 14px;
+        }
+        .toc-intro-link:hover { color: var(--gray-light); }
+        .toc-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 22px; height: 22px;
+            border-radius: 50%;
+            background: rgba(244,124,32,0.12);
+            color: var(--orange);
+            font-size: 0.68rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            transition: background 0.18s, color 0.18s;
+        }
+        .toc-link.toc-active .toc-badge { background: var(--orange); color: #fff; }
+
+        .theme-toggle-btn {
+            position: fixed;
+            bottom: 28px;
+            left: 28px;
+            z-index: 998;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--dark-card);
+            border: 1.5px solid var(--border-o);
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.45);
+            color: var(--orange);
+            outline: none;
+            transition: transform 0.18s, box-shadow 0.22s, background 0.28s, border-color 0.28s;
+        }
+        .theme-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 24px rgba(244,124,32,0.35);
+            background: rgba(244,124,32,0.14);
+        }
+        .theme-toggle-btn .icon-moon { display: none; }
+        .theme-toggle-btn .icon-sun  { display: block; }
+
+        body, .nav, .summary-section, .cta-section, footer,
+        .highlight-box, .intro-letter, .toc-panel, .toc-head,
+        .chapter, .intro-section, .cta-card, .gateway {
+            transition: background-color 0.32s ease, color 0.32s ease, border-color 0.32s ease;
+        }
+
+        html.light-mode {
+            --dark:        #F5F5F5;
+            --dark-2:      #EAEAEA;
+            --dark-3:      #E0E0E0;
+            --dark-card:   #FFFFFF;
+            --border:      rgba(0,0,0,0.1);
+            --border-o:    rgba(244,124,32,0.4);
+            --white:       #1A1A1A;
+            --gray-light:  #333333;
+            --gray:        #555555;
+            --gray-dark:   #888888;
+        }
+
+        html.light-mode body {
+            background: #F5F5F5;
+            color: #1A1A1A;
+        }
+
+        html.light-mode .theme-toggle-btn .icon-moon { display: block; }
+        html.light-mode .theme-toggle-btn .icon-sun  { display: none; }
+        html.light-mode .theme-toggle-btn {
+            background: #FFFFFF;
+            border-color: rgba(244,124,32,0.45);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+        }
+        html.light-mode .theme-toggle-btn:hover {
+            background: rgba(244,124,32,0.1);
+        }
+
+        html.light-mode .nav {
+            background: rgba(245,245,245,0.96);
+            border-bottom-color: rgba(0,0,0,0.1);
+        }
+
+        html.light-mode .gateway {
+            background:
+                radial-gradient(ellipse at 50% 40%, rgba(244,124,32,0.08) 0%, transparent 60%),
+                #F5F5F5;
+        }
+
+        html.light-mode .gateway-scroll-arrow {
+            border-color: rgba(244,124,32,0.4);
+        }
+
+        html.light-mode .gateway-or::before,
+        html.light-mode .gateway-or::after {
+            background: rgba(0,0,0,0.12);
+        }
+
+        html.light-mode .gateway-download { color: #FFFFFF; }
+
+        html.light-mode .gateway-toc {
+            background: rgba(0,0,0,0.04);
+            border-color: rgba(244,124,32,0.3);
+        }
+
+        html.light-mode .toc-item {
+            border-bottom-color: rgba(0,0,0,0.07);
+        }
+
+        html.light-mode .summary-section {
+            background: #EAEAEA;
+        }
+
+        html.light-mode .cta-section {
+            background:
+                radial-gradient(ellipse at 50% 0%, rgba(244,124,32,0.1) 0%, transparent 55%),
+                #FFF7EE;
+        }
+
+        html.light-mode .cta-card {
+            background: rgba(0,0,0,0.04);
+            border-color: rgba(0,0,0,0.1);
+        }
+
+        html.light-mode footer {
+            background: #E8E8E8;
+            border-top-color: rgba(0,0,0,0.1);
+        }
+
+        html.light-mode .do-card .card-label {
+            color: #166534;
+            background: rgba(22,101,52,0.1);
+        }
+        html.light-mode .dont-card .card-label {
+            color: #991b1b;
+            background: rgba(153,27,27,0.1);
+        }
+
+        html.light-mode .nav-cta,
+        html.light-mode .btn-main { color: #FFFFFF; }
+
+        html.light-mode .ch-num,
+        html.light-mode .sig-avatar { color: #FFFFFF; }
+
+        html.light-mode .toc-panel {
+            background: #FFFFFF;
+            border-left-color: rgba(244,124,32,0.3);
+        }
+        html.light-mode .toc-head {
+            background: #F5F5F5;
+            border-bottom-color: rgba(0,0,0,0.1);
+        }
+        html.light-mode .toc-link:hover {
+            background: rgba(0,0,0,0.05);
+            border-right-color: rgba(244,124,32,0.35);
+        }
+        html.light-mode .toc-close-btn:hover {
+            background: rgba(0,0,0,0.07);
+        }
+
+        html.light-mode [style*="color:white"],
+        html.light-mode [style*="color: white"],
+        html.light-mode [style*="color:#fff"],
+        html.light-mode [style*="color: #fff"],
+        html.light-mode [style*="color:#FFF"],
+        html.light-mode [style*="color:#FFFFFF"],
+        html.light-mode [style*="color: #FFFFFF"] {
+            color: #1A1A1A !important;
+        }
+
+        html.light-mode [style*="color:#4ade80"],
+        html.light-mode [style*="color: #4ade80"] { color: #166534 !important; }
+        html.light-mode [style*="color:#f87171"],
+        html.light-mode [style*="color: #f87171"] { color: #991b1b !important; }
+
+        .pdf-download-btn {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 998;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--orange);
+            border: 1.5px solid var(--border-o);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.45);
+            color: #FFFFFF;
+            outline: none;
+            text-decoration: none;
+            transition: transform 0.18s, box-shadow 0.22s, background 0.28s;
+        }
+        .pdf-download-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 24px rgba(244,124,32,0.45);
+            background: var(--orange-dark);
+        }
+        
+
+        .script-section {
+            padding: 90px 40px;
+            background: var(--dark-2);
+        }
+        .script-block {
+            background: var(--dark-card);
+            border: 1px solid var(--border);
+            border-radius: var(--r-md);
+            padding: 28px 28px 28px 24px;
+            margin-bottom: 20px;
+        }
+        .script-block .script-label {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: rgba(244,124,32,0.15);
+            color: var(--orange);
+            font-size: 0.75rem; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            padding: 4px 12px; border-radius: 50px;
+            margin-bottom: 14px;
+        }
+        .script-block p {
+            font-size: 0.97rem;
+            color: var(--gray-light);
+            line-height: 1.8;
+            margin-bottom: 8px;
+        }
+        .script-block p:last-child { margin-bottom: 0; }
+        .script-version-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--orange);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<nav class="nav">
+    <button class="nav-theme-btn" id="navThemeToggle" aria-label="מצב בהיר / כהה">
+        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+    <a href="#top" class="nav-logo">
+        <img src="https://static.wixstatic.com/media/bb1f28_860fb633f38a4961b21c3049d08e2e93~mv2.png" alt="eBookPro">
+    </a>
+    <div class="nav-chapters">
+        <a href="#ch1" class="nav-ch">בחירת שותפים</a>
+        <a href="#ch2" class="nav-ch">הפקת תוכן</a>
+        <a href="#ch3" class="nav-ch">מיתוג ויזואלי</a>
+        <a href="#ch4" class="nav-ch">שיווק</a>
+        <a href="#ch5" class="nav-ch">הראייה קדימה</a>
+    </div>
+    <a href="#cta" class="nav-cta">דברו איתנו</a>
+</nav>
+
+
+<!-- ═══════════════ GATEWAY – Download or Read Online ═══════════════ -->
+<section class="gateway" id="top">
+    <div class="gateway-inner">
+
+        <div class="gateway-logo">
+            <img src="https://static.wixstatic.com/media/bb1f28_860fb633f38a4961b21c3049d08e2e93~mv2.png" alt="eBookPro">
+        </div>
+
+        <div class="gateway-badge">
+            <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#F47C20"/></svg>
+            מדריך חינמי &nbsp;·&nbsp; 5 פרקים מעשיים
+        </div>
+
+        <h1 class="gateway-title">
+            עשה ואל תעשה<br>
+            <span class="orange">המדריך המעשי לסופר הישראלי</span><br>
+            בזירה הבינלאומית
+        </h1>
+
+        <p class="gateway-desc">
+            כל מה שצריך לדעת לפני שחותמים על חוזה, בוחרים הוצאה לאור ומוציאים את הספר לעולם – מבוסס על ניסיון עם קרוב ל-2,000 ספרים.
+        </p>
+
+        <div class="gateway-actions">
+            <a href="https://bb1f2801-7c48-49b3-beb2-e38a72fb001c.usrfiles.com/ugd/bb1f28_d43fdb4f412444769804d45c13df620b.pdf" target="_blank" download="ebookpro-guide.pdf" class="gateway-download">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                הורדת המדריך כ-PDF
+            </a>
+
+            <div class="gateway-or">או</div>
+
+            <button class="gateway-scroll" onclick="iframeScrollTo(document.getElementById('intro'))">
+                המשיכו לגלול וקראו אונליין
+                <span class="gateway-scroll-arrow">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </span>
+            </button>
+        </div>
+
+        <div class="gateway-toc">
+            <div class="toc-label">תוכן עניינים</div>
+            <a href="#intro" class="toc-item"><span class="toc-n">✦</span> הקדמה – מכתב אישי מבני כרמי</a>
+            <a href="#ch1" class="toc-item"><span class="toc-n">1</span> בחירת השותפים הנכונים</a>
+            <a href="#ch2" class="toc-item"><span class="toc-n">2</span> הפקת תוכן ברמה בינלאומית</a>
+            <a href="#ch3" class="toc-item"><span class="toc-n">3</span> מיתוג ויזואלי שמוכר</a>
+            <a href="#ch4" class="toc-item"><span class="toc-n">4</span> שיווק ופרסום – להעלות מול למכור</a>
+            <a href="#ch5" class="toc-item"><span class="toc-n">5</span> הראייה קדימה – פריצה גלובלית</a>
+        </div>
+
+        <div class="gateway-meta">
+            <span class="gateway-meta-item">
+                <svg width="14" height="14" fill="none" stroke="#F47C20" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                בני כרמי, מייסד eBookPro
+            </span>
+            <span class="gateway-meta-item">
+                <svg width="14" height="14" fill="none" stroke="#F47C20" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                5 פרקים מעשיים
+            </span>
+            <span class="gateway-meta-item">
+                <svg width="14" height="14" fill="none" stroke="#F47C20" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                קריאה של כ-15 דקות
+            </span>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ═══════════════ הקדמה ═══════════════ -->
+<section class="intro-section" id="intro">
+    <div class="content-wrap">
+        <span class="section-kicker">הקדמה</span>
+        <h2 style="font-size:1.6rem; font-weight:700; margin-bottom:32px; line-height:1.25;">מכתב אישי אליכם,<br>לפני שמתחילים את הדרך</h2>
+
+        <div class="intro-letter">
+            <p>יכול להיות שכתבתם את הספר והנחתם במגירה למשך שנים, או אולי רק עכשיו סיימתם את כתב היד וההתרגשות בשיאה. או שאולי הוצאתם ספר באחת ההוצאות בארץ</p>
+
+            <p>רגע לפני שאתם רצים להגשים את החלום הבינלאומי, אני כותב לכם את המילים הללו מתוך תחושת שליחות ואחריות אמיתית. <strong>בשיחות עם סופרים לאחרונה, נחשפתי שוב ושוב להבטחות שווא לרב מכר בינלאומי בטוח, חוזים דרקוניים שלקחו מהם את הזכויות, וסכומים של עשרות אלפי שקלים שנשפכים ללא שום אסטרטגיה שיווקית ריאלית.</strong></p>
+
+            <p>ראינו סופרים שאיבדו את כל השקעתם ונותרו עם מפח נפש, ופשוט לא יכולנו לעמוד יותר מנגד. המדריך הזה מוגש לכם <strong>כשירות לקהילת הכותבים בישראל</strong>, מתוך אמונה ש"תוכן הוא הזהב החדש" ושהקול הישראלי ראוי להישמע על הבמות הגדולות בעולם, אבל בדרך הנכונה.</p>
+
+            <p>המטרה של הדפים הבאים היא אחת: להעניק לכם ידע אסטרטגי וכלים מעשיים לצאת למסע להפיכת הספר שלכם למותג בינלאומי תוך שמירה על בעלות מלאה וזכויות יוצרים. אנחנו רוצים לחשוף בפניכם את כללי המשחק האמיתיים של אמזון והשוק הגלובלי, ולתת לכם את הכלים לזהות אנשי מקצוע אמיתיים. <strong>תקראו את המדריך הזה בעיון רב לפני שאתם חותמים על חוזה או מעבירים שקל אחד לגורם כלשהו.</strong> היצירה שלכם היא הנכס היקר ביותר שלכם, ומגיע לה הסיכוי ההוגן, המקצועי והבטוח ביותר לפרוץ את גבולות השפה ולהפוך למותג בינלאומי.</p>
+
+            <p style="color:var(--gray-light); font-size:1.02rem; margin-top:4px; margin-bottom:0;">אוהב את העבודה שלי,</p>
+
+            <div class="intro-signature">
+                <div class="sig-avatar">בכ</div>
+                <div>
+                    <div class="sig-name">בני כרמי</div>
+                    <div class="sig-title">מייסד ומנכ"ל eBookPro</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="ch-divider"></div>
+
+
+<!-- ═══════════════ פרק 1 ═══════════════ -->
+<section class="chapter" id="ch1">
+    <div class="chapter-header">
+        <div class="chapter-num-badge">
+            <div class="ch-num">1</div>
+            <span class="ch-label">פרק ראשון</span>
+        </div>
+        <h2 class="chapter-title">בחירת השותפים – אל תפקידו את היצירה שלכם בידיים הלא נכונות</h2>
+        <p class="chapter-tagline">אתם עומדים לבחור את הגוף שילווה אתכם – הוצאה לאור או סוכנות ספרותית. אל תחתמו על שום חוזה מתוך דחף או הבטחות נוצצות.</p>
+    </div>
+
+    <div class="chapter-body">
+
+        <p class="body-text">סיימתם לכתוב את הספר, וההתרגשות בשיאה. רגע לפני שאתם צוללים לאוקיינוס הבינלאומי, עצרו. אתם עומדים לבחור את הגוף שילווה אתכם – הוצאה לאור או סוכנות ספרותית. אל תחתמו על שום חוזה מתוך דחף או הבטחות נוצצות. מדובר בשותפות לדרך שיכולה להיות המקפצה שלכם להצלחה עולמית, או המכשול שיגרום לכם לאבד שליטה על היצירה שלכם. הנה מה שאתם חייבים לבדוק כדי לוודא שאתם בידיים מקצועיות והוגנות:</p>
+
+        <h3 class="subheading">דגש על "הוכחת ביצוע" – הסנדלר לא הולך יחף</h3>
+
+        <div class="do-card">
+            <span class="card-label">✓ עשה</span>
+            <p style="color:var(--gray-light); font-size:0.97rem; line-height:1.8;">כשאתם ניגשים להוצאה לאור, הפעולה הראשונה שלכם צריכה להיות בקשה פשוטה: <strong style="color:white;">"תראו לי מה עשיתם עבור ספרים שלכם (שאתם מחזיקים בהם את הזכויות) ועבור סופרים אחרים שאתם מקדמים"</strong> באמזון. הוצאה מקצועית שבאמת שולטת באלגוריתם של אמזון ובזירה הבינלאומית חייבת להציג הצלחות מוכחות בשטח.</p>
+        </div>
+
+        <ul class="checklist">
+            <li><span class="check-bullet">✓</span><strong style="color:white;">שימו לב לנתונים:</strong> בדקו אם להוצאה יש ניסיון בליווי של מאות ספרים באמזון (ב-eBookPro למשל, ליווינו קרוב ל2,000 ספרים באמזון).</li>
+            <li><span class="check-bullet">✓</span><strong style="color:white;">חפשו קבלות:</strong> האם הם הצליחו להביא סופרים ישראלים לרשימות רבי-המכר באמזון?</li>
+            <li><span class="check-bullet">✓</span>האם הם חתמו על חוזי תרגום עם הוצאות ברחבי העולם כמו למשל הוצאות ענק כמו HarperCollins או פינגווין רנדום האוס? <strong style="color:white;">אם ההוצאה לא יודעת למכור את ספריה שלה ולהגיע לתוצאות, היא לא תוכל לעשות זאת עבורכם.</strong></li>
+        </ul>
+
+        <h3 class="subheading">חשיבות הבעלות בחשבון ה-KDP – הכוח חייב להישאר אצלכם</h3>
+
+        <p class="body-text">עולם ההוצאה לאור באמזון בנוי על פלטפורמת ה-KDP (Kindle Direct Publishing), המאפשרת לסופרים להיות "פאבלישרים" עצמאיים ולמכור ישירות לקורא ללא מתווכים.</p>
+
+        <div class="two-col">
+            <div class="highlight-box">
+                <div class="hb-title">✓ אל תתפשרו</div>
+                <p>וודאו שההוצאה פותחת את חשבון ה-KDP על שמכם בלבד. במודל הוגן, אתם <strong style="color:white;">בעלי הבית</strong> של הנכס הדיגיטלי שלכם.</p>
+            </div>
+            <div class="highlight-box">
+                <div class="hb-title">✓ מסלול הכסף</div>
+                <p>בעלות על החשבון משמעותה שהתמלוגים (עד <strong style="color:white;">70% לספר דיגיטלי</strong>) עוברים מאמזון ישירות אליכם, לבנק שלכם חודש בחודשו, ללא תחנות ביניים ש"גוזרות קופון" בדרך. הימנעו מהוצאות שגובות את הכסף אליהן ומבטיחות להעביר לכם אותו בהמשך – זהו סיכון מיותר.</p>
+            </div>
+        </div>
+
+        <h3 class="subheading">שמירה על זכויות היוצרים</h3>
+
+        <p class="body-text">הספר שלכם הוא נכס כלכלי שיכול להניב פירות לאורך עשורים דרך תרגומים, עיבודים לסרטים או סדרות.</p>
+
+        <div class="dont-card">
+            <span class="card-label">✗ שימו לב לחוזה</span>
+            <p style="color:var(--gray-light); font-size:0.97rem; line-height:1.8;">במודל של אמזון, כל הזכויות נשארות אצל הסופר. הימנעו מחוזים של הוצאות מסורתיות או היברידיות שדורשות מכם לוותר על הזכויות הבינלאומיות או על זכויות התרגום והעיבוד <strong style="color:white;">לעד.</strong></p>
+        </div>
+
+        <div class="tip-card">
+            <span class="card-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg> הגנה משפטית</span>
+            <p style="color:var(--gray-light); font-size:0.97rem; line-height:1.8;"><strong style="color:white;">זכויות יוצרים הן קניין רוחני שקם לכם באופן אוטומטי מרגע הכתיבה.</strong></p>
+        </div>
+
+        <h3 class="subheading">מבחן הממליצים</h3>
+
+        <p class="body-text">אל תתביישו לבקש מההוצאה שמות וטלפונים של סופרים שכבר עשו איתם את הדרך הבינלאומית.</p>
+
+        <ul class="checklist">
+            <li><span class="check-bullet">✓</span><strong style="color:white;">דברו עם השטח:</strong> שאלו את הסופרים על רמת השירות, המקצועיות של המתרגמים והעורכים, והאם ההבטחות השיווקיות באמת תורגמו למכירות ולחשיפה.</li>
+            <li><span class="check-bullet">✓</span><strong style="color:white;">חפשו שותפי אמת:</strong> תהליך הוצאת ספר הוא "ריצה למרחקים ארוכים". אתם צריכים צוות שאתם סומכים עליו, שקשוב לכם ומשתף אתכם בהחלטות, ולא מפעל להעלאת קבצים.</li>
+        </ul>
+
+        <blockquote class="blockquote">
+            <strong>זכרו:</strong> המעבר מהשוק המקומי הקטן לאוקיינוס הגלובלי דורש שותפים שלא רק "מעלים ספר לאתר", אלא בונים לכם אסטרטגיה לטווח ארוך.
+        </blockquote>
+
+    </div>
+</section>
+
+<div class="ch-divider"></div>
+
+
+<!-- ═══════════════ פרק 2 ═══════════════ -->
+<section class="chapter" id="ch2">
+    <div class="chapter-header">
+        <div class="chapter-num-badge">
+            <div class="ch-num">2</div>
+            <span class="ch-label">פרק שני</span>
+        </div>
+        <h2 class="chapter-title">הפקת התוכן – איך לגרום לספר שלכם להישמע "Native"</h2>
+        <p class="chapter-tagline">אל תטעו לחשוב שתרגום הוא פעולה טכנית של העברת מילים משפה לשפה.</p>
+    </div>
+
+    <div class="chapter-body">
+
+        <p class="body-text">החלטתם לצאת לדרך, ועכשיו הספר שלכם עומד לעבור את השינוי הגדול ביותר שלו. אל תטעו לחשוב שתרגום הוא פעולה טכנית של העברת מילים משפה לשפה. בשוק גלובלי צפוף כמו אמזון, קוראים אמריקאים או בריטיים הם חסרי סבלנות לטקסט שנשמע "מתורגם" או "שבור". כדי שהספר שלכם לא רק ייקרא אלא גם יקבל ביקורות מהללות, אתם צריכים הפקה שלא מתפשרת על שום ניואנס.</p>
+
+        <h3 class="subheading">למה אתם חייבים מתרגמ/ת ומנהל/ת תרגום Native מטעם ההוצאה?</h3>
+
+        <div class="do-card">
+            <span class="card-label">✓ עשה</span>
+            <p style="color:var(--gray-light); font-size:0.97rem; line-height:1.8;">כשאתם עובדים עם הוצאה לאור, וודאו שיש מישהו בצוות שהאנגלית שלו היא שפת אם (Native) והוא מנהל את תהליך התרגום מקצה לקצה.</p>
+        </div>
+
+        <ul class="checklist">
+            <li><span class="check-bullet">✓</span><strong style="color:white;">בקרה חסרת פשרות:</strong> מנהל/ת תרגום Native יודעים לזהות מתי המתרגם (מוכשר ככל שיהיה) "התעצל" או פספס סלנג עדכני.</li>
+            <li><span class="check-bullet">✓</span><strong style="color:white;">גשר תרבותי:</strong> משמשים כ"עין" של הקורא בחו"ל עוד לפני שהספר פורסם, ומוודא שאיכות העבודה עומדת בסטנדרטים הגבוהים ביותר של השוק הבינלאומי.</li>
+        </ul>
+
+        <h3 class="subheading">ההבדל הקריטי: תרגום מילים מול "אדפטציה תרבותית" (Localization)</h3>
+
+        <p class="body-text">זהו השלב שבו ספרים נופלים או נוסקים. קוראים באמזון לא מחפשים "ספרות ישראלית מתורגמת" – הם מחפשים ספרות יפה שמרגישה כאילו <strong>נכתבה במקור באנגלית.</strong></p>
+
+        <div class="two-col">
+            <div class="highlight-box">
+                <div class="hb-title">פיצוח הקוד התרבותי</div>
+                <p>אדפטציה תרבותית היא התאמה של הומור, דימויים, קודים חברתיים וקצב הדיבור לתרבות היעד. הומור בריטי עדין, למשל, לא תמיד יעבור בארה"ב, וביטויים צבאיים ישראליים דורשים הסבר או מונח מקביל שידבר לקורא האמריקאי.</p>
+            </div>
+            <div class="highlight-box">
+                <div class="hb-title">שיווק דרך התוכן</div>
+                <p>אדפטציה נכונה לוקחת בחשבון את הציפיות של קוראי הז'אנר. אם כתבתם מותחן, הקורא מצפה לקצב מסוים ולשפה מסוימת. אם התרגום יפספס את ה"מוזיקה" הפנימית של הז'אנר, הקורא ירגיש ניתוק וישאיר ביקורת שלילית.</p>
+            </div>
+        </div>
+
+        <h3 class="subheading">המודל ההיברידי (AI + עריכת Native) – איך עושים את זה נכון?</h3>
+
+        <p class="body-text">בעולם של 2026, אנחנו כבר לא שואלים אם להשתמש בבינה מלאכותית, אלא <strong>איך לרתום אותה בלי לאבד את הנשמה של הסיפור.</strong></p>
+
+        <ul class="checklist">
+            <li><span class="check-bullet">✓</span><strong style="color:white;">הליטוש האנושי הוא חובה:</strong> ה-AI עלול לפספס סרקזם, רגש עמוק או ניואנסים תרבותיים. לכן, כל פרק עובר עריכה ספרותית ולשונית מעמיקה על ידי עורך אנושי Native שמחזיר לטקסט את החיים, הדיוק וה"קול" הייחודי שלכם.</li>
+            <li><span class="check-bullet">✓</span><strong style="color:white;">עבודה בשכבות:</strong> כדי להגיע לתוצאה מושלמת, אנחנו עובדים בשלבים – משלד הפרק, דרך הרחבות ודוגמאות, ועד לעריכה סופית לבהירות מקסימלית.</li>
+        </ul>
+
+        <h3 class="subheading">עימוד לקינדל – הפרטים הקטנים שעושים הבדל גדול</h3>
+
+        <p class="body-text">העימוד הוא הפנים של הספר שלכם בתוך מכשיר הקריאה. עימוד חובבני יגרום לקורא לסגור את הספר בשנייה הראשונה.</p>
+
+        <ul class="checklist">
+            <li><span class="check-bullet">✓</span><strong style="color:white;">תאימות לפורמט:</strong> הספר הדיגיטלי חייב להיות בפורמט EPUB מותאם, עם תוכן עניינים פעיל (Active TOC) שמאפשר ניווט קל בין הפרקים.</li>
+            <li><span class="check-bullet">✓</span><strong style="color:white;">משקל הקובץ (Delivery Cost):</strong> אמזון גובה "מס" על העברת נתונים. קובץ כבד מדי עם תמונות לא מותאמות ינגוס לכם בתמלוגים. חשוב להשתמש בתמונות ברזולוציה של 300DPI אך לוודא שהן עוברות אופטימיזציה כדי שהקובץ יישאר קל.</li>
+            <li><span class="check-bullet">✓</span><strong style="color:white;">חוויית Read Sample:</strong> זכרו שהקוראים בוחנים את העמודים הראשונים שלכם דרך כפתור ה-"Read Sample" באמזון. ודאו שהעימוד נראה מקצועי, מזמין ונטול שגיאות.</li>
+        </ul>
+
+        <div class="tip-card">
+            <span class="card-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg> הטיפ המעשי שלנו</span>
+            <p style="color:var(--gray-light); font-size:0.97rem; line-height:1.8;">אל תתפשרו על איכות השפה. קורא בחו"ל שנתקל בתרגום "מכאני" ירגיש שזלזלו בו. <strong style="color:white;">השקעה בעריכה ספרותית ולשונית רב-שלבית היא לא "הוצאה" – היא ההשקעה החכמה ביותר בנכס שלכם.</strong></p>
+        </div>
+
+        <p class="body-text">מוכנים להמשיך לפרק 3? נדבר שם על המיתוג הוויזואלי – איך גורמים לקורא להקליק על הכריכה שלכם מתוך מיליוני ספרים אחרים.</p>
+
+    </div>
+</section>
+
+<div class="ch-divider"></div>
+
+
+<!-- ═══════════════ פרק 3 ═══════════════ -->
+<section class="chapter" id="ch3">
+    <div class="chapter-header">
+        <div class="chapter-num-badge">
+            <div class="ch-num">3</div>
+            <span class="ch-label">פרק שלישי</span>
+        </div>
+        <h2 class="chapter-title">מיתוג ויזואלי – איך לנצח בקרב על תשומת הלב ב-2 שניות</h2>
+        <p class="chapter-tagline">באמזון יש מעל 10 מיליון כותרים. הספר שלכם עלול להישאר שקוף אם לא תדעו איך "לצוד" את עין הקורא.</p>
+    </div>
+
+    <div class="chapter-body">
+
+        <p class="body-text">כתבתם ספר מופלא, אבל באוקיינוס של אמזון, שבו משווקים מעל 10 מיליון כותרים, הספר שלכם עלול להישאר שקוף אם לא תדעו איך "לצוד" את עין הקורא. זכרו: אמזון הוא שוק מסחרי, לא תחרות "פרסי הספרות". בזירה הזו, הכללים הבאים יהפכו את הספר שלכם למותג בינלאומי בולט:</p>
+
+        <blockquote class="blockquote">
+            "האצן הכי מהיר בעולם יפסיד לילד בן 17, אם לילד יש מכונית" – הכותב המוכשר ביותר יפסיד למי שמבין את כללי המשחק של הפלטפורמה.
+        </blockquote>
+
+        <h3 class="subheading">חוק ה-70% – ההחלטה מתקבלת בשבריר שנייה</h3>
+
+        <p class="body-text">מחקרי מעקב עיניים (LookTracker) מוכיחים כי הכריכה ושם הספר אחראים על <span class="inline-stat">למעלה מ-70%</span> מהחלטת הרכישה. הקורא הממוצע לא "מטייל" בחנות; הוא סורק תוצאות חיפוש במהירות שיא. אם המיתוג שלכם מעורפל או לא מקצועי, הקוראים פשוט ימשיכו הלאה לספר הבא מבלי להקליק.</p>
+
+        <div class="tip-card">
+            <span class="card-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg> הבינו את האלגוריתם</span>
+            <p style="color:var(--gray-light); font-size:0.97rem; line-height:1.8;">אתם חייבים להבין איך אמזון עובדת: מיתוג נכון מייצר קליקים, קליקים מייצרים מכירות, ומכירות גורמות לאלגוריתם "להתאהב" בספר שלכם ולדחוף אותו קדימה בתוצאות החיפוש <strong style="color:white;">בחינם.</strong></p>
+        </div>
+
+        <h3 class="subheading">למה "שונה זה מפחיד" בשוק האמריקאי?</h3>
+
+        <div class="dont-card">
+            <span class="card-label">✗ הטעות הנפוצה ביותר</span>
+            <p style="color:var(--gray-light); font-size:0.97rem; line-height:1.8;">זוהי הטעות הנפוצה ביותר של סופרים ישראלים: הניסיון להיות "ייחודי מדי" או "אומנותי" בעיצוב הכריכה. בניגוד לחנות פיזית שבה אתם רוצים לבלוט מעל המדף, באמזון <strong style="color:white;">המגוון העצום גורם לקורא לחפש באופן לא מודע את התבנית המוכרת לו.</strong> הקורא האמריקאי הוא "קורא סדרתי" שרוצה לדעת בדיוק מה הוא הולך לקבל. אם עיצבתם כריכה ש"שוברת את המוסכמות", אתם לא מסקרנים אותו – אתם מרתיעים אותו.</p>
+        </div>
+
+        <h3 class="subheading">קוד ה-Fit to Genre – לדבר בשפת הז'אנר</h3>
+
+        <p class="body-text">המפתח להצלחה הוא להתאים את המיתוג לציפיות של קוראי הז'אנר הספציפי שלכם:</p>
+
+        <ul class="checklist">
+            <li><span class="check-bullet">✓</span><strong style="color:white;">התאמה אינטואיטיבית:</strong> ברומן היסטורי על מלחמת העולם השניה למשל, הקורא מצפה לראות דמות אישה מהגב בלבוש תקופתי, חוטי תיל או מסילת רכבת.</li>
+            <li><span class="check-bullet">✓</span><strong style="color:white;">פסיכולוגיה של צבעים ופונטים:</strong> לכל ז'אנר יש "קודים" – שחור למותחנים פסיכולוגיים, ירוק בהיר לספרי בריאות, ופונטים נקיים כמו Gotham לספרי עיון לעומת פונט Orbitron עתידני למדע בדיוני. אם לא תעמדו בסטנדרטים האלו, הקורא יזהה חובבנות ויעבור הלאה.</li>
+        </ul>
+
+        <h3 class="subheading">מחקר שוק ומתחרים – אל תנחשו, תבדקו</h3>
+
+        <p class="body-text">לפני שאתם בוחרים שם או כריכה, צאו למחקר שוק מעמיק בטופ 100 של הקטגוריה שלכם.</p>
+
+        <div class="do-card">
+            <span class="card-label">✓ עשה – לפני כל בחירת כריכה</span>
+            <ul class="checklist" style="margin-top:10px;">
+                <li><span class="check-bullet">✓</span><strong style="color:white;">זיהוי ביקוש:</strong> בדקו אילו ספרים דומים לשלכם מצליחים ומהם האלמנטים המשותפים לכריכות שלהם.</li>
+                <li><span class="check-bullet">✓</span><strong style="color:white;">דיוק מסרים:</strong> ודאו שהשם והכריכה מעבירים מסר אחד ברור. אם כתבתם על "סוכן מוסד", אל תשימו תמונה של נוף כללי – שימו אלמנטים שיבהירו בשנייה שמדובר במותחן ריגול.</li>
+            </ul>
+        </div>
+
+        <h3 class="subheading">חשיבות הכתיבה השיווקית – ה"הוק" (Hook) שיעצור את הגלילה</h3>
+
+        <p class="body-text">המיתוג לא נגמר בכריכה; הוא ממשיך בטקסט השיווקי. המשפט הראשון בתיאור הספר (ה-Hook) הוא מה שיגרום לקורא הפוטנציאלים להמשיך ולקרוא.</p>
+
+        <p class="body-text"><strong>חוק 2 השורות:</strong> אמזון מציגה רק מספר שורות ראשונות לפני כפתור ה-"Read More". אם ה"הוק" לא יהיה מספיק עוצמתי וממוקד ז'אנר, הקורא לא יפתח את התיאור המלא, ולא תהיה רכישה.</p>
+
+        <div class="two-col">
+            <div class="dont-card">
+                <span class="card-label">✗ כללי מדי</span>
+                <p style="color:#f87171; font-size:0.95rem; line-height:1.7; font-style:italic;">"סיפור על אהבה בלתי אפשרית"</p>
+            </div>
+            <div class="do-card">
+                <span class="card-label">✓ מסר ספציפי מנצח מסר כללי</span>
+                <p style="color:#4ade80; font-size:0.95rem; line-height:1.7; font-style:italic;">"היא ידעה שהתאהבות בו היא טעות, אבל טעויות מעולם לא הרגישו נכון כל כך."</p>
+            </div>
+        </div>
+
+        <div class="tip-card">
+            <span class="card-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg> הטיפ המעשי שלנו</span>
+            <p style="color:var(--gray-light); font-size:0.97rem; line-height:1.8;">אל תלכו עם ה"אמת האומנותית" שלכם נגד השוק. תנו לקוראים את מה שהם מחפשים באריזה שהם מכירים ואוהבים, <strong style="color:white;">והשאירו את הייחודיות שלכם בתוך דפי הספר.</strong></p>
+        </div>
+
+        <p class="body-text">מוכנים לפרק הבא? נדבר בו על אסטרטגיית ההשקה והאלגוריתם – איך גורמים למנוע החיפוש של אמזון לעבוד בשבילכם ולהביא לכם קוראים בחינם.</p>
+
+    </div>
+</section>
+
+<div class="ch-divider"></div>
+
+
+<!-- ═══════════════ פרק 4 ═══════════════ -->
+<section class="chapter" id="ch4">
+    <div class="chapter-header">
+        <div class="chapter-num-badge">
+            <div class="ch-num">4</div>
+            <span class="ch-label">פרק רביעי</span>
+        </div>
+        <h2 class="chapter-title">שיווק ופרסום – ההבדל בין "להעלות ספר" לבין "למכור ספר"</h2>
+        <p class="chapter-tagline">אמזון היא זירה של "Pay to Play" – מי שלא מזרים תנועה (טראפיק) לדף המכירה שלו, נשאר שקוף.</p>
+    </div>
+
+    <div class="chapter-body">
+
+        <p class="body-text">סיימתם את ההפקה, והספר שלכם נראה ומרגיש כמו רב-מכר בינלאומי. עכשיו מגיעה שעת האמת. אל תפלו למלכודת של סופרים רבים שחושבים שברגע שהספר באוויר, הקוראים ינהרו אליו מעצמם. הנה מה שאתם חייבים לוודא שהשותפים שלכם עושים, כדי שהספר שלכם לא רק "יהיה שם", אלא באמת יימכר:</p>
+
+        <h3 class="subheading">אסטרטגיית השקה – אל תצאו לדרך בלי "תוכנית קרב"</h3>
+
+        <p class="body-text">השקה היא לא אירוע חד-פעמי, היא תהליך מתוכנן של מומנטום.</p>
+
+        <div class="do-card">
+            <span class="card-label">✓ עשה – מה לבדוק?</span>
+            <p style="color:var(--gray-light); font-size:0.97rem; line-height:1.8;">שאלו את ההוצאה: <strong style="color:white;">"מה קורה ב-60 הימים שלפני ההעלאה?"</strong> אסטרטגיה נכונה כוללת הכנת הקרקע מבחינה תקשורתית, גיוס מבקרים מוקדמים (ARC), ותזמון של "ימי חינם" או "ימי מבצע" כדי להקפיץ את הספר בדירוגים.</p>
+        </div>
+
+        <p class="body-text"><strong>המטרה:</strong> להתברג ברשימת ה-Hot New Releases של אמזון כבר בשבועות הראשונים, מה שנותן לספר "תו תקן" של הצלחה ומגביר מכירות באופן אוטומטי.</p>
+
+        <h3 class="subheading">אסטרטגיית קידום ממומן (AMS) – לא "לשרוף" כסף, אלא לייצר רווח</h3>
+
+        <p class="body-text">מערכת ה-AMS היא עמוד השדרה של השיווק באמזון.</p>
+
+        <ul class="checklist">
+            <li><span class="check-bullet">✓</span><strong style="color:white;">שימו לב למקצועיות:</strong> הוצאה מקצועית לא רק "מרימה קמפיין", היא מנהלת אותו על בסיס נתונים. ודאו שהם מבינים מונחים כמו <strong style="color:white;">ACOS</strong> (היחס בין השקעה בפרסום לרווח ממכירות) ושיש להם יכולת לבצע אופטימיזציה שבועית לקמפיינים.</li>
+            <li><span class="check-bullet">✓</span><strong style="color:white;">אסטרטגיית Pull:</strong> בניגוד לפייסבוק ש"דוחף" מודעות לאנשים, פלטפורמת הפרסום של AMS עובדת לפי מילות מפתח לקוראים שכבר <strong style="color:white;">מחפשים לרכוש ספר.</strong></li>
+        </ul>
+
+        <div class="dont-card">
+            <span class="card-label">✗ אל תעשה</span>
+            <p style="color:var(--gray-light); font-size:0.97rem; line-height:1.8;">אם להוצאה אין אסטרטגיה מובנית למערכת AMS – <strong style="color:white;">אתם מפסידים את הקוראים הכי מדויקים שלכם</strong> לטובת המתחרים.</p>
+        </div>
+
+        <h3 class="subheading">מחקר "מילות מפתח" – המפתח לחשיפה אורגנית בחינם</h3>
+
+        <p class="body-text">מילות מפתח (Keywords) הן הדרך שבה מנוע החיפוש של אמזון מבין למי להציג את הספר שלכם.</p>
+
+        <div class="two-col">
+            <div class="dont-card">
+                <span class="card-label">✗ מילה כללית מדי</span>
+                <p style="color:#f87171; font-size:0.95rem; line-height:1.7;">"Thriller" – שם התחרות בלתי אפשרית, אפס סיכוי להופיע</p>
+            </div>
+            <div class="do-card">
+                <span class="card-label">✓ מילת זהב נישתית</span>
+                <p style="color:#4ade80; font-size:0.95rem; line-height:1.7;">"International espionage thriller" – תחרות ניהלת, סיכוי ריאלי לדף הראשון</p>
+            </div>
+        </div>
+
+        <ul class="checklist">
+            <li><span class="check-bullet">✓</span><strong style="color:white;">איך תזהו מקצוענים?</strong> אנשי מקצוע לא יבחרו מילים כלליות מדי. הם יחפשו את "מילות הזהב" – ביטויים ספציפיים ונישתיים.</li>
+            <li><span class="check-bullet">✓</span><strong style="color:white;">הוכחת עבודה:</strong> ודאו שהם משתמשים בתוכנות אנליזה מתקדמות למחקר שוק ולא רק "מנחשים" מה אנשים מקלידים.</li>
+        </ul>
+
+        <h3 class="subheading">להעלות ספר מול למכור ספר – האמת הכואבת</h3>
+
+        <p class="body-text">סופרים רבים מתפתים להוצאות שמציעות "הפצה באתרים של הוצאות לאור" או "באלפי חנויות ספרים ברשת".</p>
+
+        <blockquote class="blockquote">
+            <strong>האמת הכואבת:</strong> להעלות קובץ זה עניין טכני פשוט. <strong>למכור ספר זה עניין אסטרטגי.</strong> מיקוד בפלטפורמה אחת חזקה (אמזון) מאפשר לרכז את כל המכירות במקום אחד, להקפיץ את הדירוג ולגרום לאלגוריתם לעבוד עבורכם.
+        </blockquote>
+
+        <div class="dont-card">
+            <span class="card-label">✗ אל תתפזרו</span>
+            <p style="color:var(--gray-light); font-size:0.97rem; line-height:1.8;">הפצה באתר הוצאה לאור ישראלית לא תביא לכם קוראים מאמריקה. אתם צריכים להיות איפה שהלקוחות נמצאים – ובאמזון יש מעל <span class="inline-stat">300 מיליון</span> כאלו.</p>
+        </div>
+
+        <h3 class="subheading">ולידציה חברתית (ביקורות מאומתות) – למה זה "ייהרג ובל יעבור"?</h3>
+
+        <ul class="checklist">
+            <li><span class="check-bullet">✓</span><strong style="color:white;">חכמת ההמונים:</strong> הקורא האמריקאי לא יקנה ספר שאין עליו ביקורות חיוביות. זהו "תו תקן חברתי" קריטי.</li>
+            <li><span class="check-bullet">✓</span><strong style="color:white;">חשיבות ה-Review:</strong> אמזון נותנת משקל גבוה בהרבה לביקורות של אנשים שבאמת רכשו את הספר דרכה. הוצאה שלא דואגת לבניית קבוצת קוראים (ARC) לקבלת ביקורות לפני ובמהלך ההשקה, פשוט לא מבינה איך המנגנון של אמזון עובד.</li>
+        </ul>
+
+        <div class="dont-card">
+            <span class="card-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> זהירות</span>
+            <p style="color:var(--gray-light); font-size:0.97rem; line-height:1.8;"><strong style="color:white;">לעולם אל תקנו ביקורות.</strong> אמזון מזהה זאת, מוחקת אותן ועלולה לחסום את חשבון הסופר שלכם לצמיתות.</p>
+        </div>
+
+        <div class="tip-card">
+            <span class="card-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg> הטיפ המעשי שלנו</span>
+            <p style="color:var(--gray-light); font-size:0.97rem; line-height:1.8;">שיווק הוא לא "מזל", הוא תוצאה של תכנון מדויק והתמדה. ודאו שהשותפים שלכם מראים לכם <strong style="color:white;">דוחות מכירה שקופים</strong> המתעדכנים בזמן אמת, כדי שתוכלו לדעת בדיוק מה עובד ומה דורש שיפור.</p>
+        </div>
+
+        <p class="body-text">מוכנים לפרק האחרון? נדבר בו על הראייה קדימה – איך ממנפים הצלחה באמזון לירידים בינלאומיים, חוזי תרגום בעולם ואפילו לעיבודים למסך.</p>
+
+    </div>
+</section>
+
+<div class="ch-divider"></div>
+
+
+<!-- ═══════════════ פרק 5 ═══════════════ -->
+<section class="chapter" id="ch5">
+    <div class="chapter-header">
+        <div class="chapter-num-badge">
+            <div class="ch-num">5</div>
+            <span class="ch-label">פרק חמישי</span>
+        </div>
+        <h2 class="chapter-title">הראייה קדימה – הפיכת הספר לנכס אסטרטגי</h2>
+        <p class="chapter-tagline">סיימתם את שלב ההשקה באמזון? זהו רק "כרטיס הכניסה" שלכם למשחק הגדול.</p>
+    </div>
+
+    <div class="chapter-body">
+
+        <p class="body-text">אל תתייחסו לספר שלכם כאל מוצר מדף בעל חיי מדף קצרים, כפי שנהוג בשוק הישראלי המצומצם. בזירה הבינלאומית, הספר הוא "נכס דיגיטלי" – ישות משפטית וכלכלית שיכולה לייצרת הכנסה, ומהווה בסיס לאינספור נכסים נוספים. בפרק זה נלמד איך למנף את ההצלחה הדיגיטלית לפריצה רב-ערוצית בעולם המו"לות המסורתי, הקולנוע והאודיו.</p>
+
+        <h3 class="subheading">1. הכניסה ב"דלת הראשית": ירידי ספרים וייצוג ספרותי</h3>
+
+        <p class="body-text">בעולם ההוצאה לאור המסורתי, הגישה למקבלי ההחלטות (Rights Managers ו-Acquisitions Editors) חסומה כמעט לחלוטין בפני סופרים עצמאיים. ללא סוכן ספרותי, הסיכוי שלכם להגיע למו"ל מוביל בחו"ל הוא אפסי.</p>
+
+        <div class="do-card">
+            <span class="card-label">✓ הירידים כזירות מסחר</span>
+            <p style="color:var(--gray-light); font-size:0.97rem; line-height:1.8;">אתם חייבים נוכחות בירידים שהם ה"וול-סטריט" של התעשייה. <strong style="color:white;">נוכחות פיזית של סוכנות בביתן רשמי יוצרת קשרים מקצועיים שעובדים עבורכם חצי שנה קדימה.</strong></p>
+        </div>
+
+        <ul class="checklist">
+            <li><span class="check-bullet">✓</span><strong style="color:white;">פרנקפורט</strong> – החשוב בעולם למסחר בזכויות</li>
+            <li><span class="check-bullet">✓</span><strong style="color:white;">לונדון</strong> – השער לשוק המערבי</li>
+            <li><span class="check-bullet">✓</span><strong style="color:white;">בייג'ינג</strong> – השער למזרח הרחוק</li>
+        </ul>
+
+        <div class="tip-card">
+            <span class="card-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg> חשיפה בקטלוג בינלאומי (Rights Catalog)</span>
+            <p style="color:var(--gray-light); font-size:0.97rem; line-height:1.8;">כדי לחשוף את הספר שלכם להוצאות לאור וסוכנים ספרותיים ברחבי העולם, על הספר להופיע בקטלוג בינלאומי של הוצאה לאור המיועד ספציפית לקידום עסקאות לרכישת זכויות תרגום והפצה. <strong style="color:white;">אם ספר לא נמצא בקטלוג הוא לא נמצא "על המדף" למכירה.</strong></p>
+        </div>
+
+        <h3 class="subheading">2. פריצה אל מעבר לאמזון: הפצה פיזית וקהלים חדשים</h3>
+
+        <p class="body-text">אמזון היא ענקית, אבל היא לא כל העולם. ישנם שווקים שלמים שצורכים תוכן בערוצים "מסורתיים" יותר.</p>
+
+        <div class="two-col">
+            <div class="highlight-box">
+                <div class="hb-title">הפצה לחנויות פיזיות וספריות (IngramSpark)</div>
+                <p>דרך פלטפורמת IngramSpark, אנו מחברים את הספר שלכם לרשת הפצה של <strong style="color:white;">45,000 נקודות מכירה</strong>, כולל חנויות ספרים פיזיות, אוניברסיטאות וספריות ברחבי העולם. זהו מודל POD (הדפסה לפי דרישה) מתקדם שמאפשר לכם להיות על מדפים בעולם <strong style="color:white;">ללא סיכון כלכלי</strong> של הדפסת מלאי מראש.</p>
+            </div>
+            <div class="highlight-box">
+                <div class="hb-title">הזדמנויות בסין ובהודו</div>
+                <p>דרך פלטפורמות כמו <strong style="color:white;">WeRead</strong> אנו פותחים לכם דלת למאות מיליוני קוראים בסין שאין להם גישה לאמזון. בנוסף, השוק ההודי, עם מעל מיליארד תושבים וקהל עצום דובר אנגלית, מהווה פוטנציאל עסקי אדיר.</p>
+            </div>
+        </div>
+
+        <h3 class="subheading">3. מעולם הספרות לעולם המסך: פלטפורמת MediaScout</h3>
+
+        <p class="body-text">תוכן מקורי הוא "הזהב החדש", וכ-<span class="inline-stat">60% מהסרטים המכניסים</span> בהיסטוריה מבוססים על ספרים.</p>
+
+        <ul class="checklist">
+            <li><span class="check-bullet">✓</span><strong style="color:white;">גשר להוליווד:</strong> מיזם MediaScout (בשיתוף Ingram העולמית) מייצר גשר ישיר בין הספר שלכם למפיקים ותסריטאים בינלאומיים המחפשים את הלהיט הבא למסך. אם כתבתם ספר שלדעתכם יכול להפוך לסרט או סידרה, את תוותרו על העלאה שלו לפלטפורמה של MediaScout.</li>
+            <li><span class="check-bullet">✓</span><strong style="color:white;">אישור שוק (Market Validation):</strong> אולפנים מחפשים סיפורים שכבר הוכיחו הצלחה כספרים כי זה מפחית עבורם את הסיכון הפיננסי.</li>
+        </ul>
+
+        <h3 class="subheading">4. המהפכה השקטה של ספרי השמע (Audiobooks)</h3>
+
+        <p class="body-text">האודיו הוא הפורמט הצומח ביותר בעולם כיום.</p>
+
+        <div class="two-col">
+            <div class="highlight-box">
+                <div class="hb-title">מוצר פרימיום</div>
+                <p>מעל <strong style="color:white;">40% צמיחה בשנה.</strong> ספרי שמע נתפסים כמוצר יוקרתי ומגיעים לקהלים חדשים – נהגים, ספורטאים ואנשים עם לקויות קריאה.</p>
+            </div>
+            <div class="highlight-box">
+                <div class="hb-title">חשיבות הקריין</div>
+                <p>איכות ההפקה, מבטא ה-Native וטון ההקראה הם קריטיים לדירוג הספר. ספר שקיים בגרסה דיגיטלית, מודפסת ואודיו יוצר "אקו-סיסטם" <strong style="color:white;">המגביר את המכירות בכל הערוצים.</strong></p>
+            </div>
+        </div>
+
+        <h3 class="subheading">5. הפוטנציאל הכלכלי: מכירת זכויות תרגום (Foreign Rights)</h3>
+
+        <blockquote class="blockquote">
+            כאן טמון הרווח הגדול באמת. כל שפה נוספת היא מחזור חיים חדש לספר שלכם.
+        </blockquote>
+
+        <ul class="checklist">
+            <li><span class="check-bullet">✓</span><strong style="color:white;">עסקאות ללא סיכון:</strong> בחוזה תרגום, המו"ל הזר נושא בכל עלויות התרגום והשיווק, ואתם נהנים ממקדמה (Advance) ומתמלוגים על כל מכירה.</li>
+            <li><span class="check-bullet">✓</span><strong style="color:white;">בניית אוטוריטה באמצעות ספר עיון:</strong> תרגום לשפות נוספות הופך אתכם מ"סופרים" למומחים בינלאומיים בתחומכם, מה שפותח דלתות להרצאות, סדנאות וייעוץ בכל העולם.</li>
+        </ul>
+
+        <div class="tip-card">
+            <span class="card-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg> זכרו</span>
+            <p style="color:var(--gray-light); font-size:0.97rem; line-height:1.8;">הספר שלכם הוא לא "חוברת", הוא <strong style="color:white;">השקעה לטווח ארוך.</strong> כשמנהלים אותו נכון כנכס אסטרטגי – עם מיתוג מדויק באמזון, ייצוג חזק בירידים והפצה רב-ערוצית – <strong style="color:white;">השמיים הם באמת לא הגבול.</strong> אנחנו כאן כדי לתת לכם את האסטרטגיה שתהפוך את היצירה שלכם להצלחה עולמית מתמשכת.</p>
+        </div>
+
+    </div>
+</section>
+
+<div class="ch-divider"></div>
+
+
+<!-- ═══════════════ סיכום ═══════════════ -->
+<section class="summary-section">
+    <div class="summary-inner">
+        <span class="section-kicker">סיכום</span>
+        <h2 style="font-size:1.8rem; font-weight:700; margin-bottom:32px; line-height:1.25;">האוקיינוס הגלובלי מחכה לכם</h2>
+
+        <p class="summary-text">כעת, כשהמילים שלכם כבר אינן כלואות בין גבולותיה הצרים של המפה המקומית, אתם ניצבים מול האופק הרחב של האוקיינוס הגלובלי. המסע שעברנו יחד בין דפי המדריך הזה הוא רק תחילתו של השינוי – המעבר מהיותכם כותבים הפונים לקהל מצומצם, להפיכתכם לבעלים של נכס אסטרטגי, שאינו תלוי בזמן או במקום.</p>
+
+        <p class="summary-text">זכרו כי הספר שכתבתם בחדרי חדרים בישראל נושא עמו את ה"תבלין" הייחודי שאליו העולם צמא כל כך. בעידן שבו התוכן הוא המטבע היקר ביותר, היצירה שלכם הופכת לישות דיגיטלית חיה שעובדת עבורכם מסביב לשעון, חוצה יבשות ותרבויות, ומבטיחה שהקול שלכם יהדהד הרבה מעבר למה שדמיינתם. בכל פעם שקוראת בסיאטל או עורך בלונדון יצללו אל תוך הסיפור שלכם, המורשת שלכם תכה שורשים חדשים.</p>
+
+        <p class="summary-text"><strong>ההצלחה הבינלאומית אינה מקרה גמור של מזל, אלא מבנה עדין של דיוק</strong> – שילוב בין תוכן לבין אסטרטגיה. מהרגע שבו ה"הוק" שלכם תפס את עין הקורא ועד לרגע שבו זכויות התרגום שלכם נמכרות בירידי הספרים בפרנקפורט או בבייג'ינג, כל צעד הוא לבנה בבניין האוטוריטה הבינלאומית שלכם.</p>
+
+        <p class="summary-text">צאו לדרך בביטחון. <strong>העולם מחכה לסיפור הישראלי הבא, והוא מחכה לכם.</strong> נשמח להיות שם לצדכם כשחלום הכתיבה יהפוך למותג בינלאומי משגשג.</p>
+    </div>
+</section>
+
+
+<!-- ═══════════════ תסריט לסרטון ═══════════════ -->
+<section class="script-section" id="video-script">
+    <div class="content-wrap">
+        <span class="section-kicker">תסריט לסרטון מדריך</span>
+
+        <!-- גרסה א' -->
+        <h2 style="font-size:1.4rem; font-weight:700; margin-bottom:28px; line-height:1.3;">גרסה א'</h2>
+
+        <div class="script-block">
+            <span class="script-label">הוק (0–3 שניות)</span>
+            <p>אל תוציאו ספר באמזון לפני שראיתם את זה.</p>
+            <p>זה יכול לחסוך לכם כסף ומפח נפש גדול מפח נפש ועשרות אלפי שקלים.</p>
+            <p>רגע לפני שאתם חותמים על חוזה להוצאת ספר בחו"ל – עצרו. הסרטון הזה עומד לחסוך לכם עשרות אלפי שקלים ומפח נפש מיותר.</p>
+        </div>
+
+        <div class="script-block">
+            <span class="script-label">גוף (3–22 שניות)</span>
+            <p>יותר מדי סופרים מגיעים אלינו אחרי שכבר התחילו תהליך… =או כשהספר כבר נכשל</p>
+            <p>ומגלים מאוחר מדי שהם לא שאלו את השאלות הנכונות.</p>
+            <p>לאור הנסיון שלנו בתרגום הפקה ושיווק של קרוב ל2000 סופרים ישראלים באמזון</p>
+            <p>אז בנינו עבורכם מדריך אחד פשוט, ובחינם:</p>
+            <p>מה לבדוק לפני שבוחרים עם מי לעבוד הוצאה לאור.</p>
+            <p>אני פוגש מידי יום סופרים מוכשרים שהבטיחו להם "הרים וגבעות" וגילו מאוחר מדי שהם איבדו את הזכויות ואת חסכונותיהם. אנחנו לא יכולים לעמוד יותר מנגד. בנינו עבורכם את המדריך האסטרטגי המלא – בחינם – כדי שתדעו לשאול את השאלות הקריטיות:</p>
+            <p>✔️ איך נראה תרגום שמותאם לשוק האמריקאי</p>
+            <p>✔️ למה כריכה "יפה" יכולה דווקא להרוס מכירות</p>
+            <p>✔️ ואיך מבדילים בין "להעלות ספר" לבין באמת למכור אותו</p>
+            <p>✔️ האם יש לחברה הוכחות ביצוע או פשוט שהם יודעים למכור ספרים באמזון ובעולם</p>
+            <p>✔️ האם יש להם סופרים ממליצים שאפשר לדבר איתם</p>
+            <p>✔️ למי שייכות הזכויות באמת</p>
+        </div>
+
+        <div class="script-block">
+            <span class="script-label">סגירה (22–30 שניות)</span>
+            <p>אם אתם בתחילת הדרך, זה המדריך שאתם חייבים לקרוא לפני כל החלטה.</p>
+            <p>תנו לעצמכם את הכוח לבחור נכון.</p>
+            <p>הקישור למדריך מחכה לכם כאן 👇</p>
+        </div>
+
+        <div class="ch-divider" style="margin:48px 0;"></div>
+
+        <!-- גרסה ב' -->
+        <h2 style="font-size:1.4rem; font-weight:700; margin-bottom:28px; line-height:1.3;">גרסה ב' (מלוטשת)</h2>
+
+        <div class="script-block">
+            <span class="script-label">הוק (0–3 שניות)</span>
+            <p>רגע לפני שאתם חותמים על חוזה להוצאת ספר בחו"ל – עצרו. הסרטון הזה עומד לחסוך לכם עשרות אלפי שקלים ומפח נפש מיותר.</p>
+        </div>
+
+        <div class="script-block">
+            <span class="script-label">גוף (3–22 שניות)</span>
+            <p>אני פוגש מידי יום סופרים מוכשרים שהבטיחו להם "הרים וגבעות" וגילו מאוחר מדי שהם איבדו את הזכויות ואת חסכונותיהם. אנחנו לא יכולים לעמוד יותר מנגד. בנינו עבורכם את המדריך האסטרטגי המלא – בחינם – כדי שתדעו לשאול את השאלות הקריטיות:</p>
+            <p>✔️ מי בעלי הבית? ודאו שחשבון ה-KDP נפתח על שמכם בלבד והזכויות נשארות אצלכם.</p>
+            <p>✔️ מבחן הוכחת הביצוע: האם להוצאה יש קבלות? האם "הסנדלר הולך יחף" או שהם יודעים למכור לעצמם?</p>
+            <p>✔️ מה זה תרגום "Native"? ההבדל הקריטי בין החלפת מילים לבין "אדפטציה תרבותית".</p>
+            <p>✔️ מיתוג או אמנות? למה כריכה "ייחודית מדי" מרתיעה את הקורא האמריקאי, ואיך "חוק ה-70%" קובע את גורל הספר.</p>
+            <p>✔️ להעלות או למכור? איך מבדילים בין פעולה טכנית לאסטרטגיה עסקית שתהפוך את הספר לנכס דיגיטלי מניב.</p>
+        </div>
+
+        <div class="script-block">
+            <span class="script-label">סגירה (22–30 שניות)</span>
+            <p>אל תצאו לאוקיינוס הגלובלי ללא מצפן. המדריך הזה הוא הדרכון הבינלאומי של היצירה שלכם. תנו לעצמכם את הכוח לבחור נכון. המדריך מחכה לכם כאן 👇</p>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ═══════════════ CTA ═══════════════ -->
+<section class="cta-section" id="cta">
+    <div class="cta-inner">
+        <span class="section-kicker">הצעד הבא</span>
+        <h2 class="cta-title">
+            מוכנים לצאת לדרך<br>
+            <span class="orange">עם הצוות הנכון?</span>
+        </h2>
+        <p class="cta-sub">
+            אחרי שקראתם את המדריך, אתם יודעים לשאול את השאלות הנכונות. eBookPro מוכנים לענות על כולן – ולהוכיח, עם מספרים.
+        </p>
+
+        <div class="cta-cards">
+            <div class="cta-card">
+                <span class="cta-card-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></span>
+                <h4>שקיפות מלאה</h4>
+                <p>דוחות מכירה שקופים בזמן אמת. החשבון על שמכם. הכסף אליכם ישירות.</p>
+            </div>
+            <div class="cta-card">
+                <span class="cta-card-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 19.75 7 21.23 7 23"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 19.75 17 21.23 17 23"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></span>
+                <h4>הוכחת ביצוע</h4>
+                <p>קרוב ל-2,000 ספרים ישראלים, מאות רשימות רבי-מכר, חוזי תרגום בינלאומיים.</p>
+            </div>
+            <div class="cta-card">
+                <span class="cta-card-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+                <h4>אסטרטגיה גלובלית</h4>
+                <p>אמזון, ירידים, IngramSpark, MediaScout, אודיו ותרגומים – הכל תחת קורת גג אחת.</p>
+            </div>
+            <div class="cta-card">
+                <span class="cta-card-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+                <h4>הזכויות שלכם</h4>
+                <p>הספר שלכם נשאר שלכם. לגמרי. תמיד.</p>
+            </div>
+        </div>
+
+        <a href="https://www.ebookpro.co.il" class="btn-main" target="_blank">
+            התחילו את הדרך עם eBookPro
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+
+        <p class="cta-note">ייעוץ ראשוני ללא עלות וללא התחייבות</p>
+    </div>
+</section>
+
+
+<footer>
+    <div class="footer-logo">
+        <img src="https://static.wixstatic.com/media/bb1f28_860fb633f38a4961b21c3049d08e2e93~mv2.png" alt="eBookPro">
+    </div>
+    <div class="footer-line"></div>
+    <p class="footer-text">
+        © 2026 eBookPro | Results Group. כל הזכויות שמורות.<br>
+        ההוצאה לאור המובילה בישראל לתרגום, הפקה והפצת ספרים בינלאומית.
+    </p>
+</footer>
+
+
+<button class="theme-toggle-btn" id="themeToggle" aria-label="החלפת ערכת צבעים">
+    <svg class="icon-moon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+    <svg class="icon-sun" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/>
+        <line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/>
+        <line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>
+</button>
+
+<button class="toc-toggle" id="tocToggle" aria-label="פתח תוכן עניינים">
+    <svg class="toc-btn-icon" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+    </svg>
+    <span class="toc-toggle-label">תוכן</span>
+</button>
+
+<div class="toc-overlay" id="tocOverlay"></div>
+
+<aside class="toc-panel" id="tocPanel" aria-label="תוכן עניינים">
+    <div class="toc-head">
+        <span class="toc-head-title">תוכן עניינים</span>
+        <button class="toc-close-btn" id="tocClose" aria-label="סגור">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.3" stroke-linecap="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+    </div>
+    <div class="toc-links">
+        <a href="#intro" class="toc-link toc-intro-link" data-toc="intro">הקדמה – מכתב אישי מבני כרמי</a>
+        <a href="#ch1" class="toc-link" data-toc="ch1"><span class="toc-badge">1</span>בחירת השותפים הנכונים</a>
+        <a href="#ch2" class="toc-link" data-toc="ch2"><span class="toc-badge">2</span>הפקת תוכן ברמה בינלאומית</a>
+        <a href="#ch3" class="toc-link" data-toc="ch3"><span class="toc-badge">3</span>מיתוג ויזואלי שמוכר</a>
+        <a href="#ch4" class="toc-link" data-toc="ch4"><span class="toc-badge">4</span>שיווק ופרסום</a>
+        <a href="#ch5" class="toc-link" data-toc="ch5"><span class="toc-badge">5</span>הראייה קדימה – פריצה גלובלית</a>
+    </div>
+</aside>
+
+<a href="https://bb1f2801-7c48-49b3-beb2-e38a72fb001c.usrfiles.com/ugd/bb1f28_d43fdb4f412444769804d45c13df620b.pdf" target="_blank" download="ebookpro-guide.pdf" class="pdf-download-btn" title="הורדת המדריך כקובץ PDF" aria-label="הורדת המדריך כקובץ PDF">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+</a>
+
+<script>
+    const bar = document.getElementById('progress-bar');
+    window.addEventListener('scroll', () => {
+        const scrolled = window.scrollY;
+        const total    = document.documentElement.scrollHeight - window.innerHeight;
+        bar.style.width = (scrolled / total * 100) + '%';
+    });
+
+    const navLinks = document.querySelectorAll('.nav-ch');
+    const chapters = ['ch1','ch2','ch3','ch4','ch5'].map(id => document.getElementById(id));
+
+    window.addEventListener('scroll', () => {
+        let current = '';
+        chapters.forEach(ch => {
+            if (ch && window.scrollY >= ch.offsetTop - 100) current = ch.id;
+        });
+        navLinks.forEach(l => {
+            l.classList.toggle('active', l.getAttribute('href') === '#' + current);
+        });
+    });
+
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+            const target = document.querySelector(a.getAttribute('href'));
+            if (!target) return;
+            e.preventDefault();
+            iframeScrollTo(target);
+        });
+    });
+
+    (function() {
+        const toggle  = document.getElementById('tocToggle');
+        const panel   = document.getElementById('tocPanel');
+        const overlay = document.getElementById('tocOverlay');
+        const closeBtn= document.getElementById('tocClose');
+
+        function openToc()  { panel.classList.add('open');    overlay.classList.add('open');    }
+        function closeToc() { panel.classList.remove('open'); overlay.classList.remove('open'); }
+
+        toggle.addEventListener('click', openToc);
+        closeBtn.addEventListener('click', closeToc);
+        overlay.addEventListener('click', closeToc);
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeToc(); });
+
+        document.querySelectorAll('.toc-link').forEach(link => {
+            link.addEventListener('click', () => setTimeout(closeToc, 180));
+        });
+
+        const tocLinks   = document.querySelectorAll('.toc-link[data-toc]');
+        const tocSections = ['intro','ch1','ch2','ch3','ch4','ch5']
+            .map(id => document.getElementById(id)).filter(Boolean);
+
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    tocLinks.forEach(l => l.classList.remove('toc-active'));
+                    const active = document.querySelector(`.toc-link[data-toc="${entry.target.id}"]`);
+                    if (active) active.classList.add('toc-active');
+                }
+            });
+        }, { rootMargin: '-8% 0px -82% 0px' });
+
+        tocSections.forEach(s => io.observe(s));
+    })();
+
+    (function() {
+        function toggleTheme() {
+            document.documentElement.classList.toggle('light-mode');
+            var isLight = document.documentElement.classList.contains('light-mode');
+            localStorage.setItem('ebookpro-theme', isLight ? 'light' : 'dark');
+        }
+        var btn = document.getElementById('themeToggle');
+        var navBtn = document.getElementById('navThemeToggle');
+        if (btn) btn.addEventListener('click', toggleTheme);
+        if (navBtn) navBtn.addEventListener('click', toggleTheme);
+    })();
+
+    /* ── iframe auto-height for Wix embed ── */
+    (function() {
+        function sendHeight() {
+            var h = document.documentElement.scrollHeight;
+            window.parent.postMessage(h, '*');
+            window.parent.postMessage(JSON.stringify({ type: 'resize', height: h }), '*');
+            window.parent.postMessage(JSON.stringify({ eventType: 'resize', height: h }), '*');
+        }
+        sendHeight();
+        window.addEventListener('load', sendHeight);
+        window.addEventListener('resize', sendHeight);
+        if (typeof ResizeObserver !== 'undefined') {
+            new ResizeObserver(sendHeight).observe(document.body);
+        }
+        setInterval(sendHeight, 500);
+    })();
+</script>
+
+</body>
+</html>

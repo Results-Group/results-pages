@@ -1,0 +1,519 @@
+<!-- ======================== HERO SECTION ======================== -->
+<div class="hero-section">
+    <div class="container">
+        <div class="content-side">
+            <div class="logo-wrapper">
+                <img src="https://static.wixstatic.com/media/93d764_94202171fd29471c910e716f3f3990ba~mv2.png" alt="StartPlan Logo" class="logo-img">
+            </div>
+
+            <h1 class="main-title">
+                יש לך רעיון <span class="nowrap">לסטארט-אפ?</span>
+                <span class="highlight">אנחנו נעזור להפוך אותו למציאות.</span>
+            </h1>
+
+            <p class="sub-title">
+                מלווים יזמים עם רעיון לסטארט-אפ/אפליקציה משלב הרעיון ועד למוצר של ממש.<br>
+                מלאו את הפרטים וניצור קשר לבדיקת הרעיון.
+            </p>
+
+            <div class="social-proof-row">
+                <div class="stat-item">
+                    <span class="stat-number">500M ₪</span>
+                    <span class="stat-label">גוייסו למיזמים</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">1,000+</span>
+                    <span class="stat-label">יזמים שליווינו</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">15M+</span>
+                    <span class="stat-label">משתמשים פעילים</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">10</span>
+                    <span class="stat-label">שנות עשייה</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-side">
+            <div class="card-form">
+                <div class="hero-trust-badge">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    דיסקרטיות מלאה מובטחת
+                </div>
+
+                <div class="hero-form-header">
+                    <h3>בדיקת היתכנות למיזם</h3>
+                    <p>שיחת אפיון ראשונית <strong>ללא עלות</strong></p>
+                </div>
+
+                <form id="heroForm" action="/lp/startplan-thanks" method="GET">
+
+                    <div class="hero-form-grid">
+                        <div class="input-group" id="hero_group_name">
+                            <label class="hero-input-label">שם מלא</label>
+                            <input type="text" id="hero_full_name" name="full_name" class="hero-form-input" required autocomplete="name">
+                            <div class="error-msg">נא להזין שם מלא תקין</div>
+                        </div>
+
+                        <div class="input-group" id="hero_group_phone">
+                            <label class="hero-input-label">מספר טלפון</label>
+                            <input type="tel" id="hero_phone_number" name="phone_number" class="hero-form-input" required dir="ltr" style="text-align: right;" autocomplete="tel">
+                            <div class="error-msg">נא להזין מספר טלפון תקין (10 ספרות)</div>
+                        </div>
+
+                        <div class="input-group" id="hero_group_email">
+                            <label class="hero-input-label">כתובת מייל</label>
+                            <input type="email" id="hero_email_address" name="email_address" class="hero-form-input" required dir="ltr" style="text-align: right;" autocomplete="email">
+                            <div class="error-msg">נא להזין כתובת דוא"ל תקינה</div>
+                        </div>
+
+                        <div class="input-group" id="hero_group_industry">
+                            <label class="hero-input-label">באיזה תחום הרעיון?</label>
+                            <input type="text" id="hero_industry" name="industry" class="hero-form-input" required>
+                            <div class="error-msg">נא להזין את תחום הרעיון</div>
+                        </div>
+
+                        <div class="input-group full-width" id="hero_group_stage">
+                            <label class="hero-input-label">באיזה שלב נמצא הרעיון?</label>
+                            <input type="text" id="hero_stage" name="stage" class="hero-form-input" required>
+                            <div class="error-msg">נא להזין את שלב הרעיון</div>
+                        </div>
+
+                        <div class="input-group full-width" id="hero_group_help">
+                            <label class="hero-input-label">איך נוכל לעזור לך?</label>
+                            <textarea id="hero_help" name="help" class="hero-form-input" rows="2" required></textarea>
+                            <div class="error-msg">נא לפרט קצת על הרעיון/עזרה</div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="heroSubmitBtn" class="hero-submit-btn">יוצאים לדרך!</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================== FLIP CARDS SECTION ======================== -->
+<section class="startplan-flipcards-section">
+    <div class="startplan-flipcards-container">
+        <h2 class="startplan-flipcards-main-title">מה מונע מאנשים לקדם את הרעיון שלהם?</h2>
+        <div class="startplan-flipcards-grid">
+
+            <div class="startplan-flip-card">
+                <div class="startplan-flip-card-inner">
+                    <div class="startplan-flip-card-front">
+                        <div class="flip-card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                        </div>
+                        <h3 class="flip-card-title">ידע מקצועי</h3>
+                        <p class="flip-card-description">לא מעט יזמים נוטים להאמין (פעמים רבות באופן שגוי) כי על מנת להקים מיזם בתחום מסוים - עליהם לשלוט בו מקצועית ברמה אבסולוטית.</p>
+                    </div>
+                    <div class="startplan-flip-card-back">
+                        <p>הקמת מיזם מצליח נשענת על חזון ברור וצוות משלים - שזה התפקיד לך ביותר יזם, לספק את החזון ואת הצוות שאתה מאמין בו ולא בהכרח על שליטה אבסולוטית בכל היבט טכני.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="startplan-flip-card">
+                <div class="startplan-flip-card-inner">
+                    <div class="startplan-flip-card-front">
+                        <div class="flip-card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99 .89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm-1 14H5c-.55 0-1-.45-1-1V8l6.94 4.34c.65 .41 1.47 .41 2.12 0L21 8v9c0 .55-.45 1-1 1zM4.78 6h14.44l-7.22 4.51L4.78 6z"/></svg>
+                        </div>
+                        <h3 class="flip-card-title">עסקים</h3>
+                        <p class="flip-card-description">קיימת דעה רווחת<br>שהקמת סטארט-אפים מיועדת<br>לאנשי עסקים ממולחים בלבד.</p>
+                    </div>
+                    <div class="startplan-flip-card-back">
+                        <p>יזמות אינה בלעדית לאנשי עסקים ותיקים, כל מיזם, לרבות אלה של אנשי עסקים מצליחים כיום, החל מנקודת פתיחה.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="startplan-flip-card">
+                <div class="startplan-flip-card-inner">
+                    <div class="startplan-flip-card-front">
+                        <div class="flip-card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                        </div>
+                        <h3 class="flip-card-title">משאבים</h3>
+                        <p class="flip-card-description">רבים נמנעים לפתח רעיונות מעולים בשל חוסר במימון, מתוך אמונה ש"רק רעיון לא מספיק".&nbsp;</p>
+                    </div>
+                    <div class="startplan-flip-card-back">
+                        <p>בעוד הון ראשוני חשוב ויכול לעזור, אבל מיזם בעל פוטנציאל משמעותי יכול למשוך משקיעים באמצעות הצגת מודל עסקי ברור ואסטרטגיית צמיחה מבוססת.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="startplan-flip-card">
+                <div class="startplan-flip-card-inner">
+                    <div class="startplan-flip-card-front">
+                        <div class="flip-card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99 .89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm-1 14H5c-.55 0-1-.45-1-1V8l6.94 4.34c.65 .41 1.47 .41 2.12 0L21 8v9c0 .55-.45 1-1 1zM4.78 6h14.44l-7.22 4.51L4.78 6z"/></svg>
+                        </div>
+                        <h3 class="flip-card-title">סתם עוד רעיון</h3>
+                        <p class="flip-card-description">למה שמכל הרעיונות בעולם, דווקא הרעיון שלי יצליח? מי אמר שיש לי משהו מעולה ביד ולא "סתם עוד רעיון"?</p>
+                    </div>
+                    <div class="startplan-flip-card-back">
+                        <p>הפוטנציאל של רעיון נמדד בפתרון שהוא מציע ובערך שהוא יוצר, לא רק בייחודיות מוחלטת. (גם GPS היה קיים לפני שהמציאו את Waze.. ותראו אותה היום)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="startplan-flip-card">
+                <div class="startplan-flip-card-inner">
+                    <div class="startplan-flip-card-front">
+                        <div class="flip-card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                        </div>
+                        <h3 class="flip-card-title">אין הבטחה</h3>
+                        <p class="flip-card-description">לקפוץ למים העמוקים נראה מפחיד מדי, התהליך נראה מחייב וארוך מדי, ללא כל הבטחה שזה ישתלם בסוף.</p>
+                    </div>
+                    <div class="startplan-flip-card-back">
+                        <p>אנחנו לא יכולים להבטיח הצלחה, אבל אנחנו כן יכולים להבטיח שבזכות השלב הראשוני, תוכלו לדעת האם כדאי ומה הסיכויים של הרעיון שלכם להצליח.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="startplan-flip-card">
+                <div class="startplan-flip-card-inner">
+                    <div class="startplan-flip-card-front">
+                        <div class="flip-card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99 .89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm-1 14H5c-.55 0-1-.45-1-1V8l6.94 4.34c.65 .41 1.47 .41 2.12 0L21 8v9c0 .55-.45 1-1 1zM4.78 6h14.44l-7.22 4.51L4.78 6z"/></svg>
+                        </div>
+                        <h3 class="flip-card-title">תמיכה</h3>
+                        <p class="flip-card-description">הדרך להקמת סטארט-אפ לא קלה. פעמים רבות, החוסר בליווי, שותפות וכתף תומכת מקשה על יזמים לצאת לדרך ולהתמיד.</p>
+                    </div>
+                    <div class="startplan-flip-card-back">
+                        <p>חשוב לדעת לבחור את השותפים לפי הדעה המקצועית בלבד - ואתם לא צריכים לעבור את זה לבד, אנחנו כאן כדי לספק ליווי, שותפות ותמיכה לאורך כל הדרך.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="startplan-flip-card">
+                <div class="startplan-flip-card-inner">
+                    <div class="startplan-flip-card-front">
+                        <div class="flip-card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                        </div>
+                        <h3 class="flip-card-title">תחרות</h3>
+                        <p class="flip-card-description">אחד הגורמים שמוציאים ליזמים את הרוח מהמפרשים הוא תחרות. הגילוי שמוצר זהה קיים כבר בשוק מוביל רבים לויתור על הרעיון.</p>
+                    </div>
+                    <div class="startplan-flip-card-back">
+                        <p>תחרות היא דבר בריא, ואפילו מעידה שיש שוק למוצר שלכם.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ======================== PREDICT SECTION ======================== -->
+<section class="predict-section-v3">
+    <div class="predict-panel left-panel">
+        <h2 class="predict-question">האם אפשר לנבא הצלחה של סטארט-אפ?</h2>
+        <p class="predict-short-answer">לא</p>
+    </div>
+    <div class="predict-panel right-panel">
+        <h3 class="predict-pivot">אבל…</h3>
+        <div class="solution-wrapper">
+            <p class="solution-text">במקום לנחש, אנחנו מתמקדים בבדיקה יסודית של השוק, בניית תוכנית עסקית מפורטת, אפיון קהל היעד ותכנון אסטרטגיית חדירה חכמה.</p>
+            <p class="solution-text">אנחנו מספקים לכם את המפה והמצפן כדי לנווט בדרך המאתגרת של הקמת סטארט-אפ, תוך כדי הימנעות ממכשולים נפוצים ומינוף נקודות חוזק.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ======================== INTRO SECTION ======================== -->
+<section class="intro-section-v2">
+    <div class="intro-grid-container">
+        <div class="intro-text-content">
+            <h1 class="intro-headline">מובילים את ה-Start Up Nation בישראל</h1>
+            <p class="intro-description">
+                נעים להכיר, אנחנו StartPlan. המשימה שלנו היא לקחת את הרעיון שלכם, להעניק לו את הידע והכלים המקצועיים הנדרשים, ולהוביל אותו בדרך הבטוחה להפוך לסטארט-אפ מצליח עם סיכויי צמיחה אמיתיים.
+            </p>
+            <div class="achievements-wrapper">
+                <div class="intro-achievement-box">
+                    <h3>גיוס הון וצמיחה</h3>
+                    <p>בעשור האחרון, ליווינו יזמים שגייסו יחד למעלה מ-<span class="stat-highlight">500 מיליון ₪</span> והגיעו עם המוצרים שלהם למיליוני משתמשים ברחבי העולם.</p>
+                </div>
+                <div class="intro-achievement-box">
+                    <div class="award-logos">
+                        <img class="forbes-logo" src="https://static.wixstatic.com/media/f559f1_1c6d29fc5eb84b88bbd07b969a93b76c~mv2.png/v1/crop/x_702,y_872,w_2204,h_702/fill/w_750,h_240,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/f559f1_1c6d29fc5eb84b88bbd07b969a93b76c~mv2.png" alt="Forbes Logo">
+                        <img src="https://static.wixstatic.com/media/bb1f28_cfd3f801c7a5442cb0f55186639bbd47~mv2.png" alt="Forbes 30 Under 30 Seal">
+                    </div>
+                    <h3>נבחרנו לרשימת 30Under30</h3>
+                    <p>לאחר שנים ארוכות בהן עזרנו לאנשים להצליח, פיתחנו עשרות מוצרים, היינו מנטורים והשקענו בעשייה, נבחרנו על ידי מגזין Forbes לרשימת 30 האנשים המשפיעים בישראל מתחת לגיל 30.</p>
+                </div>
+            </div>
+        </div>
+        <div class="intro-image-container">
+            <img src="https://startplan.net/wp-content/uploads/2024/05/Nir_Slakman-0280-scaled-1-1024x1536.jpg" alt="ניר סלקמן, מייסד StartPlan" class="intro-image">
+        </div>
+    </div>
+</section>
+
+<!-- ======================== MEDIA SECTION ======================== -->
+<section class="startplan-media-section">
+    <div class="startplan-media-container">
+        <h2 class="startplan-media-headline">StartPlan בתקשורת</h2>
+        <div class="swiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                    <div class="card-content-wrapper">
+                        <div class="media-logo-placeholder">MAKO</div>
+                        <h3 class="startplan-item-title">חברת הייעוץ לסטארטאפים מתרחבת ללונדון</h3>
+                        <p class="startplan-item-description">כתבה על התרחבותה של StartPlan לשוק הלונדוני והחזון להפיץ את בשורת הסטארט-אפ ניישן.</p>
+                        <a href="https://www.mako.co.il/news-money/2022_q2/Article-e47a9f7c67fef71026.htm" target="_blank" rel="noopener noreferrer" class="startplan-item-link">קראו את הכתבה <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg></a>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="card-content-wrapper">
+                        <div class="media-logo-placeholder">YouTube</div>
+                        <h3 class="startplan-item-title">דביר ודוראל על שכר יוצאי יחידות טכנולוגיות</h3>
+                        <p class="startplan-item-description">ראיון עומק על האתגרים וההזדמנויות בשוק השכר לבוגרי יחידות טכנולוגיות.</p>
+                        <div class="startplan-video-embed-container">
+                            <iframe src="https://www.youtube.com/embed/-7c7O1Cz_Cw?si=Ni8I6m4U2c71rHZO" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="card-content-wrapper">
+                        <div class="media-logo-placeholder">Globes</div>
+                        <h3 class="startplan-item-title">ראיון על מודלים עסקיים: כסף קטן - מהפכה גדולה!</h3>
+                        <p class="startplan-item-description">מומחי StartPlan משתפים בתובנותיהם על בניית מודלים עסקיים חדשניים.</p>
+                        <a href="https://www.globes.co.il/news/article.aspx?did=1001237481" target="_blank" rel="noopener noreferrer" class="startplan-item-link">קראו את הכתבה <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg></a>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="card-content-wrapper">
+                        <div class="media-logo-placeholder">13tv</div>
+                        <h3 class="startplan-item-title">טור דעה: להקים סטארטאפ כנגד כל הסיכויים</h3>
+                        <p class="startplan-item-description">טור דעה מעורר השראה הסוקר את האתגרים הייחודיים בהקמת סטארט-אפ בישראל.</p>
+                        <a href="https://13tv.co.il/item/news/domestic/zon7x-227546/" target="_blank" rel="noopener noreferrer" class="startplan-item-link">קראו את הכתבה <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-pagination"></div>
+    </div>
+</section>
+
+<!-- ======================== PROCESS SECTION ======================== -->
+<section class="startplan-process-section">
+    <h2>הדרך שלנו להקמת סטארט-אפים ומיזמים</h2>
+    <div class="startplan-progress-vertical">
+        <div class="startplan-process-step">
+            <h3>מבצעים מחקר שוק</h3>
+            <p>לפני שמתחייבים לסטארט-אפ ומשקיעים בו את מלוא הזמן והמשאבים יש לבדוק את הפוטנציאל העסקי שלו. מי הם המתחרים הפועלים בשוק? מהו גודל השוק? אל תבנו תכנית עסקית לסטארט-אפ לפני שביצעתם בדיקה מעמיקה ראשונית.</p>
+        </div>
+        <div class="startplan-process-step">
+            <h3>בונים תכנית עסקית</h3>
+            <p>בניית מצגת למשקיעים ותכנית פיננסית מקיפה: מה חשוב להדגיש למשקיעים? על מה להתעכב ומה לא? איך מנצלים את האמצעים שברשות הסטארט-אפ כדי להוביל אותו לצמיחה.</p>
+        </div>
+        <div class="startplan-process-step">
+            <h3>מתכננים ומעצבים</h3>
+            <p>בידול המיזם אל מול התחרות, אסטרטגיית חדירה לשוק והנגשת המוצר ויתרונותיו לקהל היעד. סקר שוק מקיף הבודק את שימוש הלקוחות העתידיים במוצר עיצוב מסכים והכנת דמו, אפיון ופיתוח גרסה ראשונית למוצר.</p>
+        </div>
+        <div class="startplan-process-step">
+            <h3>מכינים אתכם לגיוס משקיעים</h3>
+            <p>הסבר מקיף על כל הדרכים למציאת משקיעים לסטארט-אפ הדרכה והדמיות שילמדו אותך איך מציגים סטארט אפ למשקיע, ייעוץ וליווי בתהליך גיוס המשקיעים, מענה לשאלות מורכבות, הכוונה בתוך התהליך וכתף תומכת.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ======================== CLIENTS SECTION ======================== -->
+<section class="startplan-clients-section">
+    <div class="startplan-clients-container">
+        <h2 class="startplan-clients-headline">הלקוחות שלנו</h2>
+        <div class="startplan-clients-grid">
+
+            <div class="startplan-client-card">
+                <div>
+                    <div class="client-logo-placeholder">ND</div>
+                    <h3 class="startplan-client-name">Nando Drones</h3>
+                    <p class="startplan-client-description">החברה פועלת בתחום הרחפנים ההגנתיים וקיבלה סיקור בחדשות 2 בשל חדשנותה.</p>
+                    <div class="client-key-stat">גיוס: 5+ מיליון ₪</div>
+                </div>
+                <div class="client-video-embed-container">
+                    <iframe src="https://www.youtube.com/embed/4ldWo2z-LFY?si=ADiayskPyFZA0r-L" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            </div>
+
+            <div class="startplan-client-card">
+                <div>
+                    <div class="client-logo-placeholder">CL</div>
+                    <h3 class="startplan-client-name">CardLatch</h3>
+                    <p class="startplan-client-description">החברה פועלת בתחום אבטחת ה-Access Control, גייסה סבב השקעה, ומוכרת לארגונים גדולים.</p>
+                    <div class="client-key-stat">סיקור ב-Mako</div>
+                </div>
+                <a href="https://www.mako.co.il/nexter-internet/security/Article-d557173d4486c61027.htm" target="_blank" rel="noopener noreferrer" class="startplan-client-link">קראו עוד ב-Mako</a>
+            </div>
+
+            <div class="startplan-client-card">
+                <div>
+                    <div class="client-logo-placeholder">BB</div>
+                    <h3 class="startplan-client-name">Boxing Buddy</h3>
+                    <p class="startplan-client-description">החברה פועלת בתחום האגרוף, גייסה סבב השקעה, פיתחה מוצר IOT משולב אפליקציה, והגישה בקשת פטנט Provisional.</p>
+                </div>
+                <div class="client-video-embed-container">
+                    <iframe src="https://www.youtube.com/embed/6x1LPTHNV3I?si=WOlNHcMSEqszak4g" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            </div>
+
+            <div class="startplan-client-card">
+                <div>
+                    <div class="client-logo-placeholder">GK</div>
+                    <h3 class="startplan-client-name">Get Key</h3>
+                    <p class="startplan-client-description">החברה פועלת בתחום הנדל"ן – גייסה סבב השקעה, פיתחה את המוצר, ומוכרת ללקוחות קצה וללקוחות עסקיים.</p>
+                </div>
+                <a href="https://www.mako.co.il/news-money/2021_q1/Article-e066b108745f771027.htm" target="_blank" rel="noopener noreferrer" class="startplan-client-link">קראו את הכתבה</a>
+            </div>
+
+            <div class="startplan-client-card">
+                <div>
+                    <div class="client-logo-placeholder">KH</div>
+                    <h3 class="startplan-client-name">Kaholo</h3>
+                    <p class="startplan-client-description">החברה פועלת בתחום ה-DevOps – גייסה עד היום כ-3.5 מיליון דולר, וקיבלה סיקור ב-GeekTime.</p>
+                </div>
+                <a href="https://www.geektime.co.il/kaholo-raises-3m/" target="_blank" rel="noopener noreferrer" class="startplan-client-link">קראו ב-GeekTime</a>
+            </div>
+
+            <div class="startplan-client-card">
+                <div>
+                    <div class="client-logo-placeholder">V</div>
+                    <h3 class="startplan-client-name">Valoo</h3>
+                    <p class="startplan-client-description">החברה פועלת בתחום הפיננסי – גייסה 2 סבבי השקעה, וקיבלה סיקור ב-Forbes על תרומתה לתחום.</p>
+                </div>
+                <a href="https://www.forbes.com/sites/forbesfinancecouncil/2023/01/24/the-rise-of-unicorn-startups-and-how-to-invest-in-them/?sh=7d9b8e1a7b7a" target="_blank" rel="noopener noreferrer" class="startplan-client-link">קראו ב-Forbes</a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ======================== SERVICES SECTION ======================== -->
+<section class="startplan-services-section">
+    <div class="startplan-services-container">
+        <h2 class="startplan-main-headline">מעטפת 360 לכל יזם</h2>
+        <p class="startplan-intro-description">
+            אנו מציעים חבילת שירותים מקיפה לליווי יזמים וסטארטאפים, משלב הרעיון ועד להצלחה בשוק. גלו כיצד נוכל להזניק את המיזם שלכם קדימה.
+        </p>
+        <div class="tabs-container">
+            <button class="tab-button active" data-tab="business">פתרונות עסקיים ופיננסיים</button>
+            <button class="tab-button" data-tab="tech">פיתוח מוצר וטכנולוגיה</button>
+        </div>
+        <div id="business" class="tab-content active">
+            <div class="startplan-services-grid" id="business-services-grid"></div>
+        </div>
+        <div id="tech" class="tab-content">
+            <div class="startplan-services-grid" id="tech-services-grid"></div>
+        </div>
+    </div>
+</section>
+
+<!-- ======================== STATS SECTION ======================== -->
+<section class="startplan-stats-section">
+    <h2>מדברים בתוצאות</h2>
+    <div class="startplan-stats-container">
+        <div class="startplan-stat-card">
+            <div class="stat-number" id="startplan-stat-1">0</div>
+            <p class="stat-label">מיליון משתמשים</p>
+        </div>
+        <div class="startplan-stat-card">
+            <div class="stat-number" id="startplan-stat-2">0</div>
+            <p class="stat-label">יזמים</p>
+        </div>
+        <div class="startplan-stat-card">
+            <div class="stat-number" id="startplan-stat-3">0</div>
+            <p class="stat-label">שנות עשייה</p>
+        </div>
+        <div class="startplan-stat-card">
+            <div class="stat-number" id="startplan-stat-4">0</div>
+            <p class="stat-label">סה"כ כספים שגוייסו (במיליוני ₪)</p>
+        </div>
+    </div>
+</section>
+
+<!-- ======================== FOOTER SECTION ======================== -->
+<section class="footer-section">
+    <div class="bg-decoration bg-grid-lines"></div>
+    <div class="bg-decoration bg-orb-1"></div>
+    <div class="bg-decoration bg-orb-2"></div>
+    <div class="bg-decoration bg-float-shape shape-a"></div>
+    <div class="bg-decoration bg-float-shape shape-b"></div>
+
+    <div class="content-grid">
+        <div class="text-col">
+            <h2 class="footer-main-headline">
+                כל הרעיונות ששינו את העולם,<br>
+                התחילו בצעד אחד קטן.
+            </h2>
+            <p class="footer-description">
+                אנחנו כאן כדי ללוות אותך שלב אחר שלב לאורך כל הדרך!
+            </p>
+        </div>
+
+        <div class="form-col">
+            <div class="form-card">
+                <div class="footer-trust-badge">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    התחייבות לדיסקרטיות מלאה
+                </div>
+
+                <div class="footer-form-header">
+                    <h3 class="footer-form-title">בדיקת היתכנות למיזם</h3>
+                    <p class="footer-form-subtitle">מלאו פרטים ונחזור אליכם לשיחת אפיון ראשונית <strong>ללא עלות</strong></p>
+                </div>
+
+                <form id="footerForm" action="/lp/startplan-thanks" method="GET">
+
+                    <div class="footer-form-grid">
+                        <div class="input-group" id="footer_group_name">
+                            <label class="footer-input-label">שם מלא</label>
+                            <input type="text" id="footer_full_name" name="full_name" class="footer-form-input" required autocomplete="name">
+                            <div class="error-msg">נא להזין שם מלא תקין (לפחות 2 אותיות)</div>
+                        </div>
+                        <div class="input-group" id="footer_group_phone">
+                            <label class="footer-input-label">מספר טלפון</label>
+                            <input type="tel" id="footer_phone_number" name="phone_number" class="footer-form-input" required dir="ltr" style="text-align: right;" autocomplete="tel">
+                            <div class="error-msg">נא להזין מספר טלפון ישראלי תקין (10 ספרות)</div>
+                        </div>
+                        <div class="input-group" id="footer_group_email">
+                            <label class="footer-input-label">כתובת מייל</label>
+                            <input type="email" id="footer_email_address" name="email_address" class="footer-form-input" required dir="ltr" style="text-align: right;" autocomplete="email">
+                            <div class="error-msg">נא להזין כתובת דוא"ל תקינה</div>
+                        </div>
+                        <div class="input-group" id="footer_group_industry">
+                            <label class="footer-input-label">באיזה תחום הרעיון שלך?</label>
+                            <input type="text" id="footer_industry" name="industry" class="footer-form-input" required>
+                            <div class="error-msg">נא להזין את תחום הרעיון</div>
+                        </div>
+                        <div class="input-group full-width" id="footer_group_stage">
+                            <label class="footer-input-label">באיזה שלב נמצא הרעיון?</label>
+                            <input type="text" id="footer_stage" name="stage" class="footer-form-input" required>
+                            <div class="error-msg">נא להזין את שלב הרעיון</div>
+                        </div>
+                        <div class="input-group full-width" id="footer_group_help">
+                            <label class="footer-input-label">איך נוכל לעזור לך?</label>
+                            <textarea id="footer_help" name="help" class="footer-form-input" rows="2" required></textarea>
+                            <div class="error-msg">נא לפרט מעט על איך נוכל לעזור</div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="footerSubmitBtn" class="footer-submit-btn">יוצאים לדרך!</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-strip">
+        <div class="footer-links">
+            <a href="https://startplan.net/terms/" target="_blank">מדיניות פרטיות</a>
+        </div>
+        <div>&copy; 2026 StartPlan. כל הזכויות שמורות.</div>
+    </div>
+</section>

@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizza Italiano | דוח סיכום פעילות שיווקית</title>
+
+    <style>
+        @font-face { font-family: 'Ping'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-regular.woff2') format('woff2'); font-weight: 400; }
+        @font-face { font-family: 'Ping'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-bold.woff2') format('woff2'); font-weight: 700; }
+        @font-face { font-family: 'Ping'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-heavy.woff2') format('woff2'); font-weight: 900; }
+
+        :root {
+            --bg-dark: #0d1112;
+            --brand-cyan: #40e1d3;
+            --brand-cyan-glow: rgba(64, 225, 211, 0.15);
+            --brand-cyan-light: rgba(64, 225, 211, 0.08);
+            --brand-yellow: #F3D56D;
+            --brand-yellow-glow: rgba(243, 213, 109, 0.15);
+            --brand-red: #FF2A4D;
+            --brand-red-glow: rgba(255, 42, 77, 0.15);
+            --brand-green: #2EC4B6;
+            --brand-green-glow: rgba(46, 196, 182, 0.15);
+            --brand-blue: #5B8CDB;
+            --brand-blue-glow: rgba(91, 140, 219, 0.15);
+            --brand-warn: #B89246;
+            --brand-warn-glow: rgba(184, 146, 70, 0.15);
+            --text-light: #FFFFFF;
+            --text-muted: #A0AABF;
+            --bg-card: rgba(21, 27, 30, 0.7);
+            --border-color: rgba(64, 225, 211, 0.13);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Ping', sans-serif;
+            background-color: var(--bg-dark);
+            color: #F8F9FA;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .bg-noise {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.03; pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            z-index: 0;
+        }
+        .bg-grid {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 50px 50px; z-index: 0; pointer-events: none;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+        }
+        .ambient-light {
+            position: fixed; border-radius: 50%; filter: blur(120px);
+            pointer-events: none; z-index: 0;
+            animation: floatLight 10s ease-in-out infinite alternate;
+        }
+        .ambient-light.light-cyan { background: var(--brand-cyan); width: 600px; height: 600px; top: -10%; right: -10%; opacity: 0.07; }
+        .ambient-light.light-cyan-b { background: var(--brand-cyan); width: 500px; height: 500px; bottom: -10%; left: -10%; opacity: 0.05; animation-delay: -5s; }
+        .ambient-light.light-center {
+            background: radial-gradient(circle, var(--brand-cyan), var(--brand-yellow));
+            width: 400px; height: 400px; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); opacity: 0.03;
+            animation: pulseCenter 12s ease-in-out infinite alternate;
+        }
+        @keyframes floatLight {
+            0% { transform: scale(1) translate(0,0); opacity: 0.06; }
+            100% { transform: scale(1.2) translate(30px,30px); opacity: 0.1; }
+        }
+        @keyframes pulseCenter {
+            0% { transform: translate(-50%,-50%) scale(0.8); opacity: 0.02; }
+            100% { transform: translate(-50%,-50%) scale(1.3); opacity: 0.05; }
+        }
+
+        header {
+            padding: 18px 4%; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(13,17,18,0.92); backdrop-filter: blur(20px);
+            z-index: 10; position: sticky; top: 0;
+        }
+        .header-title { display: flex; align-items: center; gap: 20px; }
+        .header-title h1 { font-size: 1.3rem; font-weight: 900; color: var(--text-light); }
+        .header-title h1 span { color: var(--brand-cyan); }
+        .header-tag { display: flex; align-items: center; gap: 12px; }
+        .date-badge {
+            background: var(--brand-cyan-glow); border: 1px solid rgba(64,225,211,0.4);
+            color: var(--brand-cyan); padding: 6px 16px; border-radius: 4px;
+            font-weight: 700; font-size: 0.85rem;
+        }
+        .pdf-download-btn {
+            background: rgba(64,225,211,0.12); border: 1px solid rgba(64,225,211,0.4);
+            color: var(--brand-cyan); padding: 7px 18px; border-radius: 4px;
+            font-family: 'Ping', sans-serif; font-weight: 700; font-size: 0.85rem;
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+            text-decoration: none;
+        }
+        .pdf-download-btn:hover { background: rgba(64,225,211,0.25); border-color: var(--brand-cyan); }
+
+        .slide-nav {
+            display: flex; gap: 0; overflow-x: auto; padding: 0 4%;
+            background: rgba(13,17,18,0.85); backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color); position: sticky; top: 66px; z-index: 9;
+        }
+        .slide-nav button {
+            background: none; border: none; color: var(--text-muted);
+            padding: 14px 20px; font-family: 'Ping', sans-serif; font-weight: 700;
+            font-size: 0.8rem; cursor: pointer; white-space: nowrap;
+            transition: all 0.25s; border-bottom: 2px solid transparent;
+        }
+        .slide-nav button:hover { color: var(--text-light); }
+        .slide-nav button.active {
+            color: var(--brand-cyan); border-bottom-color: var(--brand-cyan);
+        }
+
+        .dashboard-container { max-width: 1200px; margin: 0 auto; padding: 30px 4% 60px; position: relative; z-index: 1; }
+
+        .tab-content { display: none; animation: fadeTab 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeTab {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-title {
+            font-size: 2rem; font-weight: 900; margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--brand-cyan), #80f0e6);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .slide-subtitle { color: var(--text-muted); font-size: 1rem; margin-bottom: 30px; font-weight: 400; }
+
+        .content-card {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 28px; margin-bottom: 24px;
+            backdrop-filter: blur(6px); position: relative; overflow: hidden;
+        }
+        .content-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(64,225,211,0.3), transparent);
+        }
+        .card-title {
+            font-size: 1.1rem; font-weight: 700; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .card-title .icon {
+            width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem;
+        }
+        .icon-cyan { background: var(--brand-cyan-glow); color: var(--brand-cyan); }
+        .icon-blue { background: var(--brand-blue-glow); color: var(--brand-blue); }
+        .icon-green { background: var(--brand-green-glow); color: var(--brand-green); }
+        .icon-red { background: var(--brand-red-glow); color: var(--brand-red); }
+        .icon-yellow { background: var(--brand-yellow-glow); color: var(--brand-yellow); }
+        .icon-warn { background: var(--brand-warn-glow); color: var(--brand-warn); }
+
+        .premium-table {
+            width: 100%; border-collapse: collapse; font-size: 0.82rem;
+        }
+        .premium-table thead th {
+            background: rgba(64,225,211,0.08); color: var(--brand-cyan);
+            padding: 12px 10px; font-weight: 700; text-align: right;
+            border-bottom: 1px solid rgba(64,225,211,0.2); white-space: nowrap;
+        }
+        .premium-table tbody td {
+            padding: 11px 10px; border-bottom: 1px solid var(--border-color);
+            color: rgba(255,255,255,0.85); vertical-align: middle;
+        }
+        .premium-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+        .premium-table tbody tr:last-child td { border-bottom: none; }
+        .premium-table tfoot td { padding: 12px 10px; border-top: 2px solid rgba(64,225,211,0.3); font-size: 0.82rem; font-weight: 700; }
+        .highlight-cyan { color: var(--brand-cyan) !important; font-weight: 700; }
+        .highlight-green { color: var(--brand-green) !important; font-weight: 700; }
+        .highlight-red { color: var(--brand-red) !important; font-weight: 700; }
+        .highlight-blue { color: var(--brand-blue) !important; font-weight: 700; }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .kpi-card {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 20px; text-align: center;
+        }
+        .kpi-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-value { font-size: 1.6rem; font-weight: 900; }
+        .kpi-value.cyan { color: var(--brand-cyan); }
+        .kpi-value.green { color: var(--brand-green); }
+        .kpi-value.blue { color: var(--brand-blue); }
+        .kpi-value.red { color: var(--brand-red); }
+        .kpi-value.yellow { color: var(--brand-yellow); }
+        .kpi-value.warn { color: var(--brand-warn); }
+
+        .insight-box {
+            background: rgba(64,225,211,0.05); border: 1px solid rgba(64,225,211,0.15);
+            border-radius: 12px; padding: 20px; margin-top: 16px;
+        }
+        .insight-box h4 { color: var(--brand-cyan); font-size: 0.9rem; margin-bottom: 8px; }
+        .insight-box p { color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.7; }
+
+        .insight-box.red-box {
+            background: rgba(255,42,77,0.05); border: 1px solid rgba(255,42,77,0.2);
+        }
+        .insight-box.red-box h4 { color: var(--brand-red); }
+
+        .insight-box.green-box {
+            background: rgba(46,196,182,0.05); border-color: rgba(46,196,182,0.2);
+        }
+        .insight-box.green-box h4 { color: var(--brand-green); }
+
+        .section-divider {
+            height: 1px; background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+            margin: 32px 0;
+        }
+
+        .issue-list { list-style: none; padding: 0; }
+        .issue-list li {
+            padding: 12px 16px; margin-bottom: 8px;
+            background: rgba(255,42,77,0.04); border: 1px solid rgba(255,42,77,0.12);
+            border-radius: 10px; color: rgba(255,255,255,0.8); font-size: 0.85rem;
+            line-height: 1.6; display: flex; align-items: flex-start; gap: 10px;
+        }
+        .issue-list li::before {
+            content: '\2715'; color: var(--brand-red); font-weight: 900; font-size: 0.9rem;
+            flex-shrink: 0; margin-top: 1px;
+        }
+
+        .good-list { list-style: none; padding: 0; }
+        .good-list li {
+            padding: 12px 16px; margin-bottom: 8px;
+            background: rgba(46,196,182,0.04); border: 1px solid rgba(46,196,182,0.12);
+            border-radius: 10px; color: rgba(255,255,255,0.8); font-size: 0.85rem;
+            line-height: 1.6; display: flex; align-items: flex-start; gap: 10px;
+        }
+        .good-list li::before {
+            content: '\2713'; color: var(--brand-green); font-weight: 900; font-size: 0.9rem;
+            flex-shrink: 0; margin-top: 1px;
+        }
+
+        .rec-list { list-style: none; padding: 0; }
+        .rec-list li {
+            padding: 12px 16px; margin-bottom: 8px;
+            background: rgba(64,225,211,0.04); border: 1px solid rgba(64,225,211,0.12);
+            border-radius: 10px; color: rgba(255,255,255,0.8); font-size: 0.85rem;
+            line-height: 1.6; display: flex; align-items: flex-start; gap: 10px;
+        }
+        .rec-list li::before {
+            content: '\2192'; color: var(--brand-cyan); font-weight: 900; font-size: 0.9rem;
+            flex-shrink: 0; margin-top: 1px;
+        }
+
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+        .challenge-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 24px; }
+        .challenge-card {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 14px; padding: 24px; position: relative; overflow: hidden;
+        }
+        .challenge-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(64,225,211,0.4), transparent);
+        }
+        .challenge-card .challenge-number {
+            color: var(--brand-cyan); font-size: 2rem; font-weight: 900; opacity: 0.15;
+            position: absolute; top: 12px; left: 16px;
+        }
+        .challenge-card h3 { color: var(--brand-cyan); font-size: 1rem; font-weight: 700; margin-bottom: 10px; }
+        .challenge-card p { color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.7; }
+
+        .table-scroll-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .bar-chart { display: flex; flex-direction: column; gap: 12px; }
+        .bar-row { display: flex; align-items: center; gap: 12px; }
+        .bar-label { width: 100px; font-size: 0.82rem; color: rgba(255,255,255,0.7); text-align: left; flex-shrink: 0; }
+        .bar-track { flex: 1; height: 28px; background: rgba(255,255,255,0.04); border-radius: 6px; position: relative; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-right: 10px; font-size: 0.75rem; font-weight: 700; color: #fff; min-width: fit-content; }
+        .bar-fill.cyan { background: linear-gradient(90deg, var(--brand-cyan), rgba(64,225,211,0.6)); }
+        .bar-fill.green { background: linear-gradient(90deg, var(--brand-green), rgba(46,196,182,0.6)); }
+        .bar-fill.blue { background: linear-gradient(90deg, var(--brand-blue), rgba(91,140,219,0.6)); }
+        .bar-fill.red { background: linear-gradient(90deg, var(--brand-red), rgba(255,42,77,0.6)); }
+        .bar-fill.yellow { background: linear-gradient(90deg, var(--brand-yellow), rgba(243,213,109,0.6)); }
+        .bar-value { font-size: 0.82rem; font-weight: 900; color: var(--text-light); width: 60px; text-align: right; flex-shrink: 0; }
+
+        .ad-card {
+            display: flex; gap: 16px; padding: 16px; margin-bottom: 12px;
+            background: rgba(255,255,255,0.02); border: 1px solid var(--border-color);
+            border-radius: 12px; align-items: center;
+        }
+        .ad-rank {
+            width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 1.1rem; flex-shrink: 0;
+        }
+        .ad-rank.gold { background: rgba(255,209,102,0.15); color: var(--brand-yellow); }
+        .ad-rank.silver { background: rgba(200,200,200,0.1); color: #ccc; }
+        .ad-rank.bronze { background: rgba(205,127,50,0.15); color: #cd7f32; }
+        .ad-info { flex: 1; }
+        .ad-info a { color: var(--brand-cyan); font-size: 0.82rem; text-decoration: none; word-break: break-all; }
+        .ad-info a:hover { text-decoration: underline; }
+
+        footer {
+            padding: 24px 4%; text-align: center; border-top: 1px solid var(--border-color);
+            color: var(--text-muted); font-size: 0.8rem; position: relative; z-index: 1;
+        }
+        footer span { color: var(--brand-cyan); font-weight: 700; }
+
+        @media (max-width: 768px) {
+            header { flex-wrap: wrap; gap: 8px; padding: 12px 4%; }
+            .header-title { gap: 10px; }
+            .header-title h1 { font-size: 0.82rem; line-height: 1.4; }
+            .header-tag { width: 100%; justify-content: space-between; }
+            .date-badge { font-size: 0.7rem; padding: 4px 10px; }
+            .pdf-download-btn { font-size: 0.7rem; padding: 4px 10px; }
+            .slide-nav {
+                top: 78px; padding: 0;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none; gap: 0;
+            }
+            .slide-nav::-webkit-scrollbar { display: none; }
+            .slide-nav button { padding: 11px 14px; font-size: 0.68rem; min-height: 44px; }
+            .dashboard-container { padding: 16px 4% 50px; }
+            .slide-title { font-size: 1.25rem; line-height: 1.3; }
+            .slide-subtitle { font-size: 0.8rem; margin-bottom: 16px; line-height: 1.5; }
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px; }
+            .kpi-card { padding: 12px 8px; border-radius: 10px; }
+            .kpi-label { font-size: 0.62rem; margin-bottom: 5px; letter-spacing: 0.3px; }
+            .kpi-value { font-size: 1.1rem; word-break: break-word; }
+            .content-card { padding: 16px 14px; margin-bottom: 14px; border-radius: 12px; }
+            .card-title { font-size: 0.88rem; gap: 8px; margin-bottom: 12px; }
+            .card-title .icon { width: 22px; height: 22px; min-width: 22px; border-radius: 6px; }
+            .two-col { grid-template-columns: 1fr; gap: 14px; }
+            .challenge-grid { grid-template-columns: 1fr; gap: 14px; }
+            .premium-table { font-size: 0.65rem; min-width: 500px; }
+            .premium-table thead th { padding: 8px 6px; white-space: nowrap; font-size: 0.6rem; }
+            .premium-table tbody td { padding: 8px 6px; white-space: nowrap; font-size: 0.62rem; }
+            .premium-table tfoot td { padding: 8px 6px; font-size: 0.62rem; }
+            .issue-list li, .good-list li, .rec-list li {
+                font-size: 0.78rem; padding: 10px 12px; gap: 8px; line-height: 1.55; border-radius: 8px;
+            }
+            .insight-box { padding: 14px; margin-top: 12px; border-radius: 10px; }
+            .insight-box h4 { font-size: 0.8rem; margin-bottom: 6px; }
+            .insight-box p { font-size: 0.76rem; line-height: 1.6; }
+            .challenge-card { padding: 16px; border-radius: 12px; }
+            .challenge-card .challenge-number { font-size: 1.5rem; }
+            .challenge-card h3 { font-size: 0.88rem; }
+            .challenge-card p { font-size: 0.78rem; line-height: 1.6; }
+            .bar-label { width: 70px; font-size: 0.72rem; }
+            .bar-value { font-size: 0.72rem; width: 50px; }
+            .section-divider { margin: 20px 0; }
+            .ambient-light.light-cyan { width: 300px; height: 300px; }
+            .ambient-light.light-cyan-b { width: 250px; height: 250px; }
+            .ambient-light.light-center { width: 200px; height: 200px; }
+            .ad-card { flex-direction: column; align-items: flex-start; gap: 10px; }
+        }
+
+        @media (max-width: 400px) {
+            header { padding: 10px 3%; }
+            .header-title h1 { font-size: 0.72rem; }
+            .date-badge { font-size: 0.65rem; }
+            .pdf-download-btn { font-size: 0.65rem; padding: 4px 8px; }
+            .slide-nav button { padding: 10px 10px; font-size: 0.62rem; }
+            .dashboard-container { padding: 12px 3% 40px; }
+            .slide-title { font-size: 1.05rem; }
+            .slide-subtitle { font-size: 0.75rem; }
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+            .kpi-card { padding: 10px 6px; }
+            .kpi-label { font-size: 0.58rem; }
+            .kpi-value { font-size: 1rem; }
+            .content-card { padding: 12px 10px; }
+            .card-title { font-size: 0.82rem; }
+            .premium-table { min-width: 450px; }
+            .premium-table thead th, .premium-table tbody td { padding: 6px 4px; font-size: 0.58rem; }
+            .issue-list li, .good-list li, .rec-list li { font-size: 0.73rem; padding: 8px 10px; }
+        }
+
+        @media print {
+            @page { size: A4 landscape; margin: 0; }
+            body { background: #0d1112 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+            .bg-noise, .bg-grid, .ambient-light, .slide-nav, .pdf-download-btn, .no-print { display: none !important; }
+            header { position: relative !important; break-after: avoid; margin: 8mm 10mm 0 10mm !important; }
+            .tab-content { display: block !important; opacity: 1 !important; break-before: page; break-inside: avoid; padding-top: 30px !important; }
+            .tab-content:first-of-type { break-before: avoid; }
+            .dashboard-container { max-width: 100% !important; padding: 0 !important; }
+            .content-card { background: rgba(10,10,10,0.95) !important; box-shadow: none !important; backdrop-filter: none !important; border: 1px solid rgba(255,255,255,0.1) !important; padding: 20px 30px !important; margin: 0 10mm !important; }
+            .kpi-card { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.15) !important; -webkit-print-color-adjust: exact !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-noise"></div>
+    <div class="bg-grid"></div>
+    <div class="ambient-light light-cyan"></div>
+    <div class="ambient-light light-cyan-b"></div>
+    <div class="ambient-light light-center"></div>
+
+    <header>
+        <div class="header-title">
+            <h1><span>Pizza Italiano</span> | דוח סיכום פעילות שיווקית</h1>
+        </div>
+        <div class="header-tag">
+            <span class="date-badge">ינואר – מאי 2026</span>
+            <button class="pdf-download-btn" onclick="window.print()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                הורד PDF
+            </button>
+        </div>
+    </header>
+
+    <nav class="slide-nav" id="slideNav">
+        <button class="active" onclick="showSlide(0)">סקירה כללית</button>
+        <button onclick="showSlide(1)">ניתוח קמפיינים</button>
+        <button onclick="showSlide(2)">ניתוח לפי סניף</button>
+        <button onclick="showSlide(3)">פילוח דמוגרפי</button>
+        <button onclick="showSlide(4)">פערים טכניים</button>
+        <button onclick="showSlide(5)">המלצות ותוכנית</button>
+    </nav>
+
+    <div class="dashboard-container">
+
+        <!-- ============ SLIDE 0: OVERVIEW ============ -->
+        <div class="tab-content active" id="slide-0">
+            <h2 class="slide-title">סקירת מצב קיים – Pizza Italiano</h2>
+            <p class="slide-subtitle">ניתוח מקיף של הפעילות השיווקית הדיגיטלית · 01.01.2026 – 29.05.2026 · חשבון Meta Ads</p>
+
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">תקציב פרסום Meta</div>
+                    <div class="kpi-value cyan">₪8,508</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">תפוצה (אנשים ייחודיים)</div>
+                    <div class="kpi-value blue">201,898</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">חשיפות</div>
+                    <div class="kpi-value cyan">1,753,222</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">תדירות ממוצעת</div>
+                    <div class="kpi-value warn">8.68</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">קליקים על קישור</div>
+                    <div class="kpi-value blue">30,032</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">הוספה לעגלה</div>
+                    <div class="kpi-value yellow">722</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">מעבר לתשלום</div>
+                    <div class="kpi-value yellow">346</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">רכישות</div>
+                    <div class="kpi-value green">263</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">עלות לרכישה (CPA)</div>
+                    <div class="kpi-value cyan">₪27.81</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">קמפיינים פעילים</div>
+                    <div class="kpi-value blue">12</div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-cyan"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div> מטרת הדו״ח</div>
+                <p style="color:rgba(255,255,255,0.75); font-size:0.9rem; line-height:1.8;">
+                    דו״ח זה מרכז ניתוח מעמיק של כלל הפעילות הפרסומית של Pizza Italiano בתקופה ינואר–מאי 2026. במסגרת הדו״ח נסקר חשבון המודעות ב-Meta, נבחנו ביצועי הקמפיינים לעומק, בוצע ניתוח לפי סניפים ופילוח דמוגרפי, זוהו פערים מבניים בהגדרות הקמפיינים, ונבנתה תוכנית עבודה ממוקדת לשיפור ביצועים והחזר השקעה.
+                </p>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-red"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div> ממצאים מרכזיים בתמצית</div>
+                <ul class="issue-list">
+                    <li>כלל הקמפיינים מוגדרים על קהלים רחבים בלבד – ללא תחומי עניין, פילוח גילאים, קהלי Lookalike או שימוש בדאטות קיימות</li>
+                    <li>הקמפיינים רצים 24/7 – גם בשעות שהסניפים סגורים, כלומר תקציב נשרף ללא יכולת המרה</li>
+                    <li>מאגר הלקוחות הקיים אינו מנוצל כלל – לא הועלו רשימות, לא נבנו קהלים דומים, לא בוצע ריטרגטינג על בסיס דאטה</li>
+                    <li>אין נוכחות בגוגל – הערוץ הקריטי ביותר עבור פיצריה (חיפוש מקומי עם כוונת רכישה) לא פעיל כלל</li>
+                    <li>אין נוכחות בטיקטוק – פלטפורמה מרכזית לתוכן F&B וקהלים צעירים לא מנוצלת</li>
+                    <li>תדירות חשיפה גבוהה במיוחד (8.68) – מעידה על שחיקת קהל משמעותית ואובדן אפקטיביות</li>
+                    <li>כתובת המייל של המותג (italianomz24@gmail.com) אינה מקצועית – נדרש דומיין מותגי ייעודי</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-blue"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div> מבנה הפעילות בתקופה</div>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:12px;">
+                    <div style="background:rgba(255,255,255,0.02); border-radius:8px; padding:14px;">
+                        <div style="color:var(--brand-cyan); font-weight:700; font-size:0.85rem; margin-bottom:4px;">קמפיינים לרכישות</div>
+                        <div style="color:var(--text-muted); font-size:0.78rem;">4 קמפיינים · 263 רכישות · ₪7,314</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.02); border-radius:8px; padding:14px;">
+                        <div style="color:var(--brand-cyan); font-weight:700; font-size:0.85rem; margin-bottom:4px;">קמפיינים לגיוס עובדים (לידים)</div>
+                        <div style="color:var(--text-muted); font-size:0.78rem;">5 קמפיינים · 31 לידים · ₪638</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.02); border-radius:8px; padding:14px;">
+                        <div style="color:var(--brand-cyan); font-weight:700; font-size:0.85rem; margin-bottom:4px;">קמפייני מעורבות / תפוצה</div>
+                        <div style="color:var(--text-muted); font-size:0.78rem;">3 קמפיינים · ₪556</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-cyan"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div> משפך ההמרה</div>
+                <div class="bar-chart">
+                    <div class="bar-row">
+                        <span class="bar-label">קליקים</span>
+                        <div class="bar-track"><div class="bar-fill cyan" style="width:100%">30,032</div></div>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">הוספה לעגלה</span>
+                        <div class="bar-track"><div class="bar-fill yellow" style="width:24%">722</div></div>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">מעבר לתשלום</span>
+                        <div class="bar-track"><div class="bar-fill blue" style="width:11.5%">346</div></div>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">רכישות</span>
+                        <div class="bar-track"><div class="bar-fill green" style="width:8.8%">263</div></div>
+                    </div>
+                </div>
+                <div class="insight-box" style="margin-top:20px;">
+                    <h4>ניתוח המשפך</h4>
+                    <p>שיעור המרה מקליק לרכישה: <strong style="color:var(--brand-cyan)">0.88%</strong> · מהוספה לעגלה לרכישה: <strong style="color:var(--brand-green)">36.4%</strong> · ממעבר לתשלום לרכישה: <strong style="color:var(--brand-green)">76%</strong>. צוואר הבקבוק העיקרי הוא בין הקליק להוספה לעגלה (2.4% בלבד) – ייתכן שמשתמשים מגיעים בשעות שהסניף סגור, או שהטירגוט הרחב מביא קהל שאינו רלוונטי.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 1: CAMPAIGN ANALYSIS ============ -->
+        <div class="tab-content" id="slide-1">
+            <h2 class="slide-title">ניתוח קמפיינים מפורט</h2>
+            <p class="slide-subtitle">פירוט ביצועי כל 12 הקמפיינים שפעלו בתקופת הדו״ח · 01.01 – 29.05.2026</p>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div> קמפיינים לרכישות (4 קמפיינים)</div>
+                <div class="table-scroll-wrapper">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>קמפיין</th>
+                            <th>סטטוס</th>
+                            <th>תקציב יומי</th>
+                            <th>הוצאה</th>
+                            <th>תפוצה</th>
+                            <th>תדירות</th>
+                            <th>קליקים</th>
+                            <th>הוספה לעגלה</th>
+                            <th>רכישות</th>
+                            <th>CPA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="font-weight:700">GZ - Sale (23.12)</td>
+                            <td><span style="color:var(--brand-green)">פעיל</span></td>
+                            <td>₪17</td>
+                            <td>₪2,589</td>
+                            <td>100,030</td>
+                            <td class="highlight-red">9.35</td>
+                            <td>23,409</td>
+                            <td>322</td>
+                            <td class="highlight-green">119</td>
+                            <td class="highlight-green">₪21.76</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:700">M - Sale (24.02)</td>
+                            <td><span style="color:var(--brand-green)">פעיל</span></td>
+                            <td>₪20</td>
+                            <td>₪1,839</td>
+                            <td>30,535</td>
+                            <td class="highlight-red">7.92</td>
+                            <td>2,719</td>
+                            <td>146</td>
+                            <td>55</td>
+                            <td>₪33.43</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:700">Remarketing (24.02)</td>
+                            <td><span style="color:var(--brand-green)">פעיל</span></td>
+                            <td>₪10</td>
+                            <td>₪915</td>
+                            <td>25,505</td>
+                            <td class="highlight-red">8.26</td>
+                            <td>2,513</td>
+                            <td>137</td>
+                            <td>59</td>
+                            <td class="highlight-green">₪15.50</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:700">M - Sale (23.12)</td>
+                            <td><span style="color:var(--text-muted)">לא פעיל</span></td>
+                            <td>₪35</td>
+                            <td>₪1,972</td>
+                            <td>34,469</td>
+                            <td>5.74</td>
+                            <td>1,029</td>
+                            <td>115</td>
+                            <td>30</td>
+                            <td class="highlight-red">₪65.73</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3">סה״כ קמפיינים לרכישות</td>
+                            <td class="highlight-cyan">₪7,314</td>
+                            <td>–</td>
+                            <td>–</td>
+                            <td>29,670</td>
+                            <td>720</td>
+                            <td class="highlight-green">263</td>
+                            <td class="highlight-cyan">₪27.81</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                </div>
+                <div class="insight-box" style="margin-top:16px">
+                    <h4>ממצאים עיקריים – קמפיינים לרכישות</h4>
+                    <p>קמפיין סניף גבעת זאב (GZ) מוביל בביצועים עם CPA של ₪21.76 ונפח של 119 רכישות. קמפיין הריטרגטינג מציג עלות רכישה נמוכה במיוחד (₪15.50), אך מבוסס על קהל רחב מדי – כלל מבקרי האתר ב-30 ימים. הקמפיין הישן של מבשרת (23.12) הופסק בצדק – CPA של ₪65.73, גבוה פי 3 מהממוצע הכולל.</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-blue"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div> קמפיינים לגיוס עובדים – לידים (5 קמפיינים)</div>
+                <div class="table-scroll-wrapper">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>קמפיין</th>
+                            <th>סטטוס</th>
+                            <th>הוצאה</th>
+                            <th>תפוצה</th>
+                            <th>לידים</th>
+                            <th>עלות לליד</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="font-weight:700">M wn | Leads (14.4)</td>
+                            <td><span style="color:var(--text-muted)">לא פעיל</span></td>
+                            <td>₪258</td>
+                            <td>2,454</td>
+                            <td class="highlight-green">21</td>
+                            <td class="highlight-green">₪12.27</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:700">M wn | Leads (1.2)</td>
+                            <td><span style="color:var(--text-muted)">לא פעיל</span></td>
+                            <td>₪145</td>
+                            <td>1,382</td>
+                            <td>5</td>
+                            <td>₪28.96</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:700">GZ wn | Leads (4.1)</td>
+                            <td><span style="color:var(--text-muted)">לא פעיל</span></td>
+                            <td>₪181</td>
+                            <td>3,044</td>
+                            <td>4</td>
+                            <td class="highlight-red">₪45.25</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:700">M wn (10.2)</td>
+                            <td><span style="color:var(--text-muted)">לא פעיל</span></td>
+                            <td>₪33</td>
+                            <td>539</td>
+                            <td>1</td>
+                            <td>₪33.01</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:700">M K wn | Leads (14.4)</td>
+                            <td><span style="color:var(--text-muted)">לא פעיל</span></td>
+                            <td>₪21</td>
+                            <td>276</td>
+                            <td>0</td>
+                            <td>–</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2">סה״כ לידים</td>
+                            <td class="highlight-cyan">₪638</td>
+                            <td>–</td>
+                            <td class="highlight-blue">31</td>
+                            <td class="highlight-cyan">₪20.57</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-yellow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div> קמפייני מעורבות / תפוצה (3 קמפיינים)</div>
+                <div class="table-scroll-wrapper">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>קמפיין</th>
+                            <th>סטטוס</th>
+                            <th>הוצאה</th>
+                            <th>תפוצה</th>
+                            <th>תוצאות</th>
+                            <th>סוג</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="font-weight:700">Giveaway (30.4)</td>
+                            <td><span style="color:var(--text-muted)">לא פעיל</span></td>
+                            <td>₪339</td>
+                            <td>21,837</td>
+                            <td>13,982</td>
+                            <td>מעורבות בפוסט</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:700">M Phone Call (1.3)</td>
+                            <td><span style="color:var(--text-muted)">לא פעיל</span></td>
+                            <td>₪129</td>
+                            <td>11,969</td>
+                            <td>6</td>
+                            <td>שיחות טלפון</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:700">Awe (1.4)</td>
+                            <td><span style="color:var(--text-muted)">לא פעיל</span></td>
+                            <td>₪89</td>
+                            <td>30,376</td>
+                            <td>30,376</td>
+                            <td>תפוצה</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2">סה״כ מעורבות/תפוצה</td>
+                            <td class="highlight-cyan">₪556</td>
+                            <td>–</td>
+                            <td colspan="2">–</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-cyan"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div> המודעות שיצרו הכי הרבה הזמנות</div>
+                <div class="ad-card">
+                    <div class="ad-rank gold">1</div>
+                    <div class="ad-info">
+                        <div style="font-weight:700; margin-bottom:4px; font-size:0.9rem;">מקום ראשון</div>
+                        <a href="https://www.facebook.com/100063702874301/posts/1454419756691440/?dco_ad_token=AapMSegKnxQDbOEtmXwWKA-mPHRoKUcXekwIyNkFKF-sRLaPHHiaVdLjXecT1JVkYzq_tvXWpgQyUpli&dco_ad_id=120241631717670093" target="_blank">צפה במודעה &larr;</a>
+                    </div>
+                </div>
+                <div class="ad-card">
+                    <div class="ad-rank silver">2</div>
+                    <div class="ad-info">
+                        <div style="font-weight:700; margin-bottom:4px; font-size:0.9rem;">מקום שני</div>
+                        <a href="https://www.facebook.com/100063702874301/posts/1498275348972547/" target="_blank">צפה במודעה &larr;</a>
+                    </div>
+                </div>
+                <div class="ad-card">
+                    <div class="ad-rank bronze">3</div>
+                    <div class="ad-info">
+                        <div style="font-weight:700; margin-bottom:4px; font-size:0.9rem;">מקום שלישי</div>
+                        <a href="https://www.facebook.com/100063702874301/posts/1498345555632193/?dco_ad_token=AaoiZp_855DvGvMhRnbmDVjC_KJ007uaRqdMUT5D5Nkkm707uobj1qsYUi-a-LLyTJJkLQVxKYy8zKgZ&dco_ad_id=120244902078420093" target="_blank">צפה במודעה &larr;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 2: BRANCH ANALYSIS ============ -->
+        <div class="tab-content" id="slide-2">
+            <h2 class="slide-title">ניתוח לפי סניף</h2>
+            <p class="slide-subtitle">השוואת ביצועים בין סניף מבשרת ציון לסניף גבעת זאב · קמפיינים לרכישות בלבד</p>
+
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">הוצאה – מבשרת ציון</div>
+                    <div class="kpi-value red">₪3,810</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">רכישות – מבשרת ציון</div>
+                    <div class="kpi-value blue">85</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">CPA – מבשרת ציון</div>
+                    <div class="kpi-value red">₪44.83</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">הוצאה – גבעת זאב</div>
+                    <div class="kpi-value green">₪2,589</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">רכישות – גבעת זאב</div>
+                    <div class="kpi-value green">119</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">CPA – גבעת זאב</div>
+                    <div class="kpi-value green">₪21.76</div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-cyan"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div> השוואת ביצועים – רכישות לפי סניף (כולל ריטרגטינג)</div>
+                <div class="bar-chart">
+                    <div class="bar-row">
+                        <span class="bar-label">גבעת זאב</span>
+                        <div class="bar-track"><div class="bar-fill green" style="width:100%">119 רכישות</div></div>
+                        <span class="bar-value">₪21.76</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">מבשרת ציון</span>
+                        <div class="bar-track"><div class="bar-fill red" style="width:71%">85 רכישות</div></div>
+                        <span class="bar-value">₪44.83</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">ריטרגטינג</span>
+                        <div class="bar-track"><div class="bar-fill cyan" style="width:50%">59 רכישות</div></div>
+                        <span class="bar-value">₪15.50</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-blue"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div> פירוט ביצועים לפי פלטפורמה ומיקום – גבעת זאב</div>
+                <div class="table-scroll-wrapper">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>פלטפורמה</th>
+                            <th>מיקום</th>
+                            <th>רכישות</th>
+                            <th>CPA</th>
+                            <th>הוצאה</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>פייסבוק</td>
+                            <td>פיד</td>
+                            <td class="highlight-green">35</td>
+                            <td>₪26.14</td>
+                            <td>₪915</td>
+                        </tr>
+                        <tr>
+                            <td>אינסטגרם</td>
+                            <td>סטוריז</td>
+                            <td>23</td>
+                            <td class="highlight-green">₪18.27</td>
+                            <td>₪420</td>
+                        </tr>
+                        <tr>
+                            <td>אינסטגרם</td>
+                            <td>פיד</td>
+                            <td>16</td>
+                            <td>₪24.59</td>
+                            <td>₪393</td>
+                        </tr>
+                        <tr>
+                            <td>אינסטגרם</td>
+                            <td>Reels</td>
+                            <td>13</td>
+                            <td>₪21.14</td>
+                            <td>₪275</td>
+                        </tr>
+                        <tr>
+                            <td>Audience Network</td>
+                            <td>כרזות</td>
+                            <td>8</td>
+                            <td>₪21.86</td>
+                            <td>₪175</td>
+                        </tr>
+                        <tr>
+                            <td>פייסבוק</td>
+                            <td>Reels מוזרמים</td>
+                            <td>5</td>
+                            <td class="highlight-green">₪8.32</td>
+                            <td>₪42</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-red"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div> פירוט ביצועים לפי פלטפורמה ומיקום – מבשרת ציון</div>
+                <div class="table-scroll-wrapper">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>פלטפורמה</th>
+                            <th>מיקום</th>
+                            <th>רכישות</th>
+                            <th>CPA</th>
+                            <th>הוצאה</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>פייסבוק</td>
+                            <td>פיד (קמפיין חדש)</td>
+                            <td>20</td>
+                            <td>₪42.64</td>
+                            <td>₪853</td>
+                        </tr>
+                        <tr>
+                            <td>פייסבוק</td>
+                            <td>פיד (קמפיין ישן)</td>
+                            <td>14</td>
+                            <td class="highlight-red">₪80.51</td>
+                            <td>₪1,127</td>
+                        </tr>
+                        <tr>
+                            <td>אינסטגרם</td>
+                            <td>סטוריז (קמפיין חדש)</td>
+                            <td>9</td>
+                            <td class="highlight-green">₪22.41</td>
+                            <td>₪202</td>
+                        </tr>
+                        <tr>
+                            <td>פייסבוק</td>
+                            <td>פיד (מובייל)</td>
+                            <td>7</td>
+                            <td class="highlight-green">₪5.92</td>
+                            <td>₪41</td>
+                        </tr>
+                        <tr>
+                            <td>Audience Network</td>
+                            <td>כרזות</td>
+                            <td>6</td>
+                            <td>₪21.14</td>
+                            <td>₪127</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+                <div class="insight-box red-box" style="margin-top:16px">
+                    <h4>פער משמעותי בין הסניפים</h4>
+                    <p>סניף מבשרת ציון צרך ₪3,810 – תקציב גבוה ב-47% מגבעת זאב – אך הניב 29% פחות רכישות. עלות הרכישה במבשרת (₪44.83) כפולה מזו של גבעת זאב (₪21.76). הקמפיין הישן של מבשרת (23.12) לבדו צרך ₪1,972 עם CPA של ₪65.73, כאשר ₪1,127 מתוכם הופנו לפיד פייסבוק בעלות של ₪80.51 לרכישה.</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-cyan"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div> ביצועי ריטרגטינג – לפי פלטפורמה</div>
+                <div class="table-scroll-wrapper">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>פלטפורמה</th>
+                            <th>מיקום</th>
+                            <th>רכישות</th>
+                            <th>CPA</th>
+                            <th>הוצאה</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>פייסבוק</td>
+                            <td>פיד</td>
+                            <td>18</td>
+                            <td>₪19.68</td>
+                            <td>₪354</td>
+                        </tr>
+                        <tr>
+                            <td>אינסטגרם</td>
+                            <td>סטוריז</td>
+                            <td>10</td>
+                            <td class="highlight-green">₪14.22</td>
+                            <td>₪142</td>
+                        </tr>
+                        <tr>
+                            <td>Audience Network</td>
+                            <td>כרזות</td>
+                            <td>10</td>
+                            <td class="highlight-green">₪9.49</td>
+                            <td>₪95</td>
+                        </tr>
+                        <tr>
+                            <td>אינסטגרם</td>
+                            <td>פיד</td>
+                            <td>6</td>
+                            <td>₪20.50</td>
+                            <td>₪123</td>
+                        </tr>
+                        <tr>
+                            <td>אינסטגרם</td>
+                            <td>Reels</td>
+                            <td>4</td>
+                            <td>₪22.34</td>
+                            <td>₪89</td>
+                        </tr>
+                        <tr>
+                            <td>פייסבוק</td>
+                            <td>Reels</td>
+                            <td>4</td>
+                            <td class="highlight-green">₪4.58</td>
+                            <td>₪18</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+                <div class="insight-box" style="margin-top:16px">
+                    <h4>ריטרגטינג – פוטנציאל לא מנוצל</h4>
+                    <p>קמפיין הריטרגטינג מציג את ה-CPA הנמוך ביותר בחשבון (₪15.50) עם 59 רכישות מהשקעה של ₪915 בלבד. הפוטנציאל כאן גדול, אך הקהל מוגדר באופן רחב מדי – כלל מבקרי האתר ב-30 ימים. פילוח מדויק יותר (הוספה לעגלה ללא השלמת רכישה, צפייה בתפריט, לקוחות חוזרים) צפוי לשפר את התוצאות באופן משמעותי.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 3: DEMOGRAPHICS ============ -->
+        <div class="tab-content" id="slide-3">
+            <h2 class="slide-title">פילוח דמוגרפי</h2>
+            <p class="slide-subtitle">התפלגות ביצועים לפי מגדר וקבוצות גיל · נתוני קמפיינים לרכישות בלבד</p>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-blue"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div> פילוח לפי מגדר</div>
+                <div class="table-scroll-wrapper">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>סדרת מודעות</th>
+                            <th>נשים – רכישות</th>
+                            <th>נשים – CPA</th>
+                            <th>גברים – רכישות</th>
+                            <th>גברים – CPA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="font-weight:700">גבעת זאב</td>
+                            <td>59</td>
+                            <td>₪22.26</td>
+                            <td>58</td>
+                            <td>₪21.60</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:700">ריטרגטינג</td>
+                            <td>29</td>
+                            <td>₪17.75</td>
+                            <td>30</td>
+                            <td class="highlight-green">₪12.92</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:700">מבשרת (קמפיין חדש)</td>
+                            <td>26</td>
+                            <td>₪36.02</td>
+                            <td>28</td>
+                            <td>₪31.08</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:700">מבשרת (קמפיין ישן)</td>
+                            <td>12</td>
+                            <td class="highlight-red">₪75.83</td>
+                            <td>17</td>
+                            <td class="highlight-red">₪60.45</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td>סה״כ</td>
+                            <td class="highlight-cyan">126</td>
+                            <td>–</td>
+                            <td class="highlight-cyan">133</td>
+                            <td>–</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                </div>
+                <div class="insight-box" style="margin-top:16px">
+                    <h4>ממצא – מגדר</h4>
+                    <p>התפלגות כמעט שווה בין נשים (126 רכישות, 48.6%) לגברים (133 רכישות, 51.4%). בסניף גבעת זאב אין פער משמעותי ב-CPA בין המגדרים. בריטרגטינג, גברים מציגים עלות רכישה נמוכה יותר (₪12.92 מול ₪17.75 לנשים). בסניף מבשרת – עלות הרכישה לנשים גבוהה יותר בשני הקמפיינים.</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-cyan"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div> פילוח לפי קבוצת גיל – גבעת זאב</div>
+                <div class="bar-chart">
+                    <div class="bar-row">
+                        <span class="bar-label">35-44</span>
+                        <div class="bar-track"><div class="bar-fill green" style="width:100%">33 רכישות</div></div>
+                        <span class="bar-value">₪19.34</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">25-34</span>
+                        <div class="bar-track"><div class="bar-fill cyan" style="width:91%">30 רכישות</div></div>
+                        <span class="bar-value">₪30.04</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">18-24</span>
+                        <div class="bar-track"><div class="bar-fill green" style="width:91%">30 רכישות</div></div>
+                        <span class="bar-value">₪19.05</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">45-54</span>
+                        <div class="bar-track"><div class="bar-fill green" style="width:67%">22 רכישות</div></div>
+                        <span class="bar-value">₪14.55</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">65+</span>
+                        <div class="bar-track"><div class="bar-fill blue" style="width:12%">4</div></div>
+                        <span class="bar-value">₪15.91</span>
+                    </div>
+                </div>
+                <div class="insight-box green-box" style="margin-top:16px">
+                    <h4>קהל חזק – גבעת זאב</h4>
+                    <p>גילאי 45-54 מניבים את ה-CPA הנמוך ביותר בסניף (₪14.55) עם 22 רכישות. גילאי 18-24 מציגים נפח גבוה (30 רכישות) בעלות אטרקטיבית (₪19.05). קבוצת 25-34 מניבה נפח דומה אך בעלות גבוהה יותר (₪30.04) – נדרשת בחינה של הקריאייטיב והמסרים לקהל זה.</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-red"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div> פילוח לפי קבוצת גיל – מבשרת ציון (שני הקמפיינים)</div>
+                <div class="bar-chart">
+                    <div class="bar-row">
+                        <span class="bar-label">25-34</span>
+                        <div class="bar-track"><div class="bar-fill cyan" style="width:100%">34 רכישות</div></div>
+                        <span class="bar-value">₪35.34</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">35-44</span>
+                        <div class="bar-track"><div class="bar-fill red" style="width:68%">23 רכישות</div></div>
+                        <span class="bar-value">₪48.56</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">45-54</span>
+                        <div class="bar-track"><div class="bar-fill cyan" style="width:53%">18 רכישות</div></div>
+                        <span class="bar-value">₪35.96</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">18-24</span>
+                        <div class="bar-track"><div class="bar-fill cyan" style="width:15%">5 רכישות</div></div>
+                        <span class="bar-value">₪36.02</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">55-64</span>
+                        <div class="bar-track"><div class="bar-fill red" style="width:9%">3</div></div>
+                        <span class="bar-value">₪101.00</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">65+</span>
+                        <div class="bar-track"><div class="bar-fill red" style="width:9%">3</div></div>
+                        <span class="bar-value">₪96.18</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div> פילוח לפי קבוצת גיל – ריטרגטינג</div>
+                <div class="bar-chart">
+                    <div class="bar-row">
+                        <span class="bar-label">25-34</span>
+                        <div class="bar-track"><div class="bar-fill green" style="width:100%">22 רכישות</div></div>
+                        <span class="bar-value">₪14.22</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">35-44</span>
+                        <div class="bar-track"><div class="bar-fill cyan" style="width:68%">15 רכישות</div></div>
+                        <span class="bar-value">₪20.22</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">45-54</span>
+                        <div class="bar-track"><div class="bar-fill green" style="width:55%">12 רכישות</div></div>
+                        <span class="bar-value highlight-green">₪9.46</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">18-24</span>
+                        <div class="bar-track"><div class="bar-fill cyan" style="width:41%">9 רכישות</div></div>
+                        <span class="bar-value">₪16.42</span>
+                    </div>
+                </div>
+                <div class="insight-box green-box" style="margin-top:16px">
+                    <h4>הזדמנות – ריטרגטינג גילאי 45-54</h4>
+                    <p>קבוצת הגיל 45-54 בקמפיין הריטרגטינג מציגה CPA של ₪9.46 בלבד – הנמוך ביותר מבין כל הקהלים בחשבון. מדובר בסגמנט עם פוטנציאל המרה גבוה במיוחד שמצדיק הגדלת תקציב ייעודי.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 4: TECHNICAL GAPS ============ -->
+        <div class="tab-content" id="slide-4">
+            <h2 class="slide-title">פערים טכניים</h2>
+            <p class="slide-subtitle">בעיות מבניות והגדרתיות שזוהו בחשבון המודעות ובאסטרטגיה הנוכחית</p>
+
+            <div class="challenge-grid">
+                <div class="challenge-card">
+                    <div class="challenge-number">01</div>
+                    <h3>טירגוט רחב בלבד</h3>
+                    <p>כלל הקמפיינים פועלים על Broad Targeting ללא הגדרת תחומי עניין, פילוח גילאים, קהלי Lookalike או שימוש בדאטה. האלגוריתם אינו מקבל אותות ממוקדים, מה שפוגע ביכולת הלמידה ומייקר את עלות הרכישה.</p>
+                </div>
+                <div class="challenge-card">
+                    <div class="challenge-number">02</div>
+                    <h3>פעילות 24/7</h3>
+                    <p>הקמפיינים רצים בכל שעות היממה, כולל שעות בהן הסניפים סגורים. חשיפות ללקוחות פוטנציאליים בשעות שאין אפשרות להזמין – מייצרות הוצאה ללא תמורה ופוגעות בשיעור ההמרה הכולל.</p>
+                </div>
+                <div class="challenge-card">
+                    <div class="challenge-number">03</div>
+                    <h3>אין שימוש בדאטות עבר</h3>
+                    <p>מאגר הלקוחות הקיים אינו מנוצל – לא הועלו רשימות לקוחות למערכת הפרסום, לא נבנו קהלי Lookalike, ולא מתבצע ריטרגטינג מבוסס היסטוריית רכישות. מדובר בנכס דאטה בעל ערך גבוה שאינו ממונף.</p>
+                </div>
+                <div class="challenge-card">
+                    <div class="challenge-number">04</div>
+                    <h3>ריטרגטינג רחב מדי</h3>
+                    <p>קמפיין הריטרגטינג מוגדר על כלל מבקרי האתר ב-30 ימים – קהל רחב מדי שאינו מבחין בין גולש מזדמן למי שכמעט ביצע הזמנה. נדרש פילוח לפי רמת כוונה: הוספה לעגלה ללא רכישה, צפייה בתפריט, ולקוחות שרכשו פעם אחת ולא חזרו.</p>
+                </div>
+                <div class="challenge-card">
+                    <div class="challenge-number">05</div>
+                    <h3>מיטוב קריאייטיב אוטומטי</h3>
+                    <p>כלל המודעות מוגדרות עם מיטוב קריאייטיב אוטומטי (DCO) – המערכת משנה טקסטים, תמונות וסידור אלמנטים לפי שיקול דעתה, ופוגעת בשליטה על הנראות המותגית. נדרש לכבות את התכונה ולשלוט במודעות באופן מלא.</p>
+                </div>
+                <div class="challenge-card">
+                    <div class="challenge-number">06</div>
+                    <h3>תדירות חשיפה גבוהה</h3>
+                    <p>תדירות חשיפה ממוצעת של 8.68 – כל משתמש נחשף למודעה כמעט 9 פעמים. ערך זה מעיד על שחיקת קהל מתקדמת (Ad Fatigue) – הקהל הפסיק להגיב והמודעות מאבדות אפקטיביות. נדרש רענון קריאייטיב תכוף והרחבת מאגר הקהלים.</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-red"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div> חוסרים קריטיים נוספים</div>
+                <ul class="issue-list">
+                    <li><strong>אין נוכחות בגוגל</strong> – לא פעלו קמפיינים בגוגל בתקופת הדו״ח. קמפיין חיפוש מקומי הוא הבסיס של כל רשת מזון – לקוחות מחפשים ״פיצה + אזור״ ואינם מוצאים את Italiano. נדרשת הקמה מיידית של קמפיין Google Search באזורים הגיאוגרפיים הרלוונטיים, בשעות פעילות הסניפים.</li>
+                    <li><strong>אין נוכחות בטיקטוק</strong> – לא פעלו קמפיינים בטיקטוק. הפלטפורמה חזקה במיוחד לקטגוריית F&B ולקהלים צעירים – ערוץ בעל פוטנציאל גבוה שאינו מנוצל.</li>
+                    <li><strong>חומרי צילום אינם בשימוש</strong> – חומרי מדיה מקצועיים (צילומים) שהופקו עבור המותג אינם משולבים בקמפיינים. הקריאייטיב הנוכחי אינו ממצה את הפוטנציאל הויזואלי של המוצר.</li>
+                    <li><strong>תכני סושיאל ללא קידום</strong> – מפורסמים כ-3 תכנים בשבוע שמניבים כ-100 חשיפות בלבד. ללא תקציב ממומן, התכנים אינם מגיעים לקהל הרלוונטי. נדרש להפוך כל פוסט איכותי לתוכן ממומן.</li>
+                    <li><strong>כתובת מייל לא מותגית</strong> – כתובת המייל של הרשת (italianomz24@gmail.com) פוגעת באמינות המותג. נדרש מעבר לכתובת עם דומיין הרשת (לדוגמה: info@italiano-pizza.co.il).</li>
+                    <li><strong>חלוקת תקציב לא אופטימלית בין הסניפים</strong> – סניף מבשרת ציון קיבל ₪3,810 (גבוה ב-47%) לעומת גבעת זאב (₪2,589) – למרות שגבעת זאב מניב ביצועים טובים משמעותית עם CPA נמוך בחצי.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-yellow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div> ניתוח דאטות קיימות – מה חסר?</div>
+                <p style="color:rgba(255,255,255,0.75); font-size:0.9rem; line-height:1.8; margin-bottom:16px;">
+                    לצורך בניית אסטרטגיה מדויקת ומיקסום החזר ההשקעה, נדרש לנתח את הנתונים הקיימים במערכת ההזמנות ובאתר:
+                </p>
+                <ul class="rec-list">
+                    <li><strong>תדירות הזמנה ממוצעת</strong> – כל כמה זמן לקוח ממוצע חוזר ומבצע הזמנה חוזרת? (שבועית? חודשית?)</li>
+                    <li><strong>ימים ושעות שיא</strong> – מהם הימים והשעות עם נפח ההזמנות הגבוה ביותר? (יום שישי בצהריים? מוצאי שבת?)</li>
+                    <li><strong>ערך לקוח ממוצע (CLV)</strong> – מהי ההכנסה הממוצעת מלקוח לאורך רבעון? נתון קריטי לחישוב תקציב גיוס לקוח אופטימלי.</li>
+                    <li><strong>גודל סל ממוצע</strong> – מה סכום ההזמנה הממוצעת ואילו מוצרים מובילים במכירות?</li>
+                    <li><strong>שיעור שימור לקוחות</strong> – מה אחוז הלקוחות החוזרים לרכישה נוספת? מהו אחוז הנטישה לאחר הזמנה ראשונה?</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 5: RECOMMENDATIONS ============ -->
+        <div class="tab-content" id="slide-5">
+            <h2 class="slide-title">המלצות ותוכנית עבודה</h2>
+            <p class="slide-subtitle">צעדים מיידיים, אופטימיזציה שוטפת והרחבת ערוצים לשיפור ביצועים ו-ROI</p>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-red"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div> פעולות דחופות – לביצוע מיידי</div>
+                <ul class="rec-list">
+                    <li><strong>הקמת קמפיין Google Search</strong> – קמפיין חיפוש מקומי באזורי הסניפים, בשעות פעילות בלבד. ביטויים כגון ״פיצה מבשרת ציון״, ״פיצריה גבעת זאב״, ״משלוח פיצה״ – מייצגים כוונת רכישה גבוהה במיוחד ואחוזי המרה צפויים משמעותיים.</li>
+                    <li><strong>הגדרת תזמון קמפיינים (Dayparting)</strong> – הגבלת כלל הקמפיינים לשעות פעילות הסניפים בלבד. צעד שיחסוך תקציב ויפנה אותו לשעות בעלות שיעור המרה גבוה.</li>
+                    <li><strong>כיבוי מיטוב קריאייטיב אוטומטי (DCO)</strong> – החזרת שליטה מלאה על נראות המודעות ומניעת פגיעה אלגוריתמית באיכות הקריאייטיב.</li>
+                    <li><strong>העלאת רשימות לקוחות קיימים</strong> – טעינת מאגר הלקוחות ל-Meta לצורך בניית קהלי Lookalike איכותיים ופניות ריטרגטינג מדויקות.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-cyan"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg></div> אופטימיזציה – שלב שני</div>
+                <ul class="rec-list">
+                    <li><strong>בניית קהלי ריטרגטינג מדויקים</strong> – פילוח לפי רמת כוונה: הוספה לעגלה ללא רכישה (7 ימים), צפייה בעמוד תפריט, לקוחות שרכשו פעם אחת ולא חזרו (30 יום), ולקוחות VIP חוזרים.</li>
+                    <li><strong>יצירת קהלי Lookalike</strong> – בניית Lookalike 1%-3% על בסיס רוכשים בפועל, מבקרי אתר איכותיים (הוספה לעגלה+), ורשימת לקוחות קיימים.</li>
+                    <li><strong>חיזוק סניף גבעת זאב</strong> – לאור ה-CPA הנמוך (₪21.76) יש להגדיל את התקציב בסניף זה ולצמצם במבשרת ציון עד לשיפור ביצועים שם.</li>
+                    <li><strong>קידום תכני סושיאל</strong> – הפיכת כל פוסט אורגני איכותי לתוכן ממומן (₪10-20 ליום). תכנים שצוברים מעורבות גבוהה – הגדלת תקציב בהתאם.</li>
+                    <li><strong>בדיקות קריאייטיב עם חומרי צילום מקצועיים</strong> – מינוף חומרי הצילום הקיימים ליצירת מודעות חדשות עם נראות ויזואלית חזקה של המוצר.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-cyan"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div> הרחבת ערוצים</div>
+                <div class="two-col">
+                    <div>
+                        <ul class="rec-list">
+                            <li><strong>טיקטוק</strong> – פלטפורמה מובילה לתוכן F&B. סרטוני הכנת פיצה, מבט מאחורי הקלעים, ביקורות לקוחות – פורמטים עם פוטנציאל ויראלי גבוה בקטגוריה.</li>
+                            <li><strong>Google Maps / פרופיל עסקי</strong> – עדכון הפרופיל העסקי בגוגל עם תמונות מקצועיות, שעות פעילות, תפריט וקישור ישיר להזמנה.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul class="rec-list">
+                            <li><strong>מייל מותגי</strong> – מעבר מ-italianomz24@gmail.com לכתובת עם דומיין הרשת – לחיזוק אמינות ומיתוג מקצועי.</li>
+                            <li><strong>אוטומציה שיווקית</strong> – בניית מסע לקוח אוטומטי: הזמנה ראשונה ← קופון חזרה ← תזכורת לאחר תקופת אי-פעילות.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-title"><div class="icon icon-green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div> סיכום – מה אפשר לשפר</div>
+                <div class="two-col">
+                    <div>
+                        <h4 style="color:var(--brand-red); font-size:0.9rem; margin-bottom:12px;">מצב נוכחי</h4>
+                        <ul class="issue-list">
+                            <li>טירגוט רחב ללא פילוח</li>
+                            <li>פרסום 24/7 כולל שעות סגורות</li>
+                            <li>אין נוכחות בגוגל ובטיקטוק</li>
+                            <li>דאטת לקוחות לא ממונפת</li>
+                            <li>שחיקת קריאייטיב (תדירות 8.68)</li>
+                            <li>חלוקת תקציב לא אופטימלית בין סניפים</li>
+                            <li>מייל לא מותגי</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color:var(--brand-green); font-size:0.9rem; margin-bottom:12px;">לאן אפשר להגיע</h4>
+                        <ul class="good-list">
+                            <li>טירגוט מדויק עם Lookalike ודאטה</li>
+                            <li>Dayparting – פרסום בשעות פעילות בלבד</li>
+                            <li>נוכחות פעילה בגוגל חיפוש ובטיקטוק</li>
+                            <li>ריטרגטינג מפולח לפי רמת כוונה</li>
+                            <li>קריאייטיב מתחדש המבוסס על צילומים מקצועיים</li>
+                            <li>הקצאת תקציב אופטימלית לפי ביצועי סניף</li>
+                            <li>מייל מותגי ומסעות לקוח אוטומטיים</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>דוח זה הופק על ידי <span>Results Digital</span> · ינואר–מאי 2026 · Pizza Italiano</p>
+    </footer>
+
+    <script>
+        function showSlide(index) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.slide-nav button').forEach(el => el.classList.remove('active'));
+            document.getElementById('slide-' + index).classList.add('active');
+            document.querySelectorAll('.slide-nav button')[index].classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

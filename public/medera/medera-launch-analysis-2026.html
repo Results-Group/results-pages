@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ניתוח לידים והשוואת קמפיינים – Medera | מרץ–מאי 2026</title>
+  <style>
+    @font-face { font-family: 'Ping'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-regular.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+    @font-face { font-family: 'Ping'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-bold.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+    @font-face { font-family: 'Ping'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-heavy.woff2') format('woff2'); font-weight: 900; font-display: swap; }
+
+    @keyframes subtleGlow { 0% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.05); } 100% { opacity: 0.4; transform: scale(1); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes shimmer { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Ping', -apple-system, sans-serif; background: #0d1112; color: #F8F9FA; direction: rtl; min-height: 100vh; -webkit-font-smoothing: antialiased; position: relative; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; top: -10%; right: -5%; width: 700px; height: 700px; background: radial-gradient(circle, rgba(64,225,211,0.06) 0%, transparent 65%); pointer-events: none; animation: subtleGlow 18s ease-in-out infinite; z-index: 0; }
+
+    .page { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 40px 32px 80px; }
+
+    .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; animation: fadeUp 0.5s ease both; }
+    .brand-badge { display: flex; align-items: center; gap: 10px; }
+    .brand-dot { width: 10px; height: 10px; border-radius: 50%; background: #40e1d3; box-shadow: 0 0 10px rgba(64,225,211,0.6); }
+    .brand-name { font-weight: 900; font-size: 1.05rem; letter-spacing: 1px; }
+    .report-date { font-size: 0.85rem; color: #A0AABF; font-weight: 400; margin-right: 12px; }
+    .btn-pdf { display: flex; align-items: center; gap: 8px; background: linear-gradient(270deg, #2dbab0, #40e1d3, #2dbab0); background-size: 200% 200%; animation: shimmer 5s ease infinite; color: #0d1112; border: none; padding: 12px 24px; border-radius: 4px; font-family: 'Ping', sans-serif; font-weight: 900; font-size: 0.95rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 8px 24px rgba(64,225,211,0.25); text-decoration: none; }
+    .btn-pdf:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(64,225,211,0.4); }
+
+    h1 { font-size: clamp(1.5rem, 2.5vw, 2.2rem); font-weight: 900; line-height: 1.2; margin-bottom: 6px; }
+    h1 span { color: #40e1d3; }
+    .subtitle { font-size: 0.88rem; color: #A0AABF; margin-bottom: 32px; }
+
+    .slide { margin-bottom: 56px; animation: fadeUp 0.6s ease 0.1s both; padding-bottom: 56px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .slide:last-child { border-bottom: none; }
+    .slide-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 2px; color: #40e1d3; text-transform: uppercase; margin-bottom: 10px; }
+    .slide-title { font-size: 1.2rem; font-weight: 900; margin-bottom: 20px; }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .kpi-card { background: rgba(21,27,30,0.7); border: 1px solid rgba(64,225,211,0.12); border-radius: 8px; padding: 20px; backdrop-filter: blur(12px); }
+    .kpi-card.hi { border-color: rgba(64,225,211,0.35); background: rgba(64,225,211,0.05); }
+    .kpi-card.warn { border-color: rgba(184,146,70,0.3); }
+    .kpi-card.bad { border-color: rgba(255,42,77,0.25); }
+    .kpi-val { font-size: 1.8rem; font-weight: 900; line-height: 1; margin-bottom: 4px; }
+    .kpi-card.hi .kpi-val { color: #40e1d3; }
+    .kpi-card.warn .kpi-val { color: #B89246; }
+    .kpi-card.bad .kpi-val { color: #FF2A4D; }
+    .kpi-lbl { font-size: 0.75rem; color: #A0AABF; }
+
+    .channel-row { display: grid; grid-template-columns: 160px 1fr 100px 100px 100px; align-items: center; padding: 16px 20px; border-radius: 8px; margin-bottom: 8px; background: rgba(21,27,30,0.5); border: 1px solid rgba(255,255,255,0.04); transition: border-color 0.2s; }
+    .channel-row:hover { border-color: rgba(64,225,211,0.2); }
+    .channel-row .name { font-weight: 700; font-size: 0.9rem; }
+    .channel-row .bar-wrap { height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+    .channel-row .bar { height: 100%; border-radius: 4px; }
+    .channel-row .metric { text-align: center; font-weight: 700; font-size: 0.88rem; }
+    .channel-row .metric small { display: block; font-size: 0.68rem; color: #A0AABF; font-weight: 400; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .stat-line { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.85rem; }
+    .stat-line:last-child { border-bottom: none; }
+    .stat-line .val { font-weight: 700; }
+    .stat-line .val.good { color: #40e1d3; }
+    .stat-line .val.bad { color: #FF2A4D; }
+    .stat-line .val.meh { color: #B89246; }
+
+    .badge { display: inline-block; padding: 2px 9px; border-radius: 3px; font-size: 0.74rem; font-weight: 700; }
+    .badge-green { background: rgba(64,225,211,0.12); color: #40e1d3; }
+    .badge-red { background: rgba(255,42,77,0.12); color: #FF2A4D; }
+    .badge-gold { background: rgba(184,146,70,0.15); color: #B89246; }
+
+    .insight-box { background: rgba(64,225,211,0.04); border: 1px solid rgba(64,225,211,0.15); border-radius: 8px; padding: 18px 22px; margin-top: 16px; }
+    .insight-box ul { list-style: none; padding: 0; }
+    .insight-box li { padding: 6px 0; font-size: 0.84rem; color: #E0E4EB; border-bottom: 1px solid rgba(255,255,255,0.04); line-height: 1.6; }
+    .insight-box li:last-child { border-bottom: none; }
+    .insight-title { font-weight: 900; font-size: 0.85rem; color: #40e1d3; margin-bottom: 8px; }
+
+    table.compare { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    table.compare th { text-align: right; padding: 12px; font-size: 0.72rem; color: #A0AABF; border-bottom: 1px solid rgba(64,225,211,0.2); font-weight: 700; letter-spacing: 0.5px; }
+    table.compare td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    table.compare tr:hover td { background: rgba(64,225,211,0.02); }
+    table.compare .winner { color: #40e1d3; font-weight: 900; }
+    table.compare .loser { color: #FF2A4D; }
+
+    .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; font-size: 0.75rem; color: #A0AABF; }
+
+    @page { margin: 0; }
+    @media print {
+      body { background: #0d1112 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body::before { display: none; }
+      .btn-pdf { display: none !important; }
+      .slide { page-break-inside: avoid; }
+    }
+    @media (max-width: 800px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .channel-row { grid-template-columns: 100px 1fr 70px 70px 70px; font-size: 0.8rem; }
+      .two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="top-bar">
+    <div class="brand-badge">
+      <div class="brand-dot"></div>
+      <span class="brand-name">MEDERA</span>
+      <span class="report-date">ניתוח לידים והשוואת קמפיינים · 24.03–17.05.2026</span>
+    </div>
+    <button class="btn-pdf" onclick="window.print()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      PDF
+    </button>
+  </div>
+
+  <h1>ניתוח לידים — <span>Medera</span></h1>
+  <p class="subtitle">24.03.2026 – 17.05.2026 · השוואה בין כלל הקמפיינים לקמפיין Launch שלנו</p>
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- SLIDE 1: BIG PICTURE -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-label">תמונת מצב כוללת</div>
+    <div class="slide-title">סיכום ביצועים — כל הלידים</div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-val">2,208</div>
+        <div class="kpi-lbl">סה"כ לידים בתקופה</div>
+      </div>
+      <div class="kpi-card hi">
+        <div class="kpi-val">566</div>
+        <div class="kpi-lbl">תואמו לייעוץ (25.6%)</div>
+      </div>
+      <div class="kpi-card hi">
+        <div class="kpi-val">261</div>
+        <div class="kpi-lbl">היו בייעוץ (11.8%)</div>
+      </div>
+      <div class="kpi-card hi">
+        <div class="kpi-val">125</div>
+        <div class="kpi-lbl">סגרו עסקה (5.7%)</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="stat-line"><span>Meta Ads</span><span class="val">1,540 לידים (69.7%)</span></div>
+        <div class="stat-line"><span>Google Ads (Search + Pmax + YouTube)</span><span class="val">375 לידים ע"פ Google Ads</span></div>
+        <div class="stat-line"><span>TikTok</span><span class="val">263 לידים (11.9%)</span></div>
+        <div class="stat-line"><span>אורגני</span><span class="val">159 לידים (7.2%)</span></div>
+      </div>
+      <div>
+        <div class="stat-line"><span>Show Rate (נקבע → ייעוץ)</span><span class="val meh">46.1%</span></div>
+        <div class="stat-line"><span>Close Rate (ייעוץ → עסקה)</span><span class="val meh">47.9%</span></div>
+        <div class="stat-line"><span>% פסולים (טירגוט)</span><span class="val bad">18.7%</span></div>
+        <div class="stat-line"><span>% ליד → סגר עסקה</span><span class="val good">5.7%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- SLIDE 2: LAUNCH CAMPAIGN -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-label">קמפיין Launch — ביצועים</div>
+    <div class="slide-title">435 לידים מקמפיין ה-Launch (19.7% מהכלל)</div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-val">435</div>
+        <div class="kpi-lbl">סה"כ לידים</div>
+      </div>
+      <div class="kpi-card hi">
+        <div class="kpi-val">100</div>
+        <div class="kpi-lbl">תואמו לייעוץ (24.2%)</div>
+      </div>
+      <div class="kpi-card hi">
+        <div class="kpi-val">61</div>
+        <div class="kpi-lbl">היו בייעוץ (14.8%)</div>
+      </div>
+      <div class="kpi-card hi">
+        <div class="kpi-val">37</div>
+        <div class="kpi-lbl">סגרו עסקה (9.0%)</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="stat-line"><span>Meta Ads</span><span class="val">188 לידים (43.2%)</span></div>
+        <div class="stat-line"><span>Google — Pmax | Snoers | Results</span><span class="val">138 לידים (31.7%)</span></div>
+        <div class="stat-line"><span>TikTok</span><span class="val">67 לידים (15.4%)</span></div>
+        <div class="stat-line"><span>Google — Youtube Campaign</span><span class="val">42 לידים (9.7%)</span></div>
+      </div>
+      <div>
+        <div class="stat-line"><span>Show Rate (נקבע → בייעוץ)</span><span class="val good">61.0%</span></div>
+        <div class="stat-line"><span>Close Rate (ייעוץ → עסקה)</span><span class="val good">60.7%</span></div>
+        <div class="stat-line"><span>% פסולים (טירגוט)</span><span class="val">22.5%</span></div>
+        <div class="stat-line"><span>% ליד → סגר עסקה</span><span class="val good">9.0%</span></div>
+      </div>
+    </div>
+
+    <div class="insight-box">
+      <div class="insight-title">פירוט קמפיינים פנימיים (Launch)</div>
+      <ul>
+        <li><strong>Google — Pmax | Snoers | Results:</strong> 138 לידים (ע"פ Google Ads). ה-CRM קלט 79% מהם. נדרש תיקון UTM tracking.</li>
+        <li><strong>Google — Youtube Campaign - Step 1 - launch:</strong> 42 לידים (ע"פ Google Ads).</li>
+        <li><strong>Broad - Commercial Launch - Graphics / Mar26:</strong> 42 לידים — הקמפיין הגדול ביותר ב-Meta</li>
+        <li><strong>Commercial Launch - RMK & LA & INT / Mar26:</strong> 33 לידים — Remarketing + Lookalike + Interest</li>
+        <li><strong>General - Launch 1 Graphics - INT+LA / Jan26 Results:</strong> 29 לידים</li>
+        <li><strong>LP - Step 1 - Commercial Launch - Broad / Mar26:</strong> 23 לידים (TikTok → Landing Page)</li>
+        <li><strong>Smart Leads - Commercial Launch 1/3:</strong> 22 לידים (TikTok Lead Forms)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- SLIDE 3: HEAD-TO-HEAD COMPARISON -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-label">השוואה ישירה</div>
+    <div class="slide-title">קמפיין Launch מול כלל הקמפיינים</div>
+
+    <table class="compare">
+      <thead>
+        <tr>
+          <th>מדד</th>
+          <th>קמפיין Launch</th>
+          <th>שאר הקמפיינים</th>
+          <th>הפרש</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight: 700;">ליד → תואם לייעוץ</td>
+          <td>24.2%</td>
+          <td>26.0%</td>
+          <td><span class="badge badge-gold">-1.8pp</span></td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Show Rate (נקבע → התקיים)</td>
+          <td class="winner">61.0%</td>
+          <td>42.9%</td>
+          <td><span class="badge badge-green">+18.1pp</span></td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Close Rate (ייעוץ → עסקה)</td>
+          <td class="winner">60.7%</td>
+          <td>44.0%</td>
+          <td><span class="badge badge-green">+16.7pp</span></td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">ליד → סגר עסקה</td>
+          <td class="winner">9.0%</td>
+          <td>4.9%</td>
+          <td><span class="badge badge-green">+4.1pp</span></td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">% פסולים (טירגוט)</td>
+          <td>22.5%</td>
+          <td>17.8%</td>
+          <td><span class="badge badge-red">+4.7pp</span></td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">% לא מעוניין</td>
+          <td>8.2%</td>
+          <td>8.6%</td>
+          <td><span class="badge badge-gold">-0.4pp</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="insight-box">
+      <div class="insight-title">מסקנות ההשוואה:</div>
+      <ul>
+        <li><strong>Show Rate גבוה פי 1.4:</strong> 61% מהלידים שתואמו בפועל הגיעו לייעוץ, לעומת 43% בשאר הקמפיינים. הלידים שלנו רציניים יותר.</li>
+        <li><strong>Close Rate גבוה פי 1.4:</strong> 60.7% מהייעוצים הסתיימו בסגירת עסקה, לעומת 44%. הלידים שלנו מתאימים יותר לשירות.</li>
+        <li><strong>סגירה סופית כפולה (9.0% vs 4.9%):</strong> כמעט פי 2 לידים הופכים ללקוחות בפועל.</li>
+        <li><strong>אחוז פסילה גבוה יותר (22.5% vs 17.8%):</strong> נובע מ-Google Pmax (28.9% פסילה). תיקון UTM + מילות מפתח שליליות יורידו את הפסילה ויגדילו עוד יותר את היתרון.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- SLIDE 4: SOURCE COMPARISON -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-label">ביצועי ערוצים</div>
+    <div class="slide-title">יחס המרה לפי מקור תנועה</div>
+
+    <table class="compare">
+      <thead>
+        <tr>
+          <th>ערוץ</th>
+          <th>לידים</th>
+          <th>% לקוח פעיל</th>
+          <th>% פסולים</th>
+          <th>% אין מענה</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight: 700;">Google Search (לא Launch)</td>
+          <td>195</td>
+          <td class="winner">9.5%</td>
+          <td>17.9%</td>
+          <td>4.8%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Meta — Launch Campaign</td>
+          <td>188</td>
+          <td class="winner">8.5%</td>
+          <td>17.6%</td>
+          <td>7.4%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">TikTok — Launch Campaign</td>
+          <td>67</td>
+          <td class="winner">7.5%</td>
+          <td class="loser">23.9%</td>
+          <td>6.0%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Google Pmax — Launch</td>
+          <td>138</td>
+          <td>5.6%</td>
+          <td class="loser">28.9%</td>
+          <td>4.2%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Google YouTube — Launch</td>
+          <td>42</td>
+          <td>5.6%</td>
+          <td class="loser">28.9%</td>
+          <td>4.2%</td>
+        </tr>
+        <tr style="border-top: 2px solid rgba(64,225,211,0.2);">
+          <td style="font-weight: 700; color: #A0AABF;">Meta — ממוצע כולל</td>
+          <td style="color: #A0AABF;">1,540</td>
+          <td style="color: #A0AABF;">4.0%</td>
+          <td style="color: #A0AABF;">17.7%</td>
+          <td style="color: #A0AABF;">5.8%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700; color: #A0AABF;">TikTok — ממוצע כולל</td>
+          <td style="color: #A0AABF;">263</td>
+          <td style="color: #A0AABF;">3.8%</td>
+          <td style="color: #A0AABF;">23.6%</td>
+          <td style="color: #A0AABF;">9.5%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="insight-box">
+      <div class="insight-title">תובנות לפי ערוץ:</div>
+      <ul>
+        <li><strong>Google Search = הערוץ הכי ממיר (9.5% לקוח פעיל):</strong> 195 לידים עם Intent גבוה, 39.3% הגיעו לייעוץ+. ערוץ זה לא חלק מ-Launch אבל שווה סקייל משמעותי.</li>
+        <li><strong>Meta ב-Launch = איזון מצוין:</strong> 8.5% ללקוח פעיל, רק 17.6% פסולים. הקמפיין שלנו מייצר לידים איכותיים משמעותית מעל הממוצע.</li>
+        <li><strong>Google Pmax + YouTube — נפח גבוה, פסילה גבוהה:</strong> 180 לידים (138+42) אבל 28.9% נפסלים. בנוסף, רק 79% נקלטים ב-CRM. נדרש תיקון טרקינג + מילות מפתח שליליות.</li>
+        <li><strong>TikTok — 7.5% ללקוח פעיל:</strong> ביצועים טובים אבל פסילה גבוהה (23.9%). Lead Form עדיף על Landing Page.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- SLIDE 5: BRANCH ANALYSIS -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-label">ביצועים לפי סניף</div>
+    <div class="slide-title">איפה הלידים ממירים הכי טוב?</div>
+
+    <div class="channel-row" style="border-color: rgba(64,225,211,0.35);">
+      <div class="name">אילת</div>
+      <div class="bar-wrap"><div class="bar" style="width: 100%; background: #40e1d3;"></div></div>
+      <div class="metric">99<small>לידים</small></div>
+      <div class="metric">38<small>המרות</small></div>
+      <div class="metric"><span class="badge badge-green">38.4%</span><small>המרה</small></div>
+    </div>
+
+    <div class="channel-row" style="border-color: rgba(64,225,211,0.25);">
+      <div class="name">עפולה</div>
+      <div class="bar-wrap"><div class="bar" style="width: 76%; background: #40e1d3;"></div></div>
+      <div class="metric">233<small>לידים</small></div>
+      <div class="metric">68<small>המרות</small></div>
+      <div class="metric"><span class="badge badge-green">29.2%</span><small>המרה</small></div>
+    </div>
+
+    <div class="channel-row" style="border-color: rgba(64,225,211,0.2);">
+      <div class="name">חיפה</div>
+      <div class="bar-wrap"><div class="bar" style="width: 70%; background: #40e1d3;"></div></div>
+      <div class="metric">556<small>לידים</small></div>
+      <div class="metric">149<small>המרות</small></div>
+      <div class="metric"><span class="badge badge-green">26.8%</span><small>המרה</small></div>
+    </div>
+
+    <div class="channel-row">
+      <div class="name">רמת גן</div>
+      <div class="bar-wrap"><div class="bar" style="width: 55%; background: #B89246;"></div></div>
+      <div class="metric">1,191<small>לידים</small></div>
+      <div class="metric">252<small>המרות</small></div>
+      <div class="metric"><span class="badge badge-gold">21.2%</span><small>המרה</small></div>
+    </div>
+
+    <div class="insight-box">
+      <div class="insight-title">תובנות לפי סניף:</div>
+      <ul>
+        <li><strong>אילת מובילה ב-38.4% המרה:</strong> הביקוש גבוה ביחס להיצע. יש לשקול הגדלת תקציב ממוקד לאילת.</li>
+        <li><strong>רמת גן = נפח הכי גדול, המרה הכי נמוכה:</strong> 54% מהלידים, אך 21.2% בלבד ממירים. תחרות גבוהה באזור? או סינון חלש?</li>
+        <li><strong>עפולה וחיפה יציבות:</strong> 27-29% — ביצועים סבירים. פוטנציאל שיפור עם קריאייטיב מותאם לאזור.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- SLIDE 6: PLATFORM DEEP DIVE -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-label">ביצועים לפי סוג קמפיין</div>
+    <div class="slide-title">מה עובד הכי טוב? (פלטפורמה × אסטרטגיה)</div>
+
+    <table class="compare">
+      <thead>
+        <tr>
+          <th>פלטפורמה × סוג</th>
+          <th>לידים</th>
+          <th>% המרה</th>
+          <th>לקוח פעיל</th>
+          <th>% פסולים</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight: 700;">Meta — Step 1 (שאלון מקדים)</td>
+          <td>30</td>
+          <td class="winner">46.7%</td>
+          <td>2</td>
+          <td>3.3%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Organic / אחר (אתר, WhatsApp)</td>
+          <td>132</td>
+          <td class="winner">43.9%</td>
+          <td>11</td>
+          <td>11.4%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Meta — אחר (Geo, Launch mix)</td>
+          <td>83</td>
+          <td class="winner">34.9%</td>
+          <td>8</td>
+          <td>21.7%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Meta — RMK & LA & INT</td>
+          <td>227</td>
+          <td>28.6%</td>
+          <td>14</td>
+          <td>18.5%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">TikTok — Lead Form</td>
+          <td>229</td>
+          <td>27.5%</td>
+          <td>11</td>
+          <td class="loser">22.7%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Meta — Broad</td>
+          <td>600</td>
+          <td>27.5%</td>
+          <td>21</td>
+          <td>17.3%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Meta — Results (Videos/Graphics)</td>
+          <td>451</td>
+          <td>26.4%</td>
+          <td>18</td>
+          <td>17.3%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Meta — Beauty / Face Treatment</td>
+          <td>153</td>
+          <td>26.1%</td>
+          <td>3</td>
+          <td>19.6%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Google Search (לא Launch)</td>
+          <td>195</td>
+          <td class="winner">39.3%</td>
+          <td class="winner">8</td>
+          <td>17.9%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Google Pmax + YouTube (Launch)</td>
+          <td>180</td>
+          <td>14.1%</td>
+          <td>8</td>
+          <td class="loser">28.9%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">TikTok — Landing Page</td>
+          <td>23</td>
+          <td class="loser">13.0%</td>
+          <td>2</td>
+          <td class="loser">30.4%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="insight-box">
+      <div class="insight-title">תובנות מרכזיות:</div>
+      <ul>
+        <li><strong>Meta Step 1 (שאלון מקדים) = הסינון הכי טוב:</strong> 46.7% המרה ורק 3.3% פסולים. הפורמט סינן מראש לידים לא רלוונטיים ושלח רק את הרציניים.</li>
+        <li><strong>Remarketing + Lookalike + Interest = רווחי ויציב:</strong> 227 לידים, 28.6% המרה, 14 לקוחות פעילים. אחוז פסילה נמוך (18.5%). לאחר Broad — הכי כדאי לסקייל.</li>
+        <li><strong>Google Search = ההמרה הגבוהה ביותר (39.3%):</strong> Intent גבוה, 9.5% הופכים ללקוח. לא חלק מ-Launch — ערוץ קיים שעובד מצוין ושווה סקייל.</li>
+        <li><strong>Google Pmax+YouTube (Launch) — פסילה גבוהה (28.9%):</strong> נדרש חידוד: מילות מפתח שליליות, UTM tracking, ואופטימיזציית דף נחיתה.</li>
+        <li><strong>TikTok Landing Page = הכי חלש:</strong> 13% המרה בלבד ו-30% פסולים. הפורמט לא עובד — Lead Form עדיף פי 2.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- SLIDE 7: TOP CAMPAIGNS -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-label">Top Campaigns</div>
+    <div class="slide-title">הקמפיינים המובילים (מינימום 10 לידים)</div>
+
+    <table class="compare">
+      <thead>
+        <tr>
+          <th>קמפיין</th>
+          <th>לידים</th>
+          <th>% המרה</th>
+          <th>פעיל</th>
+          <th>% פסול</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight: 700;" class="winner">Step 1 - Commercial Launch - Mix / May26</td>
+          <td>17</td>
+          <td class="winner">52.9%</td>
+          <td>1</td>
+          <td>5.9%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;" class="winner">LP - Mix - Top / Apr26</td>
+          <td>10</td>
+          <td class="winner">50.0%</td>
+          <td>2</td>
+          <td>0.0%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">LP - Beauty Face Treatment - Broad / Apr26</td>
+          <td>47</td>
+          <td class="winner">36.2%</td>
+          <td>3</td>
+          <td>8.5%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Results Videos&Graphics - Mix - Eilat / Mar26</td>
+          <td>44</td>
+          <td>34.1%</td>
+          <td>2</td>
+          <td>9.1%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Commercial Launch - Step 1 - Broad adv / Mar26</td>
+          <td>21</td>
+          <td>33.3%</td>
+          <td>3</td>
+          <td>19.0%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Lead Form - Step 1 - Broad - Results videos / Feb26</td>
+          <td>123</td>
+          <td>31.7%</td>
+          <td>6</td>
+          <td>16.3%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Commercial Launch - RMK & LA & INT / Mar26</td>
+          <td>33</td>
+          <td>30.3%</td>
+          <td class="winner">4</td>
+          <td>3.0%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Beauty Face Treatment INT / 15April</td>
+          <td>114</td>
+          <td>28.9%</td>
+          <td>2</td>
+          <td>16.7%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Results Videos - INT+LA / Jan26</td>
+          <td>126</td>
+          <td>25.4%</td>
+          <td>5</td>
+          <td>19.8%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Results Videos&Graphics - Broad / Feb26</td>
+          <td>233</td>
+          <td>24.9%</td>
+          <td>5</td>
+          <td>18.0%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="insight-box">
+      <div class="insight-title">מה משותף לקמפיינים המנצחים?</div>
+      <ul>
+        <li><strong>פורמט Step 1 (שאלון מקדים):</strong> הקמפיינים שכוללים שאלון מקדים ב-Meta ממירים פי 2 מ-Broad רגיל (50%+ לעומת 25-27%).</li>
+        <li><strong>Landing Page עולה על Lead Form ב-Meta:</strong> LP Beauty Face Treatment (36.2%) לעומת טופס ישיר (28.9%).</li>
+        <li><strong>RMK & LA & INT = הכי נמוך בפסילה (3% בלבד):</strong> קהלי Retargeting + Lookalike + Interest מייצרים כמעט אפס לידים לא רלוונטיים.</li>
+        <li><strong>אילת כ-Geo Target = מצוין:</strong> קמפייני "Eilat" ממירים ב-34% — ביקוש גבוה, תחרות נמוכה.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- SLIDE 8: LAUNCH INTERNAL BREAKDOWN -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-label">Launch — Deep Dive</div>
+    <div class="slide-title">ביצועי הקמפיינים הפנימיים בתוך ה-Launch</div>
+
+    <table class="compare">
+      <thead>
+        <tr>
+          <th>קמפיין</th>
+          <th>לידים</th>
+          <th>% המרה</th>
+          <th>פעיל</th>
+          <th>% פסול</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background: rgba(64,225,211,0.04);">
+          <td style="font-weight: 700;">Google — Pmax | Snoers | Results</td>
+          <td>138</td>
+          <td>14.1%</td>
+          <td>8</td>
+          <td class="loser">28.9%</td>
+        </tr>
+        <tr style="background: rgba(64,225,211,0.04);">
+          <td style="font-weight: 700;">Google — Youtube Campaign - Step 1</td>
+          <td>42</td>
+          <td>14.1%</td>
+          <td>—</td>
+          <td class="loser">28.9%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;" class="winner">Step 1 - Commercial Launch - Mix / May26</td>
+          <td>17</td>
+          <td class="winner">52.9%</td>
+          <td>1</td>
+          <td>5.9%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Commercial Launch - Step 1 - Broad adv - OneLiner / Mar26</td>
+          <td>13</td>
+          <td class="winner">38.5%</td>
+          <td>2</td>
+          <td>7.7%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Commercial Launch - Step 1 - Broad adv / Mar26</td>
+          <td>21</td>
+          <td>33.3%</td>
+          <td>3</td>
+          <td>19.0%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Smart Leads - All the ads / Commercial Launch 1/3 (TikTok)</td>
+          <td>22</td>
+          <td>31.8%</td>
+          <td>1</td>
+          <td>13.6%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Broad - Commercial Launch - Graphics / Mar26</td>
+          <td>42</td>
+          <td>31.0%</td>
+          <td>1</td>
+          <td class="loser">28.6%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Commercial Launch - RMK & LA & INT / Mar26</td>
+          <td>33</td>
+          <td>30.3%</td>
+          <td>4</td>
+          <td>3.0%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">General - Launch 1 Graphics - INT+LA / Jan26 Results</td>
+          <td>29</td>
+          <td>24.1%</td>
+          <td>2</td>
+          <td class="loser">37.9%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">Commercial Launch - Step 1 - Feed / Apr26</td>
+          <td>11</td>
+          <td>27.3%</td>
+          <td>2</td>
+          <td>9.1%</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700;">LP - Step 1 - Commercial Launch - Broad / Mar26 (TikTok)</td>
+          <td>23</td>
+          <td class="loser">13.0%</td>
+          <td>2</td>
+          <td class="loser">30.4%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="insight-box">
+      <div class="insight-title">מה עובד בתוך ה-Launch:</div>
+      <ul>
+        <li><strong>Google Pmax (138 לידים) + YouTube (42 לידים):</strong> יחד 180 לידים, אבל פסילה גבוהה (28.9%) ורק 79% נקלטים ב-CRM. הפוטנציאל גדול — אבל דורש תיקון UTM, מילות מפתח שליליות, ובדיקת אינטגרציה.</li>
+        <li><strong>Step 1 + Mix (May26) = המנצח הגדול ב-Meta:</strong> 52.9% המרה, 5.9% פסולים בלבד. שאלון מקדים + מיקס קריאייטיבים = הפורמולה המנצחת.</li>
+        <li><strong>RMK & LA & INT = הכי נקי:</strong> 4 לקוחות פעילים מ-33 לידים (12.1%!) ורק 3% פסולים. קהלים חמים + Lookalike = זהב.</li>
+        <li><strong>Broad Graphics (Mar26) = נפח גבוה אבל 28.6% פסילה:</strong> מביא הרבה לידים אבל כמעט שליש לא רלוונטיים. נדרש חידוד טירגוט.</li>
+        <li><strong>TikTok LP (Landing Page) = הכי חלש:</strong> 13% המרה ו-30% פסולים. TikTok Lead Form (31.8%) עדיף פי 2.4.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- SLIDE 9: AD FORMAT / LANDING PAGE -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-label">ביצועים לפי פורמט</div>
+    <div class="slide-title">טופס vs דף נחיתה — מה מביא לידים יותר איכותיים?</div>
+
+    <div class="channel-row" style="border-color: rgba(64,225,211,0.35);">
+      <div class="name">אורגני (אתר)</div>
+      <div class="bar-wrap"><div class="bar" style="width: 100%; background: #40e1d3;"></div></div>
+      <div class="metric">54<small>לידים</small></div>
+      <div class="metric">21<small>המרות</small></div>
+      <div class="metric"><span class="badge badge-green">38.9%</span><small>המרה</small></div>
+    </div>
+
+    <div class="channel-row" style="border-color: rgba(64,225,211,0.25);">
+      <div class="name">טופס טיפול פנים (Meta)</div>
+      <div class="bar-wrap"><div class="bar" style="width: 77%; background: #40e1d3;"></div></div>
+      <div class="metric">261<small>לידים</small></div>
+      <div class="metric">78<small>המרות</small></div>
+      <div class="metric"><span class="badge badge-green">29.9%</span><small>המרה</small></div>
+    </div>
+
+    <div class="channel-row" style="border-color: rgba(64,225,211,0.2);">
+      <div class="name">LP נחירות (Meta)</div>
+      <div class="bar-wrap"><div class="bar" style="width: 74%; background: #40e1d3;"></div></div>
+      <div class="metric">231<small>לידים</small></div>
+      <div class="metric">67<small>המרות</small></div>
+      <div class="metric"><span class="badge badge-green">29.0%</span><small>המרה</small></div>
+    </div>
+
+    <div class="channel-row" style="border-color: rgba(64,225,211,0.15);">
+      <div class="name">Lead Form TikTok</div>
+      <div class="bar-wrap"><div class="bar" style="width: 70%; background: #40e1d3;"></div></div>
+      <div class="metric">220<small>לידים</small></div>
+      <div class="metric">60<small>המרות</small></div>
+      <div class="metric"><span class="badge badge-green">27.3%</span><small>המרה</small></div>
+    </div>
+
+    <div class="channel-row">
+      <div class="name">Facebook Lead Form</div>
+      <div class="bar-wrap"><div class="bar" style="width: 69%; background: #B89246;"></div></div>
+      <div class="metric">1,146<small>לידים</small></div>
+      <div class="metric">306<small>המרות</small></div>
+      <div class="metric"><span class="badge badge-gold">26.7%</span><small>המרה</small></div>
+    </div>
+
+    <div class="channel-row">
+      <div class="name">LP נחירות (Results Page)</div>
+      <div class="bar-wrap"><div class="bar" style="width: 54%; background: #B89246;"></div></div>
+      <div class="metric">33<small>לידים</small></div>
+      <div class="metric">7<small>המרות</small></div>
+      <div class="metric"><span class="badge badge-gold">21.2%</span><small>המרה</small></div>
+    </div>
+
+    <div class="channel-row" style="border-color: rgba(255,42,77,0.15);">
+      <div class="name">Google LP (Pmax + YouTube)</div>
+      <div class="bar-wrap"><div class="bar" style="width: 53%; background: #FF2A4D;"></div></div>
+      <div class="metric">116<small>לידים</small></div>
+      <div class="metric">24<small>המרות</small></div>
+      <div class="metric"><span class="badge badge-red">20.7%</span><small>המרה</small></div>
+    </div>
+
+    <div class="insight-box">
+      <div class="insight-title">תובנות:</div>
+      <ul>
+        <li><strong>טפסים ייעודיים (טיפול פנים / נחירות) ממירים טוב יותר מ-Lead Form כללי:</strong> 29-30% לעומת 26.7%. הטפסים הממוקדים סוננים את הלידים טוב יותר.</li>
+        <li><strong>אורגני = הלידים הכי איכותיים (38.9%):</strong> אנשים שמגיעים לבד לאתר = Intent גבוה. נדרשת השקעה ב-SEO.</li>
+        <li><strong>Google LP (Pmax + YouTube) = דף נחיתה דורש שיפור:</strong> 20.7% המרה בלבד. בהשוואה ל-Search (39.3%), דף הנחיתה של Pmax לא ממיר מספיק. נדרש A/B testing ואופטימיזציה.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- SLIDE 10: TOP ACTIVE-GENERATING CAMPAIGNS -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-label">מייצרי לקוחות</div>
+    <div class="slide-title">הקמפיינים שייצרו הכי הרבה לקוחות פעילים (במספר מוחלט)</div>
+
+    <div class="channel-row" style="border-color: rgba(64,225,211,0.35);">
+      <div class="name">Google Search (לא Launch)</div>
+      <div class="bar-wrap"><div class="bar" style="width: 100%; background: #40e1d3;"></div></div>
+      <div class="metric">195<small>לידים</small></div>
+      <div class="metric">8<small>לקוחות</small></div>
+      <div class="metric"><span class="badge badge-green">9.5%</span><small>% פעיל</small></div>
+    </div>
+
+    <div class="channel-row" style="border-color: rgba(64,225,211,0.3);">
+      <div class="name">Google Pmax + YouTube (Launch)</div>
+      <div class="bar-wrap"><div class="bar" style="width: 88%; background: #40e1d3;"></div></div>
+      <div class="metric">180<small>לידים</small></div>
+      <div class="metric">8<small>לקוחות</small></div>
+      <div class="metric"><span class="badge badge-green">5.6%</span><small>% פעיל</small></div>
+    </div>
+
+    <div class="channel-row" style="border-color: rgba(64,225,211,0.2);">
+      <div class="name">Results V&G - Ramat Gan / Mar26</div>
+      <div class="bar-wrap"><div class="bar" style="width: 32%; background: #40e1d3;"></div></div>
+      <div class="metric">224<small>לידים</small></div>
+      <div class="metric">7<small>לקוחות</small></div>
+      <div class="metric"><span class="badge badge-gold">3.1%</span><small>% פעיל</small></div>
+    </div>
+
+    <div class="channel-row" style="border-color: rgba(64,225,211,0.2);">
+      <div class="name">Lead Form - Results videos / Feb26</div>
+      <div class="bar-wrap"><div class="bar" style="width: 27%; background: #40e1d3;"></div></div>
+      <div class="metric">123<small>לידים</small></div>
+      <div class="metric">6<small>לקוחות</small></div>
+      <div class="metric"><span class="badge badge-gold">4.9%</span><small>% פעיל</small></div>
+    </div>
+
+    <div class="channel-row" style="border-color: rgba(64,225,211,0.2);">
+      <div class="name">Results Videos - INT+LA / Jan26</div>
+      <div class="bar-wrap"><div class="bar" style="width: 23%; background: #40e1d3;"></div></div>
+      <div class="metric">126<small>לידים</small></div>
+      <div class="metric">5<small>לקוחות</small></div>
+      <div class="metric"><span class="badge badge-gold">4.0%</span><small>% פעיל</small></div>
+    </div>
+
+    <div class="channel-row" style="border-color: rgba(64,225,211,0.2);">
+      <div class="name">Videos - Eilat / Results - Feb26</div>
+      <div class="bar-wrap"><div class="bar" style="width: 23%; background: #40e1d3;"></div></div>
+      <div class="metric">82<small>לידים</small></div>
+      <div class="metric">5<small>לקוחות</small></div>
+      <div class="metric"><span class="badge badge-green">6.1%</span><small>% פעיל</small></div>
+    </div>
+
+    <div class="channel-row" style="border-color: rgba(64,225,211,0.3);">
+      <div class="name">Launch - RMK & LA & INT / Mar26</div>
+      <div class="bar-wrap"><div class="bar" style="width: 18%; background: #40e1d3;"></div></div>
+      <div class="metric">33<small>לידים</small></div>
+      <div class="metric">4<small>לקוחות</small></div>
+      <div class="metric"><span class="badge badge-green">12.1%</span><small>% פעיל</small></div>
+    </div>
+
+    <div class="insight-box">
+      <div class="insight-title">תובנות:</div>
+      <ul>
+        <li><strong>Launch RMK & LA & INT = שיא היעילות:</strong> 12.1% מהלידים הפכו ללקוחות פעילים. בניגוד לשאר הקמפיינים (3-5%), Remarketing ב-Launch מכפיל את ההמרה.</li>
+        <li><strong>Google Search = 9.5% ליד→לקוח:</strong> הערוץ הכי יעיל ליצירת לקוחות. עובד מצוין — שווה להגדיל תקציב ונתח חשיפה.</li>
+        <li><strong>Google Pmax + YouTube (Launch) = 8 לקוחות מ-180 לידים:</strong> תיקון UTM + מילות מפתח שליליות + בדיקת CRM integration יכפילו את התוצאות.</li>
+        <li><strong>אילת (Results Feb26) = 6.1% ליד → לקוח:</strong> מאשר שקמפיינים ממוקדים גיאוגרפית לאילת מניבים תוצאות מעולות.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- SLIDE 11: FUNNEL BREAKDOWN -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-label">משפך סטטוסים מלא</div>
+    <div class="slide-title">לאן הולכים הלידים? (כל הקמפיינים)</div>
+
+    <div class="channel-row" style="border-color: rgba(64,225,211,0.2);">
+      <div class="name">יחזור לתיאום</div>
+      <div class="bar-wrap"><div class="bar" style="width: 100%; background: #B89246;"></div></div>
+      <div class="metric">523<small>לידים</small></div>
+      <div class="metric"><span class="badge badge-gold">23.7%</span><small>מהכלל</small></div>
+      <div class="metric"></div>
+    </div>
+
+    <div class="channel-row" style="border-color: rgba(255,42,77,0.15);">
+      <div class="name">לא רלוונטי</div>
+      <div class="bar-wrap"><div class="bar" style="width: 58%; background: #FF2A4D;"></div></div>
+      <div class="metric">306<small>לידים</small></div>
+      <div class="metric"><span class="badge badge-red">13.9%</span><small>מהכלל</small></div>
+      <div class="metric"></div>
+    </div>
+
+    <div class="channel-row" style="border-color: rgba(64,225,211,0.25);">
+      <div class="name">נקבע ייעוץ</div>
+      <div class="bar-wrap"><div class="bar" style="width: 58%; background: #40e1d3;"></div></div>
+      <div class="metric">305<small>לידים</small></div>
+      <div class="metric"><span class="badge badge-green">13.8%</span><small>מהכלל</small></div>
+      <div class="metric"></div>
+    </div>
+
+    <div class="channel-row" style="border-color: rgba(255,42,77,0.1);">
+      <div class="name">לא מעוניין</div>
+      <div class="bar-wrap"><div class="bar" style="width: 36%; background: #FF2A4D;"></div></div>
+      <div class="metric">189<small>לידים</small></div>
+      <div class="metric"><span class="badge badge-red">8.6%</span><small>מהכלל</small></div>
+      <div class="metric"></div>
+    </div>
+
+    <div class="channel-row" style="border-color: rgba(64,225,211,0.2);">
+      <div class="name">ייעוץ התקיים</div>
+      <div class="bar-wrap"><div class="bar" style="width: 26%; background: #40e1d3;"></div></div>
+      <div class="metric">136<small>לידים</small></div>
+      <div class="metric"><span class="badge badge-green">6.2%</span><small>מהכלל</small></div>
+      <div class="metric"></div>
+    </div>
+
+    <div class="channel-row" style="border-color: rgba(64,225,211,0.3);">
+      <div class="name">לקוח פעיל</div>
+      <div class="bar-wrap"><div class="bar" style="width: 22%; background: #40e1d3;"></div></div>
+      <div class="metric">113<small>לידים</small></div>
+      <div class="metric"><span class="badge badge-green">5.1%</span><small>מהכלל</small></div>
+      <div class="metric"></div>
+    </div>
+
+    <div class="channel-row">
+      <div class="name">טלפון לא מחובר</div>
+      <div class="bar-wrap"><div class="bar" style="width: 20%; background: #FF2A4D;"></div></div>
+      <div class="metric">105<small>לידים</small></div>
+      <div class="metric"><span class="badge badge-red">4.8%</span><small>מהכלל</small></div>
+      <div class="metric"></div>
+    </div>
+
+    <div class="insight-box" style="border-color: rgba(184,146,70,0.3);">
+      <div class="insight-title" style="color: #B89246;">שימו לב — "יחזור לתיאום" הוא 23.7% מכל הלידים</div>
+      <ul>
+        <li>523 לידים תקועים בסטטוס "יחזור לתיאום". זה כמעט רבע מהלידים שנכנסו. השאלה היא: כמה מהם באמת חזרו? ומה המדיניות למעקב?</li>
+        <li>נוסף על כך, 119 לידים (5.4%) בסטטוס "ביקש לחזור אליו" ו-68 (3.1%) "לחזור לתיאום מועד פגישה". בסך הכל, <strong>32.2% מהלידים</strong> נמצאים בסטטוסי "המתנה".</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- SLIDE 12: BOTTOM LINE -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="slide" style="border-bottom: none; padding-bottom: 0;">
+    <div class="slide-label">שורה תחתונה</div>
+    <div class="slide-title">סיכום והמלצות</div>
+
+    <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+      <div class="kpi-card hi">
+        <div class="kpi-val">9.0%</div>
+        <div class="kpi-lbl">סגרו עסקה (Launch)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val">4.9%</div>
+        <div class="kpi-lbl">סגרו עסקה (שאר)</div>
+      </div>
+      <div class="kpi-card hi">
+        <div class="kpi-val">61%</div>
+        <div class="kpi-lbl">Show Rate (Launch)</div>
+      </div>
+      <div class="kpi-card hi">
+        <div class="kpi-val">61%</div>
+        <div class="kpi-lbl">Close Rate (Launch)</div>
+      </div>
+    </div>
+
+    <div class="insight-box" style="border-color: rgba(64,225,211,0.35);">
+      <div class="insight-title">סיכום ממצאים מרכזיים:</div>
+      <ul>
+        <li><strong>Launch מניב כמעט פי 2 עסקאות (9.0% vs 4.9%):</strong> 435 לידים, 37 סגרו עסקה. הלידים שלנו ממירים טוב יותר בכל שלב במשפך.</li>
+        <li><strong>Show Rate של 61% (vs 43% בשאר):</strong> הלידים מגיעים בפועל לייעוצים — לא "מתאיידים" אחרי תיאום. סימן לאיכות ליד גבוהה.</li>
+        <li><strong>Close Rate של 61% (vs 44% בשאר):</strong> מי שמגיע לייעוץ — סוגר. הקמפיין מביא את האנשים הנכונים.</li>
+        <li><strong>Meta ב-Launch = הפורמולה המנצחת:</strong> Step 1 + Mix (52.9% המרה), RMK & LA & INT (12.1% ליד→לקוח, 3% פסילה בלבד).</li>
+        <li><strong>Google Search (לא Launch) = הערוץ הכי ממיר:</strong> 9.5% ליד→לקוח, Intent גבוה. דורש סקייל.</li>
+        <li><strong>Google Pmax + YouTube — פוטנציאל לא ממומש:</strong> 180 לידים, 28.9% פסילה, 21% לא נקלטים ב-CRM. תיקון UTM + מילות שליליות = הזדמנות.</li>
+        <li><strong>אילת = הסניף הכי ממיר (38.4%):</strong> ביקוש לא מנוצל. קמפיינים ממוקדים גיאוגרפית לאילת מניבים תוצאות מעולות.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>מקור: CRM לידים · תקופה: 24.03–17.05.2026</span>
+    <span style="color: #40e1d3; font-weight: 900;">MEDERA</span>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relax | תודה - הדרך לשקט מתחילה כאן</title>
+    <style>
+        @font-face {
+            font-family: 'Ping';
+            src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-regular.woff2') format('woff2');
+            font-weight: 400; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Ping';
+            src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-bold.woff2') format('woff2');
+            font-weight: 700; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Ping';
+            src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-heavy.woff2') format('woff2');
+            font-weight: 900; font-display: swap;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        #relax-ty {
+            font-family: 'Ping', sans-serif;
+            background: #0b0e0f;
+            color: #FFFFFF;
+            direction: rtl;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .ty-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .ty-status-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #40e1d3 0%, #2dbab0 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(64, 225, 211, 0.15);
+        }
+
+        .ty-status-icon svg {
+            width: 30px;
+            height: 30px;
+            color: #0b0e0f;
+        }
+
+        .ty-header h1 {
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            font-weight: 900;
+            margin-bottom: 12px;
+            line-height: 1.1;
+        }
+
+        .ty-header p {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: #A0AABF;
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.5;
+        }
+
+        .ty-steps-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
+            width: 100%;
+            margin-bottom: 50px;
+        }
+
+        .ty-step-card {
+            flex: 1;
+            min-width: 280px;
+            max-width: 310px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .ty-step-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(64, 225, 211, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .ty-step-num {
+            font-size: 0.8rem;
+            font-weight: 900;
+            color: #40e1d3;
+            background: rgba(64, 225, 211, 0.08);
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+        }
+
+        .ty-step-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #FFFFFF;
+        }
+
+        .ty-step-card p {
+            font-size: 0.95rem;
+            color: #8892A4;
+            line-height: 1.4;
+        }
+
+        .ty-cta {
+            width: 100%;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .ty-cta-label {
+            color: #A0AABF;
+            margin-bottom: 20px;
+            font-size: 1rem;
+            display: block;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 45px;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 1.3rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #40e1d3 0%, #2dbab0 100%);
+            color: #0b0e0f;
+            box-shadow: 0 8px 20px rgba(64, 225, 211, 0.15);
+        }
+
+        .btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 12px 25px rgba(64, 225, 211, 0.2);
+        }
+
+        .btn-link {
+            display: block;
+            margin-top: 20px;
+            color: #5C6478;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .btn-link:hover { color: #40e1d3; }
+
+        @media (max-width: 800px) {
+            #relax-ty { padding: 30px 15px; justify-content: flex-start; }
+            .ty-status-icon { width: 60px; height: 60px; margin-bottom: 15px; }
+            .ty-status-icon svg { width: 25px; height: 25px; }
+            .ty-steps-container { flex-direction: column; align-items: center; gap: 12px; }
+            .ty-step-card { width: 100%; max-width: 100%; padding: 20px; }
+            .ty-header h1 { font-size: 1.9rem; }
+            .ty-header p { margin-bottom: 30px; }
+            .btn { width: 100%; padding: 15px 20px; font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="relax-ty">
+    <div class="ty-wrapper">
+        
+        <div class="ty-status-icon">
+            <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+            </svg>
+        </div>
+
+        <div class="ty-header">
+            <h1>איזה כיף, אנחנו יוצאים לדרך.</h1>
+            <p>הפרטים שלך כבר אצלנו. בזמן שאתה נרגע, צוות ניהול הסיכונים שלנו מתחיל לעבור עליהם כדי להתאים לך את העסקה הנדירה והמדויקת ביותר עבורך.</p>
+        </div>
+
+        <div class="ty-steps-container">
+            <div class="ty-step-card">
+                <span class="ty-step-num">שלב 01</span>
+                <h3>שיחת היכרות</h3>
+                <p>נבין יחד מה המטרות והיכולות שלך כדי שנוכל להתקדם לפגישה מקצועית וממוקדת.</p>
+            </div>
+            <div class="ty-step-card">
+                <span class="ty-step-num">שלב 02</span>
+                <h3>מציאת הזדמנות</h3>
+                <p>ננתח את הפרופיל שלך ונחשוף בפניך את העסקאות הבלעדיות במחירון אפס שמתאימות רק לך.</p>
+            </div>
+            <div class="ty-step-card">
+                <span class="ty-step-num">שלב 03</span>
+                <h3>ליווי צמוד</h3>
+                <p>גיוס הון, תמהיל משכנתא וליווי משפטי - אנחנו איתך לאורך כל הדרך, עד לחתימה.</p>
+            </div>
+        </div>
+
+        <div class="ty-cta">
+            <span class="ty-cta-label">רוצים לדבר איתנו כבר עכשיו? אנחנו מחכים לכם.</span>
+            <a href="tel:*8844" class="btn">חייגו אלינו: 8844*</a>
+            <a href="https://relaxgroup.co.il/" class="btn-link">← חזרה לאתר הבית</a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    (function(){
+        function fixLayout() {
+            const el = document.getElementById('relax-ty');
+            if (!el) return;
+            let p = el.parentElement;
+            while (p && p !== document.body) {
+                p.style.padding = '0';
+                p.style.margin = '0';
+                p.style.maxWidth = 'none';
+                p.style.width = '100%';
+                p.style.height = 'auto';
+                p.style.minHeight = '100%';
+                p = p.parentElement;
+            }
+        }
+        fixLayout();
+        window.addEventListener('resize', fixLayout);
+    })();
+</script>
+
+</body>
+</html>

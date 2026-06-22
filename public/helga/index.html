@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>הלגה רקנטי - הרמת עפעפיים ושקעי עיניים | פרוטוקול טיפולי</title>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6DYXFH6GF7"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-6DYXFH6GF7');
+    </script>
+
+    <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "umgq5wz12w");
+    </script>
+
+    <script async src="//83.uctm.xyz/t.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* --- Custom Font Definition --- */
+        @font-face {
+            font-family: 'Ping';
+            src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-regular.woff2') format('woff2');
+            font-weight: 400;
+        }
+        @font-face {
+            font-family: 'Ping';
+            src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-bold.woff2') format('woff2');
+            font-weight: 700;
+        }
+        @font-face {
+            font-family: 'Ping';
+            src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-heavy.woff2') format('woff2');
+            font-weight: 900;
+        }
+        
+        /* --- Base Styles --- */
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Ping', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #F8F6F2;
+            color: #2d2d2d; 
+            font-weight: 400;
+            overflow-x: hidden; 
+        }
+
+        .font-serif-display {
+            font-family: 'Ping', sans-serif;
+            font-weight: 900;
+        }
+
+        .brand-gold { color: #b49e7b; }
+        .brand-gold-bg { background-color: #b49e7b; }
+        
+        /* --- Form Styles --- */
+        .form-input {
+            background-color: #ffffff;
+            border: 1px solid #e5e3df;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            color: #2d2d2d;
+            font-family: 'Ping', sans-serif !important;
+            -webkit-appearance: none;
+        }
+        .form-input::placeholder {
+            font-family: 'Ping', sans-serif;
+        }
+        .form-input:focus {
+            border-color: #b49e7b;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(180, 158, 123, 0.15);
+        }
+        .form-input.error {
+            border-color: #e53e3e;
+            background-color: #fff5f5;
+        }
+        .checkbox-error {
+            outline: 2px solid #e53e3e;
+        }
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            text-align: right;
+            display: none;
+        }
+
+        /* Animation Styles */
+        .fade-in-section {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+        
+        /* Gallery Styles */
+        [x-cloak] { display: none !important; }
+        .gallery-container { position: relative; }
+        .gallery-image { transition: opacity 0.3s ease-in-out; }
+        
+        .gallery-button {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.8) !important; color: #2d2d2d !important;
+            border: none !important; padding: 0.75rem !important; border-radius: 9999px !important;
+            cursor: pointer; transition: all 0.3s ease;
+            z-index: 50 !important; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+        }
+        .gallery-button:hover { background-color: #ffffff !important; transform: translateY(-50%) scale(1.1); }
+        
+        .gallery-tab {
+            transition: color 0.3s ease, border-color 0.3s ease;
+            border-bottom: 2px solid transparent !important;
+            border-top: none !important;
+            border-left: none !important;
+            border-right: none !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            font-weight: 700 !important;
+            outline: none !important;
+            margin: 0 !important;
+        }
+        .gallery-tab.active {
+            color: #b49e7b !important;
+            border-bottom-color: #b49e7b !important;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .cursor-pointer { cursor: pointer; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-[#F8F6F2]">
+        <div class="container mx-auto px-5 lg:px-6 max-w-screen-xl py-10 lg:py-20">
+            <div class="grid grid-cols-1 lg:grid-cols-2 items-center gap-8 lg:gap-16">
+                <div class="text-center lg:text-right order-1 lg:order-none">
+                    <img src="https://static.wixstatic.com/media/515225_8c5853ce0803447b8a2d2a350ea1245d~mv2.png" alt="לוגו Helga Rekanati" class="h-10 lg:h-14 mx-auto lg:mx-0 mb-6 lg:mb-8 opacity-80" style="filter: brightness(0);">
+                    
+                    <h1 class="text-4xl lg:text-7xl font-serif-display text-gray-900 leading-tight">
+                        החלופה המדעית <br> לניתוח עפעפיים: <br>
+                        <span class="text-2xl lg:text-5xl font-bold block mt-2">פרוטוקול משולב לשיקום ומתיחה</span>
+                    </h1>
+                    
+                    <p class="mt-4 lg:mt-6 max-w-lg mx-auto lg:mx-0 text-base lg:text-xl text-gray-800 leading-relaxed">
+                        במקום לחתוך את העור, אנו בונים אותו מחדש.
+                        <br class="hidden lg:block">
+                        השיטה של <span class="brand-gold font-bold">הלגה רקנטי</span> לטיפול בצניחת עפעפיים ושקעי עיניים, המבוססת על אבחון מדויק ותוצאה שעומדת במבחן הזמן.
+                    </p>
+                    
+                    <a onclick="scrollToForm()" class="cursor-pointer inline-block mt-8 lg:mt-10 brand-gold-bg text-white font-bold py-3 px-8 lg:px-10 rounded-full hover:bg-opacity-90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-base lg:text-lg whitespace-nowrap">
+                        לתיאום בדיקת התאמה
+                    </a>
+                    
+                     <div class="mt-8 pt-6 border-t border-gray-200">
+                        <div class="grid grid-cols-2 gap-3 lg:gap-4 text-xs lg:text-sm text-gray-600">
+                             <div class="font-bold flex items-center justify-start"><span class="brand-gold ml-2">■</span> 35 שנות ניסיון קליני</div>
+                             <div class="font-bold flex items-center justify-start"><span class="brand-gold ml-2">■</span> ללא התערבות כירורגית</div>
+                             <div class="font-bold flex items-center justify-start"><span class="brand-gold ml-2">■</span> תוצאה אסתטית ומדויקת</div>
+                             <div class="font-bold flex items-center justify-start"><span class="brand-gold ml-2">■</span> אבחון בשיטת עבר-הווה-עתיד</div>
+                        </div>
+                        <p class="mt-4 text-xs lg:text-sm text-gray-500 font-medium">סניפים: ראשל"צ | נתניה | ירושלים</p>
+                    </div>
+                </div>
+                
+                <div class="w-full relative group aspect-video mt-4 lg:mt-0 order-2 lg:order-none">
+                    <div class="absolute inset-0 border-2 border-[#b49e7b] rounded-lg transform translate-x-2 translate-y-2 lg:translate-x-4 lg:translate-y-4 transition-transform duration-300 group-hover:translate-x-2 group-hover:translate-y-2 hidden lg:block"></div>
+                    <video class="w-full h-full object-cover rounded-lg relative z-10 shadow-md" autoplay loop muted playsinline>
+                        <source src="https://video.wixstatic.com/video/515225_3e5559c204634e43a3fbc755f932c71e/360p/mp4/file.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <section class="py-12 lg:py-32 bg-white fade-in-section">
+        <div class="container mx-auto px-5 lg:px-6 max-w-screen-xl">
+            <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+                <div class="text-center lg:text-right mb-8 lg:mb-0">
+                      <h2 class="font-serif-display text-3xl lg:text-5xl text-gray-900 leading-tight">לא רק "להרים". <br> לבנות את התשתית מחדש.</h2>
+                      <div class="w-16 lg:w-20 h-1 brand-gold-bg mt-4 lg:mt-6 mb-6 lg:mb-8 mx-auto lg:mx-0"></div>
+                      
+                      <p class="text-base lg:text-lg text-gray-700 leading-relaxed font-bold">העיקרון המנחה של שיטת הלגה רקנטי: פתרון מקיף, לא נקודתי.</p>
+                      
+                      <p class="mt-4 text-base lg:text-lg text-gray-600 leading-relaxed">
+                          נפילת עפעפיים ושקעים מתחת לעיניים הם סימפטום להיחלשות רקמות החיבור והעור. ניתוח מטפל בסימפטום (עודף העור), אך הפרוטוקול שלנו מטפל במקור הבעיה.
+                      </p>
+                      
+                      <p class="mt-4 text-base lg:text-lg text-gray-600 leading-relaxed">
+                          באמצעות שילוב מדויק של טכנולוגיות מתקדמות (פלזמה/טיקסל) למיצוק הסיבים, לצד תכשירים פעילים המותאמים אישית - אנו יוצרים "פיגום" חדש לעור.
+                      </p>
+                      
+                      <p class="mt-6 text-base lg:text-lg text-gray-600 leading-relaxed bg-[#F8F6F2] p-6 border-r-4 border-[#b49e7b] text-right">
+                          <span class="font-bold text-gray-900">התוצאה:</span> מראה פתוח, נקי ואסתטי, שנשמר יציב לאורך שנים, ללא המראה ה"מופתע" או המלאכותי האופייני להליכים כירורגיים.
+                      </p>
+                </div>
+                
+                <div class="flex flex-col h-[400px] lg:h-[600px]" x-data="galleryWithTabs()">
+                    <div class="flex justify-center border-b border-gray-200 mb-4 shrink-0">
+                        <button type="button" @click="activeTab = 'results'" :class="{'active': activeTab === 'results'}" class="gallery-tab flex-1 pb-3 text-center text-sm lg:text-base text-gray-500 hover:text-gray-700 transition-colors">תוצאות מוכחות</button>
+                        <button type="button" @click="activeTab = 'clinic'" :class="{'active': activeTab === 'clinic'}" class="gallery-tab flex-1 pb-3 text-center text-sm lg:text-base text-gray-500 hover:text-gray-700 transition-colors">הסטנדרט שלנו</button>
+                        <button type="button" @click="activeTab = 'products'" :class="{'active': activeTab === 'products'}" class="gallery-tab flex-1 pb-3 text-center text-sm lg:text-base text-gray-500 hover:text-gray-700 transition-colors">התכשירים</button>
+                    </div>
+                    <div class="gallery-container flex-1 bg-gray-50 rounded-lg overflow-hidden border border-gray-100 shadow-md relative w-full">
+                        
+                        <div x-show="activeTab === 'results'" class="absolute inset-0">
+                                <template x-for="(image, index) in results.images" :key="index">
+                                    <div x-show="results.currentIndex === index" class="gallery-image absolute inset-0">
+                                        <img :src="image" alt="תוצאות לפני ואחרי" class="w-full h-full object-cover object-center">
+                                        <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white p-4 text-center text-sm z-40 relative">תוצאה לאחר סדרת טיפולים ע"פ הפרוטוקול</div>
+                                    </div>
+                                </template>
+                                <button type="button" @click.stop="results.currentIndex = (results.currentIndex - 1 + results.images.length) % results.images.length" class="gallery-button left-3">❮</button>
+                                <button type="button" @click.stop="results.currentIndex = (results.currentIndex + 1) % results.images.length" class="gallery-button right-3">❯</button>
+                        </div>
+                        
+                         <div x-show="activeTab === 'clinic'" class="absolute inset-0">
+                                <template x-for="(image, index) in clinic.images" :key="index">
+                                    <div x-show="clinic.currentIndex === index" class="gallery-image absolute inset-0">
+                                        <img :src="image" alt="הקליניקה" class="w-full h-full object-cover object-center">
+                                    </div>
+                                </template>
+                                <button type="button" @click.stop="clinic.currentIndex = (clinic.currentIndex - 1 + clinic.images.length) % clinic.images.length" class="gallery-button left-3">❮</button>
+                                <button type="button" @click.stop="clinic.currentIndex = (clinic.currentIndex + 1) % clinic.images.length" class="gallery-button right-3">❯</button>
+                        </div>
+
+                        <div x-show="activeTab === 'products'" class="absolute inset-0">
+                                <template x-for="(image, index) in products.images" :key="index">
+                                    <div x-show="products.currentIndex === index" class="gallery-image absolute inset-0">
+                                        <img :src="image" alt="מוצרי הלגה רקנטי" class="w-full h-full object-cover object-center">
+                                    </div>
+                                </template>
+                                <button type="button" @click.stop="products.currentIndex = (products.currentIndex - 1 + products.images.length) % products.images.length" class="gallery-button left-3">❮</button>
+                                <button type="button" @click.stop="products.currentIndex = (products.currentIndex + 1) % products.images.length" class="gallery-button right-3">❯</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 lg:py-32 bg-[#f0ede6] fade-in-section">
+        <div class="container mx-auto px-5 lg:px-6 max-w-screen-xl text-center">
+            <h2 class="font-serif-display text-3xl lg:text-4xl text-gray-900 mb-2">מרכיבי הפרוטוקול לשיקום אזור העיניים</h2>
+            <p class="max-w-3xl mx-auto mt-4 lg:mt-6 text-base lg:text-lg leading-relaxed text-gray-600">
+                הגישה שלנו היא הוליסטית ומדעית. הטיפול אינו מסתכם במכשיר אחד, אלא בשילוב סינרגטי המותאם למצב העור הספציפי שלך.
+            </p>
+            <div class="max-w-5xl mx-auto mt-10 lg:mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                <div class="bg-white p-6 lg:p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow text-right border-t-4 border-[#b49e7b]">
+                    <h3 class="font-serif-display text-xl lg:text-2xl mb-3 text-gray-900">הרמה ומיצוק העפעף</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">שימוש בטכנולוגיות תרמיות וכיווץ סיבים (Fibroblast) ליצירת אפקט מתיחה ללא חיתוך העור העודף.</p>
+                </div>
+                <div class="bg-white p-6 lg:p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow text-right border-t-4 border-[#b49e7b]">
+                    <h3 class="font-serif-display text-xl lg:text-2xl mb-3 text-gray-900">טיפול בשקעים וכהויות</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">עידוד זרימת דם וניקוז לימפתי לשיפור הגוון, בשילוב חומרים פעילים לשיקום העובי והמרקם.</p>
+                </div>
+                 <div class="bg-white p-6 lg:p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow text-right border-t-4 border-[#b49e7b]">
+                    <h3 class="font-serif-display text-xl lg:text-2xl mb-3 text-gray-900">בניית קולגן ואלסטין</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">גירוי עמוק של שכבות הדרמיס לייצור מחודש של אבני הבניין של העור, לתוצאה יציבה.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="pt-12 pb-16 lg:pt-32 lg:pb-16 bg-gray-900 text-white fade-in-section" id="form-section">
+        <div class="container mx-auto px-5 lg:px-6 max-w-screen-xl">
+            <div class="flex flex-col lg:grid lg:grid-cols-2 gap-10 lg:gap-24 items-start">
+                 
+                 <div class="text-center lg:text-right space-y-6 lg:space-y-8 order-1 w-full">
+                        <div>
+                             <h2 class="text-3xl lg:text-5xl font-serif-display leading-tight">הלגה רקנטי: <br><span class="text-[#b49e7b]">האוטוריטה לחידוש העור</span></h2>
+                             <p class="mt-4 text-base lg:text-lg text-gray-300 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                                 "הפנים שלנו הן כרטיס הביקור שלנו. בשיטה שפיתחתי, אנחנו לא מנסים לשנות את מי שאת, אלא להחזיר את הגרסה הטובה, הרעננה והמדויקת ביותר שלך - זו שתעמוד במבחן הזמן."
+                             </p>
+                        </div>
+                        
+                        <div class="bg-gray-800 bg-opacity-50 p-6 rounded-lg border-r-2 border-[#b49e7b]">
+                             <p class="text-gray-300 italic text-sm lg:text-base">"הגעתי סקפטית לגבי טיפול ללא ניתוח בעפעפיים, אבל התוצאה הדהימה אותי. המבט נפתח, הכבדות נעלמה, ואני נראית פשוט... אני. רק הרבה יותר טוב."</p>
+                             <p class="text-[#b49e7b] font-bold mt-4 text-sm">- יעל מ., מטופלת סניף ראשון לציון</p>
+                        </div>
+                </div>
+
+                 <div class="bg-gray-800 p-6 lg:p-12 rounded-xl shadow-2xl border border-gray-700 relative overflow-hidden order-2 lg:order-1 w-full">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-[#b49e7b] opacity-10 rounded-bl-full"></div>
+                    
+                    <h3 class="text-2xl lg:text-4xl font-serif-display text-center mb-2 text-white">הצעד הראשון לשינוי</h3>
+                    <p class="text-center text-gray-400 mb-6 lg:mb-8 text-sm">השאירי פרטים לתיאום פגישת ייעוץ ובדיקת התאמה</p>
+                    
+                    <form id="leadForm" novalidate class="space-y-4 lg:space-y-5">
+                        
+                        <input type="hidden" name="utm_source" id="utm_source" value="">
+                        <input type="hidden" name="utm_campaign" id="utm_campaign" value="">
+                        <input type="hidden" name="utm_content" id="utm_content" value="">
+                        <input type="hidden" name="full_url" id="full_url" value="">
+                        <input type="hidden" name="sid" id="sid" value="">
+
+                        <div class="relative">
+                             <input type="text" id="full_name" name="full_name" placeholder="שם מלא" class="form-input text-right w-full p-3 lg:p-4 rounded-lg bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-[#b49e7b] transition-colors text-base">
+                             <div class="error-message" id="error-name">נא להזין שם תקין בעברית/אנגלית</div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="relative">
+                                <input type="tel" id="phone" name="phone" placeholder="טלפון נייד" class="form-input text-right w-full p-3 lg:p-4 rounded-lg bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-[#b49e7b] text-base" maxlength="11">
+                                <div class="error-message" id="error-phone">נא להזין נייד תקין (לדוגמה: 0501234567)</div>
+                            </div>
+                            <div class="relative">
+                                <input type="email" id="email" name="email" placeholder="דואר אלקטרוני" class="form-input text-right w-full p-3 lg:p-4 rounded-lg bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-[#b49e7b] text-base">
+                                <div class="error-message" id="error-email">נא להזין כתובת מייל תקינה</div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="relative">
+                                 <select id="subject" name="subject" required class="form-input w-full p-3 lg:p-4 rounded-lg bg-gray-700 border-gray-600 text-gray-300 text-right appearance-none focus:border-[#b49e7b] text-base">
+                                    <option value="" disabled>נושא הטיפול המבוקש</option>
+                                    <option value="eyes" class="text-white" selected>הרמת עפעפיים / שקעי עיניים</option>
+                                    <option value="double-chin" class="text-white">סנטר כפול וקו לסת</option>
+                                    <option value="anti-aging" class="text-white">מיצוק והצערת העור (אנטי-אייג'ינג)</option>
+                                    <option value="pigmentation" class="text-white">פיגמנטציה וכתמי עור</option>
+                                    <option value="cellulite" class="text-white">טיפול בצלוליט</option>
+                                    <option value="acne" class="text-white">אקנה (פנים/גוף)</option>
+                                    <option value="scars" class="text-white">טשטוש צלקות וסימני מתיחה</option>
+                                    <option value="other" class="text-white">אחר</option>
+                                </select>
+                                <div class="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">▼</div>
+                            </div>
+                            <div class="error-message" id="error-subject">נא לבחור נושא טיפול</div>
+                        </div>
+
+                         <div>
+                            <div class="relative">
+                                <select id="branch" name="branch" required class="form-input w-full p-3 lg:p-4 rounded-lg bg-gray-700 border-gray-600 text-gray-300 text-right appearance-none focus:border-[#b49e7b] text-base">
+                                    <option value="" disabled selected>בחירת סניף לפגישה</option>
+                                    <option value="rishon" class="text-white">ראשון לציון</option>
+                                    <option value="netanya" class="text-white">נתניה</option>
+                                    <option value="jerusalem" class="text-white">ירושלים</option>
+                                </select>
+                                <div class="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">▼</div>
+                            </div>
+                            <div class="error-message" id="error-branch">נא לבחור סניף מועדף</div>
+                        </div>
+                        
+                         <div class="flex items-start gap-2 mt-2">
+                            <input type="checkbox" id="terms" name="terms" required class="mt-1 w-4 h-4 text-[#b49e7b] bg-gray-700 border-gray-600 rounded focus:ring-[#b49e7b] focus:ring-2 focus:ring-offset-gray-800">
+                            <label for="terms" class="text-xs text-gray-300 leading-tight">
+                                אני מאשר/ת את מסירת הפרטים והשימוש בהם ליצירת קשר ודיוור, בהתאם <a href="https://helga.co.il/privacy-policy/" target="_blank" class="underline text-[#b49e7b] hover:text-white">למדיניות הפרטיות</a>.
+                            </label>
+                        </div>
+                        <div class="error-message" id="error-terms">יש לאשר את תנאי השימוש</div>
+                        
+                        <button type="submit" id="submitBtn" class="w-full mt-4 lg:mt-6 brand-gold-bg text-white font-bold text-sm lg:text-lg py-2.5 lg:py-4 px-4 lg:px-8 rounded-full hover:bg-[#a38d6b] transition-all duration-300 shadow-lg transform hover:-translate-y-1 whitespace-nowrap flex justify-center items-center">
+                            <span>לתיאום בדיקת התאמה אישית</span>
+                            <div class="spinner" id="spinner"></div>
+                        </button>
+                        <p class="text-xs text-gray-500 text-center mt-4">* הפנייה אינה מחייבת • המידע נשמר בחיסיון מלא</p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-[#F8F6F2] border-t border-gray-200">
+        <div class="container mx-auto px-5 lg:px-6 max-w-screen-xl py-10 text-center">
+            <img src="https://static.wixstatic.com/media/515225_8c5853ce0803447b8a2d2a350ea1245d~mv2.png" alt="לוגו Helga Rekanati" class="h-6 lg:h-8 mx-auto mb-6 opacity-60" style="filter: brightness(0);">
+            <div class="flex justify-center gap-4 lg:gap-6 mb-6 text-sm font-bold text-gray-600">
+                 <span>ראשון לציון</span>
+                 <span class="text-gray-300">|</span>
+                 <span>נתניה</span>
+                 <span class="text-gray-300">|</span>
+                 <span>ירושלים</span>
+            </div>
+            <p class="text-sm text-gray-500 mb-2">&copy; <span id="currentYear"></span> הלגה רקנטי - True Beauty. כל הזכויות שמורות.</p>
+            
+            <a href="https://www.resultsdigital.org/" target="_blank" rel="noopener noreferrer" dir="ltr" class="text-sm text-gray-500 font-normal hover:text-[#b49e7b] transition-colors duration-300 block font-sans">
+                Proudly created by RESULTS GROUP
+            </a>
+        </div>
+    </footer>
+    
+    <script>
+        function scrollToForm() {
+            const formSection = document.getElementById('form-section');
+            if (formSection) {
+                formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+            
+            const sections = document.querySelectorAll('.fade-in-section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.15
+            });
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            // Tracking Logic - קריאה ישירה מה-URL
+            function captureCallboxId() {
+                if(window.location.hash) {
+                    const hashValue = window.location.hash.substring(1);
+                    const callBoxInput = document.getElementById('sid');
+                    if(callBoxInput && hashValue) {
+                        callBoxInput.value = hashValue;
+                    }
+                }
+            }
+
+            // ניסיון ראשון מיידי
+            captureCallboxId();
+
+            // ניסיון נוסף אחרי שניה - כי סקריפט Callbox עשוי להוסיף hash אחרי טעינת הדף
+            setTimeout(captureCallboxId, 1500);
+            setTimeout(captureCallboxId, 3000);
+
+            // האזנה לשינויים ב-hash בזמן אמת
+            window.addEventListener('hashchange', captureCallboxId);
+
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const source = params.get('utm_source');
+                const campaign = params.get('utm_campaign');
+                const content = params.get('utm_content');
+
+                if(source) document.getElementById('utm_source').value = source;
+                if(campaign) document.getElementById('utm_campaign').value = campaign;
+                if(content) document.getElementById('utm_content').value = content;
+                
+                document.getElementById('full_url').value = window.location.href;
+            } catch (e) {
+                console.log('Could not parse URL tracking parameters', e);
+            }
+
+            // קבלת URL מהעמוד האב דרך postMessage (למקרה שהדף מוטמע ב-iframe)
+            window.onmessage = function(event) {
+                if (event.data && typeof event.data === 'string') {
+                    try {
+                        const rawUrl = event.data;
+                        document.getElementById('full_url').value = rawUrl;
+
+                        if (rawUrl.includes('#')) {
+                            const hashValue = rawUrl.split('#').pop();
+                            const callBoxInput = document.getElementById('sid');
+                            if (callBoxInput && hashValue) {
+                                callBoxInput.value = hashValue;
+                            }
+                        }
+
+                        const urlObj = new URL(rawUrl.startsWith('http') ? rawUrl : 'https://dummy.com' + rawUrl);
+                        const params = new URLSearchParams(urlObj.search);
+                        
+                        const source = params.get('utm_source');
+                        const campaign = params.get('utm_campaign');
+                        const content = params.get('utm_content');
+
+                        if(source) document.getElementById('utm_source').value = source;
+                        if(campaign) document.getElementById('utm_campaign').value = campaign;
+                        if(content) document.getElementById('utm_content').value = content;
+                    } catch (e) {
+                        console.log('Could not parse URL from parent', e);
+                    }
+                }
+            };
+
+            // Form Validation & Submission
+            const form = document.getElementById('leadForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const spinner = document.getElementById('spinner');
+            const btnText = submitBtn.querySelector('span');
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.form-input').forEach(el => el.classList.remove('error'));
+                document.getElementById('terms').classList.remove('checkbox-error');
+                
+                let isValid = true;
+                
+                const nameInput = document.getElementById('full_name');
+                const nameRegex = /^[a-zA-Z\u0590-\u05FF\s']+$/;
+                if (!nameInput.value.trim() || !nameRegex.test(nameInput.value) || nameInput.value.length < 2) {
+                    showError('full_name', 'error-name');
+                    isValid = false;
+                }
+
+                const phoneInput = document.getElementById('phone');
+                const cleanPhone = phoneInput.value.replace(/\D/g, '');
+                if (cleanPhone.length < 9 || cleanPhone.length > 10 || !cleanPhone.startsWith('05')) {
+                    showError('phone', 'error-phone');
+                    isValid = false;
+                }
+
+                const emailInput = document.getElementById('email');
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(emailInput.value)) {
+                    showError('email', 'error-email');
+                    isValid = false;
+                }
+
+                const subjectInput = document.getElementById('subject');
+                if (!subjectInput.value) {
+                    showError('subject', 'error-subject');
+                    isValid = false;
+                }
+
+                const branchInput = document.getElementById('branch');
+                if (!branchInput.value) {
+                    showError('branch', 'error-branch');
+                    isValid = false;
+                }
+
+                const termsInput = document.getElementById('terms');
+                if (!termsInput.checked) {
+                      termsInput.classList.add('checkbox-error');
+                      document.getElementById('error-terms').style.display = 'block';
+                      isValid = false;
+                }
+
+                if (!isValid) return;
+
+                // לפני השליחה - ניסיון אחרון לתפוס את ה-sid
+                captureCallboxId();
+
+                submitBtn.disabled = true;
+                btnText.textContent = "שולח...";
+                spinner.style.display = "inline-block";
+
+                const formData = new FormData(form);
+                const data = {};
+                formData.forEach((value, key) => data[key] = value);
+
+                const zapierEndpoint = 'https://hooks.zapier.com/hooks/catch/7822700/u77h87b/';
+                const callboxEndpoint = 'https://scripts.callbox.co.il/helga/cbforms.php';
+
+                Promise.all([
+                    fetch(zapierEndpoint, {
+                        method: 'POST',
+                        body: JSON.stringify(data),
+                    }),
+                    fetch(callboxEndpoint, {
+                        method: 'POST',
+                        body: formData,
+                    })
+                ])
+                .then(() => {
+                    window.location.href = "https://helga.co.il/thanks/";
+                })
+                .catch(error => {
+                    console.error('Error sending leads:', error);
+                    window.location.href = "https://helga.co.il/thanks/";
+                });
+            });
+
+            function showError(inputId, errorId) {
+                document.getElementById(inputId).classList.add('error');
+                document.getElementById(errorId).style.display = 'block';
+            }
+        });
+
+        function galleryWithTabs() {
+            return {
+                activeTab: 'results',
+                results: {
+                    currentIndex: 0,
+                    images: [
+                        'https://static.wixstatic.com/media/bb1f28_4ac5271c0edb40249983b3d5de469d3e~mv2.png',
+                        'https://static.wixstatic.com/media/bb1f28_e2486b0db693438e837a1df678302793~mv2.png',
+                    ]
+                },
+                clinic: {
+                    currentIndex: 0,
+                    images: [
+                        'https://static.wixstatic.com/media/515225_88aa805dd21a4a4ca04d32b5e290dc2f~mv2.jpeg',
+                        'https://static.wixstatic.com/media/515225_38a656234d89467c89d89b68f6047d35~mv2.jpeg',
+                        'https://static.wixstatic.com/media/515225_c1282fd4f3b841b1903771ab30bce182~mv2.jpeg',
+                        'https://static.wixstatic.com/media/515225_6210aa591e2345b9887bbf90943a4e5f~mv2.jpeg',
+                    ]
+                },
+                products: {
+                    currentIndex: 0,
+                    images: [
+                        'https://static.wixstatic.com/media/515225_5fbc28c218fb4e10b645690d9ce09736~mv2.jpg',
+                        'https://static.wixstatic.com/media/515225_107b352f608844d4be1edf357a5be691~mv2.jpg',
+                        'https://static.wixstatic.com/media/515225_cdb6c9ba44d14e7bbaf1c7e426e9e58e~mv2.jpg',
+                        'https://static.wixstatic.com/media/515225_a8923fda8e6d44d59fed4583d234cfae~mv2.jpg',
+                    ]
+                },
+                next(gallery) {
+                    this[gallery].currentIndex = (this[gallery].currentIndex + 1) % this[gallery].images.length;
+                },
+                prev(gallery) {
+                    this[gallery].currentIndex = (this[gallery].currentIndex - 1 + this[gallery].images.length) % this[gallery].images.length;
+                },
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ulike Israel – תוכנית אסטרטגית</title>
+
+    <style>
+        @font-face { font-family: 'Ping'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-regular.woff2') format('woff2'); font-weight: 400; }
+        @font-face { font-family: 'Ping'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-bold.woff2') format('woff2'); font-weight: 700; }
+        @font-face { font-family: 'Ping'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-heavy.woff2') format('woff2'); font-weight: 900; }
+
+        :root {
+            --bg-dark: #050505;
+            --color-cyan: #00E5FF;
+            --brand-gold: #D4AF37;
+            --brand-gold-glow: rgba(212, 175, 55, 0.15);
+            --brand-gold-light: rgba(212, 175, 55, 0.08);
+            --brand-blue: #5B8CDB;
+            --brand-blue-glow: rgba(91, 140, 219, 0.15);
+            --brand-green: #4ECDC4;
+            --brand-green-glow: rgba(78, 205, 196, 0.15);
+            --brand-rose: #C9A0DC;
+            --brand-rose-glow: rgba(201, 160, 220, 0.15);
+            --brand-solar: #FF9F43;
+            --brand-solar-glow: rgba(255, 159, 67, 0.15);
+            --brand-red: #ff6b6b;
+            --brand-red-glow: rgba(255, 107, 107, 0.15);
+            --text-light: #FFFFFF;
+            --text-muted: #888;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.07);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Ping', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .bg-noise {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.03; pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            z-index: 0;
+        }
+        .bg-grid {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 50px 50px; z-index: 0; pointer-events: none;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+        }
+        .ambient-light {
+            position: fixed; border-radius: 50%; filter: blur(120px);
+            pointer-events: none; z-index: 0;
+            animation: floatLight 10s ease-in-out infinite alternate;
+        }
+        .ambient-light.light-cyan { background: var(--color-cyan); width: 600px; height: 600px; top: -10%; right: -10%; opacity: 0.06; }
+        .ambient-light.light-gold { background: var(--brand-gold); width: 500px; height: 500px; bottom: -10%; left: -10%; opacity: 0.12; animation-delay: -5s; }
+        .ambient-light.light-center {
+            background: radial-gradient(circle, var(--brand-gold), var(--brand-solar));
+            width: 400px; height: 400px; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); opacity: 0.04;
+            animation: pulseCenter 12s ease-in-out infinite alternate;
+        }
+        @keyframes floatLight {
+            0% { transform: scale(1) translate(0,0); opacity: 0.06; }
+            100% { transform: scale(1.2) translate(30px,30px); opacity: 0.14; }
+        }
+        @keyframes pulseCenter {
+            0% { transform: translate(-50%,-50%) scale(0.8); opacity: 0.02; }
+            100% { transform: translate(-50%,-50%) scale(1.3); opacity: 0.06; }
+        }
+
+        .progress-bar {
+            position: fixed; top: 0; left: 0; height: 3px; z-index: 100;
+            background: linear-gradient(90deg, var(--brand-gold), var(--color-cyan), var(--brand-gold));
+            background-size: 200% 100%;
+            animation: shimmer 3s linear infinite;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 12px var(--brand-gold), 0 0 30px rgba(212,175,55,0.3);
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        header {
+            padding: 18px 4%; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(5,5,5,0.92); backdrop-filter: blur(20px);
+            z-index: 10; position: sticky; top: 0;
+        }
+        .header-title { display: flex; align-items: center; gap: 20px; }
+        .logo { height: 34px; }
+        .header-title h1 { font-size: 1.3rem; font-weight: 900; color: var(--text-light); border-right: 2px solid rgba(212,175,55,0.3); padding-right: 20px; }
+        .header-title span { color: var(--brand-gold); }
+        .header-tag { display: flex; align-items: center; gap: 12px; }
+        .date-badge {
+            background: var(--brand-gold-glow); border: 1px solid rgba(212,175,55,0.4);
+            color: var(--brand-gold); padding: 6px 16px; border-radius: 4px;
+            font-weight: 700; font-size: 0.95rem;
+        }
+        .client-badge {
+            background: rgba(255,255,255,0.04); border: 1px solid var(--border-color);
+            color: var(--text-muted); padding: 6px 14px; border-radius: 4px;
+            font-weight: 600; font-size: 0.9rem;
+        }
+
+        .dashboard-container { display: flex; flex-direction: column; flex: 1; max-width: 1400px; margin: 0 auto; width: 100%; padding: 30px 3%; position: relative; z-index: 1; }
+        .content-area {
+            flex: 1; background: linear-gradient(160deg, rgba(10,10,10,0.7) 0%, rgba(5,5,5,0.85) 50%, rgba(10,10,10,0.7) 100%);
+            border: 1px solid rgba(255,255,255,0.06); border-radius: 8px;
+            padding: 50px 60px; backdrop-filter: blur(20px);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.03);
+            min-width: 0; position: relative; z-index: 1;
+        }
+        .tab-content { display: none; max-width: 1000px; margin-left: auto; margin-right: auto; }
+        .tab-content.active { display: block; }
+
+        .tab-content.active .anim-item { opacity: 0; transform: translateY(20px); animation: fadeUp 0.6s ease forwards; }
+        .tab-content.active .anim-item:nth-child(1) { animation-delay: 0.05s; }
+        .tab-content.active .anim-item:nth-child(2) { animation-delay: 0.12s; }
+        .tab-content.active .anim-item:nth-child(3) { animation-delay: 0.19s; }
+        .tab-content.active .anim-item:nth-child(4) { animation-delay: 0.26s; }
+        .tab-content.active .anim-item:nth-child(5) { animation-delay: 0.33s; }
+        .tab-content.active .anim-item:nth-child(6) { animation-delay: 0.40s; }
+        .tab-content.active .anim-item:nth-child(7) { animation-delay: 0.47s; }
+        .tab-content.active .anim-item:nth-child(8) { animation-delay: 0.54s; }
+        .tab-content.active .anim-item:nth-child(9) { animation-delay: 0.61s; }
+        .tab-content.active .anim-item:nth-child(10) { animation-delay: 0.68s; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-content.slide-enter { animation: slideEnter 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes slideEnter {
+            from { opacity: 0; transform: translateX(-30px) scale(0.98); }
+            to { opacity: 1; transform: translateX(0) scale(1); }
+        }
+
+        .hero-label {
+            color: var(--brand-gold); font-size: 0.85rem; font-weight: 700;
+            letter-spacing: 4px; text-transform: uppercase;
+            display: flex; align-items: center; justify-content: center;
+            gap: 14px; margin-bottom: 20px;
+        }
+        .hero-label::before, .hero-label::after {
+            content: ''; width: 50px; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--brand-gold));
+            box-shadow: 0 0 10px var(--brand-gold);
+        }
+        .hero-label::after { background: linear-gradient(90deg, var(--brand-gold), transparent); }
+        .slide-accent-line {
+            width: 80px; height: 2px;
+            background: linear-gradient(90deg, var(--brand-gold), var(--color-cyan));
+            margin: 12px auto; border-radius: 2px;
+            box-shadow: 0 0 16px rgba(212,175,55,0.4);
+        }
+
+        .slide-nav {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border-color);
+        }
+        .slide-nav-btn {
+            background: rgba(10,10,10,0.9); border: 1px solid rgba(255,255,255,0.12);
+            color: var(--text-muted); padding: 14px 32px; border-radius: 6px;
+            font-family: 'Ping', sans-serif; font-size: 1rem; font-weight: 700;
+            cursor: pointer; transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 10px;
+            backdrop-filter: blur(10px);
+        }
+        .slide-nav-btn:hover { background: rgba(212,175,55,0.08); border-color: var(--brand-gold); color: var(--brand-gold); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(212,175,55,0.15); }
+        .slide-nav-btn:disabled { opacity: 0.15; pointer-events: none; }
+        .slide-counter { display: flex; align-items: center; gap: 6px; }
+        .slide-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: rgba(255,255,255,0.12); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;
+        }
+        .slide-dot:hover { background: rgba(255,255,255,0.3); transform: scale(1.3); }
+        .slide-dot.active {
+            background: var(--brand-gold); box-shadow: 0 0 12px rgba(212,175,55,0.5);
+            width: 26px; border-radius: 4px;
+        }
+        .slide-number { color: var(--text-muted); font-size: 0.95rem; font-weight: 700; margin: 0 14px; }
+
+        .tab-title { font-size: 2.6rem; font-weight: 900; margin-bottom: 12px; color: var(--text-light); line-height: 1.15; text-align: center; }
+        .tab-title span { color: var(--brand-gold); text-shadow: 0 0 30px rgba(212,175,55,0.25); }
+        .tab-subtitle { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 35px; line-height: 1.7; max-width: 800px; text-align: center; margin-left: auto; margin-right: auto; }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 30px; }
+        .kpi-card {
+            background: rgba(10,10,10,0.85); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;
+            padding: 22px; display: flex; flex-direction: column; gap: 8px;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; overflow: hidden;
+        }
+        .kpi-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(212,175,55,0.3), transparent);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .kpi-card:hover { transform: translateY(-6px); border-color: rgba(212,175,55,0.35); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+        .kpi-card:hover::before { opacity: 1; }
+        .kpi-card.highlight { border-color: rgba(212,175,55,0.4); background: var(--brand-gold-light); }
+        .kpi-card.green-highlight { border-color: rgba(78,205,196,0.4); background: var(--brand-green-glow); }
+        .kpi-card.red-highlight { border-color: rgba(255,107,107,0.4); background: var(--brand-red-glow); }
+        .kpi-title { font-size: 0.88rem; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; justify-content: space-between; }
+        .kpi-value { font-size: 2.2rem; font-weight: 900; color: var(--text-light); letter-spacing: -0.5px; }
+        .kpi-value.gold { color: var(--brand-gold); text-shadow: 0 0 20px rgba(212,175,55,0.2); }
+        .kpi-value.medium { font-size: 1.6rem; }
+        .kpi-value.green { color: var(--brand-green); text-shadow: 0 0 20px rgba(78,205,196,0.2); }
+        .kpi-value.red { color: var(--brand-red); text-shadow: 0 0 20px rgba(255,107,107,0.2); }
+        .kpi-trend { font-size: 0.82rem; padding: 4px 10px; border-radius: 4px; display: inline-block; align-self: flex-start; font-weight: 700; }
+        .kpi-trend.gold { color: var(--brand-gold); background: var(--brand-gold-glow); }
+        .kpi-trend.green { color: var(--brand-green); background: var(--brand-green-glow); }
+        .kpi-trend.red { color: var(--brand-red); background: var(--brand-red-glow); }
+
+        .strategic-note {
+            background: rgba(10,10,10,0.6); border-right: 3px solid var(--color-cyan);
+            padding: 20px 24px; border-radius: 6px; margin-bottom: 22px;
+            font-size: 0.95rem; color: var(--text-light); line-height: 1.8;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .strategic-note:hover { transform: translateX(-4px); box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+        .strategic-note.gold { border-right-color: var(--brand-gold); background: var(--brand-gold-light); }
+        .strategic-note.green { border-right-color: var(--brand-green); background: var(--brand-green-glow); }
+        .strategic-note.blue { border-right-color: var(--brand-blue); background: var(--brand-blue-glow); }
+        .strategic-note.solar { border-right-color: var(--brand-solar); background: var(--brand-solar-glow); }
+        .strategic-note.red { border-right-color: var(--brand-red); background: var(--brand-red-glow); }
+
+        .table-container { width: 100%; overflow-x: auto; background: rgba(10,10,10,0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; margin-top: 14px; margin-bottom: 22px; }
+        .premium-table { width: 100%; border-collapse: collapse; text-align: center; white-space: nowrap; }
+        .premium-table th { padding: 16px 14px; color: var(--text-muted); font-weight: 700; font-size: 0.85rem; border-bottom: 2px solid rgba(212,175,55,0.3); background: rgba(255,255,255,0.02); text-transform: uppercase; letter-spacing: 0.5px; }
+        .premium-table td { padding: 14px 14px; color: var(--text-light); border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.95rem; font-weight: 600; }
+        .premium-table tbody tr { transition: all 0.25s ease; }
+        .premium-table tbody tr:hover { background: rgba(212,175,55,0.06); transform: scale(1.005); }
+        .premium-table tbody tr:last-child td { border-bottom: none; }
+
+        .quote-block {
+            background: linear-gradient(135deg, rgba(212,175,55,0.05) 0%, rgba(10,10,10,0.8) 100%);
+            border: 1px solid rgba(212,175,55,0.2); border-radius: 8px;
+            padding: 30px 35px; margin: 25px 0; position: relative;
+            font-size: 1.15rem; line-height: 1.8; color: #ddd;
+        }
+        .quote-block::before {
+            content: '"'; position: absolute; top: 10px; right: 20px;
+            font-size: 4rem; color: rgba(212,175,55,0.2); font-family: Georgia, serif; line-height: 1;
+        }
+
+        .comparison-bar {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;
+            overflow: hidden; margin: 20px 0;
+        }
+        .comparison-bar .comp-side {
+            padding: 28px 24px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+        }
+        .comparison-bar .comp-side.good { background: rgba(78,205,196,0.06); border-left: 1px solid rgba(255,255,255,0.08); }
+        .comparison-bar .comp-side.bad { background: rgba(255,107,107,0.06); }
+        .comparison-bar .comp-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; }
+        .comparison-bar .comp-value { font-size: 2.4rem; font-weight: 900; }
+        .comparison-bar .comp-detail { font-size: 0.85rem; color: var(--text-muted); }
+
+        .flow-step {
+            display: flex; align-items: flex-start; gap: 16px; margin-bottom: 14px;
+            padding: 14px 18px; background: rgba(10,10,10,0.6);
+            border: 1px solid rgba(255,255,255,0.06); border-radius: 6px;
+            transition: all 0.25s ease;
+        }
+        .flow-step:hover { border-color: rgba(212,175,55,0.3); background: rgba(212,175,55,0.03); }
+        .flow-step .step-num {
+            min-width: 32px; height: 32px; border-radius: 50%;
+            background: var(--brand-gold-glow); border: 1px solid rgba(212,175,55,0.4);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; font-weight: 900; color: var(--brand-gold);
+        }
+        .flow-step .step-content { flex: 1; }
+        .flow-step .step-content h4 { font-size: 0.95rem; font-weight: 800; margin-bottom: 4px; }
+        .flow-step .step-content p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+
+        .site-footer {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 24px;
+            font-size: 0.7rem; color: rgba(255,255,255,0.3);
+            font-weight: 400; letter-spacing: 0.3px;
+            background: linear-gradient(to top, rgba(5,5,5,0.6), transparent);
+            pointer-events: none;
+        }
+        .site-footer span, .site-footer a { pointer-events: auto; }
+        .site-footer a { color: rgba(255,255,255,0.35); text-decoration: none; transition: color 0.3s ease; }
+        .site-footer a:hover { color: rgba(255,255,255,0.6); }
+
+        .present-btn {
+            background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05));
+            border: 1px solid rgba(212,175,55,0.5);
+            color: var(--brand-gold);
+            padding: 7px 18px; border-radius: 4px;
+            font-family: 'Ping', sans-serif; font-weight: 700; font-size: 0.85rem;
+            cursor: pointer; transition: all 0.3s;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .present-btn:hover {
+            background: linear-gradient(135deg, rgba(212,175,55,0.3), rgba(212,175,55,0.1));
+            border-color: var(--brand-gold);
+            box-shadow: 0 4px 20px rgba(212,175,55,0.2);
+            transform: translateY(-1px);
+        }
+
+        body.fullscreen-mode { overflow: hidden; }
+        body.fullscreen-mode header { padding: 14px 3%; }
+        body.fullscreen-mode .dashboard-container { padding: 20px 2%; max-width: 100%; height: calc(100vh - 60px); }
+        body.fullscreen-mode .content-area { height: 100%; display: flex; flex-direction: column; padding: 40px 60px; overflow-y: auto; }
+        body.fullscreen-mode .tab-content { flex: 1; }
+        body.fullscreen-mode .tab-title { font-size: 3rem; }
+        body.fullscreen-mode .tab-subtitle { font-size: 1.2rem; }
+        body.fullscreen-mode .kpi-value { font-size: 2.5rem; }
+        body.fullscreen-mode .kpi-value.medium { font-size: 1.9rem; }
+        body.fullscreen-mode .site-footer { display: none; }
+
+        .counter-glow { animation: counterPulse 2s ease-in-out; }
+        @keyframes counterPulse {
+            0% { text-shadow: none; }
+            50% { text-shadow: 0 0 30px currentColor; }
+            100% { text-shadow: 0 0 20px rgba(212,175,55,0.2); }
+        }
+
+        .tab-content.active .tab-title { animation: titleReveal 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes titleReveal {
+            from { opacity: 0; transform: translateY(-15px); letter-spacing: 3px; }
+            to { opacity: 1; transform: translateY(0); letter-spacing: normal; }
+        }
+        .tab-content.active .tab-subtitle { animation: subtitleReveal 0.7s 0.15s cubic-bezier(0.4, 0, 0.2, 1) both; }
+        @keyframes subtitleReveal {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .big-number { font-size: 4.5rem; font-weight: 900; text-align: center; line-height: 1; margin: 20px 0; }
+        .big-number.gold { color: var(--brand-gold); text-shadow: 0 0 40px rgba(212,175,55,0.3); }
+        .big-number.green { color: var(--brand-green); text-shadow: 0 0 40px rgba(78,205,196,0.3); }
+        .big-number.red { color: var(--brand-red); text-shadow: 0 0 40px rgba(255,107,107,0.3); }
+        .big-number-label { text-align: center; font-size: 1rem; color: var(--text-muted); margin-bottom: 30px; }
+
+        .insight-list { list-style: none; padding: 0; }
+        .insight-list li {
+            padding: 12px 0; font-size: 0.95rem; color: #ccc; line-height: 1.7;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            display: flex; align-items: flex-start; gap: 12px;
+        }
+        .insight-list li::before { content: '→'; color: var(--brand-gold); font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+
+        @media (max-width: 768px) {
+            .dashboard-container { padding: 16px 2%; }
+            .content-area { padding: 22px 16px; border-radius: 12px; }
+            .tab-title { font-size: 1.8rem; margin-bottom: 10px; }
+            .tab-subtitle { font-size: 0.95rem; margin-bottom: 25px; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .kpi-card { padding: 16px; }
+            .kpi-value { font-size: 1.8rem; }
+            .slide-nav-btn { padding: 10px 18px; font-size: 0.85rem; }
+            header { flex-direction: column; gap: 10px; padding: 14px 4%; }
+            .big-number { font-size: 3rem; }
+            .comparison-bar { grid-template-columns: 1fr; }
+        }
+
+        @media print {
+            @page { size: A4 landscape; margin: 0; }
+            body { background: #050505 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .slide-nav, .present-btn, .progress-bar { display: none !important; }
+            .tab-content { display: block !important; opacity: 1 !important; break-before: page; break-inside: avoid; padding-top: 30px !important; }
+            .tab-content:first-of-type { break-before: avoid; }
+            header { position: relative !important; }
+            .tab-content.active .anim-item { opacity: 1 !important; transform: none !important; animation: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="progress-bar" id="progressBar" style="width: 7.7%;"></div>
+
+    <div class="site-footer">
+        <a href="https://www.results-group.org/" target="_blank">www.results-group.org</a>
+        <span>By Results Group</span>
+    </div>
+
+    <div class="bg-noise"></div>
+    <div class="bg-grid"></div>
+    <div class="ambient-light light-cyan"></div>
+    <div class="ambient-light light-gold"></div>
+    <div class="ambient-light light-center"></div>
+
+    <header>
+        <div class="header-title">
+            <img src="https://static.wixstatic.com/media/515225_d7ed5ed1634e4012828342de92956ccf~mv2.png" alt="Medera" class="logo" style="filter: none;">
+            <h1>Ulike Israel – <span>תוכנית אסטרטגית</span></h1>
+        </div>
+        <div class="header-tag">
+            <button class="present-btn" onclick="togglePresentation()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                מצב הצגה
+            </button>
+            <div class="client-badge">Ulike Israel</div>
+            <div class="date-badge">H2 2026</div>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <main class="content-area">
+
+            <!-- שקף 1: פתיחה ומטרת העל -->
+            <div id="slide-1" class="tab-content active slide-enter">
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 55vh;">
+                    <div class="hero-label anim-item">Ulike Israel</div>
+                    <h2 class="tab-title anim-item" style="font-size: 2.2rem; max-width: 750px;">מעבר מפרסום מבוסס תנועה<br><span>למערך מכירות משולב (אתר ומוקד טלפוני)</span></h2>
+                    <div class="slide-accent-line anim-item" style="margin-bottom: 35px;"></div>
+
+                    <p class="tab-subtitle anim-item" style="max-width: 700px; text-align: center; margin-bottom: 30px;">תוכנית עבודה חצי-שנתית להשגת יעד החזר השקעה של פי 4 ומעבר לפעילות רווחית ויציבה.</p>
+
+                    <div class="anim-item" style="max-width: 750px; text-align: right;">
+                        <ul class="insight-list" style="font-size: 0.95rem;">
+                            <li>המותג Ulike מציע את הטכנולוגיה המובילה ביותר בשוק הישראלי, והמודעות אליו נמצאת בזינוק קבוע (גידול של <b style="color: var(--brand-green);">46% בחיפושים באנגלית ו-86% בעברית</b> במהלך אפריל).</li>
+                            <li>מטרת התוכנית: אופטימיזציה של תהליך הרכישה באתר, יישום מודל המכירות המשולב של מובילת השוק (סנסיקה), ומקסום תקציבי המדיה.</li>
+                            <li><b style="color: var(--brand-gold);">החזון:</b> הגעה להחזר השקעה כולל של פי 4 על ידי הפיכת הקהל הקיים באתר (75,000 מבקרים בחודש) ממתעניינות לרוכשות בפועל.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- שקף 2: האבחנה המקצועית -->
+            <div id="slide-2" class="tab-content">
+                <h2 class="tab-title">אפריל 2026: <span>הפרסום משיג ביצועים יוצאים מן הכלל, האתר מוכן לשדרוג</span></h2>
+                <p class="tab-subtitle">מערך המדיה עובד בדיוק לפי היעדים ומייצר תנועה איכותית וממוקדת.</p>
+
+                <div class="anim-item kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 25px;">
+                    <div class="kpi-card green-highlight" style="text-align: center; align-items: center;">
+                        <div class="kpi-title" style="justify-content: center;">Google ROAS כולל</div>
+                        <div class="kpi-value green">4.49x</div>
+                        <div class="kpi-trend green">מעל יעד 4x</div>
+                    </div>
+                    <div class="kpi-card green-highlight" style="text-align: center; align-items: center;">
+                        <div class="kpi-title" style="justify-content: center;">Google Shopping</div>
+                        <div class="kpi-value green">6.00x</div>
+                        <div class="kpi-trend green">ROAS</div>
+                    </div>
+                    <div class="kpi-card green-highlight" style="text-align: center; align-items: center;">
+                        <div class="kpi-title" style="justify-content: center;">חיפוש מותג</div>
+                        <div class="kpi-value green">16.98x</div>
+                        <div class="kpi-trend green">ROAS</div>
+                    </div>
+                    <div class="kpi-card green-highlight" style="text-align: center; align-items: center;">
+                        <div class="kpi-title" style="justify-content: center;">Meta Leads</div>
+                        <div class="kpi-value green">5.86x</div>
+                        <div class="kpi-trend green">ROAS</div>
+                    </div>
+                </div>
+
+                <div class="anim-item" style="background: rgba(255,50,50,0.04); border: 2px solid rgba(255,80,80,0.4); border-radius: 8px; padding: 30px; margin-bottom: 20px;">
+                    <p style="font-size: 1rem; color: var(--text-muted); text-align: center; margin-bottom: 16px;"><b>ההישגים במדיה מעולים, וההזדמנות הגדולה ביותר היא מקסום שיעור ההמרה באתר:</b></p>
+                    <div class="comparison-bar" style="margin: 0;">
+                        <div class="comp-side good">
+                            <div class="comp-label">ינואר 26 (אתר Wix ממוטב)</div>
+                            <div class="comp-value" style="color: var(--brand-green);">0.69%</div>
+                            <div class="comp-detail">&#8362;162,372 מכירות</div>
+                        </div>
+                        <div class="comp-side bad">
+                            <div class="comp-label">אפריל 26 (אתר Shopify חדש)</div>
+                            <div class="comp-value" style="color: var(--brand-red);">0.14%</div>
+                            <div class="comp-detail">75,000 מבקרים | &#8362;274,373 מכירות</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="anim-item strategic-note red" style="text-align: center;">
+                    <b style="font-size: 1rem;">משמעות הנתון:</b> מערך הפרסום מייצר עניין מסיבי, ושיפור מבנה האתר החדש יאפשר לתרגם את העניין הזה לרכישות של מכשיר פרימיום בשווי ₪2,000+.
+                </div>
+            </div>
+
+            <!-- שקף 3: בנצ'מרק Sensica -->
+            <div id="slide-3" class="tab-content">
+                <h2 class="tab-title">למידה מהשוק: <span>התאמת שיטת השיווק והמכירה לקהל הישראלי</span></h2>
+                <p class="tab-subtitle">סנסיקה מחזיקה 40.65% נתח חשיפה מול 31.40% שלנו – פער קטן ובר-השגה של כ-9%.</p>
+
+                <div class="anim-item" style="background: rgba(10,10,10,0.6); border: 1px solid rgba(212,175,55,0.2); border-radius: 8px; padding: 28px; margin-bottom: 25px;">
+                    <h4 style="color: var(--brand-gold); font-size: 0.95rem; font-weight: 700; margin-bottom: 16px;">שיטת הפעילות של סנסיקה:</h4>
+                    <p style="font-size: 0.92rem; color: #ccc; line-height: 1.8; margin-bottom: 14px;">התבססות על ההבנה שלקוחות ישראליות מעדיפות מענה אנושי ומקצועי לפני רכישה בסכומים של ₪2,000+. הן <b style="color: #fff;">לא מסתמכות על רכישה ישירה (Self-Checkout)</b>.</p>
+                    <p style="font-size: 0.92rem; color: #ccc; line-height: 1.8; margin: 0;"><b style="color: #fff;">מערך המכירות:</b> גיוס לידים מסיבי מהדיגיטל → העברה למוקד מכירות טלפוני מיומן → מענה לחששות (כאב, בטיחות, אחריות) ושדרוג עסקאות.</p>
+                </div>
+
+                <div class="anim-item strategic-note gold" style="text-align: center;">
+                    <b>המסקנה עבור Ulike:</b> שילוב מנצח של המוצר העדיף טכנולוגית שלנו (אייר 10 ורוז) יחד עם תשתית מכירות וייעוץ אישית, יבטיח את מיקסום הרווחיות מהלידים והתנועה.
+                </div>
+            </div>
+
+            <!-- שקף 4: המודל הכלכלי של המוקד -->
+            <div id="slide-4" class="tab-content">
+                <h2 class="tab-title">מתמטיקה של רווחיות: <span>המרה מלידים למכירות</span></h2>
+                <p class="tab-subtitle">הוכחת היתכנות – הנתונים כבר קיימים מאפריל 2026.</p>
+
+                <div class="anim-item kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 25px;">
+                    <div class="kpi-card" style="text-align: center; align-items: center;">
+                        <div class="kpi-title" style="justify-content: center;">לידים באפריל</div>
+                        <div class="kpi-value medium gold">128</div>
+                        <div class="kpi-trend gold">תקציב ₪5,221</div>
+                    </div>
+                    <div class="kpi-card" style="text-align: center; align-items: center;">
+                        <div class="kpi-title" style="justify-content: center;">עלות לליד</div>
+                        <div class="kpi-value medium gold">&#8362;40.78</div>
+                    </div>
+                    <div class="kpi-card" style="text-align: center; align-items: center;">
+                        <div class="kpi-title" style="justify-content: center;">סגירות (ללא מוקד מקצועי)</div>
+                        <div class="kpi-value medium green">15</div>
+                        <div class="kpi-trend green">11.72% המרה</div>
+                    </div>
+                    <div class="kpi-card" style="text-align: center; align-items: center;">
+                        <div class="kpi-title" style="justify-content: center;">CAC</div>
+                        <div class="kpi-value medium green">&#8362;348</div>
+                        <div class="kpi-trend green">ממוצע הזמנה ₪2,040</div>
+                    </div>
+                </div>
+
+                <div class="anim-item" style="background: rgba(78,205,196,0.04); border: 1px solid rgba(78,205,196,0.2); border-radius: 8px; padding: 28px; margin-bottom: 20px;">
+                    <h4 style="color: var(--brand-green); font-size: 0.95rem; font-weight: 700; margin-bottom: 14px;">התוכנית לקדימה:</h4>
+                    <ul class="insight-list" style="font-size: 0.9rem;">
+                        <li>גיוס 2 נציגות מכירות (משמרות בוקר/ערב)</li>
+                        <li>מוקד מקצועי עם סקריפט מובנה וזמן תגובה של פחות מ-10 דקות</li>
+                        <li>יעד סגירה: <b>20%</b> (סגירה של 1 מתוך 5 לידים) – לעומת 11.72% היום ללא מוקד</li>
+                    </ul>
+                </div>
+
+                <div class="anim-item strategic-note green" style="text-align: center;">
+                    <b>התוצאה:</b> באותו תקציב מדיה ובאותה עלות ליד (₪50 בממוצע), המוקד מייצר פעילות רווחית עם <b style="font-size: 1.2rem;">ROAS מעל 8x</b> בערוץ זה!
+                </div>
+            </div>
+
+            <!-- שקף 5: אסטרטגיית מוצרים -->
+            <div id="slide-5" class="tab-content">
+                <h2 class="tab-title">פילוח ומיקוד קטלוג: <span>Air 10 ו-Rose</span></h2>
+                <p class="tab-subtitle">AIR 10 – הספינה המובילה | ROSE – הפריצה העונתית</p>
+
+                <div class="anim-item" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                    <div style="background: rgba(10,10,10,0.8); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 28px;">
+                        <div style="font-size: 0.8rem; color: var(--brand-gold); font-weight: 700; letter-spacing: 2px; margin-bottom: 8px;">71% מההכנסות באפריל (₪194.7K)</div>
+                        <h3 style="font-size: 1.4rem; font-weight: 900; margin-bottom: 6px;">Air 10</h3>
+                        <div style="font-size: 1.8rem; font-weight: 900; color: var(--brand-gold); margin-bottom: 16px;">&#8362;2,299</div>
+                        <ul class="insight-list" style="font-size: 0.85rem;">
+                            <li><b>מיצוב:</b> המכשיר החזק ביותר בשוק, תחליף מלא למכונים</li>
+                            <li><b>קהל:</b> נשים 25-45, בעלות מודעות גבוהה ואמצעים</li>
+                            <li><b>אסטרטגיית פאנל:</b> מסלול לידים ישיר למוקד טלפוני (חסם מחיר גבוה)</li>
+                        </ul>
+                    </div>
+                    <div style="background: rgba(10,10,10,0.8); border: 1px solid rgba(201,160,220,0.3); border-radius: 8px; padding: 28px;">
+                        <div style="font-size: 0.8rem; color: var(--brand-rose); font-weight: 700; letter-spacing: 2px; margin-bottom: 8px;">מוצר חדירה + Upsell (₪15.5K באפריל)</div>
+                        <h3 style="font-size: 1.4rem; font-weight: 900; margin-bottom: 6px;">Rose 2IN1</h3>
+                        <div style="font-size: 1.8rem; font-weight: 900; color: var(--brand-rose); margin-bottom: 16px;">&#8362;1,399</div>
+                        <ul class="insight-list" style="font-size: 0.85rem;">
+                            <li><b>מיצוב:</b> הסרת שיער + הצערת עור. מחיר נגיש</li>
+                            <li><b>קהל:</b> צעיר יותר (20-35), סטודנטיות, פתרון משלים</li>
+                            <li><b>אסטרטגיית פאנל:</b> רכישה ישירה באונליין + Upsell טלפוני ל-Air 10</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- שקף 6: תוכנית CRO לאתר -->
+            <div id="slide-6" class="tab-content">
+                <h2 class="tab-title">CRO מיידי: <span>מ-0.14% אל עבר ה-1%</span></h2>
+                <p class="tab-subtitle">529 גולשים הגיעו ל-Checkout באפריל. רק 122 רכשו. איבדנו 407 לקוחות חמות בשלב התשלום!</p>
+
+                <div class="anim-item strategic-note red" style="text-align: center; margin-bottom: 25px;">
+                    <b style="font-size: 1.1rem;">פוטנציאל אבוד: מעל &#8362;800,000 בחודש בודד</b>
+                </div>
+
+                <div class="anim-item">
+                    <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 16px; color: var(--text-muted);">פעולות קריטיות לביצוע מיידי באתר:</h4>
+                    <div class="flow-step">
+                        <div class="step-num">1</div>
+                        <div class="step-content">
+                            <h4>מסלול דואלי בעמוד המוצר (Dual CTA)</h4>
+                            <p>לצד "קני עכשיו" – כפתור בולט: <b>"רוצה להתייעץ לפני הרכישה? השאירי פרטים לשיחה עם מומחית."</b> מי שלא קונה – הופכת לליד למוקד.</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <h4>הורדת חיכוך ב-Checkout</h4>
+                            <p>מעבר לעמוד תשלום של שלב אחד (One-Step Checkout), תמיכה מלאה ב-Apple Pay, Google Pay.</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num">3</div>
+                        <div class="step-content">
+                            <h4>אלמנטי אמון (Trust Badges)</h4>
+                            <p>הבלטה בראש האתר: אישור FDA | אחריות יבואן רשמי מורחבת לשנתיים | משלוח חינם.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- שקף 7: אוטומציות ושימור -->
+            <div id="slide-7" class="tab-content">
+                <h2 class="tab-title">מקסום ערך הלקוח: <span>הפיכת נטישות עגלה למזומן</span></h2>
+                <p class="tab-subtitle">מערך אוטומטי רב-ערוצי לטיפול ב-407 נוטשות הקופה בכל חודש.</p>
+
+                <div class="anim-item">
+                    <div class="flow-step">
+                        <div class="step-num">1</div>
+                        <div class="step-content">
+                            <h4>30 דקות – WhatsApp אוטומטי</h4>
+                            <p>"ראינו שאהבת את ה-Air 10, צריכה עזרה?" עם כפתור למענה אנושי.</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <h4>24 שעות – מייל עדויות וידאו</h4>
+                            <p>Before/After של לקוחות ישראליות אמיתיות.</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num">3</div>
+                        <div class="step-content">
+                            <h4>72 שעות – הצעה לשיחה או קופון מוגבל</h4>
+                            <p>סגירה מהירה למי שעדיין מתלבטת.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="anim-item" style="background: rgba(10,10,10,0.6); border: 1px solid rgba(212,175,55,0.2); border-radius: 8px; padding: 22px; margin-top: 20px;">
+                    <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--brand-gold); margin-bottom: 10px;">קמפייני ריטרגטינג ממוקדים:</h4>
+                    <p style="font-size: 0.88rem; color: #ccc; margin: 0;">הזרמת תקציב גבוה יותר לקהלים חמים: מבקרות באתר ב-14 יום האחרונים, צופות 50%+ בסרטוני TikTok – עם הצעות ערך ממוקדות חסמים.</p>
+                </div>
+            </div>
+
+            <!-- שקף 8: קריאייטיב ומדיה -->
+            <div id="slide-8" class="tab-content">
+                <h2 class="tab-title">Creative Playbook: <span>פחות מודעות "יפות", יותר מודעות ממירות</span></h2>
+                <p class="tab-subtitle">ניתוח מודעות אפריל: UGC אותנטי וקוד קופון הם הדרייברים החזקים ביותר.</p>
+
+                <div class="anim-item kpi-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 25px;">
+                    <div class="kpi-card green-highlight" style="text-align: center; align-items: center;">
+                        <div class="kpi-title" style="justify-content: center;">Air 10 UGC</div>
+                        <div class="kpi-value medium green">3.5x</div>
+                        <div class="kpi-trend green">15 רכישות ישירות</div>
+                    </div>
+                    <div class="kpi-card green-highlight" style="text-align: center; align-items: center;">
+                        <div class="kpi-title" style="justify-content: center;">Rose קמפיין קיץ</div>
+                        <div class="kpi-value medium green">4.71x</div>
+                        <div class="kpi-trend green">11 רכישות ישירות</div>
+                    </div>
+                </div>
+
+                <div class="anim-item" style="margin-bottom: 20px;">
+                    <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 14px; color: var(--text-muted);">תוכנית קריאייטיב חודשית: 8-12 קריאייטיבים חדשים מבוססים על:</h4>
+                    <ul class="insight-list" style="font-size: 0.9rem;">
+                        <li>סרטוני "אנבוקסינג" (Unboxing) אותנטיים</li>
+                        <li>השוואת עלויות: <b>₪2,299 פעם אחת מול ₪15,000 על סדרת טיפולים במכון</b></li>
+                        <li>תוצאות ויזואליות (Before / After)</li>
+                        <li>Honest Reviews – יוצרות שלא מפחדות לומר גם חסרונות</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- שקף 9: תקציב וחלוקת ערוצים -->
+            <div id="slide-9" class="tab-content">
+                <h2 class="tab-title">הקצאת תקציב: <span>מיקוד בערוצים בעלי ROAS גבוה</span></h2>
+                <p class="tab-subtitle">תוכנית מדורגת מבוססת ביצועים: ₪50K בחודש הראשון, עולה בהתאם לתוצאות.</p>
+
+                <div class="anim-item table-container">
+                    <table class="premium-table">
+                        <thead>
+                            <tr>
+                                <th>ערוץ</th>
+                                <th>תקציב</th>
+                                <th>%</th>
+                                <th>הגיון אסטרטגי</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><b>Meta – Leads</b></td>
+                                <td>&#8362;20,000</td>
+                                <td>40%</td>
+                                <td>הזנת מוקד (5.86x ROAS מוכח)</td>
+                            </tr>
+                            <tr>
+                                <td><b>Google Ads</b></td>
+                                <td>&#8362;17,500</td>
+                                <td>35%</td>
+                                <td>שופינג + מותג (עד 16.9x ROAS, נחסם עקב מגבלת תקציב)</td>
+                            </tr>
+                            <tr>
+                                <td><b>Meta – Purchase</b></td>
+                                <td>&#8362;7,500</td>
+                                <td>15%</td>
+                                <td>רכישות ישירות + ריטרגטינג ממוקד</td>
+                            </tr>
+                            <tr>
+                                <td><b>TikTok</b></td>
+                                <td>&#8362;5,000</td>
+                                <td>10%</td>
+                                <td>Awareness שמזין חיפושי גוגל (+86% חיפושים)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="anim-item strategic-note blue" style="text-align: center; margin-top: 20px;">
+                    <b>מעבר לשלב ב' (חודש 3+):</b> הגדלה ל-₪100K+ מותנית בעמידה ביעד ROAS כולל של 4x ומעלה.
+                </div>
+            </div>
+
+            <!-- שקף 10: תוכנית שיווק עונתית -->
+            <div id="slide-10" class="tab-content">
+                <h2 class="tab-title">גאנט חצי-שנתי: <span>עונתיות אסתטית ומבצעים אסטרטגיים</span></h2>
+                <p class="tab-subtitle">תוכנית שיווק יוני – נובמבר 2026</p>
+
+                <div class="anim-item">
+                    <div class="flow-step">
+                        <div class="step-num" style="background: rgba(212,175,55,0.15); border-color: rgba(212,175,55,0.4); color: var(--brand-gold);">&#9728;</div>
+                        <div class="step-content">
+                            <h4>יוני – יולי: עונת הקיץ ובגדי הים</h4>
+                            <p>קמפיין "Ready for Summer". מיקוד בתוצאות מהירות (תוך שבועיים). חודשי שיא בביקושים.</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num" style="background: rgba(78,205,196,0.15); border-color: rgba(78,205,196,0.4); color: var(--brand-green);">&#9992;</div>
+                        <div class="step-content">
+                            <h4>אוגוסט – ספטמבר: החופש הגדול והטיסות</h4>
+                            <p>קמפיין "Travel Edition" – דגש על הנוחות של מכשיר נייד ואישי שלוקחים לכל נסיעה וטיסה.</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num" style="background: rgba(91,140,219,0.15); border-color: rgba(91,140,219,0.4); color: var(--brand-blue);">&#9733;</div>
+                        <div class="step-content">
+                            <h4>אוקטובר – נובמבר: חגי תשרי ושיקום העור</h4>
+                            <p>קמפיין ראש השנה + הסתיו. זמן מושלם להתחיל טיפולי הסרה לקראת השנה הבאה, שיקום נזקי שמש עם Rose.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="anim-item strategic-note gold" style="text-align: center; margin-top: 20px;">
+                    <b>מבצעים מניעים:</b> "Trade-In" (החלפת מכשיר ישן/מתחרה) + באנדלים (Air 10 + Rose במחיר מיוחד) – הוכחו כמנועי רכישה חזקים.
+                </div>
+            </div>
+
+            <!-- שקף 11: נהלי עבודה -->
+            <div id="slide-11" class="tab-content">
+                <h2 class="tab-title">שותפות עסקית מלאה: <span>נהלי עבודה ובקרת ביצועים קשיחה</span></h2>
+                <p class="tab-subtitle">מודל עבודה מסונכרן ושקוף לחלוטין להבטחת הצלחת התוכנית.</p>
+
+                <div class="anim-item">
+                    <div class="flow-step">
+                        <div class="step-num" style="background: rgba(91,140,219,0.15); border-color: rgba(91,140,219,0.4); color: var(--brand-blue);">1</div>
+                        <div class="step-content">
+                            <h4>פגישת סינכרון שבועית (כל יום ראשון, 30 דקות)</h4>
+                            <p>מעבר על נתוני השבוע החולף, ניתוח קריאייטיב וקבלת החלטות מהירות.</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num" style="background: rgba(78,205,196,0.15); border-color: rgba(78,205,196,0.4); color: var(--brand-green);">2</div>
+                        <div class="step-content">
+                            <h4>לולאת היזון חוזר יומי מהמוקד (Daily Feedback Loop)</h4>
+                            <p>המוקד מדווח על איכות הלידים וסיבות סירוב → הסוכנות מייצרת קריאייטיב ייעודי תוך 48 שעות שעונה על ההתנגדויות בקמפיינים.</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num" style="background: rgba(212,175,55,0.15); border-color: rgba(212,175,55,0.4); color: var(--brand-gold);">3</div>
+                        <div class="step-content">
+                            <h4>דאשבורד משותף בזמן אמת (Live Dashboard)</h4>
+                            <p>גישה 24/7 למנכ"ל ולצוות לנתוני ההוצאה, הלידים, המכירות וה-ROAS.</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num" style="background: rgba(255,107,107,0.15); border-color: rgba(255,107,107,0.4); color: var(--brand-red);">4</div>
+                        <div class="step-content">
+                            <h4>מערכת התראות (Alerts)</h4>
+                            <p>התראה אוטומטית על כל תנודה חריגה של מעל 20% בביצועים – תגובה מיידית, לא בסוף החודש.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- שקף 12: תוכנית פעולה -->
+            <div id="slide-12" class="tab-content">
+                <h2 class="tab-title">Roadmap ליישום מיידי: <span>מה עושים מחר בבוקר?</span></h2>
+                <div class="slide-accent-line anim-item" style="margin-bottom: 25px;"></div>
+
+                <div class="anim-item" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 25px;">
+                    <div style="background: rgba(10,10,10,0.8); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 24px;">
+                        <div style="font-size: 0.75rem; color: var(--brand-gold); font-weight: 700; letter-spacing: 1px; margin-bottom: 10px;">שבוע 1</div>
+                        <ul class="insight-list" style="font-size: 0.82rem;">
+                            <li>שיפורים טכניים באתר (מהירות, Trust Badges)</li>
+                            <li>הוספת כפתור "שיחה עם יועצת" בעמודי מוצר</li>
+                            <li>ניסוח תסריט מכירות (Script) למוקד</li>
+                        </ul>
+                    </div>
+                    <div style="background: rgba(10,10,10,0.8); border: 1px solid rgba(78,205,196,0.3); border-radius: 8px; padding: 24px;">
+                        <div style="font-size: 0.75rem; color: var(--brand-green); font-weight: 700; letter-spacing: 1px; margin-bottom: 10px;">שבוע 2</div>
+                        <ul class="insight-list" style="font-size: 0.82rem;">
+                            <li>גיוס והדרכה של נציגת מכירות ראשונה</li>
+                            <li>הקמת קמפיין לידים ממוקד ב-Meta</li>
+                            <li>הפעלת אוטומציות נטישת עגלה (WhatsApp + Email)</li>
+                        </ul>
+                    </div>
+                    <div style="background: rgba(10,10,10,0.8); border: 1px solid rgba(91,140,219,0.3); border-radius: 8px; padding: 24px;">
+                        <div style="font-size: 0.75rem; color: var(--brand-blue); font-weight: 700; letter-spacing: 1px; margin-bottom: 10px;">שבוע 3-4</div>
+                        <ul class="insight-list" style="font-size: 0.82rem;">
+                            <li>אופטימיזציה של תקציבי גוגל (פתיחת חסימות שופינג)</li>
+                            <li>מעקב יומי הדוק אחר יחס סגירה (יעד: 12-15%)</li>
+                            <li>בחינת ROAS משולב וכיוונון</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- שקף 13: מוקד המכירות -->
+            <div id="slide-13" class="tab-content">
+                <h2 class="tab-title">מוקד Ulike: <span>ייעוץ אסתטי אישי המבטיח סגירת עסקאות</span></h2>
+                <p class="tab-subtitle">מערך יועצות אסתטיקה מיומנות, מותאם למכירת מוצרי פרימיום (מעל ₪2,000) ומתמקד בבניית אמון והתאמה אישית.</p>
+
+                <div class="anim-item">
+                    <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 16px; color: var(--brand-gold);">1. ניהול שיחת הייעוץ:</h4>
+                    <div class="flow-step">
+                        <div class="step-num">1</div>
+                        <div class="step-content">
+                            <h4>שלב האבחון</h4>
+                            <p>"באילו אזורים את מסירה שיער כיום? מהי ההוצאה החודשית שלך על טיפולים?" – הצבת עוגן מחיר ריאלי הממחיש את החיסכון.</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <h4>שלב ההדרכה</h4>
+                            <p>הסבר מפורט על טכנולוגיית הקירור הייחודית להבטחת חוויה נעימה ונטולת כאב.</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num">3</div>
+                        <div class="step-content">
+                            <h4>שלב הסגירה</h4>
+                            <p>המרת מחיר למונחי תשלום חודשי: "ההשקעה שלך היא רק 191 ₪ בחודש – נמוך משמעותית מטיפול בודד."</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num">4</div>
+                        <div class="step-content">
+                            <h4>שלב הרחבת העסקה</h4>
+                            <p>לאחר סגירת Air 10, הצעת Rose בהטבה מיוחדת כמתנה משלימה.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="anim-item" style="margin-top: 20px;">
+                    <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 14px; color: var(--brand-green);">2. שגרת עבודה מוקפדת ב-CRM:</h4>
+                    <ul class="insight-list" style="font-size: 0.88rem;">
+                        <li><b>כלל 5 הדקות:</b> יצירת קשר ראשוני תוך פחות מ-5 דקות – מקסום סיכויי סגירה בעשרות אחוזים.</li>
+                        <li><b>רצף פניות שיטתי:</b> שיחה טלפונית → WhatsApp אישי → שיחת המשך ביום המחרת → הודעת טקסט עם הצעת ערך. מיצוי מלא של כל פנייה.</li>
+                    </ul>
+                </div>
+
+                <div class="anim-item" style="margin-top: 20px;">
+                    <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 14px; color: var(--brand-blue);">3. מנגנון שיפור מתמיד (סנכרון מול הסוכנות):</h4>
+                    <ul class="insight-list" style="font-size: 0.88rem;">
+                        <li>תיעוד מדויק של סיבות אי-סגירה (למשל: "העדפת פתרון זול", "חשש מיעילות", "חשש מכאב").</li>
+                        <li>דוח שבועי לסוכנות. זיהוי מגמה (40% חוששות מכאב?) → יצירת סרטוני הסברה תוך 48 שעות שמופצים ישירות ללקוחות רלוונטיות.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- שקף 14: נציג וירטואלי באתר -->
+            <div id="slide-14" class="tab-content">
+                <h2 class="tab-title">נציג וירטואלי חכם: <span>זיהוי וליווי מתעניינות בזמן אמת</span></h2>
+                <p class="tab-subtitle">מיצוי הפוטנציאל של 75,000 מבקרים/חודש דרך חוויית ייעוץ מותאמת אישית באתר.</p>
+
+                <div class="anim-item" style="margin-bottom: 20px;">
+                    <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 14px; color: var(--brand-gold);">תזמון הפנייה:</h4>
+                    <ul class="insight-list" style="font-size: 0.9rem;">
+                        <li>פנייה יזומה לגולשת ששוהה באתר מעל 40 שניות וטרם התקדמה לרכישה.</li>
+                        <li>זיהוי כוונת יציאה מהאתר – הצגת הצעת ערך רגע לפני עזיבה.</li>
+                    </ul>
+                </div>
+
+                <div class="anim-item" style="background: rgba(10,10,10,0.6); border: 1px solid rgba(212,175,55,0.2); border-radius: 8px; padding: 24px; margin-bottom: 20px;">
+                    <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 16px; color: var(--brand-green);">תסריט המעורבות ההדרגתית:</h4>
+                    <div class="flow-step">
+                        <div class="step-num">1</div>
+                        <div class="step-content">
+                            <h4>נציג וירטואלי:</h4>
+                            <p>"שלום! אני רואה שאת מתעניינת ב-Air 10. איזה סוג עור ושיער יש לך?" (אפשרויות בחירה פשוטות)</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <h4>הגולשת בוחרת:</h4>
+                            <p>סוג עור / שיער מהאפשרויות המוצגות.</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num">3</div>
+                        <div class="step-content">
+                            <h4>נציג וירטואלי:</h4>
+                            <p>"מצוין, הטכנולוגיה שלנו מותאמת בדיוק לנתונים אלו! אשמח לקשר אותך לשיחה קצרה עם מומחית + הטבה אישית להשלמת הרכישה."</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num">4</div>
+                        <div class="step-content">
+                            <h4>הגולשת משאירה מספר טלפון:</h4>
+                            <p>הפנייה מועברת בזמן אמת לטיפול מיידי במוקד.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="anim-item strategic-note gold" style="text-align: center;">
+                    <b>השורה התחתונה:</b> הפיכת תנועה אנונימית להזדמנויות מכירה חמות ואיכותיות שהמוקד הופך לעסקאות.
+                </div>
+            </div>
+
+            <!-- שקף 15: יוצרות תוכן -->
+            <div id="slide-15" class="tab-content">
+                <h2 class="tab-title">יוצרות תוכן: <span>מיקוד בסרטוני הדרכה המניבים מכירות ישירות</span></h2>
+                <p class="tab-subtitle">עבודה עם יוצרות המספקות סרטונים אותנטיים ומניעים לפעולה – שמטרתם הבלעדית היא הגדלת שורת הרווח.</p>
+
+                <div class="anim-item" style="margin-bottom: 25px;">
+                    <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 14px; color: var(--brand-gold);">1. מבנה הסרטון הממיר:</h4>
+                    <div class="flow-step">
+                        <div class="step-num" style="font-size: 0.7rem;">0-3s</div>
+                        <div class="step-content">
+                            <h4>הצגת הפתרון</h4>
+                            <p>"מאז שעברתי לטיפול ביתי, חסכתי אלפי שקלים והנה התוצאות שלי אחרי שבועיים."</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num" style="font-size: 0.7rem;">3-15s</div>
+                        <div class="step-content">
+                            <h4>המחשה ויזואלית</h4>
+                            <p>הדגמת שימוש + תוצאות מוחשיות (Before/After ברורים).</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num" style="font-size: 0.7rem;">15-25s</div>
+                        <div class="step-content">
+                            <h4>פיזור חששות</h4>
+                            <p>הדגמת נוחות (טכנולוגיית קירור) + הצגת תשלומים נוחים.</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num" style="font-size: 0.7rem;">25-30s</div>
+                        <div class="step-content">
+                            <h4>קריאה לפעולה + הטבה ייעודית</h4>
+                            <p>CTA ברור עם קוד הטבה אישי של היוצרת.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="anim-item" style="background: rgba(78,205,196,0.04); border: 1px solid rgba(78,205,196,0.2); border-radius: 8px; padding: 22px;">
+                    <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px; color: var(--brand-green);">2. מודל תגמול מבוסס הצלחה:</h4>
+                    <p style="font-size: 0.9rem; color: #ccc; line-height: 1.7; margin: 0;">תגמול בסיסי + <b style="color: #fff;">עמלה משמעותית על כל מכירה דרך הקוד האישי</b>. מבטיח מעורבות מלאה – היוצרת מקדמת בעקביות, מעלה עדכונים שוטפים ומעניקה מענה אישי לעוקבות כדי למקסם מכירות.</p>
+                </div>
+            </div>
+
+            <!-- שקף 16: מועדון לקוחות -->
+            <div id="slide-16" class="tab-content">
+                <h2 class="tab-title">מועדון VIP: <span>תגמול לקוחות והרחבת מעגל הרוכשות</span></h2>
+                <p class="tab-subtitle">הפיכת לקוחות מרוצות לממליצות פעילות, תוך ניצול מהירות התוצאות ושביעות הרצון.</p>
+
+                <div class="anim-item">
+                    <div class="flow-step">
+                        <div class="step-num" style="background: rgba(212,175,55,0.15); border-color: rgba(212,175,55,0.4); color: var(--brand-gold);">&#9733;</div>
+                        <div class="step-content">
+                            <h4>תזמון מדויק: 21 ימים לאחר הרכישה</h4>
+                            <p>הלקוחה כבר חווה תוצאות. הודעה: "אנו בטוחים שאת כבר נהנית מהתוצאות, ולכן צירפנו אותך למועדון השגרירות האקסקלוסיבי שלנו."</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num" style="background: rgba(212,175,55,0.15); border-color: rgba(212,175,55,0.4); color: var(--brand-gold);">&#9830;</div>
+                        <div class="step-content">
+                            <h4>מנגנון "כרטיסי הזהב"</h4>
+                            <p>הלקוחה מקבלת 3 כרטיסי הטבה דיגיטליים, מוגבלים בזמן ובכמות, לשיתוף עם חברות קרובות: "קיבלתי 3 כרטיסי VIP בלעדיים שמעניקים הנחה משמעותית."</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-num" style="background: rgba(78,205,196,0.15); border-color: rgba(78,205,196,0.4); color: var(--brand-green);">&#8362;</div>
+                        <div class="step-content">
+                            <h4>מערך תגמול</h4>
+                            <p>על כל רכישה דרך הכרטיסים – החזר כספי. מימוש כל 3 = <b>החזר מלא על המכשיר או מכשיר משלים במתנה</b>. רכישת לקוחות חדשות בעלות מינימלית.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- שקף 17: ניהול תקציב מדורג -->
+            <div id="slide-17" class="tab-content">
+                <h2 class="tab-title">ניהול תקציב מדורג: <span>השקעה חכמה המותאמת לביצועי האתר</span></h2>
+                <p class="tab-subtitle">התקציב מופנה לאתר רק לאחר שנוכיח עלייה בשיעורי ההמרה.</p>
+
+                <div class="anim-item" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                    <div style="background: rgba(212,175,55,0.04); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 24px;">
+                        <div style="font-size: 0.8rem; color: var(--brand-gold); font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;">שלב 1 – מיידי (יוני-יולי)</div>
+                        <h4 style="font-size: 1rem; margin-bottom: 10px;">ריכוז מאמץ בערוצים היעילים ביותר</h4>
+                        <ul class="insight-list" style="font-size: 0.85rem;">
+                            <li>80% מהתקציב → קמפיינים המייצרים פניות ישירות למוקד</li>
+                            <li>ערוץ זה ממיר ביעילות גבוהה (5.86x ROAS)</li>
+                            <li>במקביל: שיפורי אתר (מהירות, פריסת תשלומים, הנגשת תשלום חודשי)</li>
+                            <li>קמפייני חיפוש מותג נשארים פעילים (16.98x ROAS)</li>
+                        </ul>
+                    </div>
+                    <div style="background: rgba(78,205,196,0.04); border: 1px solid rgba(78,205,196,0.3); border-radius: 8px; padding: 24px;">
+                        <div style="font-size: 0.8rem; color: var(--brand-green); font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;">שלב 2 – נקודת המפנה (חציית 0.5% המרה)</div>
+                        <h4 style="font-size: 1rem; margin-bottom: 10px;">הסטה מדורגת לקמפייני רכישה ישירה</h4>
+                        <ul class="insight-list" style="font-size: 0.85rem;">
+                            <li>שיפורי אתר + Trust Badges הובילו לעלייה עקבית מעל 0.5%</li>
+                            <li>מעבר הדרגתי: 10% בכל פעם מתקציב הלידים → רכישות באתר</li>
+                            <li>הגדלת תנועה לאתר רק כשהתשתית ערוכה לקלוט אותה</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="anim-item strategic-note green" style="text-align: center;">
+                    <b>היתרון העסקי:</b> פעילות המדיה מממנת את עצמה דרך עסקאות המוקד, בזמן שהאתר עובר שדרוג. הגדלת תנועה לאתר – רק כשהוא ממיר.
+                </div>
+            </div>
+
+            <!-- שקף 18: סיכום והשורה התחתונה -->
+            <div id="slide-18" class="tab-content">
+                <div class="hero-label anim-item">השורה התחתונה</div>
+                <h2 class="tab-title anim-item">התשתית מוכנה לזינוק</h2>
+                <div class="slide-accent-line anim-item" style="margin-bottom: 35px;"></div>
+
+                <div class="anim-item" style="max-width: 750px; margin: 0 auto; text-align: right;">
+                    <ul class="insight-list" style="font-size: 1rem; line-height: 2;">
+                        <li>הוכחנו בינואר (0.69% המרה) ובקמפיינים של אפריל (4.49x בגוגל ו-5.86x בלידים) שמותג Ulike מסוגל לייצר פעילות חזקה, יציבה ורווחית במיוחד בישראל.</li>
+                        <li>החלפת חברת הפרסום לא תפתור את חסם המכירות הנוכחי, מכיוון ש<b style="color: var(--brand-gold);">האתגר אינו הבאת התנועה</b> – אלא ארכיטקטורת האתר והצורך במענה טלפוני מסודר למוצרי יוקרה.</li>
+                        <li>שיפור יחס ההמרה באתר ל-1% בלבד (באותו תקציב פרסום קיים!) יזניק את הפעילות ל-<b style="color: var(--brand-green);">750 הזמנות בחודש ומעל ₪1.5M במכירות ישירות.</b></li>
+                    </ul>
+                </div>
+
+                <div class="anim-item" style="background: linear-gradient(135deg, rgba(212,175,55,0.06) 0%, rgba(10,10,10,0.4) 50%, rgba(78,205,196,0.06) 100%); border: 1px solid rgba(212,175,55,0.2); border-radius: 8px; padding: 30px; text-align: center; margin-top: 30px;">
+                    <p style="color: #ddd; font-size: 1rem; line-height: 1.8; margin: 0 0 14px 0;">אנו מציעים שותפות אסטרטגית מלאה, מבוססת נתונים, שקיפות ובקרת איכות קשיחה,<br>כדי להביא את Ulike למקום הראוי לו:</p>
+                    <div style="font-size: 1.6rem; font-weight: 900; color: var(--brand-gold); text-shadow: 0 0 30px rgba(212,175,55,0.3);">המותג המוביל והרווחי ביותר בישראל.</div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="slide-nav">
+                <button class="slide-nav-btn" id="prevBtn" onclick="changeSlide(-1)">
+                    הקודם <span>&rarr;</span>
+                </button>
+                <div class="slide-counter" id="slideCounter"></div>
+                <button class="slide-nav-btn" id="nextBtn" onclick="changeSlide(1)">
+                    <span>&larr;</span> הבא
+                </button>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        var slides = ['slide-1','slide-2','slide-3','slide-4','slide-5','slide-6','slide-7','slide-8','slide-9','slide-10','slide-11','slide-13','slide-14','slide-15','slide-16','slide-17','slide-12','slide-18'];
+        var slideNames = ['פתיחה','אבחנה','סנסיקה','מודל כלכלי','מוצרים','CRO','אוטומציות','קריאייטיב','תקציב','עונתיות','נהלי עבודה','מוקד מכירות','נציג וירטואלי','יוצרות תוכן','מועדון VIP','תקציב מדורג','Roadmap','סיכום'];
+        var currentSlide = 0;
+
+        function updateProgressBar() {
+            var progress = ((currentSlide + 1) / slides.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function initSlideCounter() {
+            var counter = document.getElementById('slideCounter');
+            var html = '<span class="slide-number">' + (currentSlide + 1) + ' / ' + slides.length + '</span>';
+            for (var i = 0; i < slides.length; i++) {
+                html += '<div class="slide-dot' + (i === currentSlide ? ' active' : '') + '" onclick="goToSlide(' + i + ')" title="' + slideNames[i] + '"></div>';
+            }
+            counter.innerHTML = html;
+        }
+
+        function animateCounters(slideEl) {
+            var values = slideEl.querySelectorAll('.kpi-value');
+            values.forEach(function(el) {
+                el.classList.add('counter-glow');
+                setTimeout(function() { el.classList.remove('counter-glow'); }, 2000);
+            });
+        }
+
+        function goToSlide(index) {
+            var prevSlide = document.getElementById(slides[currentSlide]);
+            prevSlide.classList.remove('active', 'slide-enter');
+
+            currentSlide = index;
+            var nextSlide = document.getElementById(slides[currentSlide]);
+            nextSlide.classList.add('active', 'slide-enter');
+
+            updateNav();
+            updateProgressBar();
+            animateCounters(nextSlide);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function changeSlide(dir) {
+            var next = currentSlide + dir;
+            if (next < 0 || next >= slides.length) return;
+            goToSlide(next);
+        }
+
+        function updateNav() {
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === slides.length - 1;
+            initSlideCounter();
+        }
+
+        function togglePresentation() {
+            var body = document.body;
+            if (!document.fullscreenElement) {
+                body.classList.add('fullscreen-mode');
+                document.documentElement.requestFullscreen().catch(function() {});
+            } else {
+                body.classList.remove('fullscreen-mode');
+                document.exitFullscreen().catch(function() {});
+            }
+        }
+
+        document.addEventListener('fullscreenchange', function() {
+            if (!document.fullscreenElement) {
+                document.body.classList.remove('fullscreen-mode');
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.target.isContentEditable) return;
+            if (e.key === 'ArrowLeft') changeSlide(1);
+            if (e.key === 'ArrowRight') changeSlide(-1);
+            if (e.key === 'f' || e.key === 'F') togglePresentation();
+            if (e.key === 'Escape' && document.fullscreenElement) {
+                document.body.classList.remove('fullscreen-mode');
+            }
+        });
+
+        updateNav();
+        updateProgressBar();
+    </script>
+</body>
+</html>

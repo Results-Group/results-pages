@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TARGO — ייעוץ אסטרטגי והערכת מוכנות לסטארטאפים</title>
+    <meta name="description" content="הערכת מצב אסטרטגית לסטארטאפים ולמיזמים טכנולוגיים. החלטות מבוססות נתונים ומוכנות לגיוס משקיעים.">
+    <link rel="icon" href="https://static.wixstatic.com/media/f559f1_c89e141b87d549eeb9530ca30cfa7258~mv2.png" type="image/png">
+
+    <style>
+        @font-face { font-family: 'Ploni'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/Ploni/ploni-light-aaa.woff2') format('woff2'); font-weight: 300; }
+        @font-face { font-family: 'Ploni'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/Ploni/ploni-regular-aaa.woff2') format('woff2'); font-weight: 400; }
+        @font-face { font-family: 'Ploni'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/Ploni/ploni-bold-aaa.woff2') format('woff2'); font-weight: 700; }
+
+        :root {
+            /* Premium B2B Palette */
+            --bg-dark: #0A1120;
+            --bg-darker: #050A14;
+            --bg-light: #F8FAFC;
+            --white: #FFFFFF;
+            
+            --brand-blue: #4B84F0;
+            --brand-blue-hover: #3366CC;
+            --brand-red: #E0513B;
+            
+            --text-dark: #0F172A;
+            --text-light: #FFFFFF;
+            --text-muted-dark: #64748B;
+            --text-muted-light: #94A3B8;
+            
+            --border-light: rgba(255,255,255,0.1);
+            --border-dark: #E2E8F0;
+            
+            --font: 'Ploni', 'Segoe UI', Tahoma, Arial, sans-serif;
+            --ease: 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font);
+            font-weight: 400;
+            color: var(--text-dark);
+            background: var(--bg-light);
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        img { max-width: 100%; display: block; }
+        a { text-decoration: none; color: inherit; }
+        
+        .container {
+            width: 100%;
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ---------- Reveal animation ---------- */
+        [data-reveal] {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity var(--ease), transform var(--ease);
+        }
+        [data-reveal].visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ============================================================
+           HERO SECTION (Split Layout)
+        ============================================================ */
+        .hero {
+            background: var(--bg-dark);
+            color: var(--text-light);
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at top right, rgba(75, 132, 240, 0.12), transparent 50%);
+            pointer-events: none;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 64px;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-logo {
+            height: 72px;
+            margin-bottom: 40px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(75, 132, 240, 0.15);
+            border: 1px solid rgba(75, 132, 240, 0.3);
+            color: var(--brand-blue);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            letter-spacing: 0.5px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 24px;
+            letter-spacing: -0.5px;
+        }
+
+        .hero-sub {
+            font-size: clamp(1.05rem, 2vw, 1.2rem);
+            color: var(--text-muted-light);
+            font-weight: 300;
+            margin-bottom: 40px;
+            max-width: 500px;
+        }
+
+        /* Trust list */
+        .hero-trust-list {
+            list-style: none;
+            margin-bottom: 0;
+        }
+        .hero-trust-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            font-size: 1rem;
+            color: var(--white);
+            font-weight: 300;
+        }
+        .hero-trust-list li svg {
+            color: var(--brand-blue);
+            flex-shrink: 0;
+        }
+
+        /* Form Card */
+        .hero-form-wrapper {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            color: var(--text-dark);
+            position: relative;
+        }
+        
+        .hero-form-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: var(--brand-blue);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .form-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .form-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted-dark);
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .form-field {
+            margin-bottom: 16px;
+        }
+        .form-field input {
+            width: 100%;
+            padding: 16px;
+            background: #F8FAFC;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            font-family: var(--font);
+            font-size: 1rem;
+            color: var(--text-dark);
+            transition: all 0.25s;
+        }
+        .form-field input:focus {
+            outline: none;
+            border-color: var(--brand-blue);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(75, 132, 240, 0.1);
+        }
+        .form-field input::placeholder { color: #94A3B8; }
+        .form-field input[type="tel"] { direction: ltr; text-align: right; }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: var(--brand-blue);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-family: var(--font);
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s;
+            margin-top: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-submit:hover {
+            background: var(--brand-blue-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(75, 132, 240, 0.25);
+        }
+        
+        .privacy-note {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted-dark);
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 40px;
+            background: var(--brand-red);
+            color: var(--white);
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            transition: all 0.25s;
+            box-shadow: 0 8px 20px rgba(224, 81, 59, 0.25);
+            text-decoration: none;
+        }
+        .btn-cta:hover {
+            background: #c9402c;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(224, 81, 59, 0.35);
+        }
+
+        /* ============================================================
+           STATS STRIP
+        ============================================================ */
+        .stats-strip {
+            background: var(--white);
+            padding: 64px 0;
+            border-bottom: 1px solid var(--border-dark);
+        }
+        .stats-grid {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-num {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--bg-dark);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        .stat-num span { color: var(--brand-blue); }
+        .stat-label {
+            font-size: 0.95rem;
+            color: var(--text-muted-dark);
+            font-weight: 400;
+        }
+
+        /* ============================================================
+           METHODOLOGY SECTION
+        ============================================================ */
+        .methodology {
+            padding: 100px 0;
+            background: var(--bg-light);
+        }
+        .section-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 64px;
+        }
+        .section-header h2 {
+            font-size: clamp(1.8rem, 3vw, 2.5rem);
+            font-weight: 700;
+            color: var(--bg-dark);
+            margin-bottom: 16px;
+            line-height: 1.25;
+        }
+        .section-header p {
+            font-size: 1.1rem;
+            color: var(--text-muted-dark);
+            font-weight: 300;
+        }
+
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+        
+        .method-card {
+            background: var(--white);
+            border: 1px solid var(--border-dark);
+            border-radius: 12px;
+            padding: 40px 32px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .method-card:hover {
+            border-color: var(--brand-blue);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.05);
+            transform: translateY(-4px);
+        }
+        .method-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; width: 4px;
+            background: var(--brand-blue);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .method-card:hover::before { opacity: 1; }
+
+        .method-icon {
+            width: 56px;
+            height: 56px;
+            background: rgba(75, 132, 240, 0.1);
+            color: var(--brand-blue);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        .method-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--bg-dark);
+        }
+        .method-card p {
+            font-size: 0.95rem;
+            color: var(--text-muted-dark);
+            line-height: 1.7;
+        }
+
+        /* ============================================================
+           THE PITCH / AUTHORITY
+        ============================================================ */
+        .pitch-section {
+            background: var(--bg-darker);
+            color: var(--white);
+            padding: 100px 0;
+            text-align: center;
+        }
+        .pitch-inner {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .pitch-inner h2 {
+            font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+            font-weight: 700;
+            margin-bottom: 32px;
+            line-height: 1.3;
+        }
+        .pitch-inner h2 span { color: var(--brand-red); }
+        .pitch-inner p {
+            font-size: 1.15rem;
+            color: var(--text-muted-light);
+            line-height: 1.8;
+            margin-bottom: 24px;
+            font-weight: 300;
+        }
+        
+        .pitch-cta {
+            margin-top: 48px;
+        }
+        .pitch-cta a {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 40px;
+            background: var(--white);
+            color: var(--bg-dark);
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            transition: all 0.25s;
+        }
+        .pitch-cta a:hover {
+            background: var(--brand-blue);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        /* ============================================================
+           ABOUT
+        ============================================================ */
+        .about-section {
+            padding: 100px 0;
+            background: var(--white);
+        }
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+        .about-content h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--bg-dark);
+            margin-bottom: 24px;
+        }
+        .about-content p {
+            font-size: 1.05rem;
+            color: var(--text-muted-dark);
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        /* ============================================================
+           FOOTER
+        ============================================================ */
+        .site-footer {
+            background: #03060C;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+            padding: 32px 24px;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.4);
+        }
+        .site-footer a {
+            color: rgba(255,255,255,0.6);
+            text-decoration: underline;
+            transition: color 0.2s;
+        }
+        .site-footer a:hover { color: var(--white); }
+
+        /* ============================================================
+           RESPONSIVE
+        ============================================================ */
+        @media (max-width: 992px) {
+            .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+            .hero-text { text-align: center; }
+            .hero-sub { margin: 0 auto 32px; }
+            .hero-trust-list { display: inline-block; text-align: right; margin: 0 auto; }
+            .method-grid { grid-template-columns: 1fr 1fr; }
+            .about-grid { grid-template-columns: 1fr; gap: 40px; }
+            .about-content { text-align: center; }
+        }
+
+        @media (max-width: 768px) {
+            .hero { padding: 48px 0 64px; }
+            .hero-logo { height: 56px; margin: 0 auto 32px; }
+            .hero-form-wrapper { padding: 32px 24px; }
+            
+            .stats-strip { padding: 48px 0; }
+            .stats-grid { gap: 32px; flex-direction: column; }
+            
+            .methodology { padding: 64px 0; }
+            .method-grid { grid-template-columns: 1fr; }
+            
+            .pitch-section { padding: 72px 0; }
+            .about-section { padding: 72px 0; }
+            
+            /* Sticky Bottom Bar */
+            body { padding-bottom: 80px; }
+            .mobile-sticky-cta {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: var(--bg-dark);
+                padding: 16px 24px;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+                z-index: 100;
+                justify-content: center;
+                align-items: center;
+                border-top: 2px solid var(--brand-blue);
+            }
+            .mobile-sticky-cta .btn-cta {
+                width: 100%;
+                padding: 14px;
+                font-size: 1.1rem;
+                box-shadow: none;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .mobile-sticky-cta { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ======================== HERO ======================== -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-grid">
+            <div class="hero-text" data-reveal>
+                <img src="https://static.wixstatic.com/media/f559f1_c89e141b87d549eeb9530ca30cfa7258~mv2.png" alt="TARGO" class="hero-logo">
+                
+                <div class="badge">הערכת מצב אסטרטגית ללא עלות</div>
+                <h1>סטארטאפ מצליח נבנה על אסטרטגיה מדויקת ונתונים מוכחים.</h1>
+                <p class="hero-sub">מ-2012 עזרנו ללמעלה מ-530 מיזמים לעבור משלב הרעיון ועד לגיוס משקיעים, באמצעות מחקר מעמיק, מודלים פיננסיים, ומוכנות מלאה לשוק.</p>
+                
+                <ul class="hero-trust-list">
+                    <li><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg> החלטות מבוססות נתונים ומחקר שוק אמיתי</li>
+                    <li><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg> מודל עסקי ופיננסי בסטנדרט של הון סיכון</li>
+                    <li><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg> מצגת משקיעים שמדברת בשפה שהם מבינים</li>
+                </ul>
+            </div>
+            
+            <div class="hero-form-wrapper" id="lead" data-reveal>
+                <div class="form-title">בדיקת התאמה לליווי</div>
+                <div class="form-subtitle">השאירו פרטים לתיאום שיחת ייעוץ אסטרטגית</div>
+                
+                <form action="/lp/targo-thanks" method="GET">
+                    <input type="hidden" name="ab_variant" value="G_ConsultingAudit">
+                    
+                    <div class="form-field">
+                        <input type="text" name="fullName" placeholder="שם מלא" required minlength="2" title="נא להזין שם מלא (לפחות 2 תווים)">
+                    </div>
+                    <div class="form-field">
+                        <input type="tel" name="phone" placeholder="מספר טלפון" required pattern="0[0-9]{8,9}" title="נא להזין מספר טלפון ישראלי תקין">
+                    </div>
+                    <div class="form-field">
+                        <input type="email" name="email" placeholder="כתובת מייל" required title="נא להזין כתובת מייל תקינה">
+                    </div>
+                    <div class="form-field">
+                        <input type="text" name="ventureStage" placeholder="באיזה שלב נמצא המיזם שלך?" required>
+                    </div>
+                    <div class="form-field">
+                        <input type="text" name="ventureField" placeholder="מה התחום או התעשייה של המיזם?" required>
+                    </div>
+                    <div class="form-field">
+                        <input type="text" name="mainChallenge" placeholder="מה האתגר המרכזי שאתה מתמודד איתו כרגע?" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-submit">
+                        הגשת בקשה לייעוץ
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m7 7-7-7 7-7"/></svg>
+                    </button>
+                </form>
+                
+                <div class="privacy-note">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" stroke="currentColor" stroke-width="2" rx="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    הבטחת סודיות מלאה (NDA) מובטחת
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ======================== STATS ======================== -->
+<section class="stats-strip">
+    <div class="container">
+        <div class="stats-grid" data-reveal>
+            <div class="stat-item">
+                <div class="stat-num" data-target="530">0<span>+</span></div>
+                <div class="stat-label">מיזמים מלווים</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" data-target="12">0</div>
+                <div class="stat-label">שנות עשייה וניסיון</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" data-target="21">0</div>
+                <div class="stat-label">תעשיות שונות</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ======================== METHODOLOGY ======================== -->
+<section class="methodology">
+    <div class="container">
+        <div class="section-header" data-reveal>
+            <h2>המתודולוגיה שלנו: מאי-ודאות למוכנות מלאה למשקיעים</h2>
+            <p>הדרך הבטוחה להצלחה מתחילה בבסיס איתן. כל תהליך ב-TARGO מבוסס על עבודת עומק מקצועית שמזניקה את המיזם שלכם קדימה ומבטיחה שאתם מוכנים לשוק ולמשקיעים.</p>
+        </div>
+        
+        <div class="method-grid">
+            <div class="method-card" data-reveal>
+                <div class="method-icon">
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 21H3V3m18 8-6-6-4 4-6-6"/></svg>
+                </div>
+                <h3>1. מחקר שוק ואנליזה</h3>
+                <p>הבנה מדויקת של קהל היעד, זיהוי המתחרים, ואיתור ההזדמנות האמיתית בשוק עוד לפני שמשקיעים משאבים יקרים בפיתוח.</p>
+            </div>
+            
+            <div class="method-card" data-reveal>
+                <div class="method-icon">
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 2v20m-5-3h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2Z"/></svg>
+                </div>
+                <h3>2. בניית מודל עסקי ופיננסי</h3>
+                <p>בניית תוכנית עסקית מקיפה ותחזיות פיננסיות מדויקות שמייצרות ודאות כלכלית ויכולות לעמוד בכל מבחן של קרנות הון סיכון.</p>
+            </div>
+            
+            <div class="method-card" data-reveal>
+                <div class="method-icon">
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+                </div>
+                <h3>3. הכנה לגיוס הון</h3>
+                <p>זיקוק הערך הייחודי למצגת משקיעים כובשת, יחד עם אסטרטגיית חדירה לשוק (GTM) שמאפשרת לגייס הלקוחות הראשונים במהירות.</p>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 56px;" data-reveal>
+            <a href="#bottom-form" class="btn-cta">
+                לתיאום פגישת ייעוץ אסטרטגית
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m7 7-7-7 7-7"/></svg>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ======================== THE PITCH ======================== -->
+<section class="pitch-section">
+    <div class="container">
+        <div class="pitch-inner" data-reveal>
+            <h2>הסטארטאפים המובילים מצליחים בזכות <span>אסטרטגיה מנצחת וביצוע מושלם.</span></h2>
+            <p>משקיעים מחפשים היום ודאות, נתונים ותוכנית פעולה ברורה. יזמים שמגיעים מוכנים היטב עם תוכנית סדורה זוכים לאמון ולמימון. אנחנו כאן כדי להכין אתכם באופן מושלם לכל פגישה, עם תשובות מדויקות לכל שאלה ומפת דרכים שמבטיחה הצלחה.</p>
+            <div class="pitch-cta">
+                <a href="#bottom-form" class="btn-cta" style="background: var(--brand-red); color: var(--white); border: none;">
+                    לבדיקת התאמה לליווי
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m7 7-7-7 7-7"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ======================== ABOUT ======================== -->
+<section class="about-section">
+    <div class="container">
+        <div class="about-grid" data-reveal>
+            <div class="about-content">
+                <h2>מי אנחנו?</h2>
+                <p>TARGO היא חברת ייעוץ אסטרטגי לסטארטאפים, שפועלת מ-2012. הצוות שלנו מורכב ממומחים בתחומי אסטרטגיה עסקית, מחקר שוק, מודלים פיננסיים וגיוס הון — עם ניסיון מצטבר של מאות פרויקטים בלמעלה מ-21 תעשיות שונות.</p>
+                <p>ליווינו למעלה מ-530 מיזמים בדרך מהרעיון הראשוני ועד גיוס משקיעים ופיתוח מוצר — כולל כתיבת תוכניות עסקיות, בניית מודלים פיננסיים, הכנת מצגות משקיעים, ואסטרטגיות חדירה לשוק.</p>
+                <p>המשרדים שלנו ממוקמים ברמת גן, ואנחנו עובדים עם יזמים מכל רחבי הארץ — בליווי צמוד, אישי ומקצועי.</p>
+                <div style="margin-top: 32px;" data-reveal>
+                    <a href="#bottom-form" class="btn-cta">
+                        בואו נדבר על המיזם שלכם
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m7 7-7-7 7-7"/></svg>
+                    </a>
+                </div>
+            </div>
+            <div class="about-image">
+                <!-- A placeholder illustration block fitting the consulting aesthetic -->
+                <div style="background: var(--bg-light); border: 1px solid var(--border-dark); border-radius: 16px; padding: 40px; text-align: center;">
+                    <img src="https://static.wixstatic.com/media/f559f1_c89e141b87d549eeb9530ca30cfa7258~mv2.png" alt="TARGO" style="width:120px; filter:brightness(0); margin: 0 auto 20px; opacity:0.2;">
+                    <h3 style="color:var(--text-muted-light); font-weight:300;">שותפים לדרך.</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ======================== BOTTOM FORM ======================== -->
+<section id="bottom-form" style="background: var(--bg-dark); padding: 80px 0; position: relative;">
+    <div class="container">
+        <div class="hero-form-wrapper" style="max-width: 600px; margin: 0 auto;" data-reveal>
+            <div class="form-title">מוכנים לעשות את הצעד הבא?</div>
+            <div class="form-subtitle">השאירו פרטים ונחזור אליכם לשיחת ייעוץ אסטרטגית, ללא התחייבות.</div>
+            
+            <form action="/lp/targo-thanks" method="GET">
+                <input type="hidden" name="ab_variant" value="G_ConsultingAudit_Bottom">
+                
+                <div class="form-field">
+                    <input type="text" name="fullName" placeholder="שם מלא" required minlength="2" title="נא להזין שם מלא (לפחות 2 תווים)">
+                </div>
+                <div class="form-field">
+                    <input type="tel" name="phone" placeholder="מספר טלפון" required pattern="0[0-9]{8,9}" title="נא להזין מספר טלפון ישראלי תקין">
+                </div>
+                <div class="form-field">
+                    <input type="email" name="email" placeholder="כתובת מייל" required title="נא להזין כתובת מייל תקינה">
+                </div>
+                <div class="form-field">
+                    <input type="text" name="ventureStage" placeholder="באיזה שלב נמצא המיזם שלך?" required>
+                </div>
+                <div class="form-field">
+                    <input type="text" name="ventureField" placeholder="מה התחום או התעשייה של המיזם?" required>
+                </div>
+                <div class="form-field">
+                    <input type="text" name="mainChallenge" placeholder="מה האתגר המרכזי שאתה מתמודד איתו כרגע?" required>
+                </div>
+                
+                <button type="submit" class="btn-submit" style="background: var(--brand-red); font-size: 1.2rem; padding: 18px; margin-top: 16px;">
+                    שליחת פרטים והתחלת עבודה
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m7 7-7-7 7-7"/></svg>
+                </button>
+            </form>
+            
+            <div class="privacy-note">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" stroke="currentColor" stroke-width="2" rx="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                הבטחת סודיות מלאה (NDA) מובטחת
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ======================== FOOTER ======================== -->
+<footer class="site-footer">
+    <p>&copy; TARGO Consulting — כל הזכויות שמורות · <a href="https://www.targo-consulting.co.il/%d7%9e%d7%93%d7%99%d7%a0%d7%99%d7%95%d7%aa-%d7%a4%d7%a8%d7%98%d7%99%d7%95%d7%aa/" target="_blank" rel="noopener">מדיניות פרטיות</a></p>
+</footer>
+
+<!-- ======================== JAVASCRIPT ======================== -->
+<script>
+(function() {
+    /* --- Scroll Reveal --- */
+    var revealEls = document.querySelectorAll('[data-reveal]');
+    if ('IntersectionObserver' in window) {
+        var revealObs = new IntersectionObserver(function(entries) {
+            entries.forEach(function(e) {
+                if (e.isIntersecting) {
+                    e.target.classList.add('visible');
+                    revealObs.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.15 });
+        revealEls.forEach(function(el) { revealObs.observe(el); });
+    } else {
+        revealEls.forEach(function(el) { el.classList.add('visible'); });
+    }
+
+    /* --- Counter animation --- */
+    var counters = document.querySelectorAll('[data-target]');
+    var counted = false;
+    function animateCounters() {
+        if (counted) return;
+        counted = true;
+        counters.forEach(function(el) {
+            var target = parseInt(el.getAttribute('data-target'), 10);
+            var duration = 1800;
+            var start = 0;
+            var startTime = null;
+            function step(ts) {
+                if (!startTime) startTime = ts;
+                var progress = Math.min((ts - startTime) / duration, 1);
+                var ease = 1 - Math.pow(1 - progress, 3);
+                el.innerHTML = Math.floor(ease * target) + (target >= 100 ? '<span>+</span>' : '');
+                if (progress < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        });
+    }
+    if ('IntersectionObserver' in window && counters.length) {
+        var counterObs = new IntersectionObserver(function(entries) {
+            entries.forEach(function(e) {
+                if (e.isIntersecting) {
+                    animateCounters();
+                    counterObs.disconnect();
+                }
+            });
+        }, { threshold: 0.3 });
+        counterObs.observe(counters[0]);
+    }
+})();
+</script>
+
+<!-- ======================== MOBILE STICKY CTA ======================== -->
+<div class="mobile-sticky-cta">
+    <a href="#bottom-form" class="btn-cta">
+        לתיאום שיחת ייעוץ
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m7 7-7-7 7-7"/></svg>
+    </a>
+</div>
+
+</body>
+</html>

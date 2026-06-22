@@ -1,0 +1,3973 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pophy - ניקיון משרדים בראש שקט</title>
+
+    <!-- סקריפטים של מעקב הושארו כפי שהם -->
+    <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "sf9syvfjg6");
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17357415233"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'AW-17357415233');
+    </script>
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '613074844727047');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=613074844727047&ev=PageView&noscript=1"
+    /></noscript>
+    <script>
+      !function (w, d, t) {
+        w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
+        ttq.load('D2883SRC77UB6AOKCQI0');
+        ttq.page();
+      }(window, document, 'ttq');
+    </script>
+    <style>
+        /* === Fonts === */
+        @font-face { font-family: 'Ping HL'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-regular.woff2') format('woff2'); font-weight: 400; }
+        @font-face { font-family: 'Ping HL'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-bold.woff2') format('woff2'); font-weight: 600; }
+        @font-face { font-family: 'Ping HL'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-heavy.woff2') format('woff2'); font-weight: 800; }
+
+        /* === Variables === */
+        :root {
+            --dark-text: #1D1D1F; /* השחור העמוק והיוקרתי של אפל */
+            --secondary-text: #86868B; /* האפור של אפל לטקסט משני */
+            --background: #FBFBFD; /* לבן שבור - נקי ורך לעיניים */
+            --border-color: #D2D2D7;
+            --font-heavy: 800;
+            --font-bold: 800;
+            --font-semibold: 600;
+            --pophy-yellow: #FFD400; 
+            --cta-background: #1D1D1F; /* כפתור שחור קלאסי לפרימיום */
+            --cta-hover-background: #333336;
+            --cta-text-color: #FFFFFF;
+        
+            --section-bg-gray: #F5F5F7;
+        
+            --app-bg: #FFFFFF;
+        
+            --app-section-gray: #F5F5F7;
+        
+            --app-dark-text: #1D1D1F;
+        
+            --app-secondary-text: #86868B;
+        
+            --app-border: rgba(0,0,0,0.08);
+        
+            --dark-bg: #0A0A0C;
+        
+            --dark-surface: rgba(255, 255, 255, 0.04);
+        
+            --dark-text-main: #FFFFFF;
+        
+            --dark-text-sec: #A1A1A6;
+        
+            --pophy-green: #34c759;
+        
+            --appstore-blue: #007aff;
+        
+            --glass-bg: rgba(255, 255, 255, 0.03);
+        
+            --glass-border: rgba(255, 255, 255, 0.08);
+        
+            --light-text: #FFFFFF;
+        
+            --error-red: #FF453A;
+        
+            --input-bg: rgba(0, 0, 0, 0.4);
+        
+            --glass-card: rgba(255, 255, 255, 0.02);
+        
+            --bg-deep: #000000;
+        
+            --bg-card: #0A0A0C;
+        
+            --text-main: #FFFFFF;
+        
+            --text-muted: #86868B;
+        
+            --pophy-yellow-glow: rgba(255, 212, 0, 0.4);
+        
+            /* צבעי פרימיום לעיצוב בהיר (Light Mode) */
+            --faq-bg: #FBFBFD;
+        
+            /* רקע אפור-פנינה של אפל */
+            --faq-card-bg: #FFFFFF;
+        
+            --faq-border: rgba(0, 0, 0, 0.05);
+        
+            --faq-text-main: #1D1D1F;
+        
+            --faq-text-muted: #6E6E73;
+        }
+
+        /* === Base Reset === */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; max-width: 100vw; }
+        body { margin: 0; padding: 0; overflow-x: hidden; width: 100%; min-width: 0; max-width: 100vw; background-color: #FBFBFD; color: var(--dark-text); font-family: 'Ping HL', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; direction: rtl; }
+
+        /* =========================================================
+           Hero + Feature Cards
+           ========================================================= */
+/* טעינת הפונטים */
+        
+        
+        
+        
+        
+
+        .page-wrapper {
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            min-height: 100vh; width: 100%; box-sizing: border-box;
+        }
+
+        .hero-split {
+            display: grid; grid-template-columns: 1fr 1fr; align-items: center;
+            max-width: 1400px; width: 100%; margin: 0 auto; padding: 80px 40px 40px; box-sizing: border-box; gap: 40px;
+        }
+
+        .hero-content {
+            padding-right: 5%; text-align: right; display: flex; flex-direction: column; align-items: flex-start;
+        }
+
+        .hero-logo { height: 45px; margin-bottom: 25px; margin-top: -30px; }
+
+        .hero-headline {
+            font-size: 3.4rem; font-weight: var(--font-bold); line-height: 1.1; letter-spacing: -1.5px;
+            margin: 0 0 20px 0; color: var(--dark-text);
+        }
+
+        /* נגיעה עדינה של המותג בלי צלליות כבדות */
+        .highlight-text {
+            color: var(--pophy-yellow);
+        }
+
+        .hero-subheadline {
+            font-size: 1.25rem; color: var(--secondary-text); margin: 0 0 15px 0;
+            max-width: 520px; line-height: 1.5; font-weight: 400;
+        }
+
+        /* --- תוספות עיצוב יוקרתי - מינימליסטי --- */
+        .hero-benefits {
+            list-style: none; padding: 0; margin: 0 0 40px 0;
+            display: flex; flex-direction: column; gap: 14px;
+        }
+        .hero-benefits li {
+            display: flex; align-items: center; gap: 12px;
+            font-size: 1.15rem; font-weight: 600; color: var(--dark-text);
+        }
+        .hero-benefits li svg {
+            width: 20px; height: 20px; flex-shrink: 0; color: var(--dark-text);
+        }
+        
+        /* --- סוף תוספות --- */
+
+        /* --- עיצוב כפתור פרימיום (Pill Shape) --- */
+        .cta-wrapper {
+            display: flex; flex-direction: column; align-items: flex-start; gap: 15px;
+        }
+
+        .hero-cta {
+            background-color: var(--cta-background); color: var(--cta-text-color);
+            font-family: 'Ping HL', sans-serif; font-size: 1.15rem; font-weight: var(--font-bold);
+            padding: 15px 40px; border: none; border-radius: 980px; /* צורה מעוגלת לחלוטין */
+            cursor: pointer;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+        }
+
+        .hero-cta:hover {
+            background-color: var(--cta-hover-background);
+            transform: scale(1.02);
+            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* חץ קטן בתוך הכפתור ליצירת תנועה */
+        .hero-cta svg {
+            width: 20px; height: 20px; transition: transform 0.3s ease;
+        }
+        .hero-cta:hover svg { transform: translateX(-5px); }
+
+        .hero-visual { position: relative; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+        
+        /* מסגרת פרימיום דמוית אייפד במקום קו מקווקו */
+        .video-premium-frame {
+            border-radius: 28px; padding: 12px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.02); 
+            box-sizing: border-box; width: 100%;
+        }
+        .hero-visual iframe {
+            width: 100%; aspect-ratio: 16/9; border-radius: 18px; border: none; display: block; box-sizing: border-box; 
+        }
+
+        @media (max-width:1100px){
+            .hero-split{grid-template-columns:1fr;gap:40px;text-align:center; padding-top: 50px;} 
+            .hero-content{padding:0;order:1;align-items:center;}
+            .hero-headline {text-align: center; font-size: 2.6rem;}
+            .hero-subheadline {text-align: center; margin: 0 auto 30px auto;}
+            .hero-benefits { align-items: center; }
+            .cta-wrapper {align-items: center; width: 100%;}
+            .hero-visual{order:2; min-height: auto; }
+        }
+
+        /* === Unified Modal (iframe-safe: overlay covers whole doc, modal positioned at click) === */
+        .unified-modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 99999;
+            display: none;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .unified-modal-overlay.is-visible {
+            opacity: 1;
+        }
+        .unified-modal {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            background-color: #fff;
+            padding: 44px 40px 36px;
+            width: calc(100% - 40px);
+            max-width: 580px;
+            max-height: 600px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 28px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            transform: translateX(-50%) scale(0.95);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-sizing: border-box;
+        }
+        .unified-modal-overlay.is-visible .unified-modal {
+            transform: translateX(-50%) scale(1);
+        }
+        .unified-modal-close {
+            position: absolute;
+            left: 20px;
+            top: 16px;
+            font-size: 28px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+            background: none;
+            border: none;
+            line-height: 1;
+            z-index: 2;
+        }
+        .unified-modal-close:hover { color: var(--dark-text); }
+        .unified-modal h2 {
+            font-size: 1.8rem;
+            font-weight: var(--font-bold);
+            margin: 0 0 6px;
+            color: var(--dark-text);
+            letter-spacing: -0.5px;
+        }
+        .unified-modal .modal-subtitle {
+            font-size: 1rem;
+            color: var(--secondary-text);
+            margin: 0 0 24px;
+            line-height: 1.5;
+        }
+        .modal-subtitle-mobile { display: none; }
+        @media (max-width: 768px) {
+            .modal-subtitle-desktop { display: none; }
+            .modal-subtitle-mobile { display: block; }
+        }
+
+        /* Tabs */
+        .modal-tabs {
+            display: flex;
+            background: #F2F2F7;
+            border-radius: 14px;
+            padding: 4px;
+            margin-bottom: 24px;
+            gap: 4px;
+        }
+        .modal-tab {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 11px;
+            border: none;
+            background: transparent;
+            font-family: 'Ping HL', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--secondary-text);
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .modal-tab.active {
+            background: #fff;
+            color: var(--dark-text);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .modal-tab:hover:not(.active) { color: var(--dark-text); }
+
+        /* Tab content */
+        .modal-tab-content { display: none; }
+        .modal-tab-content.active { display: block; }
+
+        /* QR panel */
+        .modal-qr-grid {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+        .modal-qr-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #F9F9FB;
+            padding: 24px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            color: var(--dark-text);
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+        .modal-qr-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+            background: #fff;
+            border-color: transparent;
+        }
+        .modal-qr-card img {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            margin-bottom: 14px;
+        }
+        .modal-qr-card strong {
+            display: block;
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .modal-qr-card span {
+            font-size: 0.85rem;
+            color: var(--secondary-text);
+        }
+
+        /* Contact form */
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: right;
+        }
+        .modal-form-field input {
+            width: 100%;
+            padding: 15px 18px;
+            border: 1.5px solid #E5E5EA;
+            border-radius: 14px;
+            font-family: 'Ping HL', sans-serif;
+            font-size: 1rem;
+            color: var(--dark-text);
+            background: #FAFAFA;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            direction: rtl;
+        }
+        .modal-form-field input:focus {
+            outline: none;
+            border-color: var(--pophy-yellow);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(255, 212, 0, 0.15);
+        }
+        .modal-form-field input::placeholder {
+            color: #AEAEB2;
+            font-weight: 400;
+        }
+        .modal-form-submit {
+            background: var(--dark-text);
+            color: #fff;
+            font-family: 'Ping HL', sans-serif;
+            font-size: 1.1rem;
+            font-weight: var(--font-bold);
+            padding: 16px;
+            border: none;
+            border-radius: 980px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 4px;
+        }
+        .modal-form-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .modal-form-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .modal-form-success {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 0;
+        }
+        .modal-form-success.show {
+            display: flex;
+        }
+        .modal-form-success .success-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--pophy-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-form-success h3 {
+            font-size: 1.4rem;
+            font-weight: var(--font-bold);
+            color: var(--dark-text);
+            margin: 0;
+        }
+        .modal-form-success p {
+            font-size: 1rem;
+            color: var(--secondary-text);
+            margin: 0;
+        }
+        .modal-form-note {
+            font-size: 0.85rem;
+            color: #AEAEB2;
+            margin-top: 2px;
+            text-align: center;
+        }
+
+        /* Footer */
+        .site-footer {
+            text-align: center;
+            padding: 30px 20px 26px;
+            background: #1D1D1F;
+            border-top: 2px solid #FFD400;
+            font-size: 0.9rem;
+            color: #AEAEB2;
+            direction: rtl;
+            position: relative;
+            z-index: 100;
+        }
+        .footer-links {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        .footer-sep { color: #555; }
+        .site-footer a {
+            color: #AEAEB2;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .site-footer a:hover { color: #FFD400; }
+        .footer-copy { font-size: 0.82rem; color: #86868B; }
+
+        @media (max-width: 768px) {
+            .unified-modal { padding: 24px 18px 20px; max-height: 500px; border-radius: 22px; width: calc(100% - 24px); }
+            .unified-modal h2 { font-size: 1.25rem; }
+            .unified-modal .modal-subtitle { font-size: 0.95rem; margin-bottom: 18px; }
+            .modal-tabs { margin-bottom: 18px; }
+            .modal-tab { font-size: 0.9rem; padding: 10px 12px; }
+            .modal-qr-grid { flex-direction: column; gap: 10px; }
+            .modal-qr-card { padding: 0 !important; flex-direction: column !important; gap: 0 !important; text-align: center; align-items: center; border: none !important; background: transparent !important; box-shadow: none !important; }
+            .modal-qr-card .qr-img { display: none !important; }
+            .modal-qr-card strong { display: none !important; }
+            .modal-qr-card span { display: none !important; }
+            .modal-qr-card .store-badge-mobile { display: block !important; }
+            .modal-form-field input { padding: 14px 16px; font-size: 0.95rem; }
+            .modal-form-submit { padding: 14px; font-size: 1rem; }
+        }
+
+        /* --- כרטיסיות מטה - עיצוב יוקרתי ואחיד --- */
+        .features-row { display: flex; justify-content: center; align-items: stretch; gap: 24px; flex-wrap: wrap; padding: 20px 20px 50px 20px; max-width: 1400px; margin: 0 auto; width: 100%; }
+        .ui-card { 
+            background: #FFFFFF; 
+            border: 1px solid transparent; 
+            border-radius: 24px; 
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05); 
+            padding: 24px 28px; display: flex; align-items: center; gap: 18px; flex-grow: 1; flex-shrink: 1; flex-basis: 300px; max-width: 380px; 
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
+        }
+        .ui-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.08); 
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+        .ui-card .icon { 
+            width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; 
+            border-radius: 14px; flex-shrink: 0; background-color: #F5F5F7; /* צבע אחיד ורגוע לכולם */
+        }
+        .ui-card .text { text-align: right; }
+        .ui-card .text strong { display: block; font-size: 1.15rem; font-weight: var(--font-bold); color: var(--dark-text); margin-bottom: 4px;}
+        .ui-card .text span { color: var(--secondary-text); font-size: 0.95rem; line-height: 1.4; display: block; }
+        
+        /* ביטול הצבעוניות הרועשת לטובת אייקונים שחורים ואלגנטיים */
+        .ui-card .icon svg { stroke: var(--dark-text); }
+
+        /* =========================================================
+           Accordion
+           ========================================================= */
+/* טעינת הפונטים של Pophy */
+
+        /* --- Accordion Section (Premium Apple Style) --- */
+        .features-accordion-section {
+            background-color: var(--section-bg-gray);
+            width: 100%;
+            padding: 80px 0 90px 0;
+            /* קו עדין בחלק העליון שמפריד מהסקשן הקודם אם יש */
+            border-top: 1px solid rgba(0,0,0,0.03); 
+        }
+
+        .accordion-container {
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 0 20px;
+        }
+
+        .features-accordion-section .section-header { 
+            text-align: center; 
+            margin-bottom: 50px; 
+        }
+        
+        .features-accordion-section .section-header h2 {
+            font-size: 3.2rem; 
+            font-weight: var(--font-bold); 
+            margin: 0 0 20px 0; 
+            letter-spacing: -1.2px; 
+            color: var(--dark-text);
+            line-height: 1.1;
+        }
+        
+        .features-accordion-section .section-header p {
+            font-size: 1.3rem; 
+            color: var(--secondary-text); 
+            margin: 0 auto; 
+            max-width: 650px; 
+            line-height: 1.6;
+        }
+
+        .accordion-wrapper { 
+            position: relative; 
+        }
+        
+        .features-accordion { 
+            display: grid; 
+            gap: 16px; 
+        }
+
+        /* הקו הדק שעליו רצה הגלולה */
+        .accordion-wrapper::before {
+            content: ''; 
+            position: absolute; 
+            right: 47px; 
+            top: 0; 
+            bottom: 0;
+            width: 2px; 
+            background-color: rgba(0,0,0,0.06); 
+            z-index: 0;
+        }
+
+        /* גלולה שחורה אלגנטית (במקום צהובה זוהרת) */
+        #active-line-pill {
+            position: absolute; 
+            right: 42px; 
+            width: 12px; 
+            height: 12px;
+            background-color: var(--dark-text); 
+            border-radius: 50%; 
+            z-index: 1;
+            box-shadow: 0 0 0 4px rgba(29, 29, 31, 0.1); /* צל עדין סביב הגלולה */
+            transition: top 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .accordion-item {
+            background-color: transparent; 
+            border-radius: 24px; 
+            border: 1px solid transparent;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
+            position: relative; 
+            z-index: 2;
+        }
+        
+        /* מצב פעיל: הופך לכרטיסייה לבנה בולטת עם צל רך */
+        .accordion-item.is-active {
+            border-color: rgba(0,0,0,0.03); 
+            background-color: #FFFFFF;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.06);
+        }
+
+        .accordion-header {
+            display: flex; 
+            align-items: center; 
+            padding: 24px; 
+            cursor: pointer;
+        }
+        
+        .accordion-header .icon {
+            flex-shrink: 0; 
+            margin-left: 24px; 
+            width: 48px; 
+            height: 48px;
+            background-color: #EFEFF2; 
+            border-radius: 14px;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            color: var(--dark-text); 
+            transition: all 0.3s ease;
+        }
+        
+        /* צבע שחור יוקרתי לאייקון הפעיל */
+        .accordion-item.is-active .icon {
+            background-color: var(--dark-text);
+            color: #FFFFFF;
+            transform: scale(1.05);
+        }
+        
+        .accordion-header .icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .accordion-header h4 {
+            flex-grow: 1;
+            font-size: 1.5rem;
+            font-weight: var(--font-semibold);
+            margin: 0;
+            color: var(--dark-text);
+            transition: color 0.3s ease;
+        }
+        
+        .accordion-header .chevron {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), color 0.3s ease;
+            color: var(--secondary-text);
+        }
+        
+        .accordion-item.is-active .chevron {
+            transform: rotate(180deg);
+            color: var(--dark-text);
+        }
+
+        .accordion-content {
+            overflow: hidden;
+            max-height: 0;
+        }
+        
+        .accordion-content p {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            margin: 0;
+            color: var(--secondary-text);
+            padding: 0 96px 28px 24px; /* ריווח נכון מתחת לטקסט ומהאייקון */
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            .features-accordion-section { padding: 60px 0 80px 0; }
+            .features-accordion-section .section-header h2 { font-size: 2rem; }
+            .features-accordion-section .section-header p { font-size: 1rem; }
+            .accordion-header { padding: 20px; }
+            .accordion-header h4 { font-size: 1.15rem; }
+            .accordion-header .icon { margin-left: 16px; width: 42px; height: 42px; }
+            .accordion-header .icon svg { width: 20px; height: 20px; }
+            .accordion-content p { padding: 0 20px 24px 20px; }
+            
+            /* הסתרת קו הזמן במובייל לטובת עיצוב נקי יותר */
+            .accordion-wrapper::before, #active-line-pill { display: none; }
+        }
+
+        /* =========================================================
+           App Walkthrough
+           ========================================================= */
+/* טעינת הפונטים של Pophy */
+
+        /* --- הוספת אנימציית גרדיאנט פרימיום ברקע --- */
+        .simulation-section-pro {
+            background: #0A0A0C;
+            padding: 100px 0 80px 0;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden; 
+        }
+
+        .simulation-section-pro .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 2; 
+        }
+
+        /* --- Section Header (Direct Copy) --- */
+        .simulation-section-pro .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .simulation-section-pro .section-header h2 {
+            font-size: 3.2rem; 
+            font-weight: var(--font-bold);
+            margin: 0 0 20px 0;
+            letter-spacing: -1.2px;
+            line-height: 1.1;
+            color: var(--dark-text-main);
+        }
+        
+        .highlight-urgency {
+            color: var(--pophy-yellow);
+        }
+        
+        .simulation-section-pro .section-header p {
+            font-size: 1.3rem;
+            color: var(--dark-text-sec);
+            margin: 0 auto;
+            max-width: 700px;
+            line-height: 1.6;
+        }
+
+        .simulation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center; 
+            gap: 80px;
+            width: 100%;
+        }
+
+        /* --- Interactive Steps --- */
+        .interactive-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .step-item {
+            background-color: transparent;
+            border: 1px solid rgba(255,255,255,0.02);
+            border-right: 4px solid rgba(255,255,255,0.05); 
+            border-radius: 20px;
+            padding: 24px 28px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        .step-item:hover {
+            background-color: rgba(255,255,255,0.02);
+        }
+        
+        .step-item.active {
+            background-color: var(--dark-surface);
+            border-right: 4px solid var(--pophy-yellow);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .step-item h3 {
+            font-size: 1.4rem;
+            font-weight: var(--font-bold);
+            margin: 0 0 8px 0;
+            line-height: 1.3;
+            color: #6E6E73;
+            transition: color 0.3s ease;
+        }
+        
+        .step-item.active h3 { color: var(--dark-text-main); }
+        
+        .step-item p {
+            font-size: 1.15rem;
+            color: var(--dark-text-sec);
+            line-height: 1.6;
+            margin: 6px 0 0;
+            opacity: 0.4;
+            transition: opacity 0.3s ease;
+        }
+        
+        .step-item.active p {
+            opacity: 1;
+        }
+
+        /* --- iPhone Mockup --- */
+        .iphone-wrapper { 
+            display: flex; 
+            justify-content: center;
+            position: sticky;
+            top: 120px;
+            z-index: 10;
+        }
+
+        .iphone-glow {
+            position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 250px; height: 500px;
+            background: var(--pophy-yellow);
+            filter: blur(80px); opacity: 0.12; z-index: -1;
+        }
+        
+        .iphone-mockup {
+            position: relative; width: 320px; height: 660px;
+            background: #000000; border-radius: 55px;
+            box-shadow: inset 0 0 0 2px #333, inset 0 0 15px rgba(255,255,255,0.1), 0 40px 80px -20px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05);
+            padding: 12px; box-sizing: border-box;
+        }
+        
+        .iphone-inner-bezel {
+            width: 100%; height: 100%; background-color: #000000; border-radius: 44px;
+            position: relative; overflow: hidden; box-shadow: inset 0 0 0 2px #000;
+        }
+
+        .iphone-notch {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 120px; height: 30px; background-color: #000000; border-radius: 0 0 20px 20px; z-index: 20;
+        }
+        
+        .iphone-screen {
+            background-color: var(--app-bg); width: 100%; height: 100%;
+            border-radius: 40px; position: relative; overflow: hidden; display: flex; flex-direction: column;
+            color: var(--app-dark-text);
+        }
+        
+        /* --- App Scenes UI --- */
+        .app-scene {
+            position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+            background-color: var(--app-bg); opacity: 0; visibility: hidden;
+            display: flex; flex-direction: column; font-size: 15px;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+            padding-top: 40px; box-sizing: border-box; z-index: 1;
+        }
+        .app-scene.visible { opacity: 1; visibility: visible; z-index: 5; }
+        
+        .app-header {
+            padding: 12px 16px; text-align: center; flex-shrink: 0;
+            background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--app-border); z-index: 10;
+        }
+        .app-header img { height: 22px; width: auto; vertical-align: middle; }
+        
+        .app-content { padding: 20px; overflow-y: auto; flex-grow: 1; text-align: right; }
+        h1.app-title { font-size: 26px; font-weight: var(--font-bold); margin: 0 0 8px 0; line-height: 1.2; color: var(--app-dark-text);}
+        p.app-subtitle { color: var(--app-secondary-text); font-size: 15px; margin: 0 0 24px 0; line-height: 1.4; }
+        h3.scene-title { font-size: 20px; font-weight: var(--font-bold); margin-bottom: 20px; color: var(--app-dark-text);}
+        
+        .app-footer { padding: 16px 20px 30px 20px; flex-shrink: 0; background-color: var(--app-bg); border-top: 1px solid var(--app-border);}
+        
+        .primary-button-app { 
+            display: block; width: 100%; padding: 16px; border-radius: 980px;
+            background: var(--app-dark-text); color: #FFFFFF;
+            font-size: 16px; font-weight: 600; text-align: center; border: none; font-family: inherit;
+            box-shadow: 0 8px 16px -6px rgba(0,0,0,0.2);
+        }
+        .primary-button-app.btn-yellow { background: var(--pophy-yellow); color: var(--app-dark-text); }
+        
+        .list-group { background: var(--app-section-gray); border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .list-item { display: flex; align-items: center; padding: 16px; border-bottom: 1px solid var(--app-border); }
+        .list-item:last-child { border-bottom: none; }
+        .list-item .icon { display:flex; color: var(--app-dark-text); margin-left: 14px; align-items: center;}
+        .list-item .icon svg { width: 22px; height: 22px; stroke-width: 2.5; } 
+        .list-item .text { font-size: 15px; font-weight: 500; flex-grow: 1; color: var(--app-dark-text); }
+        .list-item .value { font-size: 15px; font-weight: 600; color: var(--app-secondary-text); }
+        
+        input, textarea { background: transparent; color: var(--app-dark-text); }
+        input::placeholder, textarea::placeholder { color: #A1A1A6; }
+        
+        .slider-value { text-align: center; font-size: 32px; font-weight: 800; margin-bottom: 20px; color: var(--app-dark-text); }
+        input[type=range] { -webkit-appearance: none; width: 100%; margin: 10px 0; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track { height: 8px; background: var(--app-border); border-radius: 4px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 28px; width: 28px; border-radius: 50%; background: #FFFFFF; cursor: pointer; margin-top: -10px; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        
+        #scene-appstore { padding-top: 0; background-color: #FFFFFF; }
+        #scene-appstore .app-content { padding-top: 40px; }
+        .appstore-header { display: flex; align-items: center; padding-bottom: 20px; }
+        .appstore-icon { width: 84px; height: 84px; background-color: var(--app-dark-text); border-radius: 20px; margin-left: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;}
+        .appstore-icon img { width: 44px; height: auto; filter: brightness(0) invert(1); }
+        .appstore-info h1 { font-size: 22px; font-weight: 800; margin: 0 0 4px 0; color: var(--app-dark-text);}
+        .appstore-info p { font-size: 14px; color: var(--app-secondary-text); margin: 0; }
+        .appstore-get-button { background-color: var(--appstore-blue); color: #fff; font-weight: 700; font-size: 15px; padding: 6px 24px; border-radius: 16px; text-align: center; margin-top: 10px; display: inline-block; }
+        
+        .appstore-stats { display: flex; justify-content: space-around; text-align: center; padding: 16px 0; border-top: 1px solid var(--app-border); border-bottom: 1px solid var(--app-border); margin-top: 10px;}
+        .stat-item .value { font-size: 16px; font-weight: 600; color: var(--app-secondary-text); }
+        .stat-item .label { font-size: 11px; color: var(--app-secondary-text); margin-top: 4px; font-weight: 500;}
+        .stat-item .value.stars { font-weight: 800; color: var(--app-dark-text); }
+        
+        .screenshots-container { padding: 24px 0; display: flex; gap: 12px; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
+        .screenshots-container::-webkit-scrollbar { display: none; }
+        .screenshot-preview { width: 140px; height: 300px; border-radius: 16px; border: 1px solid var(--app-border); overflow: hidden; position: relative; flex-shrink: 0; background-color: var(--app-section-gray); padding: 12px; box-sizing: border-box; }
+        .preview-header { text-align: center; padding-bottom: 8px; margin-bottom: 12px; border-bottom: 1px solid var(--app-border); }
+        .preview-header img { height: 12px; }
+        .preview-content h3 { font-size: 12px; font-weight: 800; margin: 0 0 12px 0; color: var(--app-dark-text); }
+        .preview-list-mini { background: #fff; border-radius: 8px; border: 1px solid var(--app-border); overflow: hidden; }
+        .preview-list-item-mini { padding: 8px; font-size: 10px; font-weight: 500; border-bottom: 1px solid var(--app-border); color: var(--app-secondary-text); }
+        .preview-list-item-mini:last-child { border-bottom: none; }
+
+        /* --- קוביית דחיפות תחתונה --- */
+        .urgency-container {
+            text-align: center;
+            margin-top: 70px;
+            padding-top: 50px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+            z-index: 2;
+        }
+        .urgency-container h4 {
+            color: #FFFFFF;
+            font-size: 2rem;
+            margin: 0 0 10px 0;
+            font-weight: var(--font-bold);
+            letter-spacing: -0.5px;
+        }
+        .urgency-container p {
+            color: var(--dark-text-sec);
+            font-size: 1.2rem;
+            margin: 0 auto 30px auto;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+        
+        .simulation-section-pro .btn-pro {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: var(--pophy-yellow); 
+            color: var(--app-dark-text);
+            font-family: 'Ping HL', sans-serif; 
+            font-size: 1.15rem; 
+            font-weight: var(--font-bold);
+            padding: 15px 40px; 
+            border: none; 
+            border-radius: 980px; 
+            cursor: pointer; 
+            text-decoration: none;
+            box-shadow: 0 10px 25px rgba(255, 212, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        .simulation-section-pro .btn-pro:hover {
+            transform: scale(1.03) translateY(-2px);
+            box-shadow: 0 15px 30px rgba(255, 212, 0, 0.35);
+        }
+        .simulation-section-pro .btn-pro svg { width: 22px; height: 22px; transition: transform 0.3s ease; }
+        .simulation-section-pro .btn-pro:hover svg { transform: translateX(-5px); }
+
+        @media (max-width: 900px) {
+            .simulation-grid { grid-template-columns: 1fr; gap: 60px; }
+            .iphone-wrapper { position: relative; top: 0; order: -1; } 
+            .simulation-section-pro .section-header h2 { font-size: 2.4rem; }
+            .simulation-section-pro .section-header p { font-size: 1.1rem; }
+            .simulation-section-pro { padding: 70px 0 50px 0; }
+            .urgency-container { margin-top: 60px; padding-top: 40px; }
+            .urgency-container h4 { font-size: 1.6rem; }
+        }
+
+        /* =========================================================
+           Story
+           ========================================================= */
+/* טעינת הפונטים */
+
+        /* --- סטריפ חזון Pophy - Innovative Layout --- */
+        .story-section {
+            padding: 100px 20px;
+            background: linear-gradient(180deg, #FFFFFF 0%, #F5F5F7 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+
+        .story-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            gap: 70px;
+            max-width: 1250px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- צד ימין: תוכן קופירייטינג --- */
+        .story-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        /* תגית חדשנית - סגנון Tech */
+        .story-section .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #FFFFFF;
+            color: var(--dark-text);
+            font-weight: 800;
+            font-size: 0.95rem;
+            padding: 8px 16px;
+            border-radius: 980px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .badge-dot {
+            width: 8px; height: 8px;
+            background-color: var(--pophy-yellow);
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .story-content h2 {
+            font-size: 3.2rem;
+            font-weight: var(--font-bold);
+            line-height: 1.1;
+            letter-spacing: -1px;
+            margin: 0 0 25px 0;
+            color: var(--dark-text);
+        }
+
+        /* הדגשה עיצובית מתחת למילה ספציפית בכותרת */
+        .story-section .highlight {
+            position: relative;
+            display: inline-block;
+            z-index: 1;
+        }
+        .story-section .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: 6px; right: -2%; left: -2%;
+            height: 12px;
+            background-color: var(--pophy-yellow);
+            opacity: 0.4;
+            z-index: -1;
+            border-radius: 4px;
+        }
+
+        .story-content p {
+            font-size: 1.25rem;
+            color: var(--secondary-text);
+            line-height: 1.6;
+            margin: 0 0 20px 0;
+            max-width: 580px;
+        }
+
+        .story-content p strong {
+            color: var(--dark-text);
+            font-weight: var(--font-bold);
+        }
+
+        /* --- כפתורי CTA וטראסט --- */
+        .cta-group {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .story-section .btn-pro {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: var(--dark-text); 
+            color: #FFFFFF;
+            font-family: 'Ping HL', sans-serif; 
+            font-size: 1.15rem; 
+            font-weight: var(--font-bold);
+            padding: 15px 40px; 
+            border: none; 
+            border-radius: 980px; 
+            cursor: pointer; 
+            text-decoration: none;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .story-section .btn-pro:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+            background: #000000;
+        }
+
+        .story-section .btn-pro svg { width: 20px; height: 20px; transition: transform 0.3s ease; }
+        .story-section .btn-pro:hover svg { transform: translateX(-5px); }
+
+        .trust-text {
+            font-size: 0.95rem;
+            color: var(--secondary-text);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* --- צד שמאל: עיצוב "שבירת גריד" (Breaking the Grid) --- */
+        .story-visual-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .video-container {
+            position: relative;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.04);
+            background: #000;
+        }
+
+        .video-container iframe {
+            width: 100%;
+            aspect-ratio: 16/9;
+            border: none;
+            display: block;
+        }
+
+
+        /* --- סגנונות מובייל לדסקטופ (כפתורים) --- */
+        .story-section .show-on-mobile { display: none; }
+        .story-section .show-on-desktop { display: inline-flex; }
+
+        /* (modal CSS moved to unified modal) */
+
+        /* --- רספונסיביות --- */
+        @media (max-width: 1024px) {
+            .story-container { gap: 60px; }
+            .story-content h2 { font-size: 2.6rem; }
+        }
+
+        @media (max-width: 900px) {
+            .story-section { padding: 70px 20px; }
+            .story-container { grid-template-columns: 1fr; gap: 60px; }
+            .story-content { align-items: center; text-align: center; }
+            .story-content h2 { font-size: 2.4rem; text-align: center;}
+
+            .cta-group { align-items: center; width: 100%; margin-top: 20px;}
+            
+            .story-section .show-on-desktop { display: none; }
+            .story-section .show-on-mobile { display: inline-flex; width: 100%; justify-content: center; }
+        }
+
+        @media (max-width: 480px) {
+            .story-content h2 { font-size: 2.2rem; }
+            .story-content p { font-size: 1.1rem; }
+            .story-section .btn-pro { width: 100%; }
+        }
+
+        /* =========================================================
+           Comparison
+           ========================================================= */
+        .trust-section-pro {
+            background-color: var(--section-bg-gray);
+            padding: 90px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .trust-section-pro .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .trust-section-pro .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .trust-section-pro .section-header h2 {
+            font-size: 3.2rem;
+            font-weight: var(--font-bold);
+            margin: 0 0 20px 0;
+            letter-spacing: -1.2px;
+            line-height: 1.1;
+            color: var(--dark-text);
+        }
+        
+        .highlight-trust {
+            color: var(--dark-text);
+            position: relative;
+            display: inline-block;
+        }
+        .highlight-trust::after {
+            content: '';
+            position: absolute;
+            bottom: 6px; right: -2%; left: -2%;
+            height: 12px;
+            background-color: var(--pophy-yellow);
+            opacity: 0.4;
+            z-index: -1;
+            border-radius: 4px;
+        }
+
+        .trust-section-pro .section-header p {
+            font-size: 1.3rem;
+            color: var(--secondary-text);
+            margin: 0 auto;
+            max-width: 650px;
+            line-height: 1.6;
+        }
+
+        /* פריסה מודרנית: קלפים מרחפים במקום טבלה נוקשה */
+        .comparison-layout {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            align-items: stretch;
+        }
+
+        .glass-card {
+            flex: 1;
+            background: #FFFFFF;
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 28px;
+            padding: 50px 40px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        }
+
+        .card-old {
+            background: #FFFFFF;
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+
+        .card-pophy {
+            background: #FFFFFF;
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+            transform: scale(1.02);
+            z-index: 10;
+        }
+
+        .card-header {
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .card-header h3 {
+            font-size: 2rem;
+            font-weight: var(--font-bold);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* הוספת לוגו מינימליסטי לכותרת של Pophy */
+        .pophy-logo-mini {
+            height: 24px;
+            margin-bottom: 2px;
+        }
+
+        .card-old .card-header h3 { color: var(--secondary-text); }
+        .card-pophy .card-header h3 { color: var(--dark-text); }
+
+        /* קו מדגיש מתחת לכותרות */
+        .card-header::after {
+            content: ''; position: absolute; bottom: -20px; right: 0; height: 3px; border-radius: 2px;
+        }
+        .card-old .card-header::after { width: 40px; background-color: rgba(0,0,0,0.08); }
+        .card-pophy .card-header::after { width: 60px; background-color: var(--pophy-yellow); }
+
+        /* רשימת ההשוואה */
+        .comparison-list {
+            display: flex;
+            flex-direction: column;
+            gap: 40px; /* ריווח נדיב בין סעיפים */
+        }
+
+        .comparison-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .icon-box {
+            flex-shrink: 0;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin-top: 2px;
+        }
+
+        .card-old .icon-box { 
+            background: rgba(0, 0, 0, 0.04); 
+            color: var(--secondary-text); 
+        }
+        
+        .card-pophy .icon-box { 
+            background: rgba(255, 212, 0, 0.15); 
+            color: #B8960A; 
+        }
+
+        .text-content h4 {
+            font-size: 1.25rem;
+            font-weight: var(--font-semibold);
+            margin: 0 0 8px 0;
+        }
+        
+        .card-old .text-content h4 { color: var(--secondary-text); }
+        .card-pophy .text-content h4 { color: var(--dark-text); }
+
+        .text-content p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin: 0;
+            color: var(--secondary-text);
+        }
+
+        @media (max-width: 900px) {
+            .comparison-layout { flex-direction: column; gap: 40px; }
+            .trust-section-pro .section-header h2 { font-size: 2.4rem; }
+            .card-pophy { transform: scale(1); } /* ביטול הגדלה במובייל */
+            .glass-card { padding: 40px 30px; }
+        }
+        
+        @media (max-width: 480px) {
+            .trust-section-pro .section-header h2 { font-size: 2rem; }
+            .card-header h3 { font-size: 1.6rem; }
+            .glass-card { padding: 30px 20px; }
+        }
+
+        /* =========================================================
+           Locations
+           ========================================================= */
+/* טעינת הפונטים */
+        
+        .locations-section-pro {
+            background-color: #FFFFFF;
+            padding: 90px 20px; 
+            position: relative;
+            border-top: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .locations-section-pro .container {
+            max-width: 1000px; 
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* --- 3. Header --- */
+        .locations-section-pro .section-header {
+            text-align: center;
+            margin-bottom: 45px; 
+        }
+
+        .locations-section-pro .section-header h2 {
+            font-size: 3.2rem;
+            font-weight: var(--font-bold);
+            color: var(--dark-text);
+            margin: 0 0 15px 0;
+            line-height: 1.1;
+            letter-spacing: -1px;
+        }
+
+        .locations-section-pro .section-header p {
+            font-size: 1.3rem;
+            color: var(--secondary-text);
+            max-width: 600px;
+            margin: 0 auto; 
+            line-height: 1.6;
+        }
+
+        /* --- 4. כרטיסיית המפה (Glassmorphism) --- */
+        .locations-widget-card {
+            background: #FFFFFF;
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 28px;
+            padding: 30px;
+            display: flex; 
+            flex-direction: column; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+            position: relative;
+        }
+        
+
+        /* --- 5. עיצוב Dropdown חכם עם חיפוש --- */
+        .location-select-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 25px;
+            z-index: 10;
+        }
+
+        .location-search-input {
+            font-family: 'Ping HL', sans-serif;
+            font-size: 1.2rem;
+            font-weight: var(--font-bold);
+            color: var(--dark-text);
+            width: 100%;
+            padding: 20px 50px 20px 44px;
+            background-color: #F5F5F7;
+            border: 1.5px solid #E5E5EA;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            direction: rtl;
+        }
+        .location-search-input::placeholder {
+            color: #AEAEB2;
+            font-weight: 400;
+        }
+        .location-search-input:hover,
+        .location-search-input:focus {
+            border-color: var(--dark-text);
+            outline: none;
+            background-color: #FFFFFF;
+        }
+        .location-select-wrapper.is-open .location-search-input {
+            border-radius: 16px 16px 0 0;
+            border-color: var(--dark-text);
+        }
+
+        .location-icon-input {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            color: var(--secondary-text);
+            pointer-events: none;
+            z-index: 2;
+        }
+        .location-chevron {
+            position: absolute;
+            left: 20px;
+            top: 22px;
+            pointer-events: none;
+            transition: transform 0.3s ease;
+            z-index: 2;
+        }
+        .location-chevron svg { fill: var(--secondary-text); }
+        .location-select-wrapper.is-open .location-chevron {
+            transform: rotate(180deg);
+        }
+
+        .location-options-list {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin: 0;
+            padding: 6px 0;
+            list-style: none;
+            background: #FFFFFF;
+            border: 1.5px solid var(--dark-text);
+            border-top: none;
+            border-radius: 0 0 16px 16px;
+            max-height: 240px;
+            overflow-y: auto;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.1);
+            direction: rtl;
+        }
+        .location-select-wrapper.is-open .location-options-list {
+            display: block;
+        }
+        .location-options-list li {
+            padding: 13px 24px;
+            font-family: 'Ping HL', sans-serif;
+            font-size: 1rem;
+            color: var(--dark-text);
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+        .location-options-list li:hover,
+        .location-options-list li.highlighted {
+            background: #F5F5F7;
+            color: var(--dark-text);
+        }
+        .location-options-list li.no-results {
+            color: #AEAEB2;
+            cursor: default;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .location-options-list li.no-results:hover {
+            background: none;
+            color: #AEAEB2;
+        }
+        .location-options-list::-webkit-scrollbar { width: 6px; }
+        .location-options-list::-webkit-scrollbar-track { background: transparent; }
+        .location-options-list::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.1);
+            border-radius: 3px;
+        }
+        
+        /* --- 6. עמודת המפה (אפקט Dark Mode למפה!) --- */
+        .map-embed-container {
+            flex-grow: 1; 
+            border-radius: 20px;
+            overflow: hidden;
+            width: 100%;
+            min-height: 400px; 
+            position: relative; 
+            border: 1px solid rgba(0,0,0,0.06);
+            background: #F5F5F7;
+        }
+
+        .map-embed-container iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            min-height: 400px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        /* --- 7. כפתור CTA תחתון (Pro Button) --- */
+        .locations-cta-container {
+            text-align: center;
+            margin-top: 40px; 
+        }
+        
+        .locations-section-pro .btn-pro {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: var(--cta-background); 
+            color: var(--cta-text-color);
+            font-family: 'Ping HL', sans-serif; 
+            font-size: 1.15rem; 
+            font-weight: var(--font-bold);
+            padding: 15px 40px; 
+            border: none; 
+            border-radius: 980px; 
+            cursor: pointer; 
+            text-decoration: none;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+        .locations-section-pro .btn-pro:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+        .locations-section-pro .btn-pro svg { width: 20px; height: 20px; transition: transform 0.3s ease; }
+        .locations-section-pro .btn-pro:hover svg { transform: translateX(-5px); }
+
+        .locations-section-pro .btn-pro.mobile-only { display: none; }
+
+        /* (modal CSS moved to unified modal) */
+        .qr-text strong { display: block; font-size: 1.1rem; font-weight: 800; margin-bottom: 5px; }
+        .qr-text span { font-size: 0.95rem; color: #86868B; }
+
+        /* --- 9. רספונסיביות --- */
+        @media (max-width: 900px) {
+            .locations-section-pro { padding: 70px 20px; }
+            .locations-section-pro .section-header h2 { font-size: 2.4rem; }
+            .locations-widget-card { padding: 20px; border-radius: 24px;}
+            .map-embed-container { min-height: 350px; }
+            .locations-section-pro .btn-pro.desktop-only { display: none; }
+            .locations-section-pro .btn-pro.mobile-only { display: inline-flex; width: 100%; }
+        }
+
+        @media (max-width: 480px) {
+            .locations-section-pro .section-header h2 { font-size: 2rem; }
+            .locations-section-pro .section-header p { font-size: 1rem; }
+        }
+
+
+        /* =========================================================
+           Final CTA + Footer
+           ========================================================= */
+/* --- רקע הסטריפ (Deep Space Grid) --- */
+        .ultimate-cta-section {
+            position: relative;
+            padding: 100px 20px 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: auto;
+            background-color: var(--bg-deep);
+            overflow: hidden;
+        }
+
+
+        .ultimate-cta-section .container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .premium-panel-wrapper {
+            position: relative;
+            border-radius: 42px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px -10px rgba(0,0,0,0.5);
+        }
+
+        .premium-panel-content {
+            position: relative;
+            background: var(--bg-card);
+            border-radius: 40px;
+            padding: 80px 40px;
+            text-align: center;
+            z-index: 2;
+            /* הילה פנימית להוספת עומק לזכוכית */
+            box-shadow: inset 0 0 40px rgba(255,255,255,0.02);
+        }
+
+        /* --- טיפוגרפיה חדשנית --- */
+        .app-icon {
+            width: 72px; height: 72px;
+            background: linear-gradient(135deg, #222, #000);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 35px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6), inset 0 2px 2px rgba(255,255,255,0.1);
+            position: relative;
+        }
+        
+        .app-icon img {
+            width: 36px; height: auto;
+            filter: brightness(0) invert(1);
+        }
+
+        .headline {
+            font-size: 3.6rem; 
+            font-weight: var(--font-heavy);
+            line-height: 1.05; 
+            margin: 0 0 24px 0;
+            letter-spacing: -1.5px;
+            color: var(--text-main);
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #FFFFFF 0%, var(--pophy-yellow) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(255, 212, 0, 0.2);
+        }
+
+        .description {
+            font-size: 1.35rem; 
+            color: var(--text-muted);
+            line-height: 1.5; 
+            margin: 0 auto 50px; 
+            max-width: 650px;
+            font-weight: 400;
+        }
+
+        /* --- אזור ההורדות --- */
+        .downloads-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* QRs לדסקטופ */
+        .desktop-qrs {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .qr-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .qr-card::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transform: skewX(-20deg); transition: 0.5s;
+        }
+
+        .qr-card:hover {
+            transform: translateY(-6px);
+            background: rgba(255, 212, 0, 0.05);
+            border-color: rgba(255, 212, 0, 0.4);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 2px 20px rgba(255,212,0,0.05);
+        }
+        
+        .qr-card:hover::before { left: 200%; }
+        
+        .qr-image {
+            width: 64px; height: 64px;
+            margin-left: 20px;
+            border-radius: 12px;
+            background: #fff; 
+            padding: 4px;
+        }
+        
+        .qr-text { text-align: right; }
+        .qr-text strong { display: block; font-size: 1.15rem; font-weight: var(--font-bold); margin-bottom: 4px; }
+        .qr-text span { font-size: 0.9rem; color: var(--text-muted); }
+
+        /* כפתורים למובייל */
+        .mobile-app-buttons {
+            display: none; 
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+            max-width: 380px;
+        }
+
+        .app-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: var(--text-main);
+            color: #000000;
+            padding: 15px 24px;
+            border-radius: 980px; 
+            text-decoration: none;
+            font-weight: var(--font-bold);
+            font-size: 1.15rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .app-btn-secondary {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .app-btn svg { width: 28px; height: 28px; }
+
+        .trust-marker {
+            margin-top: 35px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.03);
+            padding: 12px 24px;
+            border-radius: 980px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* (old inner footer CSS removed — using .site-footer instead) */
+        
+        .fade-up-element { opacity: 0; transform: translateY(40px); }
+
+        /* --- רספונסיביות --- */
+        @media (max-width: 992px) {
+            .ultimate-cta-section { padding: 80px 20px 50px; min-height: auto;}
+            .premium-panel-content { padding: 60px 20px; border-radius: 38px; }
+            .headline { font-size: 2.8rem; }
+            .desktop-qrs { display: none; }
+            .mobile-app-buttons { display: flex; margin: 0 auto;}
+        }
+        
+        @media (max-width: 480px) {
+            .headline { font-size: 2.2rem; letter-spacing: -1px; margin-bottom: 20px;}
+            .description { font-size: 1.15rem; margin-bottom: 40px;}
+            .premium-panel-content { padding: 50px 20px; border-radius: 32px;}
+            .app-icon { width: 64px; height: 64px; margin-bottom: 25px;}
+            .app-icon img { width: 32px; }
+            .trust-marker { font-size: 1rem; flex-direction: column; gap: 4px; text-align: center; border: none; background: transparent;}
+        }
+
+        /* =========================================================
+           FAQ
+           ========================================================= */
+/* טעינת הפונטים */
+
+        .faq-section-pro {
+            padding: 90px 20px;
+            background-color: var(--faq-bg);
+            position: relative;
+        }
+
+        .faq-section-pro .container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* --- Header --- */
+        .faq-section-pro .section-header {
+            text-align: center;
+            margin-bottom: 45px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .badge-faq {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.04);
+            color: var(--faq-text-main);
+            font-size: 0.95rem;
+            font-weight: 800;
+            padding: 8px 16px;
+            border-radius: 980px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .faq-section-pro .section-header h2 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            margin: 0 0 15px 0;
+            letter-spacing: -1.2px;
+            line-height: 1.1;
+            color: var(--faq-text-main);
+        }
+
+        .faq-section-pro .section-header p {
+            font-size: 1.3rem;
+            color: var(--faq-text-muted);
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* --- Accordion (שאלות ותשובות) --- */
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .faq-item {
+            background-color: var(--faq-card-bg);
+            border: 1px solid var(--faq-border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            /* אנימציית כניסה פשוטה ובטוחה */
+            animation: fadeInUp 0.8s ease-out forwards;
+            opacity: 0;
+        }
+
+        /* דיליי מדורג להופעת השאלות */
+        .faq-item:nth-child(1) { animation-delay: 0.1s; }
+        .faq-item:nth-child(2) { animation-delay: 0.2s; }
+        .faq-item:nth-child(3) { animation-delay: 0.3s; }
+        .faq-item:nth-child(4) { animation-delay: 0.4s; }
+        .faq-item:nth-child(5) { animation-delay: 0.5s; }
+        .faq-item:nth-child(6) { animation-delay: 0.6s; }
+
+        .faq-item:hover {
+            box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+            transform: translateY(-2px);
+            border-color: rgba(0,0,0,0.1);
+        }
+
+        /* מצב פעיל (פתוח) */
+        .faq-item.active {
+            border-color: var(--pophy-yellow);
+            box-shadow: 0 15px 35px rgba(255, 212, 0, 0.1);
+        }
+
+        .faq-question {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 30px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--faq-text-main);
+            text-align: right;
+            transition: color 0.3s ease;
+        }
+
+        .faq-icon {
+            width: 24px;
+            height: 24px;
+            position: relative;
+            flex-shrink: 0;
+            margin-right: 20px;
+        }
+
+        .faq-icon::before, .faq-icon::after {
+            content: '';
+            position: absolute;
+            background-color: var(--faq-text-main);
+            border-radius: 2px;
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.3s ease;
+        }
+
+        /* קו אופקי */
+        .faq-icon::before {
+            top: 50%; left: 0; right: 0; height: 2px;
+            transform: translateY(-50%);
+        }
+
+        /* קו אנכי */
+        .faq-icon::after {
+            top: 0; bottom: 0; left: 50%; width: 2px;
+            transform: translateX(-50%);
+        }
+
+        /* מצב פעיל לאייקון */
+        .faq-item.active .faq-icon::before {
+            background-color: var(--faq-text-main);
+        }
+        
+        .faq-item.active .faq-icon::after {
+            transform: translateX(-50%) rotate(90deg);
+            opacity: 0;
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .faq-answer-inner {
+            padding: 0 30px 30px 30px;
+            font-size: 1.15rem;
+            color: var(--faq-text-muted);
+            line-height: 1.6;
+        }
+
+        .faq-answer-inner strong {
+            color: var(--faq-text-main);
+            font-weight: 800;
+        }
+
+        /* --- Keyframes --- */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- רספונסיביות --- */
+        @media (max-width: 768px) {
+            .faq-section-pro { padding: 70px 20px; }
+            .faq-section-pro .section-header h2 { font-size: 2rem; }
+            .faq-section-pro .section-header p { font-size: 1rem; }
+            .faq-question { font-size: 1.1rem; padding: 18px 22px; }
+            .faq-answer-inner { padding: 0 22px 22px 22px; font-size: 1rem; }
+        }
+
+        /* =============================================================
+           GLOBAL MOBILE RESPONSIVE OVERRIDES
+           ============================================================= */
+
+        /* --- Main mobile breakpoint --- */
+        @media (max-width: 768px) {
+
+            /* Kill all layout-shifting animations on mobile */
+            .glass-card,
+            .card-pophy .comparison-item,
+            .fade-up-element {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+
+            /* Global 10% narrower on mobile */
+            .container { padding-left: 5vw !important; padding-right: 5vw !important; }
+            .features-row { padding-left: 5vw !important; padding-right: 5vw !important; }
+
+            /* --- Hero --- */
+            .hero-split {
+                padding: 36px 20px 30px !important;
+                gap: 28px;
+            }
+            .hero-logo { margin-top: 0; height: 38px; }
+            .hero-headline { font-size: 2rem !important; line-height: 1.15; }
+            .hero-subheadline { font-size: 1rem; max-width: 100%; }
+            .hero-benefits { gap: 10px; align-items: center; width: 100%; }
+            .hero-benefits li { font-size: 0.95rem; justify-content: center; width: 100%; text-align: center; }
+            .cta-wrapper { align-items: center !important; width: 100%; }
+            .hero-cta { font-size: 0.95rem; padding: 12px 24px; width: 100%; justify-content: center; text-align: center; }
+            .hero-visual { padding: 0; }
+            .video-premium-frame { padding: 8px; border-radius: 20px; }
+            .hero-visual iframe { border-radius: 14px; }
+
+            /* --- Feature Cards --- */
+            .features-row {
+                padding: 10px 16px 40px !important;
+                gap: 10px;
+            }
+            .ui-card {
+                flex-basis: 100% !important;
+                max-width: 100% !important;
+                padding: 16px 18px;
+                gap: 14px;
+                border-radius: 18px;
+            }
+            .ui-card .icon { width: 44px; height: 44px; border-radius: 12px; }
+            .ui-card .text strong { font-size: 1rem; }
+            .ui-card .text span { font-size: 0.85rem; }
+
+            /* --- Accordion --- */
+            .features-accordion-section .section-header { margin-bottom: 40px; }
+
+            /* --- Simulation / App Walkthrough --- */
+            .simulation-section-pro { animation: none !important; background-size: 100% 100% !important; }
+            .simulation-section-pro .section-header { margin-bottom: 40px; }
+            .simulation-grid { gap: 30px !important; }
+            .iphone-wrapper { max-width: 260px; margin: 0 auto; }
+            .iphone-mockup { width: 100% !important; height: 0 !important; padding-bottom: 206.25% !important; border-radius: 40px; padding-top: 0 !important; padding-left: 8px !important; padding-right: 8px !important; animation: none !important; }
+            .iphone-screen { border-radius: 22px; }
+            .iphone-inner-bezel { border-radius: 26px; }
+            .iphone-glow { display: none; }
+            .interactive-steps { padding: 0 16px; }
+            .step-item {
+                padding: 14px 16px !important;
+            }
+            .step-item h3 { font-size: 1.05rem; }
+            .step-item p {
+                font-size: 0.9rem;
+                max-height: none !important;
+                opacity: 1 !important;
+                margin-top: 6px !important;
+                overflow: visible !important;
+                transition: none !important;
+            }
+            .step-item.active {
+                border-right-width: 3px;
+            }
+            .urgency-container { margin-top: 40px; padding-top: 30px; }
+            .urgency-container h4 { font-size: 1.2rem; }
+            .simulation-section-pro .btn-pro { width: 100%; justify-content: center; box-sizing: border-box; }
+
+            /* --- Unified button size for all sections on mobile --- */
+            .btn-pro,
+            .hero-cta,
+            .app-btn { font-size: 0.95rem !important; padding: 12px 24px !important; }
+
+            /* --- Story --- */
+            .story-section { padding: 70px 20px 70px !important; }
+            .story-container { gap: 40px !important; }
+            .story-content { padding: 0 !important; }
+            .story-content h2 { font-size: 2rem !important; }
+            .story-content p { font-size: 1rem; }
+            /* --- Comparison --- */
+            .trust-section-pro { padding: 60px 16px !important; }
+            .trust-section-pro .section-header { margin-bottom: 40px; }
+            .trust-section-pro .section-header h2 { font-size: 2rem !important; }
+            .trust-section-pro .section-header p { font-size: 1rem !important; }
+            .comparison-layout { gap: 20px !important; }
+            .glass-card { padding: 28px 20px; border-radius: 24px; }
+            .card-header { margin-bottom: 30px; }
+            .card-header h3 { font-size: 1.5rem; }
+            .comparison-list { gap: 24px; }
+            .comparison-item .text-content h4 { font-size: 1rem; }
+            .comparison-item .text-content p { font-size: 0.9rem; }
+
+            /* --- Locations --- */
+            .locations-section-pro { padding: 50px 16px !important; }
+            .locations-section-pro .section-header { margin-bottom: 30px; }
+            .locations-section-pro .section-header h2 { font-size: 1.8rem !important; line-height: 1.2; }
+            .locations-section-pro .section-header p { font-size: 0.95rem !important; }
+            .locations-widget-card {
+                padding: 16px !important;
+                padding-top: 40px !important;
+                border-radius: 20px !important;
+                gap: 14px;
+                overflow: visible;
+            }
+            .location-search-input {
+                font-size: 0.95rem;
+                padding: 14px 42px 14px 36px;
+                border-radius: 12px;
+            }
+            .location-select-wrapper.is-open .location-search-input { border-radius: 12px 12px 0 0; }
+            .location-options-list { border-radius: 0 0 12px 12px; max-height: 180px; }
+            .location-icon-input { top: 14px; right: 14px; width: 18px; height: 18px; }
+            .location-chevron { top: 16px; left: 12px; }
+            .location-options-list li { padding: 12px 18px; font-size: 0.9rem; }
+            .map-embed-container {
+                min-height: 250px !important;
+                height: 55vw;
+                max-height: 320px;
+                border-radius: 14px !important;
+            }
+            .map-embed-container iframe { min-height: 250px !important; }
+            .locations-cta-container { padding: 0; margin-top: 20px; }
+            .locations-cta-container .btn-pro { width: 100%; justify-content: center; font-size: 0.9rem !important; }
+
+            /* --- FAQ --- */
+            .faq-section-pro { padding: 60px 16px !important; }
+            .faq-section-pro .section-header { margin-bottom: 40px; }
+            .faq-section-pro .section-header h2 { font-size: 2rem !important; }
+            .faq-list { gap: 10px; }
+            .faq-question { font-size: 1.1rem; padding: 18px 20px; }
+            .faq-answer-inner { padding: 0 20px 20px; font-size: 0.95rem; }
+
+            /* --- Final CTA --- */
+            .ultimate-cta-section { padding: 60px 16px 40px !important; min-height: auto !important; }
+            .premium-panel-content { padding: 40px 20px !important; border-radius: 28px !important; }
+            .headline { font-size: 2.2rem !important; margin-bottom: 16px; }
+            .description { font-size: 1rem !important; margin-bottom: 30px; }
+            .desktop-qrs { display: none !important; }
+            .mobile-app-buttons { display: flex !important; margin: 0 auto; }
+            .app-btn { flex: 1; justify-content: center; }
+            .downloads-wrapper { gap: 14px; }
+            .app-icon { width: 72px; height: 72px; margin-bottom: 20px; }
+            .trust-marker { font-size: 0.95rem; }
+
+            /* --- Footer --- */
+            .site-footer { font-size: 0.8rem; padding: 24px 16px 76px !important; }
+        }
+
+        /* --- Small phones --- */
+        @media (max-width: 480px) {
+            .hero-split { padding: 28px 16px 24px !important; }
+            .hero-headline { font-size: 1.7rem !important; }
+            .hero-subheadline { font-size: 0.9rem; }
+            .hero-benefits li { font-size: 0.85rem; gap: 8px; }
+
+            /* Unified small-phone buttons */
+            .btn-pro,
+            .hero-cta,
+            .app-btn { font-size: 0.88rem !important; padding: 11px 20px !important; }
+
+            /* All section h2: uniform 1.7rem */
+            .features-accordion-section .section-header h2,
+            .simulation-section-pro .section-header h2,
+            .story-content h2,
+            .trust-section-pro .section-header h2,
+            .locations-section-pro .section-header h2,
+            .faq-section-pro .section-header h2 { font-size: 1.7rem !important; }
+            .headline { font-size: 1.8rem !important; letter-spacing: -0.5px; }
+
+            /* All section descriptions: uniform 0.9rem */
+            .description { font-size: 0.9rem !important; }
+            .story-content p { font-size: 0.9rem; }
+
+            .accordion-header h4 { font-size: 1.05rem !important; }
+            .iphone-wrapper { max-width: 200px; }
+            .card-header h3 { font-size: 1.3rem !important; }
+            .glass-card { padding: 24px 16px; }
+            .map-embed-container { min-height: 220px; }
+            .faq-question { font-size: 0.95rem; padding: 16px 18px; }
+            .premium-panel-content { padding: 32px 16px !important; }
+            .app-icon { width: 60px; height: 60px; }
+            .app-icon img { width: 28px; }
+            .trust-marker { font-size: 0.85rem; flex-direction: column; gap: 4px; text-align: center; border: none; background: transparent; }
+        }
+
+
+        /* =========================================================
+           Sticky Mobile CTA Bar
+           ========================================================= */
+        .sticky-mobile-cta {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(0,0,0,0.06);
+            padding: 10px 16px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+            z-index: 9980;
+            display: none;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .sticky-mobile-cta.is-visible { transform: translateY(0); }
+        .sticky-cta-btn {
+            width: 100%;
+            background: var(--cta-background, #1D1D1F);
+            color: var(--cta-text-color, #fff);
+            font-family: 'Ping HL', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            padding: 13px 20px;
+            border: none;
+            border-radius: 980px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        .sticky-cta-btn:active { transform: scale(0.97); }
+        .sticky-cta-btn svg { width: 18px; height: 18px; }
+
+        @media (min-width: 769px) {
+            .sticky-mobile-cta { display: none !important; }
+        }
+        @media (max-width: 768px) {
+            .sticky-mobile-cta { display: block; }
+        }
+
+
+
+        /* =========================================================
+           Personas Section
+           ========================================================= */
+        .personas-section {
+            padding: 90px 20px;
+            background: var(--section-bg-gray);
+            border-top: 1px solid rgba(0,0,0,0.03);
+        }
+        .personas-section .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .personas-section .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .personas-section .section-header h2 {
+            font-size: 3.2rem;
+            font-weight: var(--font-bold);
+            margin: 0 0 20px 0;
+            letter-spacing: -1.2px;
+            line-height: 1.1;
+            color: var(--dark-text);
+        }
+        .personas-section .section-header p {
+            font-size: 1.3rem;
+            color: var(--secondary-text);
+            margin: 0 auto;
+            max-width: 650px;
+            line-height: 1.6;
+        }
+        .personas-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .persona-card {
+            background: #FFFFFF;
+            border: 1px solid rgba(0,0,0,0.04);
+            border-radius: 24px;
+            padding: 32px 28px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+        }
+        .persona-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+        .persona-card .persona-tagline {
+            font-size: 1.15rem;
+            font-weight: var(--font-bold);
+            color: var(--dark-text);
+            margin: 0 0 12px 0;
+            line-height: 1.3;
+        }
+        .persona-card .persona-text {
+            font-size: 0.95rem;
+            color: var(--secondary-text);
+            line-height: 1.55;
+            margin: 0 0 20px 0;
+        }
+        .persona-card .persona-meta {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #AEAEB2;
+            padding-top: 16px;
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+        .persona-card.persona-highlight {
+            border-color: rgba(0,0,0,0.08);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+        }
+        .persona-card.persona-highlight .persona-tagline { color: var(--dark-text); }
+        .personas-cta-wrap {
+            text-align: center;
+            margin-top: 40px;
+        }
+        .personas-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            background: var(--dark-text);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 980px;
+            font-family: 'Ping HL', sans-serif;
+            font-size: 1rem;
+            font-weight: var(--font-bold);
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+        .personas-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+        }
+        .personas-cta svg { width: 18px; height: 18px; }
+        @media (max-width: 900px) {
+            .personas-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+            .personas-section .section-header h2 { font-size: 2.4rem; }
+        }
+        @media (max-width: 768px) {
+            .personas-section { padding: 60px 16px; }
+            .personas-section .section-header h2 { font-size: 2rem !important; }
+            .personas-section .section-header p { font-size: 1rem; }
+            .personas-section .section-header { margin-bottom: 40px; }
+        }
+        @media (max-width: 480px) {
+            .personas-section .section-header h2 { font-size: 1.7rem !important; }
+        }
+
+
+
+
+    </style>
+</head>
+<body>
+
+    <!-- =========================================================
+         Hero + Feature Cards
+         ========================================================= -->
+    <section class="hero-split">
+            <div class="hero-content">
+                <img src="https://static.wixstatic.com/media/bb1f28_0f698d00e96e433583a41170ffc64e19~mv2.png" alt="Pophy Logo" class="hero-logo">
+                
+                <!-- כותרת נקייה, חדה וללא צלליות -->
+                <h1 class="hero-headline">
+                    ניקיון המשרד מתנהל מעצמו.<br>
+                    <span class="highlight-text">אתם פנויים לנהל את העסק.</span>
+                </h1>
+                
+                <p class="hero-subheadline">
+                    פלטפורמה חכמה שמחליפה את חברות הניקיון של פעם. מצוותים מסוננים ועד פיקוח בזמן אמת – השליטה המלאה חוזרת אליכם, ישירות מהנייד.
+                </p>
+                
+                <ul class="hero-benefits">
+                    <li><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> ניהול דיגיטלי מלא, ללא טלפונים וללא בירוקרטיה</li>
+                    <li><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> מודל אפס סיכון: משלמים רק לאחר אישור התוצאה</li>
+                </ul>
+                
+                <div class="cta-wrapper">
+                    <!-- כפתור פרימיום שחור ומעוגל -->
+                    <button id="cta-button" class="hero-cta">
+                        להורדת האפליקציה
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    
+
+                </div>
+            </div>
+
+            <div class="hero-visual" id="video-container">
+                <!-- מסגרת נקייה עם אפקט זכוכית במקום קו מקווקו צהוב -->
+                <div class="video-premium-frame">
+                    <iframe 
+                        src="https://www.youtube.com/embed/EWbl4endr7Q?si=AZvG_lEv4Ydo_DVu" 
+                        title="YouTube video player" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        referrerpolicy="strict-origin-when-cross-origin" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- שינוי פסיכולוגי בכרטיסיות: מילים שמשדרות תהליך וביטחון -->
+            <section class="features-row">
+                
+                <div class="ui-card" id="card1">
+                    <div class="icon">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 7V5C8 3.34315 9.34315 2 11 2H13C14.6569 2 16 3.34315 16 5V7M6 10H18L19 21H5L6 10Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <div class="text">
+                        <strong>1. 100% דיגיטלי</strong>
+                        <span>סוגרים הזמנה בכמה לחיצות, באפס התעסקות</span>
+                    </div>
+                </div>
+
+                <div class="ui-card" id="card2">
+                    <div class="icon">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22ZM12 6V12L16 14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <div class="text">
+                        <strong>2. מישהו לסמוך עליו</strong>
+                        <span>סינון קפדני ופיקוח מלא על איכות הביצוע</span>
+                    </div>
+                </div>
+
+                <div class="ui-card" id="card3">
+                    <div class="icon">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L9 17L4 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <div class="text">
+                        <strong>3. אחריות מלאה</strong>
+                        <span>התשלום מתבצע רק כשאתם מרוצים ב-100%</span>
+                    </div>
+                </div>
+
+            </section>
+
+    <!-- (Hero modal removed — unified modal used instead) -->
+
+
+
+
+    <!-- =========================================================
+         Accordion
+         ========================================================= -->
+    <section class="features-accordion-section">
+        <div class="accordion-container">
+            <div class="section-header">
+                <!-- הכותרת שונתה כדי לשדר ביטחון ואפס מאמץ במקום "לא משנה מי מנקה" -->
+                <h2>סטנדרט חדש לניהול משרד.</h2>
+                <p>השארנו מאחור את חברות הכוח-אדם הישנות. ככה נראה שירות ניקיון במאה ה-21.</p>
+            </div>
+
+            <div class="accordion-wrapper">
+                <span id="active-line-pill"></span>
+                <div class="features-accordion">
+                    
+                    <!-- פריט 1: מתחבר לכאב של תשלום על שירות גרוע -->
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <div class="icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12.89 1.45l8 4A2 2 0 0 1 22 7.24v9.53a2 2 0 0 1-1.11 1.79l-8 4a2 2 0 0 1-1.79 0l-8-4A2 2 0 0 1 2 16.76V7.24a2 2 0 0 1 1.11-1.79l8-4a2 2 0 0 1 1.78 0z"></path>
+                                    <polyline points="2.32 6.16 12 11 21.68 6.16"></polyline>
+                                    <line x1="12" y1="22.76" x2="12" y2="11"></line>
+                                </svg>
+                            </div>
+                            <h4>תשלום מבוסס תוצאות (אפס סיכון)</h4>
+                            <div class="chevron">
+                                <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                            </div>
+                        </div>
+                        <div class="accordion-content">
+                            <p>אל תשלמו על הבטחות. החיוב מתבצע אוטומטית אך ורק לאחר שאישרתם באפליקציה שהמשרד נוקה לשביעות רצונכם המלאה.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- פריט 2: מתחבר למיצוב של "הייטק" ואפס התעסקות -->
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <div class="icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                                </svg>
+                            </div>
+                            <h4>אוטומציה מלאה של הלו"ז</h4>
+                            <div class="chevron">
+                                <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                            </div>
+                        </div>
+                        <div class="accordion-content">
+                            <p>מגדירים תדירות ומועדים פעם אחת, והמערכת תדאג לשאר. צריכים שינוי? הכל מתעדכן בקליק, כולל חשבוניות אוטומטיות לרואה חשבון.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- פריט 3: מתחבר לפחד מהעובדים ולספקים מפוקפקים -->
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <div class="icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                </svg>
+                            </div>
+                             <h4>סינון ופיקוח ללא פשרות</h4>
+                            <div class="chevron">
+                                <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                            </div>
+                        </div>
+                        <div class="accordion-content">
+                            <p>הביטחון שלכם קודם לכל. כל ספק עובר בדיקות רקע מחמירות, ו-Pophy מנטרת את איכות הביצוע באופן שוטף כגוף מפקח עצמאי.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- GSAP (loaded before any script that depends on it) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof gsap === 'undefined') return;
+            const accordionItems = gsap.utils.toArray('.accordion-item');
+            const activePill = document.getElementById('active-line-pill');
+
+            // פונקציה להזזת הגלולה
+            function movePill(activeItem) {
+                if (activeItem && activePill && window.innerWidth > 768) {
+                    const header = activeItem.querySelector('.accordion-header');
+                    // חישוב המיקום האמצעי של האייקון בכרטיסייה הפעילה
+                    const pillTopPosition = activeItem.offsetTop + (header.offsetHeight / 2) - (activePill.offsetHeight / 2);
+                    gsap.to(activePill, { top: pillTopPosition, duration: 0.4, ease: 'power2.out' });
+                }
+            }
+
+            accordionItems.forEach((item, index) => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                
+                // אתחול גובה 0 לכל התכנים
+                gsap.set(content, { maxHeight: 0 });
+
+                // פתיחת הפריט הראשון כברירת מחדל
+                if (index === 0) {
+                    item.classList.add('is-active');
+                    gsap.set(content, { maxHeight: 'auto' });
+                    setTimeout(() => movePill(item), 100); // השהייה קלה כדי לאפשר רינדור
+                }
+
+                header.addEventListener('click', () => {
+                    // אם הפריט כבר פעיל, סגור אותו
+                    if (item.classList.contains('is-active')) {
+                        gsap.to(content, { maxHeight: 0, duration: 0.4, ease: 'power2.inOut' });
+                        item.classList.remove('is-active');
+                    } else {
+                        // סגירת כל שאר הפריטים הפעילים
+                        accordionItems.forEach(otherItem => {
+                            if (otherItem.classList.contains('is-active')) {
+                                const otherContent = otherItem.querySelector('.accordion-content');
+                                gsap.to(otherContent, { maxHeight: 0, duration: 0.4, ease: 'power2.inOut' });
+                                otherItem.classList.remove('is-active');
+                            }
+                        });
+
+                        // פתיחת הפריט שנלחץ
+                        item.classList.add('is-active');
+                        movePill(item);
+                        gsap.to(content, {
+                            maxHeight: content.scrollHeight, // פתיחה חלקה עד לגובה התוכן
+                            duration: 0.4,
+                            ease: 'power2.inOut'
+                        });
+                    }
+                });
+            });
+
+            // עדכון מיקום הגלולה בעת שינוי גודל מסך
+            window.addEventListener('resize', () => {
+                const activeItem = document.querySelector('.accordion-item.is-active');
+                if (activeItem) {
+                    movePill(activeItem);
+                }
+            });
+        });
+    </script>
+
+
+    <!-- =========================================================
+         App Walkthrough
+         ========================================================= -->
+    <section class="simulation-section-pro">
+        <div class="container">
+            <div class="section-header">
+                <h2>מרכז בקרה שלם בכף היד</h2>
+                <p>מהזמנת שירות בלחיצה ועד דיווח על ליקויים בזמן אמת. ככה מנהלים משרד חכם, שלב אחרי שלב.</p>
+            </div>
+            
+            <div class="simulation-grid">
+                
+                <!-- iPhone Mockup (Left Column) -->
+                <div class="iphone-wrapper">
+                    <div class="iphone-glow"></div>
+                    <div class="iphone-mockup">
+                        <div class="iphone-inner-bezel">
+                            <div class="iphone-notch"></div>
+                            <div class="iphone-screen">
+                                
+                                <!-- Scene 1: App Store -->
+                                <div class="app-scene visible" id="scene-appstore">
+                                    <div class="app-content">
+                                        <div class="appstore-header">
+                                            <div class="appstore-icon">
+                                                <img src="https://static.wixstatic.com/media/bb1f28_0f698d00e96e433583a41170ffc64e19~mv2.png" alt="Pophy Logo Icon">
+                                            </div>
+                                            <div class="appstore-info">
+                                                <h1>Pophy</h1>
+                                                <p>ניקיון משרדים, בראש שקט.</p>
+                                                <div class="appstore-get-button">הורדה</div>
+                                            </div>
+                                        </div>
+                                        <div class="appstore-stats">
+                                            <div class="stat-item">
+                                                <div class="value stars">4.9 ★</div>
+                                                <div class="label">2.4K דירוגים</div>
+                                            </div>
+                                            <div class="stat-item">
+                                                <div class="value">#1</div>
+                                                <div class="label">בעסקים</div>
+                                            </div>
+                                            <div class="stat-item">
+                                                <div class="value">4+</div>
+                                                <div class="label">גיל</div>
+                                            </div>
+                                        </div>
+                                        <div class="screenshots-container">
+                                            <div class="screenshot-preview">
+                                                <div class="preview-header"><img src="https://static.wixstatic.com/media/bb1f28_0f698d00e96e433583a41170ffc64e19~mv2.png" alt="Pophy Logo"></div>
+                                                <div class="preview-content">
+                                                    <h3>פתיחת חשבון</h3>
+                                                    <div class="preview-list-mini">
+                                                        <div class="preview-list-item-mini">שם מלא</div>
+                                                        <div class="preview-list-item-mini">כתובת המשרד</div>
+                                                        <div class="preview-list-item-mini">פרטי קשר</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="screenshot-preview" style="background:#FFFFFF;">
+                                                <div class="preview-header"><img src="https://static.wixstatic.com/media/bb1f28_0f698d00e96e433583a41170ffc64e19~mv2.png" alt="Pophy Logo"></div>
+                                                <div class="preview-content">
+                                                    <h3 style="font-size: 16px; margin-bottom:4px;">היי דור,</h3>
+                                                    <p style="font-size: 10px; color:#86868B; margin:0 0 12px 0;">פעולות מהירות</p>
+                                                    <div class="preview-list-mini">
+                                                        <div class="preview-list-item-mini" style="display:flex; justify-content:space-between;">ניקיון חדש <svg style="width:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></svg></div>
+                                                        <div class="preview-list-item-mini" style="display:flex; justify-content:space-between;">הזמנה קודמת <svg style="width:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Scene 2: Register -->
+                                <div class="app-scene" id="scene-register">
+                                    <div class="app-header"><img src="https://static.wixstatic.com/media/bb1f28_0f698d00e96e433583a41170ffc64e19~mv2.png" alt="Pophy Logo"></div>
+                                    <div class="app-content">
+                                        <h3 class="scene-title">יצירת חשבון מהירה</h3>
+                                        <div class="list-group">
+                                            <div class="list-item"><input type="text" placeholder="שם מלא" style="width:100%; border:none; font-family:inherit; font-size:16px;"></div>
+                                            <div class="list-item"><input type="tel" placeholder="מספר נייד" style="width:100%; border:none; font-family:inherit; font-size:16px; text-align: right;"></div>
+                                            <div class="list-item"><input type="text" placeholder="כתובת המשרד" style="width:100%; border:none; font-family:inherit; font-size:16px;"></div>
+                                        </div>
+                                        <p style="font-size:14px; text-align:center; color: var(--app-secondary-text); margin-top:20px;">קוד אימות ישלח ב-SMS להשלמת ההרשמה.</p>
+                                    </div>
+                                    <div class="app-footer"><button class="primary-button-app">המשך</button></div>
+                                </div>
+                                
+                                <!-- Scene 3: Welcome & Dashboard -->
+                                <div class="app-scene" id="scene-welcome">
+                                    <div class="app-header"><img src="https://static.wixstatic.com/media/bb1f28_0f698d00e96e433583a41170ffc64e19~mv2.png" alt="Pophy Logo"></div>
+                                    <div class="app-content">
+                                        <h1 class="app-title">היי דור,</h1>
+                                        <p class="app-subtitle">ברוך הבא ל-Pophy. כאן תוכל לנהל את הניקיון ולעקוב אחר חשבוניות בקלות.</p>
+                                        <h3 class="scene-title" style="font-size: 16px; margin-top: 30px;">פעולות מהירות</h3>
+                                        <div class="list-group">
+                                            <div class="list-item">
+                                                <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+                                                <div class="text">תזמון ניקיון חדש</div><div class="value">></div>
+                                            </div>
+                                            <div class="list-item">
+                                                <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+                                                <div class="text">שכפול הזמנה קודמת</div><div class="value">></div>
+                                            </div>
+                                            <div class="list-item">
+                                                <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+                                                <div class="text">צפייה בחשבוניות</div><div class="value">></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Scene 4: Frequency -->
+                                <div class="app-scene" id="scene-frequency">
+                                    <div class="app-header"><img src="https://static.wixstatic.com/media/bb1f28_0f698d00e96e433583a41170ffc64e19~mv2.png" alt="Pophy Logo"></div>
+                                    <div class="app-content">
+                                        <h3 class="scene-title">בחירת מועדים</h3>
+                                        <p class="app-subtitle">מתי נוח לכם שהצוות שלנו יגיע?</p>
+                                        <div class="list-group">
+                                            <div class="list-item"><div class="text">תדירות ניקיון</div><div class="value">שבועי קבוע</div></div>
+                                            <div class="list-item"><div class="text">יום מועדף</div><div class="value">ימי ג'</div></div>
+                                            <div class="list-item"><div class="text">שעת התחלה</div><div class="value">18:00</div></div>
+                                        </div>
+                                    </div>
+                                    <div class="app-footer"><button class="primary-button-app">שמירה והמשך</button></div>
+                                </div>
+                                
+                                <!-- Scene 5: Size & Price -->
+                                <div class="app-scene" id="scene-size">
+                                    <div class="app-header"><img src="https://static.wixstatic.com/media/bb1f28_0f698d00e96e433583a41170ffc64e19~mv2.png" alt="Pophy Logo"></div>
+                                    <div class="app-content">
+                                        <h3 class="scene-title">גודל המשרד</h3>
+                                        <p class="app-subtitle">הזינו את גודל המשרד לקבלת מחיר מדויק וסופי.</p>
+                                        <div style="margin: 40px 0;">
+                                            <div class="slider-value"><span id="slider-val-display">180</span> מ"ר</div>
+                                            <input id="size-slider" type="range" min="50" max="300" value="180" step="10">
+                                        </div>
+                                    </div>
+                                    <div class="app-footer"><button class="primary-button-app">הצג הצעת מחיר</button></div>
+                                </div>
+                                
+                                <!-- Scene 6: Summary -->
+                                <div class="app-scene" id="scene-summary">
+                                    <div class="app-header"><img src="https://static.wixstatic.com/media/bb1f28_0f698d00e96e433583a41170ffc64e19~mv2.png" alt="Pophy Logo"></div>
+                                    <div class="app-content">
+                                        <h3 class="scene-title">סיכום הזמנה</h3>
+                                        <div class="list-group">
+                                            <div class="list-item"><div class="text">מסלול</div><div class="value">שבועי קבוע</div></div>
+                                            <div class="list-item"><div class="text">גודל</div><div class="value">180 מ"ר</div></div>
+                                            <div class="list-item"><div class="text">אמצעי תשלום</div><div class="value">Visa **** 1234</div></div>
+                                        </div>
+                                        
+                                        <div class="list-group" style="background:transparent; border:none; margin-top:-10px;">
+                                            <div class="list-item" style="border:none;">
+                                                <div class="text" style="font-size: 18px; font-weight:800;">עלות סופית</div>
+                                                <div class="value" style="font-size: 18px; color:var(--app-dark-text);">₪450</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="app-footer"><button class="primary-button-app btn-yellow">אשרו הזמנה</button></div>
+                                </div>
+                                
+                                <!-- Scene 7: Approval -->
+                                 <div class="app-scene" id="scene-approval">
+                                    <div class="app-header"><img src="https://static.wixstatic.com/media/bb1f28_0f698d00e96e433583a41170ffc64e19~mv2.png" alt="Pophy Logo"></div>
+                                    <div class="app-content" style="text-align: center; display: flex; flex-direction: column; justify-content: center; padding-top: 60px;">
+                                        <div style="margin-bottom:20px; color: var(--pophy-yellow);">
+                                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" stroke-linejoin="round" stroke-linecap="round"/></svg>
+                                        </div>
+                                        <h1 class="app-title">הניקיון הסתיים!</h1>
+                                        <p class="app-subtitle" style="font-size: 16px;">האם הצוות עמד בסטנדרט ואתם מרוצים מהתוצאה?</p>
+                                    </div>
+                                    <div class="app-footer" style="background:transparent; border:none;">
+                                        <!-- המיקרו-קופי תוקן למסר "מרוצים משלמים" -->
+                                        <button class="primary-button-app" style="background:var(--app-dark-text); color:#fff; margin-bottom: 12px;">כן, מרוצים ומוכנים לחייב</button>
+                                        <button class="primary-button-app" style="background:var(--app-section-gray); color:var(--app-dark-text);">דיווח על ליקוי באפליקציה</button>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Steps (Right Column) -->
+                <div class="interactive-steps">
+                    <div class="step-item active" data-scene="scene-appstore">
+                        <h3>1. מורידים את האפליקציה</h3>
+                        <p>זמינה בחינם בחנויות האפליקציות. הצעד הראשון שלכם לעבר משרד נקי בלי כאבי ראש.</p>
+                    </div>
+                    <div class="step-item" data-scene="scene-register">
+                        <h3>2. פותחים חשבון בקלות</h3>
+                        <p>מזינים את פרטי המשרד פעם אחת בלבד. המערכת שומרת הכל בצורה מאובטחת להזמנות הבאות.</p>
+                    </div>
+                    <div class="step-item" data-scene="scene-welcome">
+                        <h3>3. הכל מרוכז במסך אחד</h3>
+                        <p>מסך הבית שלכם. מפה תוכלו להוציא חשבוניות, לשכפל הזמנות קודמות או לפתוח קריאה חדשה בקליק.</p>
+                    </div>
+                    <div class="step-item" data-scene="scene-frequency">
+                        <h3>4. בוחרים מתי לנקות</h3>
+                        <p>מגדירים תדירות (פעם בשבוע, חודש, או חד-פעמי) ובוחרים את היום והשעה שנוחים לכם.</p>
+                    </div>
+                    <div class="step-item" data-scene="scene-size">
+                        <h3>5. רואים מחיר סופי מראש</h3>
+                        <p>בלי הפתעות. מזינים את גודל המשרד במ"ר ומקבלים מיד הצעת מחיר סופית, ללא תוספות נסתרות.</p>
+                    </div>
+                    <div class="step-item" data-scene="scene-summary">
+                        <h3>6. אישור ושליחת הזמנה</h3>
+                        <p>עוברים על הפרטים ולוחצים 'אשרו הזמנה'. מהרגע הזה, הצוותים המסוננים שלנו לוקחים פיקוד.</p>
+                    </div>
+                    <div class="step-item" data-scene="scene-approval">
+                        <!-- הכותרת תוקנה לדרישה המדויקת שלך -->
+                        <h3>7. ומשלמים? רק כשמרוצים!</h3>
+                        <p>סיימנו לנקות? תקבלו התראה לנייד. כרטיס האשראי יחויב אך ורק לאחר שאישרתם שהמשרד מבריק.</p>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="urgency-container">
+                <h4>זמין להורדה בחינם</h4>
+                <p>פתיחת חשבון לוקחת פחות מדקה. בחרו מועד, קבלו מחיר — וסיימתם.</p>
+                <a href="#" class="btn-pro">
+                    להורדת האפליקציה בחינם
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+            </div>
+
+        </div>
+    </section>
+    
+    <!-- ייבוא GSAP לאנימציות -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const steps = document.querySelectorAll('.step-item');
+            const scenes = document.querySelectorAll('.app-scene');
+            const sizeSlider = document.getElementById('size-slider');
+            const sliderDisplay = document.getElementById('slider-val-display');
+
+            function setActiveStep(targetStep) {
+                steps.forEach(s => s.classList.remove('active'));
+                targetStep.classList.add('active');
+
+                const targetSceneId = targetStep.dataset.scene;
+                scenes.forEach(scene => {
+                    if (scene.id === targetSceneId) {
+                        scene.classList.add('visible');
+                    } else {
+                        scene.classList.remove('visible');
+                    }
+                });
+            }
+            
+            steps.forEach(step => {
+                step.addEventListener('click', function() {
+                    setActiveStep(this);
+                });
+            });
+
+            if (sizeSlider && sliderDisplay) {
+                sizeSlider.addEventListener('input', function() {
+                    sliderDisplay.textContent = this.value;
+                });
+            }
+        });
+    </script>
+
+
+    <!-- =========================================================
+         Personas - "איזה בעל משרד אתם?"
+         ========================================================= -->
+    <section class="personas-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>למי הפלטפורמה נועדה?</h2>
+                <p>למנהלים ובעלי עסקים שהזמן שלהם יקר מדי בשביל לרדוף אחרי מנקים.</p>
+            </div>
+
+            <div class="personas-grid">
+                <div class="persona-card">
+                    <h3 class="persona-tagline">משרד עו"ד</h3>
+                    <p class="persona-text">חייבים שהמשרד ייצג אתכם בכבוד מול לקוחות, אבל שורפים שעות יקרות על ניהול ספקי ניקיון.</p>
+                    <div class="persona-meta">עד 150 מ"ר · ניקיון שבועי</div>
+                </div>
+
+                <div class="persona-card">
+                    <h3 class="persona-tagline">סוכנות דיגיטל</h3>
+                    <p class="persona-text">ציוד יקר במשרד ורצון לביטחון מקסימלי. צריכים לדעת בדיוק מי נכנס, בלי להתקין מצלמות בכל פינה.</p>
+                    <div class="persona-meta">עד 200 מ"ר · ניקיון פעמיים בשבוע</div>
+                </div>
+
+                <div class="persona-card persona-highlight">
+                    <h3 class="persona-tagline">משרד עצמאי</h3>
+                    <p class="persona-text">רוצים פתרון 'שגר ושכח'. מערכת שעובדת ברקע ודואגת שהמשרד יהיה מבריק בכל בוקר מחדש.</p>
+                    <div class="persona-meta">עד 100 מ"ר · ניקיון חודשי</div>
+                </div>
+            </div>
+
+            <div class="personas-cta-wrap">
+                <button class="personas-cta main-cta-trigger">
+                    להורדת האפליקציה
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- =========================================================
+         Story
+         ========================================================= -->
+    <section class="story-section">
+        <div class="story-container">
+            
+            <div class="story-content">
+                <!-- תגית מודרנית עם נקודה קטנה צבעונית -->
+                <div class="badge">
+                    <span class="badge-dot"></span>
+                    הסיפור מאחורי Pophy
+                </div>
+                
+                <!-- כותרת עוצמתית, חיובית וחתוכה -->
+                <h2>באנו לפתור את הכאב של <span class="highlight">עצמנו.</span></h2>
+                
+                <p>
+                    ניהלנו משרדים, בדיוק כמוכם. התסכול מרדיפה אחרי ספקי ניקיון, חוסר השקיפות, וההתפשרות התמידית על האיכות - הובילו אותנו להקים את Pophy.
+                </p>
+
+                <p>
+                    בנינו מודל שעובד בשביל הלקוח: <strong>מערכת טכנולוגית שפותרת את הכאבים הלוגיסטיים, בשילוב גוף מפקח שמוודא שהעבודה באמת קורית כמו שצריך.</strong>
+                </p>
+                
+                <div class="cta-group">
+                    <button id="why-pophy-cta-button-desktop" class="btn-pro show-on-desktop">
+                        להורדת האפליקציה בחינם
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    
+                    <a href="https://onelink.to/c5r32b" target="_blank" id="why-pophy-cta-button-mobile" class="btn-pro show-on-mobile">
+                        להורדת האפליקציה בחינם
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                    
+                    <!-- Micro-copy להורדת התנגדויות (Trust) -->
+                    <span class="trust-text">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--pophy-green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                        זמין ב-App Store וב-Google Play
+                    </span>
+                </div>
+            </div>
+            
+            <div class="story-visual-wrapper">
+                <!-- מסגרת תלת-ממדית לוידאו -->
+                <div class="video-container">
+                    <iframe 
+                        src="https://www.youtube.com/embed/VsIY76C_Nyk?si=IBOH2YMyWjZ0sO6_" 
+                        title="YouTube video player" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        referrerpolicy="strict-origin-when-cross-origin" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                
+            </div>
+
+        </div>
+    </section>
+
+    <!-- (Story modal removed — unified modal used instead) -->
+
+
+    <!-- =========================================================
+         Comparison
+         ========================================================= -->
+    <section class="trust-section-pro">
+        <div class="container">
+            <div class="section-header">
+                <h2>למה מנהלי משרדים עוברים<br><span class="highlight-trust">ל-Pophy?</span></h2>
+                <p>ההבדל בין חברת כוח-אדם מסורתית לפלטפורמה טכנולוגית שמנוהלת חכם.</p>
+            </div>
+
+            <div class="comparison-layout">
+                
+                <!-- קלף Pophy - הועבר להיות ראשון בסדר (יופיע בצד ימין ב-RTL) -->
+                <div class="glass-card card-pophy">
+                    <div class="card-header">
+                        <h3>
+                            <img src="https://static.wixstatic.com/media/bb1f28_0f698d00e96e433583a41170ffc64e19~mv2.png" alt="Pophy" class="pophy-logo-mini" style="filter: brightness(0);">
+                            הסטנדרט שלנו
+                        </h3>
+                    </div>
+                    
+                    <div class="comparison-list">
+                        <div class="comparison-item">
+                            <div class="icon-box">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                            </div>
+                            <div class="text-content">
+                                <h4>צוותים מסוננים</h4>
+                                <p>כל צוות עובר בדיקות רקע ותקופת מבחן לפני שנכנס לפלטפורמה.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-item">
+                            <div class="icon-box">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                            </div>
+                            <div class="text-content">
+                                <h4>שקיפות ובקרת איכות</h4>
+                                <p>Pophy פועלת כגוף מפקח עצמאי. ליקוי? מדווחים באפליקציה — הצוות חוזר לתקן.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-item">
+                            <div class="icon-box">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                            </div>
+                            <div class="text-content">
+                                <h4>תשלום לפי תוצאה</h4>
+                                <p>החיוב מתבצע רק אחרי שאישרתם באפליקציה שהניקיון הושלם לשביעות רצונכם.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- קלף השיטה הישנה - הועבר להיות שני בסדר (יופיע בצד שמאל ב-RTL) -->
+                <div class="glass-card card-old">
+                    <div class="card-header">
+                        <h3>השיטה הישנה</h3>
+                    </div>
+                    
+                    <div class="comparison-list">
+                        <div class="comparison-item">
+                            <div class="icon-box">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                            </div>
+                            <div class="text-content">
+                                <h4>בלי שקיפות</h4>
+                                <p>לרוב לא יודעים מי העובד שמגיע, ואין תהליך סינון ברור.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-item">
+                            <div class="icon-box">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                            </div>
+                            <div class="text-content">
+                                <h4>קשה לפתור בעיות</h4>
+                                <p>כשיש ליקוי, צריך להתקשר, לרדוף, ולקוות שמישהו יטפל.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-item">
+                            <div class="icon-box">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                            </div>
+                            <div class="text-content">
+                                <h4>ריטיינר קבוע</h4>
+                                <p>משלמים סכום חודשי קבוע, בלי קשר לאיכות השירות שהתקבלה.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- GSAP Animations (desktop only) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.innerWidth <= 768) return;
+            if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+            gsap.registerPlugin(ScrollTrigger);
+
+            var cards = gsap.utils.toArray('.glass-card');
+            gsap.fromTo(cards, 
+                { y: 50, opacity: 0 },
+                {
+                    y: 0, opacity: 1, duration: 1, stagger: 0.2, ease: "power3.out",
+                    scrollTrigger: { trigger: '.comparison-layout', start: 'top 85%', toggleActions: 'play none none none' }
+                }
+            );
+            
+            var pophyItems = gsap.utils.toArray('.card-pophy .comparison-item');
+            gsap.fromTo(pophyItems,
+                { x: -20, opacity: 0 },
+                {
+                    x: 0, opacity: 1, duration: 0.6, stagger: 0.15, ease: "power2.out", delay: 0.5,
+                    scrollTrigger: { trigger: '.card-pophy', start: 'top 80%' }
+                }
+            );
+        });
+    </script>
+
+
+    <!-- =========================================================
+         Locations
+         ========================================================= -->
+    <section class="locations-section-pro">
+        <div class="container">
+            <div class="section-header">
+                <!-- קופירייטינג שיוצר תחושת ביקוש וחדשנות -->
+                <h2>איפה השירות זמין?</h2>
+                <p>Pophy פעילה במרכז ובשפלה. בחרו את עיר המשרד שלכם כדי להתחיל.</p>
+            </div>
+            
+            <div class="locations-widget-card">
+                
+                
+                <div class="location-select-wrapper" id="location-dropdown">
+                    <svg class="location-icon-input" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <input type="text" class="location-search-input" id="location-search" placeholder="חפשו עיר..." autocomplete="off" />
+                    <svg class="location-chevron" width="16" height="16" viewBox="0 0 16 16" fill="#fff"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>
+                    <ul class="location-options-list" id="location-options-list"></ul>
+                </div>
+
+                <div class="map-embed-container">
+                    <iframe 
+                        id="map-iframe"
+                        class="map-iframe" 
+                        width="100%" 
+                        height="100%" 
+                        style="border:0;" 
+                        allow=""
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade"
+                        src="https://www.google.com/maps?q=%D7%A0%D7%A1%20%D7%A6%D7%99%D7%95%D7%A0%D7%94&output=embed">
+                    </iframe>
+                </div>
+            </div>
+
+            <div class="locations-cta-container">
+                <button id="locations-cta-button" class="btn-pro desktop-only">
+                    בדקתי, רוצה להזמין ניקיון
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <a href="https://onelink.to/c5r32b" target="_blank" class="btn-pro mobile-only">
+                    בדקתי, רוצה להזמין ניקיון
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- (Locations modal removed — unified modal used instead) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const locations = [
+                'אזור', 'אזור התעשייה צריפין', 'באר יעקב', 'בית דגן', 'בני ברק',
+                'בת ים', 'גבעת ברנר', 'גבעתיים', 'גדרה', 'גני תקווה',
+                'הוד השרון', 'הרצליה', 'חולון', 'יבנה', 'כנות',
+                'כפר טרומן', 'כפר סבא', 'כפר קאסם', 'לוד', 'מודיעין-מכבים-רעות',
+                'מושב מגשימים', 'נס ציונה', 'נתניה', 'פתח תקווה', 'קריית אונו',
+                'ראש העין', 'ראשון לציון', 'רחובות', 'רינתיה', 'רמלה',
+                'רמת גן', 'רמת השרון', 'רעננה', 'שוהם', 'תל אביב'
+            ];
+
+            const wrapper = document.getElementById('location-dropdown');
+            const searchInput = document.getElementById('location-search');
+            const optionsList = document.getElementById('location-options-list');
+            const mapIframe = document.getElementById('map-iframe');
+            var highlightIdx = -1;
+
+            function switchLocation(locationName) {
+                mapIframe.src = `https://www.google.com/maps?q=${encodeURIComponent(locationName)}&output=embed`;
+                searchInput.value = locationName;
+                closeDropdown();
+            }
+
+            function renderOptions(filter) {
+                var q = (filter || '').trim();
+                var filtered = q ? locations.filter(function(loc) { return loc.indexOf(q) !== -1; }) : locations;
+                optionsList.innerHTML = '';
+                highlightIdx = -1;
+                if (filtered.length === 0) {
+                    var li = document.createElement('li');
+                    li.className = 'no-results';
+                    li.textContent = 'לא נמצאה עיר מתאימה';
+                    optionsList.appendChild(li);
+                    return;
+                }
+                filtered.forEach(function(loc, i) {
+                    var li = document.createElement('li');
+                    li.textContent = loc;
+                    li.setAttribute('data-city', loc);
+                    li.addEventListener('click', function() { switchLocation(loc); });
+                    optionsList.appendChild(li);
+                });
+            }
+
+            function openDropdown() {
+                wrapper.classList.add('is-open');
+                renderOptions(searchInput.value);
+                searchInput.select();
+            }
+
+            function closeDropdown() {
+                wrapper.classList.remove('is-open');
+                highlightIdx = -1;
+            }
+
+            searchInput.addEventListener('focus', openDropdown);
+            searchInput.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (!wrapper.classList.contains('is-open')) openDropdown();
+            });
+            searchInput.addEventListener('input', function() { renderOptions(this.value); });
+
+            searchInput.addEventListener('keydown', function(e) {
+                var items = optionsList.querySelectorAll('li:not(.no-results)');
+                if (!items.length) return;
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    highlightIdx = Math.min(highlightIdx + 1, items.length - 1);
+                    updateHighlight(items);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    highlightIdx = Math.max(highlightIdx - 1, 0);
+                    updateHighlight(items);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (highlightIdx >= 0 && items[highlightIdx]) {
+                        switchLocation(items[highlightIdx].getAttribute('data-city'));
+                    }
+                } else if (e.key === 'Escape') {
+                    closeDropdown();
+                    searchInput.blur();
+                }
+            });
+
+            function updateHighlight(items) {
+                items.forEach(function(li, i) {
+                    li.classList.toggle('highlighted', i === highlightIdx);
+                });
+                if (items[highlightIdx]) items[highlightIdx].scrollIntoView({ block: 'nearest' });
+            }
+
+            document.addEventListener('click', function(e) {
+                if (!wrapper.contains(e.target)) closeDropdown();
+            });
+
+            renderOptions('');
+            window.onmessage = (event) => {
+                if (event.data && event.data.type === 'PophyLocation') {
+                    const cityName = event.data.city;
+                    if (locations.includes(cityName)) { switchLocation(cityName); }
+                }
+            };
+
+            fetch('https://ipapi.co/json/')
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data.city) {
+                        var city = data.city;
+                        if (locations.includes(city)) {
+                            switchLocation(city);
+                        }
+                    }
+                })
+                .catch(() => {});
+        });
+    </script>
+
+
+
+
+
+
+
+
+    <!-- =========================================================
+         FAQ
+         ========================================================= -->
+    <section class="faq-section-pro">
+        <div class="container">
+            
+            <div class="section-header">
+                <div class="badge-faq">שאלות נפוצות</div>
+                <h2>רגע לפני שיוצאים לדרך.</h2>
+                <p>מפרקים את החששות. ריכזנו את כל מה שחשוב לדעת על מודל הפיקוח, הביטוח והסטנדרט של Pophy.</p>
+            </div>
+
+            <div class="faq-list">
+                
+                <!-- שאלה 1: נוגעת בפחד החדירה למרחב הפרטי -->
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>איך אני יודע על מי לסמוך כשאני לא במשרד?</span>
+                        <div class="faq-icon"></div>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            זה החשש הכי גדול של בעלי משרדים, וזו בדיוק הסיבה ש-Pophy הוקמה. בניגוד לחברות כוח אדם מהדור הישן, כל צוות שמצטרף לפלטפורמה שלנו עובר <strong>בדיקות רקע מחמירות, סינון קפדני ותקופת מבחן</strong>. אנחנו עובדים אך ורק עם אנשי מקצוע אמינים שמוכיחים את עצמם לאורך זמן, כדי להבטיח לכם שקט נפשי מוחלט.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- שאלה 2: נוגעת בבידול של Pophy כמפקח ולא כספק -->
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>אתם בעצם חברת ניקיון רגילה עם אפליקציה?</span>
+                        <div class="faq-icon"></div>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            ממש לא. Pophy היא <strong>פלטפורמה טכנולוגית וגוף מפקח</strong>. במודל הישן, חברת הניקיון היא גם מי שמבצע וגם מי שאמור לבקר את עצמו – מתכון לבינוניות. אצלנו זה עובד אחרת: אנחנו פועלים מטעמכם, מפקחים על הצוותים, מודדים את הביצועים שלהם, ודואגים שהסטנדרט יישמר כל יום מחדש.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- שאלה 3: מנגנון התשלום -->
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>איך עובד מנגנון ה-"משלמים רק כשמרוצים"?</span>
+                        <div class="faq-icon"></div>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            בצורה השקופה ביותר שיש. לאחר כל ניקיון, תקבלו התראה לאפליקציה. כרטיס האשראי שלכם יחויב <strong>אך ורק לאחר שתאשרו באפליקציה שהמשרד נוקה לשביעות רצונכם המלאה</strong>. מצאתם ליקוי? מדווחים בקליק, והצוות יחזור לתקן את הדרוש ללא שום עלות נוספת. הכוח תמיד אצלכם.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- שאלה 4: "אפס התעסקות" ולוגיסטיקה -->
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>אני צריך לדאוג לחומרי ניקיון וציוד?</span>
+                        <div class="faq-icon"></div>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            החזון שלנו הוא <strong>אפס התעסקות</strong>. הצוותים מגיעים עם כל הציוד המקצועי והחומרים הנדרשים לניקיון מושלם. אין לכם צורך לדאוג לרכש, למלאי או למוצרים חסרים.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- שאלה 5: פחד מחוזים והתחייבויות -->
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>האם השירות דורש התחייבות שנתית או קנסות יציאה?</span>
+                        <div class="faq-icon"></div>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            לא. אנחנו מאמינים שאיכות השירות היא מה שמשאיר לקוחות, לא חוזים כובלים. אין ב-Pophy דמי מנוי, התחייבויות לשנה או קנסות יציאה. אתם מגדירים את תדירות הניקיון באפליקציה ויכולים <strong>לשנות, להשהות או לבטל בכל רגע נתון</strong>, פשוט כי אתם שולטים בתהליך.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- שאלה 6: פחד מנזקים למשרד (ציוד יקר) -->
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>האם הציוד היקר במשרד מכוסה ביטוחית?</span>
+                        <div class="faq-icon"></div>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            בהחלט. כל פעילות המבוצעת דרך הפלטפורמה של Pophy מגובה ב<strong>פוליסת ביטוח צד ג' מקיפה</strong>. המשרד שלכם, המחשבים, הציוד והמידע – הכל מכוסה ומאובטח כדי שתוכלו לישון בשקט.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // לוגיקה לפתיחה וסגירה של האקורדיון - קוד נקי ללא תלויות חיצוניות
+            const faqItems = document.querySelectorAll('.faq-item');
+            
+            faqItems.forEach(item => {
+                const questionBtn = item.querySelector('.faq-question');
+                const answerContent = item.querySelector('.faq-answer');
+                
+                questionBtn.addEventListener('click', () => {
+                    const isActive = item.classList.contains('active');
+                    
+                    // סגירת כל שאר השאלות הפתוחות
+                    faqItems.forEach(otherItem => {
+                        otherItem.classList.remove('active');
+                        otherItem.querySelector('.faq-answer').style.maxHeight = null;
+                    });
+                    
+                    // פתיחת השאלה שנלחצה
+                    if (!isActive) {
+                        item.classList.add('active');
+                        answerContent.style.maxHeight = answerContent.scrollHeight + "px";
+                    }
+                });
+            });
+        });
+    </script>
+
+
+
+
+        <!-- =========================================================
+         Final CTA + Footer
+         ========================================================= -->
+    <section class="ultimate-cta-section">
+
+        <div class="container">
+            <div class="premium-panel-wrapper fade-up-element">
+                <div class="premium-panel-content">
+                    
+                    <div class="app-icon">
+                        <img src="https://static.wixstatic.com/media/bb1f28_0f698d00e96e433583a41170ffc64e19~mv2.png" alt="Pophy Icon">
+                    </div>
+
+                    <h2 class="headline">הגיע הזמן <span class="gradient-text">לעבוד חכם.</span></h2>
+                    
+                    <p class="description">
+                        הורידו את האפליקציה, הזמינו ניקיון ללא התחייבות וללא ריטיינר, ותגלו כמה פשוט ניהול המשרד יכול להיות.
+                    </p>
+                    
+                    <div class="downloads-wrapper">
+                        
+                        <!-- יוצג רק בדסקטופ (סריקת QR) -->
+                        <div class="desktop-qrs">
+                            <a href="https://apps.apple.com/app/pophy" target="_blank" rel="noopener" class="qr-card">
+                                <div class="qr-text">
+                                    <strong>App Store</strong>
+                                    <span>סרקו להורדה למכשירי iOS</span>
+                                </div>
+                                <img src="https://static.wixstatic.com/media/f559f1_8fe6c4bc92dd4ac2bf7d45926ac8ebfd~mv2.png" alt="QR iOS" class="qr-image">
+                            </a>
+                            <a href="https://play.google.com/store/apps/details?id=com.pophy" target="_blank" rel="noopener" class="qr-card">
+                                <div class="qr-text">
+                                    <strong>Google Play</strong>
+                                    <span>סרקו להורדה למכשירי Android</span>
+                                </div>
+                                <img src="https://static.wixstatic.com/media/bb1f28_695f4e8059f44e2fb55ced07064a609b~mv2.png" alt="QR Android" class="qr-image">
+                            </a>
+                        </div>
+                        
+                        <!-- יוצג רק במובייל/טאבלט (כפתורי הורדה ישירים) -->
+                        <div class="mobile-app-buttons">
+                            <a href="https://onelink.to/c5r32b" target="_blank" class="app-btn">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14.88 2.15c.61-.75 1.02-1.72.9-2.73-1.01.05-2.07.64-2.7 1.38-.56.66-.99 1.66-.86 2.65 1.09.08 2.05-.57 2.66-1.3zM16.58 13.9c-.03-2.3 1.88-3.41 1.97-3.47-1.07-1.57-2.73-1.78-3.32-1.81-1.42-.14-2.77.84-3.5.84-.73 0-1.84-.82-3.03-.8-1.55.02-2.98.9-3.78 2.29-1.62 2.82-.41 6.99 1.17 9.27.77 1.12 1.69 2.37 2.91 2.32 1.17-.05 1.63-.76 3.05-.76 1.41 0 1.84.76 3.07.74 1.25-.02 2.04-1.15 2.8-2.27.88-1.28 1.24-2.52 1.26-2.59-.03-.01-2.43-.93-2.6-3.76z"/></svg>
+                                הורדה ל-iOS
+                            </a>
+                            <a href="https://onelink.to/c5r32b" target="_blank" class="app-btn app-btn-secondary">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.68 2.22A2.43 2.43 0 0 0 4 3.93v16.14a2.43 2.43 0 0 0 .68 1.71l.06.06 9.07-9.07v-.23L4.74 2.16l-.06.06zM15.93 11.2L6.1 5.5l-.26-.14c-.81-.46-1.62.06-1.62 1v12.27c0 .94.81 1.46 1.62 1l9.83-5.7.26-.14c.82-.46.82-1.2 0-1.66z"/></svg>
+                                הורדה ל-Android
+                            </a>
+                        </div>
+                        
+                        <!-- מיקרו-קופי נקי ללא אזכור של דמי מנוי -->
+                        <div class="trust-marker">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--pophy-green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                            פתיחת חשבון בחינם. משלמים רק על התוצאה.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.innerWidth > 768 && typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+                gsap.registerPlugin(ScrollTrigger);
+                gsap.to('.fade-up-element', {
+                    y: 0, opacity: 1, duration: 1.2, ease: "power3.out",
+                    scrollTrigger: { trigger: ".ultimate-cta-section", start: "top 70%" }
+                });
+            } else {
+                document.querySelectorAll('.fade-up-element').forEach(function(el) {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                });
+            }
+            
+            // Tracking scripts 
+            const links = document.querySelectorAll('a.qr-card, a.app-btn');
+            links.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (typeof gtag === 'function') gtag('event', 'conversion', {'send_to': 'AW-17357415233/lk5YCND1p_8aEMHG1NRA'});
+                    if (typeof fbq === 'function') fbq('track', 'Download');
+                    if (typeof ttq === 'function') ttq.track('Download');
+                });
+            });
+        });
+    </script>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-links">
+            <a href="https://www.pophy.co.il/privcay" target="_blank" rel="noopener noreferrer">מדיניות פרטיות</a>
+            <span class="footer-sep">·</span>
+            <a href="https://www.pophy.co.il/terms" target="_blank" rel="noopener noreferrer">תנאי שימוש</a>
+        </div>
+        <div class="footer-copy">
+            כל הזכויות שמורות ל-Pophy &copy; 2026 &nbsp;|&nbsp; נבנה ע״י <a href="https://www.resultsdigital.org/creative" target="_blank" rel="noopener">Results Group</a>
+        </div>
+    </footer>
+
+
+    <!-- Sticky Mobile CTA Bar -->
+    <div class="sticky-mobile-cta" id="sticky-cta">
+        <button class="sticky-cta-btn" id="sticky-cta-btn">
+            להזמנת ניקיון באפס סיכון
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+    </div>
+
+
+    <!-- =========================================================
+         Unified Modal (QR + Contact Form)
+         ========================================================= -->
+    <div id="unified-modal" class="unified-modal-overlay">
+        <div class="unified-modal">
+            <button class="unified-modal-close" aria-label="סגור">&times;</button>
+            
+            <h2>מוכנים לשקט נפשי אמיתי?</h2>
+            <p class="modal-subtitle modal-subtitle-desktop">סרקו את הקוד להורדה מיידית, או השאירו פרטים ונתאם הכל עבורכם</p>
+            <p class="modal-subtitle modal-subtitle-mobile">הורידו את האפליקציה או השאירו פרטים ונתאם הכל עבורכם</p>
+
+            <div class="modal-tabs">
+                <button class="modal-tab active" data-tab="download">להורדה מיידית</button>
+                <button class="modal-tab" data-tab="contact">שנחזור אליכם</button>
+            </div>
+
+            <!-- Tab 1: QR Download -->
+            <div class="modal-tab-content active" id="tab-download">
+                <div class="modal-qr-grid">
+                    <a href="https://onelink.to/c5r32b" target="_blank" class="modal-qr-card">
+                        <img src="https://static.wixstatic.com/media/f559f1_8fe6c4bc92dd4ac2bf7d45926ac8ebfd~mv2.png" alt="QR Code for Apple App Store" class="qr-img">
+                        <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on App Store" class="store-badge-mobile" style="display:none; height: 48px;">
+                        <strong>App Store</strong>
+                        <span>סרקו להורדה למכשירי Apple</span>
+                    </a>
+                    <a href="https://onelink.to/c5r32b" target="_blank" class="modal-qr-card">
+                        <img src="https://static.wixstatic.com/media/bb1f28_695f4e8059f44e2fb55ced07064a609b~mv2.png" alt="QR Code for Google Play Store" class="qr-img">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" class="store-badge-mobile" style="display:none; height: 48px;">
+                        <strong>Google Play</strong>
+                        <span>סרקו להורדה למכשירי Android</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Tab 2: Contact Form -->
+            <div class="modal-tab-content" id="tab-contact">
+                <form class="modal-form" id="contact-form">
+                    <div class="modal-form-field">
+                        <input type="text" name="fullName" placeholder="שם מלא" required>
+                    </div>
+                    <div class="modal-form-field">
+                        <input type="tel" name="phone" placeholder="טלפון" required dir="ltr" style="text-align: right;">
+                    </div>
+                    <div class="modal-form-field">
+                        <input type="email" name="email" placeholder="כתובת מייל" required dir="ltr" style="text-align: right;">
+                    </div>
+                    <div class="modal-form-field">
+                        <input type="text" name="company" placeholder="שם החברה / העסק" required>
+                    </div>
+                    <input type="hidden" name="utm_source">
+                    <input type="hidden" name="utm_campaign">
+                    <input type="hidden" name="utm_content">
+                    <input type="hidden" name="utm_medium">
+                    <input type="hidden" name="utm_term">
+                    <input type="hidden" name="page_url">
+                    <button type="submit" class="modal-form-submit">קבעו שיחת ייעוץ חינם</button>
+                    <p class="modal-form-note">ללא התחייבות. נחזור אליכם תוך מספר שעות.</p>
+                </form>
+                <div class="modal-form-success" id="form-success">
+                    <div class="success-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                    </div>
+                    <h3>קיבלנו! נחזור אליכם בהקדם</h3>
+                    <p>נציג Pophy ייצור אתכם קשר כדי לתאם הכל.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         UTM Capture
+         ========================================================= -->
+    <script>
+        var _pendingUtmUrl = null;
+        var _utmKeys = ['utm_source', 'utm_campaign', 'utm_content', 'utm_medium', 'utm_term'];
+
+        /* Read UTM directly from any URL string */
+        function _applyUtmToAllForms(urlString) {
+            var forms = document.querySelectorAll('form');
+            if (!forms.length) { _pendingUtmUrl = urlString; return; }
+            try {
+                var u = new URL(urlString);
+                var p = u.searchParams;
+                var hasAny = _utmKeys.some(function(k) { return p.has(k); });
+                if (!hasAny) return;
+                forms.forEach(function(form) {
+                    _utmKeys.forEach(function(k) {
+                        var inp = form.querySelector('input[name="' + k + '"]');
+                        if (inp && p.has(k)) inp.value = p.get(k);
+                    });
+                });
+            } catch (e) {}
+        }
+
+        /* 1. Try iframe's own URL */
+        _applyUtmToAllForms(window.location.href);
+
+        /* 2. Try parent page URL directly (works when same-origin) */
+        try {
+            _applyUtmToAllForms(window.parent.location.href);
+        } catch(e) {}
+
+        /* 3. postMessage from Wix (works cross-origin) — accept both
+              plain URL strings AND structured {url, href, location} objects */
+        window.addEventListener('message', function(event) {
+            if (!event.data) return;
+            if (typeof event.data === 'string') {
+                if (event.data.indexOf('http') === 0) {
+                    _applyUtmToAllForms(event.data);
+                } else {
+                    try {
+                        var parsed = JSON.parse(event.data);
+                        var url = parsed.url || parsed.href || parsed.location || parsed.pageUrl || '';
+                        if (url && url.indexOf('http') === 0) _applyUtmToAllForms(url);
+                    } catch(e2) {}
+                }
+            } else if (typeof event.data === 'object') {
+                var url = event.data.url || event.data.href || event.data.location || event.data.pageUrl || '';
+                if (url && url.indexOf('http') === 0) _applyUtmToAllForms(url);
+            }
+        });
+
+        /* 4. Fallback: parse UTM directly from referrer if nothing else worked */
+        (function() {
+            try {
+                if (document.referrer && document.referrer.indexOf('utm_') !== -1) {
+                    _applyUtmToAllForms(document.referrer);
+                }
+            } catch(e) {}
+        })();
+    </script>
+
+    <!-- Unified Modal Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (_pendingUtmUrl) { _applyUtmToAllForms(_pendingUtmUrl); _pendingUtmUrl = null; }
+
+        var modal = document.getElementById('unified-modal');
+        var closeBtn = modal.querySelector('.unified-modal-close');
+        var tabs = modal.querySelectorAll('.modal-tab');
+        var tabContents = modal.querySelectorAll('.modal-tab-content');
+        var contactForm = document.getElementById('contact-form');
+        var formSuccess = document.getElementById('form-success');
+
+        function _getElementPageY(el) {
+            if (!el || typeof el.getBoundingClientRect !== 'function') return 0;
+            var rect = el.getBoundingClientRect();
+            var scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+            return rect.top + scrollY;
+        }
+
+        var _viewCenterY = 400;
+        try {
+            var _obs = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        var t = _getElementPageY(entry.target);
+                        _viewCenterY = t + entry.target.offsetHeight / 2;
+                        window._viewCenterY = _viewCenterY;
+                    }
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('section').forEach(function(s) { _obs.observe(s); });
+        } catch(e) {}
+
+        function _getDocHeight() {
+            return Math.max(
+                document.body.scrollHeight || 0,
+                document.documentElement.scrollHeight || 0,
+                document.body.offsetHeight || 0,
+                document.documentElement.offsetHeight || 0
+            );
+        }
+
+        function openModal(evt) {
+            var clickY = 0;
+
+            if (evt) {
+                var btn = evt.currentTarget || evt.target;
+                if (btn) {
+                    var rect = btn.getBoundingClientRect();
+                    if (rect && rect.height > 0) {
+                        var scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+                        clickY = rect.top + scrollY + rect.height / 2;
+                    }
+                }
+            }
+
+            if (!clickY) clickY = _viewCenterY || 400;
+
+            modal.style.height = _getDocHeight() + 'px';
+            modal.style.display = 'block';
+
+            var innerBox = modal.querySelector('.unified-modal');
+            if (innerBox) {
+                innerBox.style.top = '-9999px';
+                innerBox.offsetHeight;
+                var boxH = innerBox.offsetHeight || 400;
+                var targetTop = Math.max(20, Math.round(clickY - boxH / 2));
+                innerBox.style.top = targetTop + 'px';
+            }
+
+            modal.offsetHeight;
+            modal.classList.add('is-visible');
+        }
+
+        function closeModal() {
+            modal.classList.remove('is-visible');
+            contactForm.style.display = '';
+            formSuccess.classList.remove('show');
+            setTimeout(function() {
+                if (!modal.classList.contains('is-visible')) {
+                    modal.style.display = 'none';
+                }
+            }, 350);
+        }
+
+        window._openPophyModal = openModal;
+        window._viewCenterY = _viewCenterY;
+
+        closeBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.classList.contains('is-visible')) closeModal();
+        });
+
+        tabs.forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                tabs.forEach(function(t) { t.classList.remove('active'); });
+                tabContents.forEach(function(c) { c.classList.remove('active'); });
+                tab.classList.add('active');
+                document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        function _getPageUrl() {
+            try {
+                var p = window.parent.location.href;
+                if (p && p.indexOf('http') === 0) return p;
+            } catch(e) {}
+            try {
+                var r = document.referrer;
+                if (r && r.indexOf('http') === 0) return r;
+            } catch(e) {}
+            return window.location.href;
+        }
+
+        function _buildFormPayload(form) {
+            var pageUrlField = form.querySelector('input[name="page_url"]');
+            if (pageUrlField) pageUrlField.value = _getPageUrl();
+
+            function val(name) {
+                var el = form.querySelector('[name="' + name + '"]');
+                return el ? String(el.value || '').trim() : '';
+            }
+
+            return {
+                fullName: val('fullName'),
+                phone: val('phone'),
+                email: val('email'),
+                company: val('company'),
+                utm_source: val('utm_source'),
+                utm_campaign: val('utm_campaign'),
+                utm_content: val('utm_content'),
+                utm_medium: val('utm_medium'),
+                utm_term: val('utm_term'),
+                page_url: val('page_url'),
+                submitted_at: new Date().toISOString()
+            };
+        }
+
+        function _sendToWebhook(payload, onDone) {
+            var webhookUrl = 'https://hooks.zapier.com/hooks/catch/5142875/4o1ugce/';
+            var body = JSON.stringify(payload);
+
+            var redirected = false;
+            function done() {
+                if (redirected) return;
+                redirected = true;
+                onDone();
+            }
+
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon(webhookUrl, body);
+                setTimeout(done, 500);
+            } else {
+                fetch(webhookUrl, { method: 'POST', body: body })
+                    .then(done).catch(done);
+                setTimeout(done, 3000);
+            }
+        }
+
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (!contactForm.checkValidity()) {
+                contactForm.reportValidity();
+                return;
+            }
+
+            var submitBtn = contactForm.querySelector('.modal-form-submit');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'שולח...';
+
+            var payload = _buildFormPayload(contactForm);
+
+            if (!payload.fullName || !payload.phone || !payload.email || !payload.company) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'קבעו שיחת ייעוץ חינם';
+                alert('יש למלא את כל השדות לפני השליחה');
+                return;
+            }
+
+            _sendToWebhook(payload, function() {
+                triggerLeadEvent();
+                try {
+                    window.top.location.href = 'https://www.pophy.co.il/thank-you-page';
+                } catch(err) {
+                    window.location.href = 'https://www.pophy.co.il/thank-you-page';
+                }
+            });
+        });
+
+        function triggerLeadEvent() {
+            if (typeof gtag === 'function') {
+                gtag('event', 'conversion', {'send_to': 'AW-17357415233/lk5YCND1p_8aEMHG1NRA'});
+            }
+            if (typeof fbq === 'function') { fbq('track', 'Lead'); }
+            if (typeof ttq === 'object' && ttq !== null && typeof ttq.track === 'function') {
+                ttq.track('Lead');
+            }
+        }
+
+        function triggerDownloadEvent() {
+            if (typeof gtag === 'function') {
+                gtag('event', 'conversion', {'send_to': 'AW-17357415233/lk5YCND1p_8aEMHG1NRA'});
+            }
+            if (typeof fbq === 'function') { fbq('track', 'Download'); }
+            if (typeof ttq === 'object' && ttq !== null && typeof ttq.track === 'function') {
+                ttq.track('Download');
+            }
+        }
+        window.triggerDownloadEvent = triggerDownloadEvent;
+
+        var isMobile = window.innerWidth <= 768;
+
+        var ctaButtons = document.querySelectorAll(
+            '#cta-button, ' +
+            '#why-pophy-cta-button-desktop, ' +
+            '#locations-cta-button, ' +
+            '.open-unified-modal, ' +
+            '.urgency-container .btn-pro, ' +
+            '.main-cta-trigger'
+        );
+        ctaButtons.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (isMobile) {
+                    triggerDownloadEvent();
+                    window.location.href = 'https://onelink.to/c5r32b';
+                    return;
+                }
+                openModal(e);
+            });
+        });
+
+        var mobileCtaLinks = document.querySelectorAll(
+            '#why-pophy-cta-button-mobile, ' +
+            '.locations-cta-container .btn-pro.mobile-only'
+        );
+        mobileCtaLinks.forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                if (isMobile) {
+                    triggerDownloadEvent();
+                    return;
+                }
+                e.preventDefault();
+                openModal(e);
+            });
+        });
+
+        var finalCtaLinks = document.querySelectorAll('.ultimate-cta-section .app-btn');
+        finalCtaLinks.forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                if (isMobile) {
+                    triggerDownloadEvent();
+                    return;
+                }
+                e.preventDefault();
+                openModal(e);
+            });
+        });
+
+        modal.querySelectorAll('.modal-qr-card').forEach(function(card) {
+            card.addEventListener('click', function() {
+                triggerDownloadEvent();
+            });
+        });
+    });
+    </script>
+
+    <!-- Sticky Mobile CTA Bar Logic -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var stickyCta = document.getElementById('sticky-cta');
+        var stickyBtn = document.getElementById('sticky-cta-btn');
+        var heroSection = document.querySelector('.hero-split');
+
+        function checkStickyVisibility() {
+            if (window.innerWidth > 768) return;
+            var heroBottom = heroSection.getBoundingClientRect().bottom;
+            if (heroBottom < 0) {
+                stickyCta.classList.add('is-visible');
+            } else {
+                stickyCta.classList.remove('is-visible');
+            }
+        }
+
+        window.addEventListener('scroll', checkStickyVisibility, { passive: true });
+        checkStickyVisibility();
+
+        stickyBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (window.innerWidth <= 768) {
+                if (typeof window.triggerDownloadEvent === 'function') window.triggerDownloadEvent();
+                window.location.href = 'https://onelink.to/c5r32b';
+                return;
+            }
+            if (typeof window._openPophyModal === 'function') {
+                window._openPophyModal(null);
+            }
+        });
+    });
+    </script>
+
+
+</body>
+</html>

@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sun Benefit – הערכת שווי חברה | אפריל 2026</title>
+
+    <style>
+        @font-face { font-family: 'Ping'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-regular.woff2') format('woff2'); font-weight: 400; }
+        @font-face { font-family: 'Ping'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-bold.woff2') format('woff2'); font-weight: 700; }
+        @font-face { font-family: 'Ping'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-heavy.woff2') format('woff2'); font-weight: 900; }
+
+        :root {
+            --bg-dark: #050505;
+            --color-cyan: #00E5FF;
+            --color-yellow: #FFDC71;
+            --brand-gold: #D4AF37;
+            --brand-gold-glow: rgba(212, 175, 55, 0.15);
+            --brand-gold-light: rgba(212, 175, 55, 0.08);
+            --brand-blue: #5B8CDB;
+            --brand-blue-glow: rgba(91, 140, 219, 0.15);
+            --brand-green: #4ECDC4;
+            --brand-green-glow: rgba(78, 205, 196, 0.15);
+            --brand-rose: #C9A0DC;
+            --brand-rose-glow: rgba(201, 160, 220, 0.15);
+            --brand-solar: #FF9F43;
+            --brand-solar-glow: rgba(255, 159, 67, 0.15);
+            --text-light: #FFFFFF;
+            --text-muted: #888;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.07);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Ping', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .bg-noise {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.03; pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            z-index: 0;
+        }
+        .bg-grid {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 50px 50px; z-index: 0; pointer-events: none;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+        }
+        .ambient-light {
+            position: fixed; border-radius: 50%; filter: blur(120px);
+            pointer-events: none; z-index: 0;
+            animation: floatLight 10s ease-in-out infinite alternate;
+        }
+        .ambient-light.light-cyan { background: var(--color-cyan); width: 600px; height: 600px; top: -10%; right: -10%; opacity: 0.05; }
+        .ambient-light.light-gold { background: var(--brand-gold); width: 500px; height: 500px; bottom: -10%; left: -10%; opacity: 0.1; animation-delay: -5s; }
+        .ambient-light.light-center {
+            background: radial-gradient(circle, var(--brand-gold), var(--brand-solar));
+            width: 400px; height: 400px; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); opacity: 0.03;
+            animation: pulseCenter 12s ease-in-out infinite alternate;
+        }
+        @keyframes floatLight {
+            0% { transform: scale(1) translate(0,0); opacity: 0.06; }
+            100% { transform: scale(1.2) translate(30px,30px); opacity: 0.12; }
+        }
+        @keyframes pulseCenter {
+            0% { transform: translate(-50%,-50%) scale(0.8); opacity: 0.02; }
+            100% { transform: translate(-50%,-50%) scale(1.3); opacity: 0.05; }
+        }
+        .deco-orbit {
+            position: fixed; border-radius: 50%;
+            border: 1px dashed rgba(212,175,55,0.04);
+            width: 800px; height: 800px; top: 50%; left: 50%;
+            transform: translate(-50%,-50%); z-index: 0; pointer-events: none;
+            animation: spin 90s linear infinite;
+        }
+        .deco-orbit-2 {
+            position: fixed; border-radius: 50%;
+            border: 1px dashed rgba(0,229,255,0.03);
+            width: 1100px; height: 1100px; top: 50%; left: 50%;
+            transform: translate(-50%,-50%); z-index: 0; pointer-events: none;
+            animation: spin 120s linear infinite reverse;
+        }
+        @keyframes spin {
+            from { transform: translate(-50%,-50%) rotate(0deg); }
+            to { transform: translate(-50%,-50%) rotate(360deg); }
+        }
+
+        header {
+            padding: 18px 4%; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(5,5,5,0.92); backdrop-filter: blur(20px);
+            z-index: 10; position: sticky; top: 0;
+        }
+        .header-title { display: flex; align-items: center; gap: 20px; }
+        .logo { height: 34px; }
+        .header-title h1 { font-size: 1.3rem; font-weight: 900; color: var(--text-light); border-right: 2px solid rgba(212,175,55,0.3); padding-right: 20px; }
+        .header-title span { color: var(--brand-gold); }
+        .header-tag { display: flex; align-items: center; gap: 12px; }
+        .date-badge {
+            background: var(--brand-gold-glow); border: 1px solid rgba(212,175,55,0.4);
+            color: var(--brand-gold); padding: 6px 16px; border-radius: 4px;
+            font-weight: 700; font-size: 0.95rem;
+        }
+        .client-badge {
+            background: rgba(255,255,255,0.04); border: 1px solid var(--border-color);
+            color: var(--text-muted); padding: 6px 14px; border-radius: 4px;
+            font-weight: 600; font-size: 0.9rem;
+        }
+
+        .dashboard-container { display: flex; flex-direction: column; flex: 1; max-width: 1200px; margin: 0 auto; width: 100%; padding: 40px 4%; position: relative; z-index: 1; }
+        .content-area {
+            flex: 1; background: linear-gradient(160deg, rgba(10,10,10,0.7) 0%, rgba(5,5,5,0.85) 50%, rgba(10,10,10,0.7) 100%);
+            border: 1px solid rgba(255,255,255,0.06); border-radius: 4px;
+            padding: 50px 60px; backdrop-filter: blur(20px);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+            min-width: 0; position: relative; z-index: 1;
+        }
+        .tab-content { display: none; animation: slideIn 0.5s ease forwards; }
+        .tab-content.active { display: block; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+
+        .hero-label {
+            color: var(--brand-gold); font-size: 0.85rem; font-weight: 700;
+            letter-spacing: 3px; text-transform: uppercase;
+            display: flex; align-items: center; justify-content: center;
+            gap: 12px; margin-bottom: 30px;
+        }
+        .hero-label::before, .hero-label::after {
+            content: ''; width: 40px; height: 1px;
+            background: var(--brand-gold); box-shadow: 0 0 10px var(--brand-gold);
+        }
+        .slide-accent-line {
+            width: 60px; height: 2px;
+            background: linear-gradient(90deg, var(--brand-gold), var(--color-cyan));
+            margin: 20px auto; border-radius: 2px;
+            box-shadow: 0 0 12px rgba(212,175,55,0.3);
+        }
+
+        .quote-frame { position: relative; padding: 40px; text-align: center; }
+        .quote-frame::before, .quote-frame::after {
+            content: ''; position: absolute; width: 30px; height: 30px;
+            border: 2px solid var(--brand-gold); opacity: 0.4;
+        }
+        .quote-frame::before { top: 0; right: 0; border-left: none; border-bottom: none; }
+        .quote-frame::after { bottom: 0; left: 0; border-right: none; border-top: none; border-color: var(--color-cyan); }
+
+        .slide-nav {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-top: 30px; padding-top: 25px; border-top: 1px solid var(--border-color);
+        }
+        .slide-nav-btn {
+            background: rgba(10,10,10,0.8); border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted); padding: 12px 28px; border-radius: 4px;
+            font-family: 'Ping', sans-serif; font-size: 1rem; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .slide-nav-btn:hover { background: rgba(212,175,55,0.06); border-color: var(--brand-gold); color: var(--brand-gold); }
+        .slide-nav-btn:disabled { opacity: 0.2; pointer-events: none; }
+        .slide-counter { display: flex; align-items: center; gap: 8px; }
+        .slide-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: rgba(255,255,255,0.12); transition: all 0.3s ease; cursor: pointer;
+        }
+        .slide-dot.active {
+            background: var(--brand-gold); box-shadow: 0 0 10px rgba(212,175,55,0.4);
+            width: 22px; border-radius: 3px;
+        }
+        .slide-number { color: var(--text-muted); font-size: 0.95rem; font-weight: 600; margin: 0 12px; }
+
+        .tab-title { font-size: 2.5rem; font-weight: 900; margin-bottom: 15px; color: var(--text-light); line-height: 1.2; text-align: center; }
+        .tab-title span { color: var(--brand-gold); text-shadow: 0 0 20px rgba(212,175,55,0.2); }
+        .tab-subtitle { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 40px; line-height: 1.7; max-width: 800px; text-align: center; margin-left: auto; margin-right: auto; }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; margin-bottom: 40px; }
+        .kpi-card { background: rgba(10,10,10,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 22px; display: flex; flex-direction: column; gap: 8px; transition: transform 0.3s ease, border-color 0.3s; }
+        .kpi-card:hover { transform: translateY(-4px); border-color: rgba(212,175,55,0.3); }
+        .kpi-card.highlight { border-color: rgba(212,175,55,0.4); background: var(--brand-gold-light); }
+        .kpi-card.green-highlight { border-color: rgba(78,205,196,0.4); background: var(--brand-green-glow); }
+        .kpi-title { font-size: 0.95rem; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; justify-content: space-between; }
+        .kpi-value { font-size: 2.2rem; font-weight: 800; color: var(--text-light); }
+        .kpi-value.gold { color: var(--brand-gold); }
+        .kpi-value.medium { font-size: 1.7rem; }
+        .kpi-value.green { color: var(--brand-green); }
+        .kpi-trend { font-size: 0.85rem; padding: 3px 8px; border-radius: 4px; display: inline-block; align-self: flex-start; font-weight: 600; }
+        .kpi-trend.gold { color: var(--brand-gold); background: var(--brand-gold-glow); }
+        .kpi-trend.muted { color: var(--text-muted); background: rgba(255,255,255,0.04); }
+        .kpi-trend.blue { color: var(--brand-blue); background: var(--brand-blue-glow); }
+        .kpi-trend.green { color: var(--brand-green); background: var(--brand-green-glow); }
+
+        .data-section-title { font-size: 1.35rem; font-weight: 800; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 10px; margin-top: 40px; text-align: center; }
+
+        .strategic-note { background: rgba(10,10,10,0.6); border-right: 2px solid var(--color-cyan); padding: 20px; border-radius: 4px; margin-bottom: 25px; font-size: 1rem; color: var(--text-light); line-height: 1.7; }
+        .strategic-note.gold { border-right-color: var(--brand-gold); background: var(--brand-gold-light); }
+        .strategic-note.green { border-right-color: var(--brand-green); background: var(--brand-green-glow); }
+        .strategic-note.blue { border-right-color: var(--brand-blue); background: var(--brand-blue-glow); }
+        .strategic-note.solar { border-right-color: var(--brand-solar); background: var(--brand-solar-glow); }
+
+        .table-container { width: 100%; overflow-x: auto; background: rgba(10,10,10,0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 4px; margin-top: 20px; margin-bottom: 30px; }
+        .premium-table { width: 100%; border-collapse: collapse; text-align: right; white-space: nowrap; }
+        .premium-table th { padding: 18px 14px; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; border-bottom: 2px solid rgba(212,175,55,0.3); background: rgba(255,255,255,0.02); position: sticky; top: 0; }
+        .premium-table td { padding: 16px 14px; color: var(--text-light); border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 1rem; font-weight: 400; }
+        .premium-table tbody tr { transition: background 0.2s ease; }
+        .premium-table tbody tr:hover { background: rgba(212,175,55,0.06); }
+        .premium-table tbody tr:last-child td { border-bottom: none; }
+        .premium-table tfoot td { border-top: 2px solid rgba(212,175,55,0.3); font-weight: 800; background: rgba(212,175,55,0.04); color: var(--brand-gold); }
+        .highlight-col { color: var(--brand-gold) !important; font-weight: 800 !important; }
+
+        .value-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 35px; }
+        .value-card { background: rgba(10,10,10,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 28px; transition: all 0.3s ease; }
+        .value-card:hover { border-color: var(--brand-gold); transform: translateY(-3px); }
+        .value-card .v-num { font-size: 2.5rem; font-weight: 900; color: var(--brand-gold); margin-bottom: 8px; line-height: 1; }
+        .value-card h4 { font-size: 1.1rem; font-weight: 800; color: var(--text-light); margin-bottom: 8px; }
+        .value-card p { color: var(--text-muted); line-height: 1.6; font-size: 0.95rem; }
+
+        .creative-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 30px; }
+        .creative-card { background: rgba(10,10,10,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 28px; transition: all 0.3s ease; }
+        .creative-card:hover { border-color: var(--brand-gold); background: rgba(212,175,55,0.02); transform: translateY(-3px); }
+        .creative-card h4 { font-size: 1.15rem; font-weight: 800; color: var(--brand-gold); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .creative-card p { color: var(--text-muted); line-height: 1.6; font-size: 0.95rem; }
+        .creative-card.full { grid-column: 1 / -1; }
+
+        .insight-card {
+            background: rgba(10,10,10,0.8); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 4px; padding: 30px; margin-bottom: 22px;
+            transition: all 0.3s ease; position: relative; overflow: hidden;
+        }
+        .insight-card:hover { border-color: rgba(212,175,55,0.3); transform: translateY(-2px); }
+        .insight-card::before {
+            content: ''; position: absolute; top: 0; right: 0; bottom: 0;
+            width: 3px; border-radius: 0 4px 4px 0;
+        }
+        .insight-card.gold::before { background: var(--brand-gold); }
+        .insight-card.green::before { background: var(--brand-green); }
+        .insight-card.blue::before { background: var(--brand-blue); }
+        .insight-card.solar::before { background: var(--brand-solar); }
+        .insight-card .insight-tag {
+            display: inline-block; padding: 4px 12px; border-radius: 3px;
+            font-size: 0.8rem; font-weight: 700; margin-bottom: 12px;
+        }
+        .insight-card.gold .insight-tag { background: var(--brand-gold-glow); color: var(--brand-gold); }
+        .insight-card.green .insight-tag { background: var(--brand-green-glow); color: var(--brand-green); }
+        .insight-card.blue .insight-tag { background: var(--brand-blue-glow); color: var(--brand-blue); }
+        .insight-card.solar .insight-tag { background: var(--brand-solar-glow); color: var(--brand-solar); }
+        .insight-card h4 { font-size: 1.15rem; font-weight: 800; color: var(--text-light); margin-bottom: 10px; }
+        .insight-card .insight-finding { color: #bbb; line-height: 1.7; font-size: 0.95rem; margin-bottom: 10px; }
+        .insight-card .insight-conclusion { color: var(--brand-gold); font-weight: 700; font-size: 0.95rem; margin-bottom: 8px; }
+
+        .step-card {
+            background: rgba(10,10,10,0.8); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 4px; padding: 26px; margin-bottom: 18px;
+            transition: all 0.3s ease;
+        }
+        .step-card:hover { border-color: rgba(212,175,55,0.3); transform: translateY(-2px); }
+        .step-card .step-num {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--brand-gold-glow); color: var(--brand-gold);
+            font-weight: 900; font-size: 0.9rem; margin-bottom: 12px;
+            border: 1px solid rgba(212,175,55,0.3);
+        }
+        .step-card h4 { font-size: 1.1rem; font-weight: 800; color: var(--text-light); margin-bottom: 8px; }
+        .step-card p { color: var(--text-muted); line-height: 1.6; font-size: 0.95rem; }
+
+        .timeline-container { position: relative; padding-right: 40px; }
+        .timeline-item { position: relative; padding-bottom: 35px; padding-right: 30px; border-right: 2px solid rgba(212,175,55,0.2); }
+        .timeline-item:last-child { border-right: none; padding-bottom: 0; }
+        .timeline-item::before { content: ''; position: absolute; right: -8px; top: 5px; width: 14px; height: 14px; border-radius: 50%; background: var(--brand-gold); border: 3px solid var(--bg-dark); }
+        .timeline-item h4 { font-size: 1.1rem; font-weight: 800; color: var(--brand-gold); margin-bottom: 8px; }
+        .timeline-item p { color: var(--text-muted); line-height: 1.6; font-size: 0.95rem; }
+
+        .score-bar-container { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+        .score-bar-bg { flex: 1; height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+        .score-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+        .score-bar-fill.gold { background: linear-gradient(90deg, var(--brand-gold), var(--brand-solar)); }
+        .score-val { font-size: 1.1rem; font-weight: 800; color: var(--brand-gold); min-width: 30px; text-align: center; }
+
+        .valuation-hero {
+            text-align: center; padding: 40px 20px; margin: 30px 0;
+            background: linear-gradient(135deg, rgba(212,175,55,0.06) 0%, rgba(10,10,10,0.4) 50%, rgba(78,205,196,0.06) 100%);
+            border: 1px solid rgba(212,175,55,0.2); border-radius: 4px;
+        }
+        .valuation-hero .big-number { font-size: 4rem; font-weight: 900; color: var(--brand-gold); text-shadow: 0 0 30px rgba(212,175,55,0.3); line-height: 1; }
+        .valuation-hero .big-label { font-size: 1.1rem; color: var(--text-muted); margin-top: 8px; }
+
+        .bullet-list { list-style: none; padding: 0; }
+        .bullet-list li { position: relative; padding: 10px 24px 10px 0; color: #bbb; line-height: 1.7; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .bullet-list li:last-child { border-bottom: none; }
+        .bullet-list li::before { content: ''; position: absolute; right: 0; top: 18px; width: 8px; height: 8px; border-radius: 50%; background: var(--brand-gold); opacity: 0.6; }
+
+        .screenshot-placeholder {
+            background: rgba(10,10,10,0.6); border: 2px dashed rgba(212,175,55,0.2);
+            border-radius: 4px; padding: 60px 30px; text-align: center; margin: 20px 0;
+            color: var(--text-muted); font-size: 1rem;
+        }
+
+        .team-card {
+            background: rgba(10,10,10,0.8); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 4px; padding: 18px 24px; margin-bottom: 10px;
+            display: flex; align-items: center; gap: 16px; transition: all 0.3s ease;
+        }
+        .team-card:hover { border-color: rgba(212,175,55,0.3); transform: translateX(-4px); }
+        .team-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--brand-gold-glow); border: 1px solid rgba(212,175,55,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .team-avatar svg { color: var(--brand-gold); }
+        .team-info { flex: 1; }
+        .team-name { font-weight: 800; color: var(--text-light); font-size: 1rem; }
+        .team-role { color: var(--text-muted); font-size: 0.85rem; margin-top: 2px; }
+
+        .fin-tabs-nav {
+            display: flex; gap: 8px; margin-bottom: 25px; flex-wrap: wrap; justify-content: center;
+        }
+        .fin-tab-btn {
+            background: rgba(10,10,10,0.8); border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted); padding: 10px 20px; border-radius: 4px;
+            font-family: 'Ping', sans-serif; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease;
+        }
+        .fin-tab-btn:hover { background: rgba(212,175,55,0.06); border-color: var(--brand-gold); color: var(--brand-gold); }
+        .fin-tab-btn.active { background: var(--brand-gold-glow); border-color: var(--brand-gold); color: var(--brand-gold); }
+        .fin-tab-content { display: none; animation: slideIn 0.4s ease forwards; }
+        .fin-tab-content.active { display: block; }
+
+        .site-footer {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 24px;
+            font-size: 0.7rem; color: rgba(255,255,255,0.3);
+            font-weight: 400; letter-spacing: 0.3px;
+            background: linear-gradient(to top, rgba(5,5,5,0.6), transparent);
+            pointer-events: none;
+        }
+        .site-footer span, .site-footer a { pointer-events: auto; }
+        .site-footer a { color: rgba(255,255,255,0.35); text-decoration: none; transition: color 0.3s ease; }
+        .site-footer a:hover { color: rgba(255,255,255,0.6); }
+
+        @media (max-width: 768px) {
+            .dashboard-container { padding: 20px 3%; }
+            .content-area { padding: 28px 20px; border-radius: 12px; }
+            .tab-title { font-size: 1.6rem; margin-bottom: 10px; }
+            .tab-subtitle { font-size: 0.95rem; margin-bottom: 25px; }
+            .data-section-title { font-size: 1.15rem; margin-top: 25px; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .kpi-card { padding: 16px; }
+            .kpi-value { font-size: 1.8rem; }
+            .kpi-value.medium { font-size: 1.4rem; }
+            .value-grid, .creative-grid { grid-template-columns: 1fr; gap: 12px; }
+            .value-card, .creative-card { padding: 20px; }
+            .value-card .v-num { font-size: 2rem; }
+            .strategic-note { padding: 15px; font-size: 0.9rem; }
+            .slide-nav { padding-top: 18px; margin-top: 20px; }
+            .slide-nav-btn { padding: 10px 18px; font-size: 0.85rem; }
+            .slide-dot { width: 6px; height: 6px; }
+            .slide-dot.active { width: 18px; }
+            .slide-number { font-size: 0.8rem; margin: 0 8px; }
+            .premium-table th { padding: 12px 10px; font-size: 0.75rem; }
+            .premium-table td { padding: 12px 10px; font-size: 0.8rem; }
+            .timeline-container { padding-right: 25px; }
+            .timeline-item { padding-right: 22px; padding-bottom: 25px; }
+            .timeline-item h4 { font-size: 0.95rem; }
+            .timeline-item p { font-size: 0.85rem; }
+            header { flex-direction: column; gap: 10px; padding: 14px 4%; }
+            .header-title h1 { font-size: 1.1rem; padding-right: 14px; }
+            .logo { height: 28px; }
+            .header-tag { gap: 8px; }
+            .date-badge, .client-badge { font-size: 0.8rem; padding: 5px 12px; }
+            .valuation-hero .big-number { font-size: 2.5rem; }
+        }
+        @media (max-width: 480px) {
+            .content-area { padding: 22px 16px; }
+            .tab-title { font-size: 1.35rem; }
+            .tab-subtitle { font-size: 0.9rem; }
+            .kpi-grid { grid-template-columns: 1fr; gap: 10px; }
+            .kpi-card { flex-direction: row; align-items: center; justify-content: space-between; gap: 0; }
+            .kpi-title { font-size: 0.85rem; margin-bottom: 0; }
+            .kpi-value { font-size: 1.5rem; text-align: left; }
+            .kpi-value.medium { font-size: 1.3rem; }
+            .kpi-trend { font-size: 0.75rem; }
+            .slide-nav-btn { padding: 8px 14px; font-size: 0.8rem; gap: 5px; }
+            .value-card .v-num { font-size: 1.6rem; margin-bottom: 4px; }
+            .value-card h4 { font-size: 0.95rem; }
+            .value-card p { font-size: 0.85rem; }
+            .header-title { gap: 12px; }
+            .header-title h1 { font-size: 0.95rem; }
+            .valuation-hero .big-number { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="site-footer">
+        <a href="https://www.results-group.org/" target="_blank">www.results-group.org</a>
+        <span>By Results Group</span>
+    </div>
+
+    <div class="bg-noise"></div>
+    <div class="bg-grid"></div>
+    <div class="ambient-light light-cyan"></div>
+    <div class="ambient-light light-gold"></div>
+    <div class="ambient-light light-center"></div>
+    <div class="deco-orbit"></div>
+    <div class="deco-orbit-2"></div>
+
+    <header>
+        <div class="header-title">
+            <img src="https://static.wixstatic.com/media/515225_d7ed5ed1634e4012828342de92956ccf~mv2.png" alt="Medera" class="logo" style="filter: none;">
+            <h1>Sun Benefit – <span>הערכת שווי</span></h1>
+        </div>
+        <div class="header-tag">
+            <div class="client-badge">Sun Benefit Ltd</div>
+            <div class="date-badge">אפריל 2026</div>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <main class="content-area">
+
+            <!-- שקף 1: שער -->
+            <div id="cover" class="tab-content active">
+                <div class="quote-frame" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 420px; text-align: center; gap: 10px;">
+                    <div class="hero-label">הערכת שווי חברה</div>
+                    <h2 style="font-size: 4.5rem; font-weight: 900; color: var(--text-light); line-height: 1; letter-spacing: -2px; margin: 0;">Sun Benefit</h2>
+                    <div class="slide-accent-line" style="margin: 22px auto;"></div>
+                    <p style="font-size: 1.5rem; color: var(--brand-gold); font-weight: 700; line-height: 1.4; text-shadow: 0 0 25px rgba(212,175,55,0.3); margin-top: 5px;">ניתוח עסקי והערכת שווי</p>
+                    <p style="font-size: 1rem; color: var(--text-muted); margin-top: 8px;">אפריל 2026</p>
+                    <div style="margin-top: 35px; display: flex; gap: 30px; justify-content: center; flex-wrap: wrap;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 900; color: var(--brand-gold);">2014</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">שנת הקמה</div>
+                        </div>
+                        <div style="width: 1px; background: rgba(255,255,255,0.1); align-self: stretch;"></div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 900; color: var(--brand-gold);">12M</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">מחזור שנתי (&#8362;)</div>
+                        </div>
+                        <div style="width: 1px; background: rgba(255,255,255,0.1); align-self: stretch;"></div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 900; color: var(--brand-gold);">EPC</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">הנדסה, רכש ובנייה</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- שקף 2: סקירת החברה -->
+            <div id="overview" class="tab-content">
+                <h2 class="tab-title">סקירת <span>החברה</span></h2>
+                <p class="tab-subtitle">חברת Sun Benefit פועלת בשוק האנרגיה הסולארית מאז 2014 ומספקת שירותי EPC</p>
+
+                <div class="strategic-note gold" style="margin-bottom: 30px;">
+                    Sun Benefit התחילה את פעילותה בשנת 2014. החברה הוקמה ומוחזקת ע"י <b>ארז עשור</b>, מהנדס מנוסה בתעשייה. החברה עוסקת בתכנון והתקנה של גגות סולריים ומערכות אגירה עבור חברות מסחריות.
+                </div>
+
+                <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); margin-bottom: 30px;">
+                    <div class="kpi-card highlight">
+                        <div class="kpi-title">מחזור מכירות</div>
+                        <div class="kpi-value medium gold">~12M &#8362;</div>
+                        <div class="kpi-trend gold">בשנתיים האחרונות</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">רווח תפעולי ממוצע</div>
+                        <div class="kpi-value medium">8%</div>
+                        <div class="kpi-trend muted">EBITDA Margin</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">שנות פעילות</div>
+                        <div class="kpi-value medium">12</div>
+                        <div class="kpi-trend blue">מאז 2014</div>
+                    </div>
+                    <div class="kpi-card green-highlight">
+                        <div class="kpi-title">תחום התמחות</div>
+                        <div class="kpi-value medium" style="font-size: 1.2rem; color: var(--brand-green);">רגולציה ורישוי</div>
+                        <div class="kpi-trend green">ייחוד תחרותי</div>
+                    </div>
+                </div>
+
+                <div class="strategic-note">
+                    השוק הוא שוק תחרותי שבו חברות נכנסות ויוצאות. כיום השוק עמוס בשחקנים עקב גידולים מתמשכים בביקושים לאנרגיה סולארית. יחד עם זה צפוי ששוק האנרגיה הנקייה והאגירה יגדל עקב ביקושים עולים מתמשכים.
+                </div>
+
+                <div class="strategic-note solar">
+                    <b>חזון הבעלים:</b> הבעלים של החברה מחפש הזדמנויות להגדלת ערך – צמיחה אורגנית עם אפשרות של מיזוג או היימכרות לשותף. התמחות החברה והבעלים הינה תחום הרגולציה והטיפול המשפטי בתכנון, רישוי והתקנה של פרויקטים בתחום.
+                </div>
+            </div>
+
+            <!-- שקף 3: מודל תפעולי -->
+            <div id="operations" class="tab-content">
+                <h2 class="tab-title">מודל <span>תפעולי</span></h2>
+                <p class="tab-subtitle">בשנת 2023 עברה החברה שינוי בדרך הפעולה – ניהול הפרויקטים הוצא לקבלני משנה, והחברה מספקת שירותי EPC (הנדסה, רכש ובנייה)</p>
+
+                <div class="creative-grid" style="margin-top: 20px;">
+                    <div class="creative-card">
+                        <h4>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                            מכירה והתקשרות
+                        </h4>
+                        <p>Sun Benefit מבצעת את המכירה, את ההתקשרות עם הלקוח וחותמת על חוזה.</p>
+                    </div>
+
+                    <div class="creative-card">
+                        <h4>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>
+                            אפיון ותכנון
+                        </h4>
+                        <p>Sun Benefit מאפיינת את הפרויקט. התכנון מתבצע על ידי Sun Benefit ובאחריותה כשההתקנה והביצוע מתבצעים על ידי קבלני משנה.</p>
+                    </div>
+
+                    <div class="creative-card">
+                        <h4>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                            רכש
+                        </h4>
+                        <p>מבצעת את הרכש בעיקר בארץ כשהציוד כיום מיוצר ומיובא בעיקר מסין במחירים צמודי דולר.</p>
+                    </div>
+
+                    <div class="creative-card">
+                        <h4>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            אחריות וליווי
+                        </h4>
+                        <p>מספקת ליווי ונותנת אחריות לפרויקט: אחריות על ההתקנה, על הפאנלים בהתאם לאחריות הספק ואחריות על הממיר.</p>
+                    </div>
+
+                    <div class="creative-card">
+                        <h4>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                            תחזוקה שוטפת
+                        </h4>
+                        <p>מספקת תחזוקה שוטפת בצורת ניטור, בדיקה שנתית ושטיפה של הפאנלים.</p>
+                    </div>
+
+                    <div class="creative-card">
+                        <h4>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>
+                            רגולציה ורישוי
+                        </h4>
+                        <p>מטפלת בקבלת רישוי מול חברת חשמל לפני יציאה לדרך של הפרויקט, ומבצעת את החיבור לחברת חשמל בתום הפרויקט.</p>
+                    </div>
+                </div>
+
+                <h3 class="data-section-title" style="margin-top: 20px;">תכולת פרויקט ממוצע</h3>
+
+                <div class="step-card" style="border-right: 3px solid var(--brand-gold);">
+                    <h4>שלבי הפרויקט</h4>
+                    <ul class="bullet-list">
+                        <li>רגולציה והיתרים</li>
+                        <li>ביצוע: רכש, פיקוח ובקרה, קונסטרוקציה של התאים הפוטו-וולטאיים, ממיר</li>
+                        <li>חיבור הפרויקט לחברת חשמל בתום הפרויקט</li>
+                    </ul>
+                </div>
+
+                <div class="strategic-note gold" style="margin-top: 20px;">
+                    הפרויקטים נמדדים בהספק החשמל שמייצרים. <b>משך זמן הפרויקט ועמידה בתוכנית קריטיים להצלחתו וקריטיים לרווחיות החברה.</b> החברה מודדת ומשפרת בעקביות את ביצועי הפרויקטים.
+                </div>
+            </div>
+
+            <!-- שקף 4: כושר עבודה ולקוחות -->
+            <div id="capacity" class="tab-content">
+                <h2 class="tab-title">כושר עבודה <span>ולקוחות</span></h2>
+                <p class="tab-subtitle">החברה מקיימת כעשרים ושישה פרויקטים בשנה בהיקף של כ-5,000 קילוואט</p>
+
+                <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 30px;">
+                    <div class="kpi-card highlight">
+                        <div class="kpi-title">פרויקטים בשנה</div>
+                        <div class="kpi-value medium gold">~26</div>
+                        <div class="kpi-trend gold">קצב שנתי</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">הספק ממוצע לפרויקט</div>
+                        <div class="kpi-value medium">180 kW</div>
+                        <div class="kpi-trend muted">קילוואט</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">אורך פרויקט ממוצע</div>
+                        <div class="kpi-value medium">~5</div>
+                        <div class="kpi-trend blue">חודשים</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">תמחור לקילוואט</div>
+                        <div class="kpi-value medium">2,200 &#8362;</div>
+                        <div class="kpi-trend green">לקילוואט תפוקה</div>
+                    </div>
+                </div>
+
+                <div class="strategic-note gold">
+                    סה"כ מייצרת החברה פרויקטים בהיקף של כ-5,000 קילוואט בשנה שנותנים היקף מכירות של <b>12 מיליון &#8362; בשנה</b>. החברה הטמיעה תוכנת Monday כפלטפורמה ל-CRM וניהול פרויקטים.
+                </div>
+
+                <h3 class="data-section-title">לקוחות</h3>
+
+                <div class="insight-card gold">
+                    <div class="insight-tag">פרופיל לקוחות</div>
+                    <h4>לקוחות מסחריים קטנים-בינוניים</h4>
+                    <div class="insight-finding">לקוחותיה של חברת Sun Benefit הם בעיקר לקוחות מסחריים בגודל קטן ובינוני ומעט בתים פרטיים.</div>
+                    <div class="insight-finding">דוגמאות: <b style="color: var(--text-light);">נוימן מפעל מתכת</b>, <b style="color: var(--text-light);">קפה רג'ואן</b>, <b style="color: var(--text-light);">מוסך צרפתי</b>.</div>
+                </div>
+
+                <div class="value-grid">
+                    <div class="value-card">
+                        <div class="v-num">~3.5</div>
+                        <h4>שנים</h4>
+                        <p>החזר השקעה ללקוח מסחרי</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="v-num">~6.5</div>
+                        <h4>שנים</h4>
+                        <p>החזר השקעה ללקוח פרטי</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- שקף 5: כוח אדם -->
+            <div id="team" class="tab-content">
+                <h2 class="tab-title">כוח <span>אדם</span></h2>
+                <p class="tab-subtitle">לחברה שישה עובדים קבועים – ארבעה על הפיירול ושניים עם חשבונית</p>
+
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+                    <div class="team-card" style="border-right: 3px solid var(--brand-gold);">
+                        <div class="team-avatar">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </div>
+                        <div class="team-info">
+                            <div class="team-name">ארז עשור</div>
+                            <div class="team-role">מנכ"ל ומנהל עסקים</div>
+                        </div>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="team-avatar">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </div>
+                        <div class="team-info">
+                            <div class="team-name">איתי בן משה</div>
+                            <div class="team-role">מנהל תפעול</div>
+                        </div>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="team-avatar">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </div>
+                        <div class="team-info">
+                            <div class="team-name">יוסף נחמני</div>
+                            <div class="team-role">מנהל רכש ופרויקטים</div>
+                        </div>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="team-avatar">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </div>
+                        <div class="team-info">
+                            <div class="team-name">אייל ארז</div>
+                            <div class="team-role">איש מכירות</div>
+                        </div>
+                    </div>
+
+                    <div class="team-card" style="border-right: 3px solid var(--brand-blue);">
+                        <div class="team-avatar" style="background: var(--brand-blue-glow); border-color: rgba(91,140,219,0.3);">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--brand-blue)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </div>
+                        <div class="team-info">
+                            <div class="team-name">יפית</div>
+                            <div class="team-role">מדבר 19 – אאוטסורס</div>
+                        </div>
+                    </div>
+
+                    <div class="team-card" style="border-right: 3px solid var(--brand-blue);">
+                        <div class="team-avatar" style="background: var(--brand-blue-glow); border-color: rgba(91,140,219,0.3);">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--brand-blue)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </div>
+                        <div class="team-info">
+                            <div class="team-name">איילת</div>
+                            <div class="team-role">מדבר 19 – אאוטסורס</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="strategic-note green" style="margin-top: 25px;">
+                    <b>תוכנית 2026:</b> גיוס של איש מכירות נוסף. בסך הכול שכר של <b>1.65 מיליון &#8362; בשנה</b>.
+                </div>
+
+                <div class="strategic-note gold">
+                    <b>פוטנציאל צמיחה:</b> לחברה יכולת לצמוח בהכנסות ב-עד <b>50%</b> ל-18 מיליון &#8362; ללא הגדלת תקורות שכר.
+                </div>
+
+                <h3 class="data-section-title">קבלני משנה</h3>
+
+                <div class="value-grid">
+                    <div class="value-card">
+                        <div class="v-num" style="font-size: 1.6rem;">טריפל גרין</div>
+                        <h4>1,150 &#8362; לקילוואט</h4>
+                        <p>כולל חומר שחור. יחסים ארוכי טווח עם Sun Benefit.</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="v-num" style="font-size: 1.6rem;">מקור-פתרונות</div>
+                        <h4>1,150 &#8362; לקילוואט</h4>
+                        <p>כולל חומר שחור. הפרויקטים מתומחרים לפי קילוואט מנורמל.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- שקף 6: שוק ותחרות -->
+            <div id="market" class="tab-content">
+                <h2 class="tab-title">שוק <span>ותחרות</span></h2>
+                <p class="tab-subtitle">מיפוי שוק האנרגיה הסולארית המתחדשת והשחקנים המרכזיים</p>
+
+                <h3 class="data-section-title" style="margin-top: 10px;">מתחרים בתחום הקטנים-בינוניים</h3>
+
+                <div class="creative-grid">
+                    <div class="creative-card">
+                        <h4>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                            אורמש
+                        </h4>
+                        <p>הכי גדולים בתחום המסחרי</p>
+                    </div>
+
+                    <div class="creative-card">
+                        <h4>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>
+                            אנרג'י
+                        </h4>
+                        <p>שייך לעידן שורתי</p>
+                    </div>
+
+                    <div class="creative-card">
+                        <h4>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                            עמית אנרגיה
+                        </h4>
+                        <p>שחקן פעיל בתחום</p>
+                    </div>
+
+                    <div class="creative-card">
+                        <h4>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                            שחקנים גדולים
+                        </h4>
+                        <p>אלקטרה, אנלייט</p>
+                    </div>
+                </div>
+
+                <h3 class="data-section-title">פילוח שוק האנרגיה הסולארית המתחדשת</h3>
+
+                <div class="creative-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                    <div class="step-card" style="text-align: center;">
+                        <div class="step-num" style="margin: 0 auto 12px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                        </div>
+                        <h4 style="text-align: center;">גגות פרטיים</h4>
+                    </div>
+                    <div class="step-card" style="text-align: center;">
+                        <div class="step-num" style="margin: 0 auto 12px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                        </div>
+                        <h4 style="text-align: center;">גגות מסחריים</h4>
+                    </div>
+                    <div class="step-card" style="text-align: center;">
+                        <div class="step-num" style="margin: 0 auto 12px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        </div>
+                        <h4 style="text-align: center;">חלקה א' – מושבים</h4>
+                    </div>
+                    <div class="step-card" style="text-align: center;">
+                        <div class="step-num" style="margin: 0 auto 12px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                        </div>
+                        <h4 style="text-align: center;">מערכות קרקעיות</h4>
+                    </div>
+                    <div class="step-card" style="text-align: center;">
+                        <div class="step-num" style="margin: 0 auto 12px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path></svg>
+                        </div>
+                        <h4 style="text-align: center;">אגירת אנרגיה</h4>
+                    </div>
+                    <div class="step-card" style="text-align: center;">
+                        <div class="step-num" style="margin: 0 auto 12px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line></svg>
+                        </div>
+                        <h4 style="text-align: center;">אגרו-פוטו-וולטאי</h4>
+                    </div>
+                    <div class="step-card" style="text-align: center;">
+                        <div class="step-num" style="margin: 0 auto 12px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        </div>
+                        <h4 style="text-align: center;">תחזוקה</h4>
+                    </div>
+                    <div class="step-card" style="text-align: center;">
+                        <div class="step-num" style="margin: 0 auto 12px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+                        </div>
+                        <h4 style="text-align: center;">שדות סולריים גדולים</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- שקף 7: הזדמנויות ומגמות -->
+            <div id="opportunities" class="tab-content">
+                <h2 class="tab-title">הזדמנויות <span>ומגמות בשוק</span></h2>
+                <p class="tab-subtitle">התקופה מאופיינת במספר מגמות משמעותיות בשוק האנרגיה</p>
+
+                <div style="display: flex; flex-direction: column; gap: 20px; margin-top: 20px;">
+
+                    <div class="insight-card green">
+                        <div class="insight-tag">מגמה עולמית</div>
+                        <h4>מעבר לאנרגיה נקייה</h4>
+                        <div class="insight-finding">מעבר מתמשך מאנרגיה פוסילית (מזהמת) לאנרגיה סולארית (נקייה). הדבר מייצר לחץ ליצירת מתקנים ליצירת אנרגיה מהשמש.</div>
+                    </div>
+
+                    <div class="insight-card blue">
+                        <div class="insight-tag">ביקוש עולה</div>
+                        <h4>בינה מלאכותית מגדילה צריכת אנרגיה</h4>
+                        <div class="insight-finding">ביקוש עולה לאנרגיה עקב צריכה מוגברת של כוח לעיבוד בינה מלאכותית.</div>
+                    </div>
+
+                    <div class="insight-card solar">
+                        <div class="insight-tag">צוואר בקבוק</div>
+                        <h4>עומס על רשת החשמל הארצית</h4>
+                        <div class="insight-finding">בארץ אין יותר מקום ברשת החשמל הארצית להובלת אנרגיה ולאגירתה. דבר המאט את אישור פרויקטים וחיבורם לרשת.</div>
+                    </div>
+
+                    <div class="insight-card green">
+                        <div class="insight-tag">הזדמנות</div>
+                        <h4>מערכות אגירה</h4>
+                        <div class="insight-finding">נפתחות הזדמנויות לפרויקטי מערכות אגירה בשילוב פרויקטים לאנרגיה סולארית או ללא קשר אליהם.</div>
+                    </div>
+
+                    <div class="insight-card gold">
+                        <div class="insight-tag">ביטחון אנרגטי</div>
+                        <h4>פרויקטי "אחרי מונה"</h4>
+                        <div class="insight-finding">ביטחון אנרגטי לבתים ולארגונים בשעת מלחמה וחירום ופגעי מזג אוויר. מענה לחוסר בכושר אגירה של חברת חשמל.</div>
+                    </div>
+
+                    <div class="insight-card blue">
+                        <div class="insight-tag">שחיקת מחירים</div>
+                        <h4>קומודיטיזציה של ציוד</h4>
+                        <div class="insight-finding">בצד הפרויקטים מחירי הציוד נשחקו וירדו באופן משמעותי. התחום הופך לקומודיטי.</div>
+                    </div>
+
+                </div>
+
+                <div class="strategic-note gold" style="margin-top: 25px;">
+                    <b>מגמה ארוכת טווח:</b> הביקושים לאנרגיה בכלל ואנרגיה סולארית בפרט והביקושים לכושר אגירה ימשיכו במגמת עלייה לאורך זמן.
+                </div>
+            </div>
+
+            <!-- שקף 8: עסקאות בענף וארזים אנרגיה -->
+            <div id="deals" class="tab-content">
+                <h2 class="tab-title">עסקאות <span>בענף</span></h2>
+                <p class="tab-subtitle">עסקאות מכירה ומיזוגים שבוצעו בשוק האנרגיה הסולארית</p>
+
+                <div class="timeline-container" style="margin-top: 30px;">
+                    <div class="timeline-item">
+                        <h4>תדיראן &larr; אלירן סולאר קונסטרוקציה</h4>
+                        <p>תדיראן קנתה את אלירן סולאר קונסטרוקציה. אלירן לא היה EPC. <b style="color: var(--brand-gold);">ב-120 מיליון &#8362;</b>.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>אמישראגז &larr; סולארט EPC</h4>
+                        <p>סולארט EPC נקנו על ידי אמישראגז.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>סופרגז &larr; מאור שיטרית</h4>
+                        <p>מאור שיטרית נמכר לסופרגז.</p>
+                    </div>
+                </div>
+
+                <h3 class="data-section-title">ארזים אנרגיה</h3>
+
+                <div class="strategic-note solar" style="margin-top: 15px;">
+                    ארז עשור, הבעלים של Sun Benefit, הוא המייסד ושותף <b>50%</b> בחברת ארזים אנרגיה שפועלת בתחום היזמות ואנרגיה הסולארית כנכס מניב. החברה שוכרת גגות ומקימה פאנלים סולריים לטובת מכירת אנרגיה לחברת חשמל. מי שביצעה בעבר את הקמת הפאנלים עבור החברה זו Sun Benefit.
+                </div>
+
+                <div class="insight-card solar" style="margin-top: 20px;">
+                    <div class="insight-tag">אתגרים</div>
+                    <h4>קשיים בשנים הראשונות של ארזים</h4>
+                    <ul class="bullet-list">
+                        <li>פרויקט שנפגע וניזוק בשדרות בזמן המלחמה</li>
+                        <li>הסכמה של הבנק למימון של רק 80% במקום 100% מהתוכנית המקורית</li>
+                        <li>עיכוב גדול של פרויקטים בשלב החיבור לחברת חשמל</li>
+                    </ul>
+                </div>
+
+                <div class="insight-card gold" style="margin-top: 0;">
+                    <div class="insight-tag">סוגיה מהותית</div>
+                    <h4>חוב ארזים אנרגיה לSun Benefit</h4>
+                    <div class="insight-finding">פרויקטים של הקמה בהיקפים של כ-1.5 מיליון &#8362; בחברת ארזים בוצעו על ידי חברת Sun Benefit אך לא חויבו. החברה מימנה את רוב הפרויקטים בהלוואות בנקים, בהיקף של כ-80%. יש לבדוק את יחסי הגומלין הפורמליים בין החברות.</div>
+                </div>
+
+                <div class="strategic-note gold">
+                    נכסיה של ארזים רשומים בחסר עקב המתואר לעיל, ולאחרונה עברה לרווחיות. החברה מוכרת בכ-1 מיליון &#8362; בשנה. <b>יש לסגור את האירוע הזה על ידי יישור קו בין החברות שצריך היה להיעשות לפני שנים.</b>
+                </div>
+
+                <div class="strategic-note">
+                    פחת ציוד ומכונות גבוה במערכות סולאריות. בכל מקרה מבחינת Sun Benefit זהו אירוע חד פעמי אבל מהותי שייתן הכנסות משמעותיות בשנת יישור הקו. מכיוון שיש בעלויות שונות בשתי החברות יש כאן שותף בארזים שנהנה מהמצב שלא בצדק. ניתן גם לטפל באירוע הזה על ידי <b>דילול של אחזקותו של השותף בארזים</b> לאחר הכנת הערכת שווי לארזים אנרגיה.
+                </div>
+
+                <div class="strategic-note blue">
+                    <b>החלטת בעלים:</b> ארז עשור הבעלים צריך להחליט האם החברה הזו נכללת בהערכת השווי. במידה וכן – נבקש לקבל את דוחות הכספיים של החברה ולקיים שיחה להבנת העסק.
+                </div>
+            </div>
+
+            <!-- שקף 9: תוצאות פיננסיות -->
+            <div id="financials" class="tab-content">
+                <h2 class="tab-title">תוצאות <span>פיננסיות</span></h2>
+                <p class="tab-subtitle">סקירת תוצאות פיננסיות 2022–2025</p>
+
+                <div class="strategic-note green" style="margin-bottom: 25px;">
+                    <b>2025 – שיפור משמעותי ברווחיות.</b> השיפור מוסבר על ידי 3 גורמים עיקריים:
+                </div>
+
+                <div class="creative-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="creative-card" style="text-align: center;">
+                        <h4 style="justify-content: center;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                            שער חליפין
+                        </h4>
+                        <p>התחזקות השקל אל מול הדולר</p>
+                    </div>
+
+                    <div class="creative-card" style="text-align: center;">
+                        <h4 style="justify-content: center;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                            סובסידיות סין
+                        </h4>
+                        <p>סובסידיות של ממשלת סין שהוזילו את מחירי הפאנלים עד סוף 2025</p>
+                    </div>
+
+                    <div class="creative-card" style="text-align: center;">
+                        <h4 style="justify-content: center;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            ניהול רווחיות
+                        </h4>
+                        <p>ניהול קפדני של הרווחיות הגולמית בתמחור פרויקטים – מינימום 25%</p>
+                    </div>
+                </div>
+
+                <div class="strategic-note" style="margin-top: 15px;">
+                    השנה 25/26 עלו הוצאות השכר לרמה שתיקח את החברה עד למחזור מכירות של <b>18 מיליון &#8362;</b>.
+                </div>
+
+                <div class="kpi-grid" style="grid-template-columns: 1fr; margin-top: 20px;">
+                    <div class="kpi-card highlight" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div class="kpi-title">אובליגו</div>
+                            <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">הלוואות ליום המאזן 31.12.2025</div>
+                        </div>
+                        <div class="kpi-value medium gold">1M &#8362;</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- שקף 10: התאמות וסוגיות -->
+            <div id="adjustments" class="tab-content">
+                <h2 class="tab-title">התאמות <span>וסוגיות</span></h2>
+                <p class="tab-subtitle">התאמות, הוצאות/הכנסות חד פעמיות, סוגיות מיסוי ויתרות ישנות</p>
+
+                <h3 class="data-section-title" style="margin-top: 10px;">הוצאות והכנסות חד פעמיות</h3>
+                <p style="color: var(--text-muted); text-align: center; font-size: 0.9rem; margin-bottom: 20px;">נוטרלו מחישוב האביטדה</p>
+
+                <div class="insight-card solar">
+                    <div class="insight-tag">ביקורת ניכויים</div>
+                    <h4>360 אלף &#8362;</h4>
+                    <div class="insight-finding">החברה עברה ביקורת ניכויים ושילמה 360 אלף &#8362; לסגירת שומות ניכויים ישנות.</div>
+                </div>
+
+                <div class="insight-card blue">
+                    <div class="insight-tag">חובות ישנים</div>
+                    <h4>557 אלף &#8362;</h4>
+                    <div class="insight-finding">לחברה חובות ישנים בטיפול בגובה 557 אלף &#8362; שהופרשה מחצית לחובות מסופקים.</div>
+                </div>
+
+                <div class="insight-card gold">
+                    <div class="insight-tag">חוב ארזים</div>
+                    <h4>1.5 מיליון &#8362;</h4>
+                    <div class="insight-finding">החברה זכאית להכנסות בגובה 1.5 מיליון &#8362; בגין פרויקטים שעשתה עבור ארזים אנרגיה. עדיין לא הוחלט איך לטפל בחוב הזה, אך בכל מקרה התעלמנו ממנו בחישוב האביטדה עקב היותו הכנסה חד פעמית.</div>
+                </div>
+
+                <div class="strategic-note" style="margin-top: 10px;">
+                    לחברה אין הפרשות לפיצויים ולחופשה, הנושא בבדיקה אצל רואה החשבון.
+                </div>
+
+                <h3 class="data-section-title">סוגיות במיסוי</h3>
+
+                <div class="insight-card green">
+                    <div class="insight-tag">החזר צפוי</div>
+                    <h4>החזר ממס הכנסה</h4>
+                    <div class="insight-finding">לSun Benefit צפוי החזר ממס הכנסה עקב פג תוקף של ניכוי מס במקור ומקדמות מוגזמות, אך אם האירוע מול ארזים ייסגר בשנת 2025 חלק מההחזר יילך לתשלום מס בגין התיקון.</div>
+                </div>
+
+                <div class="insight-card solar">
+                    <div class="insight-tag">ביקורת 2022</div>
+                    <h4>שומת דיבידנד – 360 אלף &#8362;</h4>
+                    <div class="insight-finding">בשנת 2025 בוצעה ביקורת ניכויים לשנת 2022 והחברה חויבה במס בהיקף של 360 אלף &#8362; בעיקר בגין סעיף דיבידנד על יתרת בעלים גבוהה של הבעלים משנת 2022. בינתיים הוכרזו דיבידנדים על יתרות בעלים גבוהות ונראה שהחברה כעת מסודרת וללא חשיפות בהיבט הזה. המס ששולם בגין שומה זו נחשב כהכנסה מוכרת ב-2025.</div>
+                </div>
+
+                <h3 class="data-section-title">יתרות ישנות</h3>
+
+                <div class="table-container" style="margin-top: 10px;">
+                    <table class="premium-table">
+                        <thead>
+                            <tr>
+                                <th>סוג יתרה</th>
+                                <th>עד תאריך</th>
+                                <th class="highlight-col">סכום (&#8362;)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>יתרת ספקים</td>
+                                <td>31.12.2023</td>
+                                <td class="highlight-col">161,798</td>
+                            </tr>
+                            <tr>
+                                <td>יתרת גמל בזכות (לבירור)</td>
+                                <td>שנים קודמות</td>
+                                <td class="highlight-col">41,053</td>
+                            </tr>
+                            <tr>
+                                <td>יתרת לקוחות</td>
+                                <td>31.12.2022</td>
+                                <td class="highlight-col">557,525</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>בנטו – סיכוי גבוה למחיקה</td>
+                                <td>אירוע חד פעמי</td>
+                                <td>354,674</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- שקף 11: תחזית וחזון -->
+            <div id="forecast" class="tab-content">
+                <h2 class="tab-title">תחזית <span>2026–2027</span></h2>
+                <p class="tab-subtitle">הקצב הוא קצב 2025 עם הפרעות מלחמה, אך מסתמן פוטנציאל צמיחה משמעותי</p>
+
+                <div class="strategic-note green" style="margin-bottom: 25px;">
+                    לטענת ארז, מסתמן פייפליין של <b>7.5 מיליון &#8362;</b> עד לסוף חודש יולי 2026, שמאפשר גידול ל-15 מיליון &#8362; – צמיחה של <b>25%</b> בשנה.
+                </div>
+
+                <div class="kpi-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 30px;">
+                    <div class="kpi-card highlight">
+                        <div class="kpi-title">צמיחה 2026</div>
+                        <div class="kpi-value medium gold">+15%</div>
+                        <div class="kpi-trend gold">בתחזית השמרנית</div>
+                    </div>
+                    <div class="kpi-card green-highlight">
+                        <div class="kpi-title">צמיחה 2027</div>
+                        <div class="kpi-value medium green">+25%</div>
+                        <div class="kpi-trend green">בתחזית השמרנית</div>
+                    </div>
+                </div>
+
+                <div class="strategic-note">
+                    בצד של ההוצאות – ההוצאות הישירות של קבלני משנה וקניות ימשיכו להתנהג כהוצאה ישירה משתנה, והתקורות לאחר גיוס מנהל תפעול ומנהל מכירות יוכלו לנהל את החברה עד כ-<b>18 מיליון &#8362;</b>.
+                </div>
+
+                <h3 class="data-section-title">חזון הבעלים</h3>
+
+                <div class="quote-frame" style="margin-top: 10px; padding: 30px;">
+                    <p style="font-size: 1.3rem; color: var(--brand-gold); font-weight: 700; line-height: 1.6; text-shadow: 0 0 15px rgba(212,175,55,0.15);">
+                        לאחר שנים של פעילות והתמחות, לייצר לחברה צמיחה אורגנית משמעותית ולהכין אותה למיזוג או הכנסת שותף.
+                    </p>
+                </div>
+            </div>
+
+            <!-- שקף 12: הערכת שווי -->
+            <div id="valuation" class="tab-content">
+                <h2 class="tab-title">הערכת <span>שווי</span></h2>
+                <p class="tab-subtitle">שיטת מכפיל הרווח התפעולי (EBITDA) ובחינה אל מול עסקאות דומות בשוק</p>
+
+                <div class="strategic-note gold" style="margin-bottom: 20px;">
+                    <b>השיטה:</b> השיטה המתאימה במקרה של Sun Benefit היא שיטת מכפיל הרווח התפעולי/אביטדה ובחינה של התוצאה אל מול עסקאות דומות בשוק, ככל שיש.
+                </div>
+
+                <div class="strategic-note" style="margin-bottom: 25px;">
+                    השיטות האחרות הן: תזרים מזומנים מהוון, שווי מעודכן של נכסים, או השוואה לעסקאות דומות שנעשו בשוק. שיטות אלה לא רלוונטיות לSun Benefit.
+                </div>
+
+                <h3 class="data-section-title" style="margin-top: 10px;">מכפילי EBITDA לפי מגזרים</h3>
+
+                <div class="table-container" style="margin-top: 10px;">
+                    <table class="premium-table">
+                        <thead>
+                            <tr>
+                                <th>מגזר</th>
+                                <th class="highlight-col">טווח מכפילים</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>נפט וגז – פרטי</td>
+                                <td class="highlight-col">5x – 7.5x</td>
+                            </tr>
+                            <tr>
+                                <td>נפט וגז – ציבורי</td>
+                                <td class="highlight-col">8x – 11x</td>
+                            </tr>
+                            <tr>
+                                <td>תשתיות (Midstream)</td>
+                                <td class="highlight-col">7x – 10x</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 700;">חברות EPC</td>
+                                <td class="highlight-col" style="font-size: 1.1rem;">4x – 7x</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="data-section-title">פרמיה / קנס למכפיל</h3>
+                <p style="color: var(--text-muted); text-align: center; font-size: 0.9rem; margin-bottom: 20px;">סולם 1–10</p>
+
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="step-card" style="padding: 18px 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <h4 style="margin: 0; font-size: 1rem;">צמיחה יציבה ו/או פוטנציאל</h4>
+                            <div class="score-val">4</div>
+                        </div>
+                        <p style="font-size: 0.85rem;">עדיין אין צמיחה בת קיימא ובשנתיים האחרונות יציבות.</p>
+                        <div class="score-bar-container">
+                            <div class="score-bar-bg"><div class="score-bar-fill gold" style="width: 40%;"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="step-card" style="padding: 18px 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <h4 style="margin: 0; font-size: 1rem;">תנודתיות</h4>
+                            <div class="score-val">5</div>
+                        </div>
+                        <p style="font-size: 0.85rem;">תנודתיות לא גבוהה אך אין צמיחה משמעותית.</p>
+                        <div class="score-bar-container">
+                            <div class="score-bar-bg"><div class="score-bar-fill gold" style="width: 50%;"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="step-card" style="padding: 18px 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <h4 style="margin: 0; font-size: 1rem;">רגולציה תומכת</h4>
+                            <div class="score-val">7</div>
+                        </div>
+                        <p style="font-size: 0.85rem;">הרגולציה בענף בישראל נחשבת תומכת.</p>
+                        <div class="score-bar-container">
+                            <div class="score-bar-bg"><div class="score-bar-fill gold" style="width: 70%;"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="step-card" style="padding: 18px 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <h4 style="margin: 0; font-size: 1rem;">תזרים חוזי (PPA)</h4>
+                            <div class="score-val">5</div>
+                        </div>
+                        <p style="font-size: 0.85rem;">הסכמי החברה הם קצרי מועד לתקופת ההקמה, בממוצע 5 חודשים. לכן ארזים היא פוטנציאל שילוב מעניין (כמו עסקי ארזים).</p>
+                        <div class="score-bar-container">
+                            <div class="score-bar-bg"><div class="score-bar-fill gold" style="width: 50%;"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="step-card" style="padding: 18px 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <h4 style="margin: 0; font-size: 1rem;">מינוף פיננסי</h4>
+                            <div class="score-val">5</div>
+                        </div>
+                        <p style="font-size: 0.85rem;">בסיכון נמוך.</p>
+                        <div class="score-bar-container">
+                            <div class="score-bar-bg"><div class="score-bar-fill gold" style="width: 50%;"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="step-card" style="padding: 18px 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <h4 style="margin: 0; font-size: 1rem;">מחירי סחורות</h4>
+                            <div class="score-val">7</div>
+                        </div>
+                        <p style="font-size: 0.85rem;">מחירי סחורות הגז והנפט עולים ותנודתיים.</p>
+                        <div class="score-bar-container">
+                            <div class="score-bar-bg"><div class="score-bar-fill gold" style="width: 70%;"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="data-section-title" style="margin-top: 30px;">שווי החברה</h3>
+
+                <div class="strategic-note gold" style="text-align: center; margin-bottom: 25px;">
+                    לאור כל הנ"ל <b>המכפיל הנכון לשימוש הוא 6.5</b>
+                </div>
+
+                <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="kpi-card">
+                        <div class="kpi-title">שווי 2024</div>
+                        <div class="kpi-value medium" style="font-size: 1.4rem;">4.86M &#8362;</div>
+                        <div class="kpi-trend muted">מכפיל 6.5</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">שווי 2025</div>
+                        <div class="kpi-value medium gold">6.73M &#8362;</div>
+                        <div class="kpi-trend gold">מכפיל 6.5</div>
+                    </div>
+                    <div class="kpi-card highlight">
+                        <div class="kpi-title">שווי 2026</div>
+                        <div class="kpi-value medium gold">7.26M &#8362;</div>
+                        <div class="kpi-trend gold">+15% צמיחה</div>
+                    </div>
+                    <div class="kpi-card green-highlight">
+                        <div class="kpi-title">שווי 2027</div>
+                        <div class="kpi-value medium green">15.3M &#8362;</div>
+                        <div class="kpi-trend green">+25% צמיחה</div>
+                    </div>
+                </div>
+
+                <div class="valuation-hero" style="margin-top: 30px;">
+                    <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700;">שווי חברה 2027 בצפי צמיחה</div>
+                    <div class="big-number">15.3M &#8362;</div>
+                    <div class="big-label">לפי מכפיל EBITDA של 6.5</div>
+                </div>
+            </div>
+
+            <!-- שקף 13: המשך תהליך -->
+            <div id="next-steps" class="tab-content">
+                <h2 class="tab-title">המשך <span>תהליך</span></h2>
+                <p class="tab-subtitle">שאלות המחכות להחלטת הבעלים והצעדים הבאים</p>
+
+                <div style="display: flex; flex-direction: column; gap: 0; margin-top: 20px; position: relative;">
+
+                    <div class="step-card" style="border-right: 3px solid var(--brand-gold);">
+                        <div class="step-num">1</div>
+                        <h4>ארזים אנרגיה</h4>
+                        <p>האם לבחון את שווי החברה בחיבור ארזים אנרגיה לSun Benefit?</p>
+                    </div>
+
+                    <div style="text-align: center; padding: 8px 0;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--brand-gold)" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+                    </div>
+
+                    <div class="step-card" style="border-right: 3px solid var(--brand-green);">
+                        <div class="step-num">2</div>
+                        <h4>סאן אנרג'י</h4>
+                        <p>מתחילים תהליך דומה עם חברת סאן אנרג'י.</p>
+                    </div>
+
+                    <div style="text-align: center; padding: 8px 0;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--brand-gold)" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+                    </div>
+
+                    <div class="step-card" style="border-right: 3px solid var(--brand-blue);">
+                        <div class="step-num">3</div>
+                        <h4>פילוח ומיפוי שוק</h4>
+                        <p>פילוח של השוק ומיפוי בשוק של Sun Benefit וסאן אנרג'י.</p>
+                    </div>
+
+                    <div style="text-align: center; padding: 8px 0;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--brand-gold)" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+                    </div>
+
+                    <div class="step-card" style="border-right: 3px solid var(--brand-solar);">
+                        <div class="step-num">4</div>
+                        <h4>בחינת סינרגיה</h4>
+                        <p>בתום התהליך נבחן את הסינרגיה הקיימת מחיבור שני הארגונים וניפגש לדון ביחד.</p>
+                    </div>
+
+                    <div style="text-align: center; padding: 8px 0;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--brand-gold)" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+                    </div>
+
+                    <div class="step-card" style="border-right: 3px solid var(--brand-rose);">
+                        <div class="step-num">5</div>
+                        <h4>החלטה אסטרטגית</h4>
+                        <p>בהתאם לתוצאות דיון לעיל, יוחלט אם מתקדמים עם מיזוג או יציאה להיימכרות.</p>
+                    </div>
+
+                </div>
+
+                <div class="strategic-note gold" style="margin-top: 30px; text-align: center;">
+                    נשמח ללוות אתכם בהמשך ההליכים בכל תרחיש אפשרי.
+                </div>
+            </div>
+
+            <!-- שקף 14: דוחות כספיים -->
+            <div id="statements" class="tab-content">
+                <h2 class="tab-title">דוחות <span>כספיים</span></h2>
+                <p class="tab-subtitle">דוחות כספיים של Sun Benefit בע"מ</p>
+
+                <div class="fin-tabs-nav">
+                    <button class="fin-tab-btn active" onclick="switchFinTab('fin-assets', this)">מאזן – נכסים</button>
+                    <button class="fin-tab-btn" onclick="switchFinTab('fin-liabilities', this)">מאזן – התחייבויות</button>
+                    <button class="fin-tab-btn" onclick="switchFinTab('fin-pnl', this)">רווח והפסד</button>
+                    <button class="fin-tab-btn" onclick="switchFinTab('fin-ebitda', this)">אביטדה ושווי</button>
+                </div>
+
+                <div id="fin-assets" class="fin-tab-content active">
+                <h4 style="color: var(--brand-gold); font-size: 1.1rem; margin-bottom: 16px; text-align: center; font-weight: 800;">נכסים</h4>
+                <div class="table-container" style="margin-bottom: 25px;">
+                    <table class="premium-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>מבוקר 2020</th>
+                                <th>מבוקר 2021</th>
+                                <th>מבוקר 2022</th>
+                                <th>מבוקר 2023</th>
+                                <th>מבוקר 2024</th>
+                                <th class="highlight-col">סקור 2025</th>
+                            </tr>
+                            <tr>
+                                <th></th>
+                                <th style="font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-top: 0;">ש"ח</th>
+                                <th style="font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-top: 0;">ש"ח</th>
+                                <th style="font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-top: 0;">ש"ח</th>
+                                <th style="font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-top: 0;">ש"ח</th>
+                                <th style="font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-top: 0;">ש"ח</th>
+                                <th style="font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-top: 0; color: var(--brand-gold);">ש"ח</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="7" style="color: var(--brand-gold); font-weight: 800; font-size: 0.95rem; padding: 14px 14px 8px;">רכוש שוטף</td></tr>
+                            <tr>
+                                <td style="font-weight: 600;">מזומנים ושווי מזומנים</td>
+                                <td>229,430</td>
+                                <td>17,500</td>
+                                <td>18,055</td>
+                                <td>674,241</td>
+                                <td>17,823</td>
+                                <td class="highlight-col">311,344</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">לקוחות וחייבים שונים</td>
+                                <td>595,369</td>
+                                <td>110,723</td>
+                                <td>1,287,645</td>
+                                <td>2,216,023</td>
+                                <td>1,078,515</td>
+                                <td class="highlight-col">2,184,413</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">בעלי מניות</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>1,182,929</td>
+                                <td>1,173,362</td>
+                                <td>1,452,494</td>
+                                <td class="highlight-col">460,493</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">חייבים ויתרות חובה</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>1,153,349</td>
+                                <td>409,643</td>
+                                <td>933,550</td>
+                                <td class="highlight-col">230,489</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>סך רכוש שוטף</td>
+                                <td>824,799</td>
+                                <td>128,223</td>
+                                <td>3,641,978</td>
+                                <td>4,473,269</td>
+                                <td>3,482,382</td>
+                                <td>3,186,739</td>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            <tr>
+                                <td style="font-weight: 600;">הלוואות לזמן ארוך</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>45,479</td>
+                                <td>45,479</td>
+                                <td>–</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">רכוש קבוע נטו</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>189,946</td>
+                                <td>146,905</td>
+                                <td>237,424</td>
+                                <td class="highlight-col">173,424</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr style="border-top: 2px solid var(--brand-gold);">
+                                <td style="font-size: 1.05rem;">סך מאזן</td>
+                                <td>824,799</td>
+                                <td>128,223</td>
+                                <td>3,831,924</td>
+                                <td>4,665,653</td>
+                                <td>3,765,285</td>
+                                <td>3,360,163</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                </div>
+
+                <div id="fin-liabilities" class="fin-tab-content">
+                <h4 style="color: var(--brand-gold); font-size: 1.1rem; margin-bottom: 16px; text-align: center; font-weight: 800;">התחייבויות</h4>
+                <div class="table-container" style="margin-bottom: 25px;">
+                    <table class="premium-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>מבוקר 2020</th>
+                                <th>מבוקר 2021</th>
+                                <th>מבוקר 2022</th>
+                                <th>מבוקר 2023</th>
+                                <th>מבוקר 2024</th>
+                                <th class="highlight-col">סקור 2025</th>
+                            </tr>
+                            <tr>
+                                <th></th>
+                                <th style="font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-top: 0;">ש"ח</th>
+                                <th style="font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-top: 0;">ש"ח</th>
+                                <th style="font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-top: 0;">ש"ח</th>
+                                <th style="font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-top: 0;">ש"ח</th>
+                                <th style="font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-top: 0;">ש"ח</th>
+                                <th style="font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-top: 0; color: var(--brand-gold);">ש"ח</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="7" style="color: var(--brand-gold); font-weight: 800; font-size: 0.95rem; padding: 14px 14px 8px;">התחייבויות שוטפות</td></tr>
+                            <tr>
+                                <td style="font-weight: 600;">אשראי מתאגידים</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>856,593</td>
+                                <td>914,877</td>
+                                <td>364,024</td>
+                                <td class="highlight-col">300,000</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">ספקים ונותני שירותים</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>1,396,210</td>
+                                <td>1,369,693</td>
+                                <td>1,160,181</td>
+                                <td class="highlight-col">1,427,279</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">זכאים ויתרות זכות</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>223,834</td>
+                                <td>1,508,146</td>
+                                <td>908,279</td>
+                                <td class="highlight-col">1,414,799</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>סך התחייבויות שוטפות</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>2,476,637</td>
+                                <td>3,792,716</td>
+                                <td>2,432,484</td>
+                                <td>3,142,078</td>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            <tr><td colspan="7" style="color: var(--brand-gold); font-weight: 800; font-size: 0.95rem; padding: 14px 14px 8px;">התחייבויות לזמן ארוך</td></tr>
+                            <tr>
+                                <td style="font-weight: 600;">הלוואות לזמן ארוך מתאגידים בנקאיים</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>918,564</td>
+                                <td>494,008</td>
+                                <td>470,363</td>
+                                <td class="highlight-col">790,045</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">התחייבות בשל סיום יחסי עובד מעביד</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>–</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">שטרי הון מבעלים</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>–</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>התחייבויות לזמן ארוך</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>918,564</td>
+                                <td>494,008</td>
+                                <td>470,363</td>
+                                <td>790,045</td>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            <tr><td colspan="7" style="color: var(--brand-gold); font-weight: 800; font-size: 0.95rem; padding: 14px 14px 8px;">הון עצמי</td></tr>
+                            <tr>
+                                <td style="font-weight: 600;">הון מניות</td>
+                                <td>–</td>
+                                <td>1,000</td>
+                                <td>1,000</td>
+                                <td>1,000</td>
+                                <td>1,000</td>
+                                <td>–</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">יתרת רווח לסוף השנה</td>
+                                <td>–</td>
+                                <td>665,429</td>
+                                <td>435,723</td>
+                                <td>377,929</td>
+                                <td>861,438</td>
+                                <td class="highlight-col">572,960</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>הון ועודפים לסוף השנה</td>
+                                <td>–</td>
+                                <td>665,429</td>
+                                <td>436,723</td>
+                                <td>378,929</td>
+                                <td>862,438</td>
+                                <td>571,960</td>
+                            </tr>
+                        </tfoot>
+                        <tfoot>
+                            <tr style="border-top: 2px solid var(--brand-gold);">
+                                <td style="font-size: 1.05rem;">סך מאזן</td>
+                                <td>–</td>
+                                <td>665,429</td>
+                                <td>3,831,924</td>
+                                <td>4,665,653</td>
+                                <td>3,765,285</td>
+                                <td>3,360,163</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                </div>
+
+                <div id="fin-pnl" class="fin-tab-content">
+                <h3 class="data-section-title" style="margin-top: 10px;">דוחות רווח והפסד 2022–2027</h3>
+
+                <div class="table-container" style="margin-bottom: 25px;">
+                    <table class="premium-table" style="min-width: 900px;">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>מבוקר 2022</th>
+                                <th>מבוקר 2023</th>
+                                <th>מבוקר 2024</th>
+                                <th>סקור 2025</th>
+                                <th style="color: var(--brand-green);">תחזית 2026</th>
+                                <th class="highlight-col">תחזית 2027</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="font-weight: 700;">הכנסות</td>
+                                <td>9,367,919 <br><span style="font-size:0.75rem; color:var(--text-muted);">100.0%</span></td>
+                                <td>7,736,946 <br><span style="font-size:0.75rem; color:var(--text-muted);">100.0%</span></td>
+                                <td>11,947,576 <br><span style="font-size:0.75rem; color:var(--text-muted);">100.0%</span></td>
+                                <td>11,826,221 <br><span style="font-size:0.75rem; color:var(--text-muted);">100.0%</span></td>
+                                <td>13,600,154 <br><span style="font-size:0.75rem; color:var(--text-muted);">100.0%</span></td>
+                                <td class="highlight-col">17,000,193 <br><span style="font-size:0.75rem; color:var(--text-muted);">100.0%</span></td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">עלות המכירות</td>
+                                <td>7,857,208 <br><span style="font-size:0.75rem; color:var(--text-muted);">83.9%</span></td>
+                                <td>6,176,375 <br><span style="font-size:0.75rem; color:var(--text-muted);">79.8%</span></td>
+                                <td>9,543,769 <br><span style="font-size:0.75rem; color:var(--text-muted);">79.9%</span></td>
+                                <td>8,926,680 <br><span style="font-size:0.75rem; color:var(--text-muted);">75.5%</span></td>
+                                <td>10,261,381 <br><span style="font-size:0.75rem; color:var(--text-muted);">75.5%</span></td>
+                                <td>12,313,657 <br><span style="font-size:0.75rem; color:var(--text-muted);">72.4%</span></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>רווח גולמי</td>
+                                <td>1,510,711 <br><span style="font-size:0.75rem;">16.1%</span></td>
+                                <td>1,560,571 <br><span style="font-size:0.75rem;">20.2%</span></td>
+                                <td>2,403,807 <br><span style="font-size:0.75rem;">20.1%</span></td>
+                                <td>2,899,541 <br><span style="font-size:0.75rem;">24.5%</span></td>
+                                <td>3,338,773 <br><span style="font-size:0.75rem;">24.5%</span></td>
+                                <td>4,686,535 <br><span style="font-size:0.75rem;">27.6%</span></td>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            <tr>
+                                <td style="font-weight: 600;">הוצאות הנהלה וכלליות</td>
+                                <td>1,704,448 <br><span style="font-size:0.75rem; color:var(--text-muted);">18.2%</span></td>
+                                <td>1,450,240 <br><span style="font-size:0.75rem; color:var(--text-muted);">18.7%</span></td>
+                                <td>1,719,451 <br><span style="font-size:0.75rem; color:var(--text-muted);">14.4%</span></td>
+                                <td>1,927,838 <br><span style="font-size:0.75rem; color:var(--text-muted);">16.3%</span></td>
+                                <td>2,285,505 <br><span style="font-size:0.75rem; color:var(--text-muted);">16.8%</span></td>
+                                <td>2,396,580 <br><span style="font-size:0.75rem; color:var(--text-muted);">14.1%</span></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>רווח תפעולי</td>
+                                <td style="color: #FF6B6B;">(193,737) <br><span style="font-size:0.75rem;">-2.1%</span></td>
+                                <td>110,331 <br><span style="font-size:0.75rem;">1.4%</span></td>
+                                <td>684,356 <br><span style="font-size:0.75rem;">5.7%</span></td>
+                                <td>971,703 <br><span style="font-size:0.75rem;">8.2%</span></td>
+                                <td>1,053,268 <br><span style="font-size:0.75rem;">7.7%</span></td>
+                                <td>2,289,955 <br><span style="font-size:0.75rem;">13.5%</span></td>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            <tr>
+                                <td style="font-weight: 600;">שחיקת מגן</td>
+                                <td>41,775 <br><span style="font-size:0.75rem; color:var(--text-muted);">0.4%</span></td>
+                                <td>168,125 <br><span style="font-size:0.75rem; color:var(--text-muted);">2.2%</span></td>
+                                <td>95,423 <br><span style="font-size:0.75rem; color:var(--text-muted);">0.8%</span></td>
+                                <td>60,259 <br><span style="font-size:0.75rem; color:var(--text-muted);">0.5%</span></td>
+                                <td>100,000 <br><span style="font-size:0.75rem; color:var(--text-muted);">0.7%</span></td>
+                                <td>120,000 <br><span style="font-size:0.75rem; color:var(--text-muted);">0.7%</span></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>רווח (הפסד) לפני הכנסות הוצאות אחרות</td>
+                                <td style="color: #FF6B6B;">(235,512) <br><span style="font-size:0.75rem;">-2.5%</span></td>
+                                <td style="color: #FF6B6B;">(57,794) <br><span style="font-size:0.75rem;">-0.7%</span></td>
+                                <td>588,933 <br><span style="font-size:0.75rem;">4.9%</span></td>
+                                <td>911,444 <br><span style="font-size:0.75rem;">7.7%</span></td>
+                                <td>953,268 <br><span style="font-size:0.75rem;">7.0%</span></td>
+                                <td>2,169,955 <br><span style="font-size:0.75rem;">12.8%</span></td>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            <tr>
+                                <td style="font-weight: 600;">(הכנסות) הוצאות חד פעמיות</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>–</td>
+                                <td>360,020 <br><span style="font-size:0.75rem; color:var(--text-muted);">3.0%</span></td>
+                                <td>–</td>
+                                <td>–</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>רווח לפני מיסים על הכנסה</td>
+                                <td style="color: #FF6B6B;">(235,512) <br><span style="font-size:0.75rem;">-2.5%</span></td>
+                                <td style="color: #FF6B6B;">(57,794) <br><span style="font-size:0.75rem;">-0.7%</span></td>
+                                <td>588,933 <br><span style="font-size:0.75rem;">4.9%</span></td>
+                                <td>551,424 <br><span style="font-size:0.75rem;">4.7%</span></td>
+                                <td>953,268 <br><span style="font-size:0.75rem;">7.0%</span></td>
+                                <td>2,169,955 <br><span style="font-size:0.75rem;">12.8%</span></td>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            <tr>
+                                <td style="font-weight: 600;">מיסים על הכנסה – הפרשה</td>
+                                <td>(5,806) <br><span style="font-size:0.75rem; color:var(--text-muted);">-0.1%</span></td>
+                                <td>–</td>
+                                <td>105,424 <br><span style="font-size:0.75rem; color:var(--text-muted);">0.9%</span></td>
+                                <td>221,132</td>
+                                <td>219,252</td>
+                                <td>499,090</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr style="border-top: 2px solid var(--brand-gold);">
+                                <td style="font-size: 1.05rem;">רווח נקי לשנה</td>
+                                <td style="color: #FF6B6B;">(229,706) <br><span style="font-size:0.75rem;">-2.5%</span></td>
+                                <td style="color: #FF6B6B;">(57,794) <br><span style="font-size:0.75rem;">-0.7%</span></td>
+                                <td>483,509 <br><span style="font-size:0.75rem;">4.0%</span></td>
+                                <td>330,292 <br><span style="font-size:0.75rem;">2.8%</span></td>
+                                <td>734,017 <br><span style="font-size:0.75rem;">5.4%</span></td>
+                                <td>1,670,866 <br><span style="font-size:0.75rem;">9.8%</span></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                </div>
+
+                <div id="fin-ebitda" class="fin-tab-content">
+                <h3 class="data-section-title" style="margin-top: 10px;">חישוב אביטדה והערכת שווי</h3>
+
+                <div class="table-container" style="margin-bottom: 25px;">
+                    <table class="premium-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>מבוקר 2024</th>
+                                <th>סקור 2025</th>
+                                <th style="color: var(--brand-green);">תחזית 2026</th>
+                                <th class="highlight-col">תחזית 2027</th>
+                            </tr>
+                            <tr>
+                                <th></th>
+                                <th style="font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-top: 0;">ש"ח</th>
+                                <th style="font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-top: 0;">ש"ח</th>
+                                <th style="font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-top: 0;">ש"ח</th>
+                                <th style="font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-top: 0; color: var(--brand-gold);">ש"ח</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="font-weight: 600;">רווח תפעולי</td>
+                                <td>684,356</td>
+                                <td>971,703</td>
+                                <td>1,053,268</td>
+                                <td class="highlight-col">2,289,955</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">החזר פחת</td>
+                                <td>63,694</td>
+                                <td>64,000</td>
+                                <td>64,000</td>
+                                <td>64,000</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td style="font-size: 1.05rem;">EBITDA</td>
+                                <td>748,050 <br><span style="font-size:0.75rem;">6.3%</span></td>
+                                <td>1,035,703 <br><span style="font-size:0.75rem;">8.8%</span></td>
+                                <td>1,117,268 <br><span style="font-size:0.75rem;">8.2%</span></td>
+                                <td>2,353,955 <br><span style="font-size:0.75rem;">13.8%</span></td>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            <tr><td colspan="5" style="height: 12px; border: none;"></td></tr>
+                            <tr>
+                                <td style="font-weight: 600;">מכפיל</td>
+                                <td style="font-size: 1.3rem; font-weight: 900; color: var(--brand-gold);">6.5</td>
+                                <td style="font-size: 1.3rem; font-weight: 900; color: var(--brand-gold);">6.5</td>
+                                <td style="font-size: 1.3rem; font-weight: 900; color: var(--brand-gold);">6.5</td>
+                                <td style="font-size: 1.3rem; font-weight: 900; color: var(--brand-gold);">6.5</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr style="border-top: 2px solid var(--brand-gold);">
+                                <td style="font-size: 1.05rem;">שווי חברה</td>
+                                <td>4,862,325</td>
+                                <td>6,732,070</td>
+                                <td>7,262,244</td>
+                                <td style="font-size: 1.1rem;">15,300,710</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="valuation-hero" style="margin-top: 20px;">
+                    <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700;">שווי חברה 2027 בצפי צמיחה</div>
+                    <div class="big-number">15.3M &#8362;</div>
+                    <div class="big-label">לפי מכפיל EBITDA של 6.5</div>
+                </div>
+                </div>
+
+            </div>
+
+            <!-- Navigation -->
+            <div class="slide-nav">
+                <button class="slide-nav-btn" id="prevBtn" onclick="changeSlide(-1)">
+                    הקודם <span>&rarr;</span>
+                </button>
+                <div class="slide-counter" id="slideCounter"></div>
+                <button class="slide-nav-btn" id="nextBtn" onclick="changeSlide(1)">
+                    <span>&larr;</span> הבא
+                </button>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        var slides = ['cover', 'overview', 'operations', 'capacity', 'team', 'market', 'opportunities', 'deals', 'financials', 'adjustments', 'forecast', 'valuation', 'next-steps', 'statements'];
+        var slideNames = [
+            'שער',
+            'סקירת החברה',
+            'מודל תפעולי',
+            'כושר עבודה ולקוחות',
+            'כוח אדם',
+            'שוק ותחרות',
+            'הזדמנויות ומגמות',
+            'עסקאות בענף',
+            'תוצאות פיננסיות',
+            'התאמות וסוגיות',
+            'תחזית',
+            'הערכת שווי',
+            'המשך תהליך',
+            'דוחות כספיים'
+        ];
+        var currentSlide = 0;
+
+        function initSlideCounter() {
+            var counter = document.getElementById('slideCounter');
+            var html = '<span class="slide-number">' + (currentSlide + 1) + ' / ' + slides.length + '</span>';
+            for (var i = 0; i < slides.length; i++) {
+                html += '<div class="slide-dot' + (i === currentSlide ? ' active' : '') + '" onclick="goToSlide(' + i + ')" title="' + slideNames[i] + '"></div>';
+            }
+            counter.innerHTML = html;
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+            document.getElementById(slides[currentSlide]).classList.add('active');
+            updateNav();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function changeSlide(dir) {
+            var next = currentSlide + dir;
+            if (next < 0 || next >= slides.length) return;
+            goToSlide(next);
+        }
+
+        function updateNav() {
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === slides.length - 1;
+            initSlideCounter();
+        }
+
+        function switchFinTab(tabId, btn) {
+            document.querySelectorAll('.fin-tab-content').forEach(function(c) { c.classList.remove('active'); });
+            document.querySelectorAll('.fin-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.target.isContentEditable) return;
+            if (e.key === 'ArrowLeft') changeSlide(1);
+            if (e.key === 'ArrowRight') changeSlide(-1);
+        });
+
+        updateNav();
+    </script>
+</body>
+</html>

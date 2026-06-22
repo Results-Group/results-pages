@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TARGO – ליווי אסטרטגי לסטארטאפים</title>
+<style>
+@font-face { font-family: 'Ploni'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/Ploni/ploni-light-aaa.woff2') format('woff2'); font-weight: 300; }
+@font-face { font-family: 'Ploni'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/Ploni/ploni-regular-aaa.woff2') format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Ploni'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/Ploni/ploni-bold-aaa.woff2') format('woff2'); font-weight: 700; }
+
+:root {
+    --white: #FFFFFF;
+    --off-white: #F9FAFB;
+    --text: #111827;
+    --text-muted: #6B7280;
+    --orange: #FF6B2C;
+    --orange-hover: #E85A1E;
+    --orange-glow: rgba(255, 107, 44, 0.15);
+    --green: #16A34A;
+    --red: #EF4444;
+    --border: #E5E7EB;
+    --font: "Ploni", sans-serif;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font); direction: rtl; background: var(--white); color: var(--text); -webkit-font-smoothing: antialiased; line-height: 1.6; overflow-x: hidden; padding-bottom: 72px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+[data-reveal] { opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
+[data-reveal].revealed { opacity: 1; transform: translateY(0); }
+
+/* ===== URGENCY TOP BAR ===== */
+.urgency-top {
+    background: var(--text); color: var(--white); text-align: center;
+    padding: 10px 16px; font-size: 0.88rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.urgency-top .pulse-dot {
+    width: 8px; height: 8px; background: var(--orange); border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.4); }
+}
+
+/* ===== HERO ===== */
+.hero { padding: 48px 0 56px; text-align: center; }
+.hero-logo { display: block; margin: 0 auto 20px; height: 96px; filter: brightness(0); }
+.hero h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; line-height: 1.25; margin-bottom: 16px; color: var(--text); }
+.hero h1 .highlight { color: var(--orange); }
+.hero-sub { font-size: 1.15rem; color: var(--text-muted); max-width: 620px; margin: 0 auto 40px; line-height: 1.7; }
+
+/* Social proof bar */
+.proof-bar { display: flex; justify-content: center; gap: 40px; margin-bottom: 40px; flex-wrap: wrap; }
+.proof-item { text-align: center; }
+.proof-num { font-size: 2rem; font-weight: 700; color: var(--text); line-height: 1; }
+.proof-label { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+
+/* Hero form */
+.hero-form {
+    max-width: 440px; margin: 0 auto; background: var(--white);
+    border: 2px solid var(--orange); border-radius: 16px;
+    padding: 32px 28px; text-align: right;
+    box-shadow: 0 4px 24px var(--orange-glow);
+    position: relative;
+}
+.form-urgency-badge {
+    position: absolute; top: -14px; right: 50%; transform: translateX(50%);
+    background: var(--orange); color: white; font-size: 0.78rem; font-weight: 700;
+    padding: 4px 18px; border-radius: 50px; white-space: nowrap;
+    animation: badgePulse 2s ease-in-out infinite;
+}
+@keyframes badgePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,44,0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(255,107,44,0); }
+}
+.hero-form h3 { font-size: 1.15rem; font-weight: 700; text-align: center; margin-bottom: 20px; }
+.field { margin-bottom: 14px; }
+.field input {
+    width: 100%; padding: 14px 16px; border: 1.5px solid var(--border);
+    border-radius: 10px; font-size: 1rem; font-family: var(--font);
+    color: var(--text); transition: border-color 0.2s; background: var(--white);
+}
+.field input::placeholder { color: #9CA3AF; text-align: right; }
+.field input[type="tel"] { direction: ltr; text-align: right; }
+.field input:focus { outline: none; border-color: var(--orange); }
+.field input.error { border-color: var(--red); }
+.error-msg { color: var(--red); font-size: 0.78rem; margin-top: 4px; display: none; }
+
+.cta-btn {
+    width: 100%; padding: 16px; background: var(--orange); color: var(--white);
+    border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 700;
+    cursor: pointer; font-family: var(--font); transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: 4px;
+}
+.cta-btn:hover { background: var(--orange-hover); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,107,44,0.3); }
+.cta-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.cta-btn svg { transition: transform 0.2s; }
+.cta-btn:hover svg { transform: translateX(-4px); }
+
+.form-trust { text-align: center; margin-top: 14px; font-size: 0.82rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 6px; }
+.form-trust svg { color: var(--green); flex-shrink: 0; }
+
+/* ===== SECTION CTA LINK ===== */
+.section-cta {
+    display: flex; justify-content: center; margin-top: 40px;
+}
+.section-cta a {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 32px; background: var(--orange); color: var(--white);
+    border-radius: 10px; font-size: 1rem; font-weight: 700; font-family: var(--font);
+    text-decoration: none; transition: all 0.2s;
+}
+.section-cta a:hover { background: var(--orange-hover); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,107,44,0.3); }
+.section-cta a svg { transition: transform 0.2s; }
+.section-cta a:hover svg { transform: translateX(-4px); }
+.section-cta.light a { background: transparent; border: 2px solid var(--orange); color: var(--orange); }
+.section-cta.light a:hover { background: var(--orange); color: var(--white); }
+
+/* ===== WHAT YOU LOSE ===== */
+.loss-section { padding: 72px 0; background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.loss-section .section-title { color: var(--text); }
+.loss-section .section-sub { color: var(--text-muted); }
+.loss-grid { display: flex; flex-direction: column; gap: 16px; max-width: 720px; margin: 0 auto; }
+.loss-card {
+    background: var(--off-white); border: 1px solid var(--border); border-radius: 14px;
+    padding: 24px 28px; display: flex; align-items: flex-start; gap: 20px;
+    transition: all 0.25s; border-right: 4px solid #DC2626;
+}
+.loss-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.05); transform: translateX(-3px); }
+.loss-icon { flex-shrink: 0; width: 44px; height: 44px; border-radius: 10px; background: #FEF2F2; display: flex; align-items: center; justify-content: center; }
+.loss-icon svg { width: 22px; height: 22px; color: #DC2626; }
+.loss-text { flex: 1; }
+.loss-text h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+.loss-text p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; margin: 0; }
+
+/* ===== WHAT YOU GET ===== */
+.results-section { padding: 72px 0; background: var(--off-white); }
+.section-title { text-align: center; font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; margin-bottom: 12px; }
+.section-sub { text-align: center; font-size: 1rem; color: var(--text-muted); margin-bottom: 48px; }
+
+.results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.result-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: 14px;
+    padding: 28px 24px; transition: all 0.25s ease;
+}
+.result-card:hover { border-color: var(--orange); box-shadow: 0 8px 24px rgba(0,0,0,0.05); transform: translateY(-3px); }
+.result-num { font-size: 2rem; font-weight: 700; color: var(--orange); margin-bottom: 10px; line-height: 1; }
+.result-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+.result-card p { font-size: 0.92rem; color: var(--text-muted); line-height: 1.65; }
+
+/* ===== INLINE CTA BANNER ===== */
+.inline-cta {
+    padding: 48px 0; background: var(--text); text-align: center; color: var(--white);
+}
+.inline-cta h2 { font-size: clamp(1.3rem, 3.5vw, 1.8rem); font-weight: 700; margin-bottom: 8px; }
+.inline-cta p { font-size: 0.95rem; color: rgba(255,255,255,0.6); margin-bottom: 24px; }
+.inline-cta .cta-btn { max-width: 340px; margin: 0 auto; }
+
+/* ===== ABOUT ===== */
+.about-section { padding: 72px 0; background: var(--off-white); border-top: 1px solid var(--border); }
+.about-inner { max-width: 720px; margin: 0 auto; text-align: center; }
+.about-inner h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; margin-bottom: 20px; }
+.about-inner p { font-size: 1rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 14px; }
+
+/* ===== BOTTOM CTA ===== */
+.bottom-cta { padding: 56px 0; text-align: center; background: var(--text); color: white; }
+.bottom-cta h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); font-weight: 700; margin-bottom: 4px; }
+.bottom-cta .urgency-line { color: var(--orange); font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+.bottom-cta > .wrap > p { font-size: 0.95rem; color: rgba(255,255,255,0.6); margin-bottom: 24px; }
+.bottom-form {
+    max-width: 440px; margin: 0 auto; background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
+    padding: 28px 28px; text-align: right;
+}
+.bottom-form .field input {
+    background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); color: white;
+}
+.bottom-form .field input::placeholder { color: rgba(255,255,255,0.4); }
+.bottom-form .field input:focus { border-color: var(--orange); background: rgba(255,255,255,0.08); }
+.bottom-form .form-trust { color: rgba(255,255,255,0.4); }
+
+/* ===== FOOTER ===== */
+.site-footer {
+    background: #0A0F1A; text-align: center; padding: 24px 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+.site-footer p { font-size: 0.8rem; color: rgba(255,255,255,0.35); margin: 0; }
+.site-footer a { color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.2s; }
+.site-footer a:hover { color: rgba(255,255,255,0.8); text-decoration: underline; }
+
+/* ===== STICKY BAR ===== */
+.sticky-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    background: var(--white); border-top: 2px solid var(--orange);
+    padding: 12px 24px; box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+    display: flex; align-items: center; justify-content: center; gap: 16px;
+    transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.22,1,0.36,1);
+}
+.sticky-bar.visible { transform: translateY(0); }
+.sticky-bar-text { font-size: 0.92rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.sticky-bar-text .pulse-dot { width: 8px; height: 8px; background: var(--orange); border-radius: 50%; animation: pulse 1.5s ease-in-out infinite; flex-shrink: 0; }
+.sticky-bar a {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 10px 28px; background: var(--orange); color: white;
+    border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.92rem;
+    font-family: var(--font); transition: all 0.2s; white-space: nowrap;
+}
+.sticky-bar a:hover { background: var(--orange-hover); transform: translateY(-1px); }
+
+/* ===== RESPONSIVE — TABLET ===== */
+@media (max-width: 1024px) {
+    .wrap { padding: 0 20px; }
+    .results-grid { gap: 16px; }
+}
+
+/* ===== RESPONSIVE — MOBILE ===== */
+@media (max-width: 768px) {
+    body { padding-bottom: 68px; }
+    .wrap { padding: 0 16px; }
+
+    .urgency-top { font-size: 0.8rem; padding: 9px 12px; }
+
+    .hero { padding: 32px 0 28px; }
+    .hero-logo { height: 72px; margin-bottom: 16px; }
+    .hero h1 { font-size: clamp(1.5rem, 6.5vw, 2rem); line-height: 1.3; margin-bottom: 12px; }
+    .hero-sub { font-size: 0.92rem; margin-bottom: 24px; line-height: 1.65; padding: 0 4px; }
+
+    .proof-bar { gap: 20px; margin-bottom: 24px; }
+    .proof-num { font-size: 1.5rem; }
+    .proof-label { font-size: 0.78rem; }
+
+    .hero-form { padding: 22px 18px; border-radius: 14px; max-width: 100%; }
+    .hero-form h3 { font-size: 1.02rem; margin-bottom: 16px; }
+    .form-urgency-badge { font-size: 0.72rem; padding: 3px 14px; top: -12px; }
+    .field { margin-bottom: 12px; }
+    .field input { padding: 13px 14px; font-size: 0.95rem; border-radius: 8px; }
+    .cta-btn { padding: 14px; font-size: 1rem; border-radius: 8px; }
+
+    .loss-section, .results-section, .about-section, .bottom-cta, .inline-cta { padding: 44px 0; }
+    .section-title { font-size: clamp(1.25rem, 5.5vw, 1.6rem); margin-bottom: 8px; padding: 0 4px; }
+    .section-sub { font-size: 0.9rem; margin-bottom: 32px; }
+
+    .section-cta { margin-top: 28px; }
+    .section-cta a { padding: 12px 24px; font-size: 0.92rem; width: 100%; justify-content: center; }
+
+    .loss-grid { gap: 12px; }
+    .loss-card { padding: 18px 16px; border-radius: 12px; gap: 14px; }
+    .loss-icon { width: 38px; height: 38px; border-radius: 8px; }
+    .loss-icon svg { width: 20px; height: 20px; }
+    .loss-text h3 { font-size: 0.95rem; }
+    .loss-text p { font-size: 0.85rem; }
+
+    .results-grid { grid-template-columns: 1fr; gap: 12px; }
+    .result-card { padding: 20px 16px; border-radius: 12px; }
+    .result-num { font-size: 1.6rem; margin-bottom: 8px; }
+    .result-card h3 { font-size: 1rem; margin-bottom: 6px; }
+    .result-card p { font-size: 0.88rem; }
+
+    .inline-cta h2 { font-size: clamp(1.1rem, 5vw, 1.4rem); }
+    .inline-cta .cta-btn { max-width: 100%; }
+
+    .about-inner h2 { font-size: clamp(1.25rem, 5.5vw, 1.6rem); margin-bottom: 16px; }
+    .about-inner p { font-size: 0.92rem; line-height: 1.7; margin-bottom: 12px; }
+
+    .bottom-cta h2 { font-size: clamp(1.25rem, 5.5vw, 1.6rem); margin-bottom: 10px; }
+    .bottom-cta .urgency-line { font-size: 0.88rem; }
+    .bottom-cta > .wrap > p { font-size: 0.9rem; margin-bottom: 28px; }
+    .bottom-form { padding: 22px 18px; border-radius: 14px; max-width: 100%; }
+
+    .about-inner .section-cta a { width: 100%; justify-content: center; }
+
+    .form-trust { font-size: 0.76rem; }
+
+    .sticky-bar { padding: 10px 14px; gap: 10px; }
+    .sticky-bar-text { font-size: 0.8rem; }
+    .sticky-bar a { padding: 10px 18px; font-size: 0.85rem; }
+}
+
+/* ===== RESPONSIVE — SMALL MOBILE ===== */
+@media (max-width: 380px) {
+    .hero h1 { font-size: 1.35rem; }
+    .proof-bar { gap: 16px; }
+    .proof-num { font-size: 1.3rem; }
+    .proof-label { font-size: 0.72rem; }
+    .hero-form { padding: 18px 14px; }
+    .field input { padding: 12px; font-size: 0.9rem; }
+    .cta-btn { padding: 13px; font-size: 0.92rem; }
+    .sticky-bar { flex-direction: column; gap: 6px; padding: 8px 12px; }
+    .sticky-bar-text { font-size: 0.76rem; }
+    .sticky-bar a { width: 100%; text-align: center; justify-content: center; padding: 10px; font-size: 0.85rem; }
+}
+</style>
+</head>
+<body data-ab-variant="E_Urgency">
+
+<!-- ===== URGENCY TOP BAR ===== -->
+<div class="urgency-top">
+    <span class="pulse-dot"></span>
+    530+ יזמים כבר יצאו לדרך — עכשיו תורכם
+</div>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+    <div class="wrap">
+        <img src="https://static.wixstatic.com/media/f559f1_c89e141b87d549eeb9530ca30cfa7258~mv2.png" alt="Targo Logo" class="hero-logo" data-reveal>
+        <h1 data-reveal>אל תפספסו את תכנית הסטארטאפים שלנו.<br><span class="highlight">הרעיון שלכם מחכה לצאת לדרך.</span></h1>
+        <p class="hero-sub" data-reveal>ליווי אסטרטגי מקיף: תוכנית עסקית, מודל פיננסי ומצגת משקיעים — בנויים על בסיס מחקר שוק אמיתי. כך שתגיעו לכל פגישה מוכנים.</p>
+
+        <div class="proof-bar" data-reveal>
+            <div class="proof-item">
+                <div class="proof-num" data-target="530" data-suffix="+">0</div>
+                <div class="proof-label">מיזמים שליווינו</div>
+            </div>
+            <div class="proof-item">
+                <div class="proof-num" data-target="12">0</div>
+                <div class="proof-label">שנות ניסיון</div>
+            </div>
+            <div class="proof-item">
+                <div class="proof-num" data-target="21">0</div>
+                <div class="proof-label">תעשיות</div>
+            </div>
+        </div>
+
+        <div class="hero-form" data-reveal>
+            <div class="form-urgency-badge">בדיקת התאמה ללא עלות</div>
+            <h3>פגישת ייעוץ ראשונית — ללא עלות</h3>
+            <form id="heroForm" action="/lp/targo-thanks" method="GET">
+                <input type="hidden" name="ab_variant" value="E_Urgency">
+                <div class="field">
+                    <input type="text" id="fullName" name="fullName" placeholder="שם מלא" required>
+                    <div id="error-fullName" class="error-msg">נא להזין שם תקין (לפחות 2 תווים)</div>
+                </div>
+                <div class="field">
+                    <input type="tel" id="phone" name="phone" placeholder="מספר טלפון" required>
+                    <div id="error-phone" class="error-msg">נא להזין מספר טלפון תקין (10 ספרות)</div>
+                </div>
+                <div class="field">
+                    <input type="email" id="email" name="email" placeholder="מייל" required>
+                    <div id="error-email" class="error-msg">נא להזין כתובת דוא"ל תקינה</div>
+                </div>
+                <button type="submit" class="cta-btn">
+                    לבדיקת הרעיון — ללא עלות
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
+            </form>
+            <p class="form-trust">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                ללא התחייבות · חזרה תוך יום עסקים אחד
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- ===== WHAT YOU LOSE BY WAITING ===== -->
+<section class="loss-section">
+    <div class="wrap">
+        <h2 class="section-title" data-reveal>כל יום שעובר בלי תוכנית — עולה לכם ביוקר</h2>
+        <p class="section-sub" data-reveal>בזמן שאתם מהססים, המתחרים שלכם כבר זזים קדימה.</p>
+        <div class="loss-grid">
+            <div class="loss-card" data-reveal data-reveal-delay="0">
+                <div class="loss-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                <div class="loss-text">
+                    <h3>בזבוז זמן יקר</h3>
+                    <p>חודשים של ניסוי וטעייה בלי כיוון ברור, במקום תוכנית מוכחת שחוסכת לכם חודשים.</p>
+                </div>
+            </div>
+            <div class="loss-card" data-reveal data-reveal-delay="80">
+                <div class="loss-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+                <div class="loss-text">
+                    <h3>הפסד כספי</h3>
+                    <p>משקיעים שלא תגיעו אליהם מוכנים — לא יתנו לכם הזדמנות שנייה.</p>
+                </div>
+            </div>
+            <div class="loss-card" data-reveal data-reveal-delay="160">
+                <div class="loss-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></div>
+                <div class="loss-text">
+                    <h3>חלון הזדמנויות נסגר</h3>
+                    <p>שווקים זזים מהר. מה שעובד היום לא בהכרח יעבוד בעוד חצי שנה.</p>
+                </div>
+            </div>
+        </div>
+        <div class="section-cta" data-reveal>
+            <a href="#lead">אל תמתינו — השאירו פרטים עכשיו <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a>
+        </div>
+    </div>
+</section>
+
+<!-- ===== WHAT YOU GET ===== -->
+<section class="results-section">
+    <div class="wrap">
+        <h2 class="section-title" data-reveal>מה מקבלים בסוף התהליך?</h2>
+        <p class="section-sub" data-reveal>ארגז הכלים המקצועי שאנחנו בונים עבור המיזם שלכם:</p>
+        <div class="results-grid">
+            <div class="result-card" data-reveal data-reveal-delay="0">
+                <div class="result-num">01</div>
+                <h3>תוכנית עסקית מקצועית</h3>
+                <p>מסמך אסטרטגי מקיף הכולל ניתוח שוק, מודל עסקי, ותוכנית פעולה ברורה להשגת היעדים.</p>
+            </div>
+            <div class="result-card" data-reveal data-reveal-delay="80">
+                <div class="result-num">02</div>
+                <h3>מודל פיננסי מלא</h3>
+                <p>תחזיות פיננסיות מדויקות, ניתוח נקודת איזון, והערכת שווי שמוכנה להצגה בפני משקיעים.</p>
+            </div>
+            <div class="result-card" data-reveal data-reveal-delay="160">
+                <div class="result-num">03</div>
+                <h3>מצגת משקיעים מנצחת</h3>
+                <p>זיקוק כל המידע למצגת חדה, ויזואלית ומשכנעת שמספרת את הסיפור שלכם בצורה הטובה ביותר.</p>
+            </div>
+            <div class="result-card" data-reveal data-reveal-delay="240">
+                <div class="result-num">04</div>
+                <h3>אסטרטגיית חדירה לשוק</h3>
+                <p>תוכנית מוגדרת להשגת הלקוחות הראשונים, הכוללת זיהוי קהלי יעד, מסרים ובחירת ערוצי שיווק.</p>
+            </div>
+        </div>
+        <div class="section-cta light" data-reveal>
+            <a href="#lead">רוצים את כל זה? דברו איתנו <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a>
+        </div>
+    </div>
+</section>
+
+<!-- ===== INLINE CTA ===== -->
+<section class="inline-cta">
+    <div class="wrap" data-reveal>
+        <h2>530+ יזמים כבר יצאו לדרך איתנו.<br>עכשיו תורכם.</h2>
+        <p>כל שבוע שעובר בלי תוכנית — מרחיק אתכם מהיעד.</p>
+        <a href="#lead" class="cta-btn" style="text-decoration:none;">
+            לתיאום שיחה עכשיו
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </a>
+    </div>
+</section>
+
+<!-- ===== ABOUT ===== -->
+<section class="about-section">
+    <div class="wrap about-inner" data-reveal>
+        <h2>מי אנחנו?</h2>
+        <p>TARGO היא חברת ייעוץ אסטרטגי לסטארטאפים, שפועלת מ-2012. הצוות שלנו מורכב ממומחים בתחומי אסטרטגיה עסקית, מחקר שוק, מודלים פיננסיים וגיוס הון — עם ניסיון מצטבר של מאות פרויקטים בלמעלה מ-21 תעשיות שונות.</p>
+        <p>ליווינו למעלה מ-530 מיזמים בדרך מהרעיון הראשוני ועד גיוס משקיעים ופיתוח מוצר — כולל כתיבת תוכניות עסקיות, בניית מודלים פיננסיים, הכנת מצגות משקיעים, ואסטרטגיות חדירה לשוק.</p>
+        <p>המשרדים שלנו ממוקמים ברמת גן, ואנחנו עובדים עם יזמים מכל רחבי הארץ — בליווי צמוד, אישי ומקצועי.</p>
+        <div class="section-cta" style="margin-top:28px;">
+            <a href="#lead">בואו נדבר על הרעיון שלכם <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a>
+        </div>
+    </div>
+</section>
+
+<!-- ===== BOTTOM CTA ===== -->
+<section class="bottom-cta" id="lead">
+    <div class="wrap">
+        <h2 data-reveal>הרעיון שלכם לא ימתין לכם לנצח.</h2>
+        <p class="urgency-line" data-reveal>כל יום שעובר בלי תוכנית — מרחיק אתכם מגיוס ההון הראשון.</p>
+        <p data-reveal>השאירו פרטים ונחזור אליכם תוך יום עסקים לתיאום פגישת ייעוץ ראשונית, ללא עלות.</p>
+        <div class="bottom-form" data-reveal data-reveal-delay="100">
+            <form id="bottomForm" action="/lp/targo-thanks" method="GET">
+                <input type="hidden" name="ab_variant" value="E_Urgency">
+                <div class="field">
+                    <input type="text" id="fullName-btm" name="fullName" placeholder="שם מלא" required>
+                    <div id="error-fullName-btm" class="error-msg">נא להזין שם תקין (לפחות 2 תווים)</div>
+                </div>
+                <div class="field">
+                    <input type="tel" id="phone-btm" name="phone" placeholder="מספר טלפון" required>
+                    <div id="error-phone-btm" class="error-msg">נא להזין מספר טלפון תקין (10 ספרות)</div>
+                </div>
+                <div class="field">
+                    <input type="email" id="email-btm" name="email" placeholder="מייל" required>
+                    <div id="error-email-btm" class="error-msg">נא להזין כתובת דוא"ל תקינה</div>
+                </div>
+                <button type="submit" class="cta-btn">
+                    לתיאום פגישת ייעוץ — ללא עלות
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
+            </form>
+            <p class="form-trust">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                ללא התחייבות · חזרה תוך יום עסקים אחד
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+    <p>&copy; TARGO Consulting — כל הזכויות שמורות · <a href="https://www.targo-consulting.co.il/%d7%9e%d7%93%d7%99%d7%a0%d7%99%d7%95%d7%aa-%d7%a4%d7%a8%d7%98%d7%99%d7%95%d7%aa/" target="_blank" rel="noopener">מדיניות פרטיות</a></p>
+</footer>
+
+<!-- ===== STICKY BAR (all devices) ===== -->
+<div class="sticky-bar" id="stickyBar">
+    <span class="sticky-bar-text">
+        <span class="pulse-dot"></span>
+        הרעיון שלכם לא יחכה — קבעו פגישה היום
+    </span>
+    <a href="#lead">
+        לתיאום פגישה ללא עלות
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </a>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    /* Reveal */
+    const obs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const d = parseInt(entry.target.dataset.revealDelay || '0');
+                setTimeout(() => entry.target.classList.add('revealed'), d);
+                obs.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('[data-reveal]').forEach(el => obs.observe(el));
+
+    /* Counter */
+    const animateCount = (el) => {
+        const target = +el.dataset.target, suffix = el.dataset.suffix || '';
+        const dur = 1600, frames = Math.round(dur / (1000/60));
+        let f = 0;
+        const tick = setInterval(() => {
+            f++;
+            const p = 1 - Math.pow(1 - f/frames, 4);
+            el.textContent = Math.round(target * p).toLocaleString() + suffix;
+            if (f === frames) { clearInterval(tick); el.textContent = target.toLocaleString() + suffix; }
+        }, 1000/60);
+    };
+    const sObs = new IntersectionObserver((entries, o) => {
+        entries.forEach(e => { if (e.isIntersecting) { animateCount(e.target); o.unobserve(e.target); } });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.proof-num[data-target]').forEach(el => sObs.observe(el));
+
+    /* Sticky bar: show after scrolling past hero, hide when bottom CTA visible */
+    const stickyBar = document.getElementById('stickyBar');
+    const heroSection = document.querySelector('.hero');
+    const bottomSection = document.getElementById('lead');
+    let pastHero = false, atBottom = false;
+
+    const updateSticky = () => {
+        stickyBar.classList.toggle('visible', pastHero && !atBottom);
+    };
+
+    new IntersectionObserver((entries) => {
+        entries.forEach(e => { pastHero = !e.isIntersecting; updateSticky(); });
+    }, { threshold: 0 }).observe(heroSection);
+
+    new IntersectionObserver((entries) => {
+        entries.forEach(e => { atBottom = e.isIntersecting; updateSticky(); });
+    }, { threshold: 0.1 }).observe(bottomSection);
+
+    /* Validation */
+    const vName = n => /^[a-zA-Z\u0590-\u05FF\s]+$/.test(n) && n.trim().length >= 2;
+    const vPhone = p => /^0?5\d{8}$/.test(p.replace(/-/g, ''));
+    const vEmail = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+
+    function setup(form, sfx) {
+        if (!form) return;
+        const showErr = (id, s) => {
+            const er = document.getElementById('error-' + id + sfx);
+            const inp = document.getElementById(id + sfx);
+            if (er) er.style.display = s ? 'block' : 'none';
+            if (inp) inp.classList.toggle('error', s);
+        };
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            ['fullName','phone','email'].forEach(id => showErr(id, false));
+            const fd = new FormData(form);
+            let ok = true;
+            if (!vName(fd.get('fullName')))  { showErr('fullName', true); ok = false; }
+            if (!vPhone(fd.get('phone')))    { showErr('phone', true); ok = false; }
+            if (!vEmail(fd.get('email')))    { showErr('email', true); ok = false; }
+            if (!ok) { const f = form.querySelector('.error'); if (f) f.focus(); return; }
+            form.querySelector('.cta-btn').disabled = true;
+            form.submit();
+        });
+    }
+    setup(document.getElementById('heroForm'), '');
+    setup(document.getElementById('bottomForm'), '-btm');
+});
+</script>
+</body>
+</html>

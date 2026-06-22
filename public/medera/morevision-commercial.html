@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoreVision – Commercial Overview | סיכום קמפיין</title>
+    <style>
+        @font-face { font-family: 'Ping'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-regular.woff2') format('woff2'); font-weight: 400; }
+        @font-face { font-family: 'Ping'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-bold.woff2') format('woff2'); font-weight: 700; }
+        @font-face { font-family: 'Ping'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-heavy.woff2') format('woff2'); font-weight: 900; }
+        :root {
+            --bg:#050505;--gold:#D4AF37;--gold-glow:rgba(212,175,55,.15);
+            --gold-light:rgba(212,175,55,.08);--cyan:#00E5FF;
+            --white:#FFFFFF;--muted:#888;--border:rgba(255,255,255,.07);--card:rgba(10,10,10,.8);
+        }
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Ping',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;}
+        .bg-noise{position:fixed;inset:0;opacity:.03;pointer-events:none;z-index:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+        .bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:50px 50px;mask-image:radial-gradient(circle at center,black 40%,transparent 100%);-webkit-mask-image:radial-gradient(circle at center,black 40%,transparent 100%);}
+        .amb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;}
+        .amb-c{background:var(--cyan);width:700px;height:700px;top:-12%;right:-12%;opacity:.07;animation:fl 10s ease-in-out infinite alternate;}
+        .amb-g{background:var(--gold);width:500px;height:500px;bottom:-10%;left:-10%;opacity:.1;animation:fl 10s ease-in-out infinite alternate;animation-delay:-5s;}
+        .amb-m{background:radial-gradient(circle,var(--gold),var(--cyan));width:400px;height:400px;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.04;animation:pc 12s ease-in-out infinite alternate;}
+        .orbit{position:fixed;border-radius:50%;border:1px dashed rgba(212,175,55,.04);width:800px;height:800px;top:50%;left:50%;transform:translate(-50%,-50%);z-index:0;pointer-events:none;animation:sp 90s linear infinite;}
+        .orbit2{position:fixed;border-radius:50%;border:1px dashed rgba(0,229,255,.03);width:1100px;height:1100px;top:50%;left:50%;transform:translate(-50%,-50%);z-index:0;pointer-events:none;animation:sp 120s linear infinite reverse;}
+        @keyframes fl{0%{transform:scale(1) translate(0,0);opacity:.06;}100%{transform:scale(1.2) translate(30px,30px);opacity:.12;}}
+        @keyframes pc{0%{transform:translate(-50%,-50%) scale(.8);opacity:.02;}100%{transform:translate(-50%,-50%) scale(1.3);opacity:.05;}}
+        @keyframes sp{from{transform:translate(-50%,-50%) rotate(0);}to{transform:translate(-50%,-50%) rotate(360deg);}}
+        header{padding:16px 4%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);background:rgba(5,5,5,.92);backdrop-filter:blur(20px);z-index:10;position:sticky;top:0;}
+        .hd-l{display:flex;align-items:center;gap:18px;}
+        .logo{height:32px;filter:brightness(0) invert(1);}
+        .hd-l h1{font-size:1.2rem;font-weight:900;border-right:2px solid rgba(212,175,55,.3);padding-right:18px;}
+        .hd-l h1 span{color:var(--gold);}
+        .hd-r{display:flex;align-items:center;gap:8px;}
+        .hbg{background:var(--gold-glow);border:1px solid rgba(212,175,55,.4);color:var(--gold);padding:5px 14px;border-radius:4px;font-weight:700;font-size:.88rem;}
+        .hbm{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:4px;font-weight:600;font-size:.82rem;}
+        .tab-nav{display:flex;gap:2px;padding:16px 4% 0;flex-wrap:wrap;background:rgba(5,5,5,.6);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:9;position:sticky;top:65px;}
+        .tb{padding:9px 16px;border:none;background:transparent;color:var(--muted);font-family:'Ping',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .25s;white-space:nowrap;}
+        .tb:hover{color:rgba(255,255,255,.7);}
+        .tb.on{color:var(--gold);border-bottom-color:var(--gold);}
+        .itab-nav{display:flex;gap:2px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:28px;}
+        .itb{padding:8px 14px;border:none;background:transparent;color:var(--muted);font-family:'Ping',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .25s;white-space:nowrap;}
+        .itb:hover{color:rgba(255,255,255,.65);}
+        .itb.on{color:var(--gold);border-bottom-color:var(--gold);}
+        .ipane{display:none;animation:fi .35s ease forwards;}
+        .ipane.on{display:block;}
+        .wrap{max-width:1200px;margin:0 auto;width:100%;padding:40px 4% 80px;position:relative;z-index:1;}
+        .pane{display:none;animation:fi .4s ease forwards;}
+        .pane.on{display:block;}
+        @keyframes fi{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+        h2.pt{font-size:2.3rem;font-weight:900;text-align:center;margin-bottom:10px;line-height:1.2;}
+        h2.pt span{color:var(--gold);text-shadow:0 0 20px rgba(212,175,55,.2);}
+        .ps{font-size:1rem;color:var(--muted);text-align:center;margin-bottom:34px;line-height:1.7;max-width:760px;margin-left:auto;margin-right:auto;}
+        h3.st{font-size:1.25rem;font-weight:800;margin:34px 0 16px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.06);text-align:center;}
+        .al{width:60px;height:2px;background:linear-gradient(90deg,var(--gold),var(--cyan));margin:14px auto 28px;border-radius:2px;}
+        .kg{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:14px;margin-bottom:28px;}
+        .kc{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:18px;display:flex;flex-direction:column;gap:6px;transition:transform .3s,border-color .3s;}
+        .kc .yt-btn{margin-top:auto;}
+        .kc:hover{transform:translateY(-3px);border-color:rgba(212,175,55,.25);}
+        .kc.hl{border-color:rgba(212,175,55,.4);background:var(--gold-light);}
+        .kl{font-size:.85rem;color:var(--muted);font-weight:600;}
+        .kv{font-size:1.9rem;font-weight:900;}
+        .kv.g{color:var(--gold);}
+        .kv.sm{font-size:1.45rem;}
+        .kt{font-size:.77rem;font-weight:700;padding:2px 7px;border-radius:3px;display:inline-block;align-self:flex-start;}
+        .kt.g{color:var(--gold);background:var(--gold-glow);}
+        .kt.m{color:var(--muted);background:rgba(255,255,255,.04);}
+        .note{background:rgba(255,255,255,.02);border-right:2px solid rgba(255,255,255,.15);padding:16px 18px;border-radius:4px;margin-bottom:20px;font-size:.95rem;color:rgba(255,255,255,.8);line-height:1.7;}
+        .note.g{border-right-color:var(--gold);background:var(--gold-light);color:var(--white);}
+        .note.c{border-right-color:var(--cyan);background:rgba(0,229,255,.04);color:var(--white);}
+        .tw{width:100%;overflow-x:auto;background:rgba(10,10,10,.6);border:1px solid rgba(255,255,255,.06);border-radius:6px;margin-bottom:24px;}
+        .tbl{width:100%;border-collapse:collapse;text-align:right;white-space:nowrap;}
+        .tbl th{padding:14px;color:var(--muted);font-weight:600;font-size:.85rem;border-bottom:2px solid rgba(212,175,55,.3);background:rgba(255,255,255,.02);}
+        .tbl td{padding:13px 14px;color:var(--white);border-bottom:1px solid rgba(255,255,255,.05);font-size:.93rem;}
+        .tbl tbody tr:hover{background:rgba(212,175,55,.04);}
+        .tbl tbody tr:last-child td{border-bottom:none;}
+        .tbl tfoot td{border-top:2px solid rgba(212,175,55,.3);font-weight:800;background:rgba(212,175,55,.04);color:var(--gold);}
+        .tbl .hl{color:var(--gold)!important;font-weight:800!important;}
+        .bar-row{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+        .bar-lbl{min-width:130px;font-size:.88rem;color:rgba(255,255,255,.8);text-align:right;font-weight:600;}
+        .bar-track{flex:1;background:rgba(255,255,255,.05);border-radius:4px;height:32px;overflow:hidden;}
+        .bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 10px;font-size:.8rem;font-weight:700;color:#050505;white-space:nowrap;transition:width .8s ease;}
+        .bar-fill.gd{background:linear-gradient(90deg,var(--gold),rgba(212,175,55,.5));}
+        .bar-fill.cy{background:linear-gradient(90deg,var(--cyan),rgba(0,229,255,.4));color:#050505;}
+        .bar-fill.wh{background:linear-gradient(90deg,rgba(255,255,255,.6),rgba(255,255,255,.25));color:#050505;}
+        .bar-val{min-width:70px;font-size:.85rem;font-weight:700;color:var(--gold);text-align:left;}
+        .adc-stats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+        .adc-stat{background:var(--gold-glow);border:1px solid rgba(212,175,55,.2);border-radius:4px;padding:4px 10px;font-size:.82rem;color:var(--gold);font-weight:700;}
+        .adc-stat.n{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:var(--muted);}
+        .yt-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(255,0,0,.15);border:1px solid rgba(255,0,0,.35);color:#ff6b6b;padding:7px 14px;border-radius:4px;font-family:'Ping',sans-serif;font-size:.82rem;font-weight:700;text-decoration:none;transition:all .25s;cursor:pointer;}
+        .yt-btn:hover{background:rgba(255,0,0,.25);color:#fff;}
+        .yt-btn svg,.fb-btn svg,.tt-btn svg{flex-shrink:0;}
+        .fb-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(24,119,242,.15);border:1px solid rgba(24,119,242,.4);color:#5b9cf6;padding:7px 14px;border-radius:4px;font-family:'Ping',sans-serif;font-size:.82rem;font-weight:700;text-decoration:none;transition:all .25s;cursor:pointer;}
+        .fb-btn:hover{background:rgba(24,119,242,.28);color:#fff;}
+        .tt-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(255,0,80,.12);border:1px solid rgba(255,0,80,.35);color:#ff6b9d;padding:7px 14px;border-radius:4px;font-family:'Ping',sans-serif;font-size:.82rem;font-weight:700;text-decoration:none;transition:all .25s;cursor:pointer;}
+        .tt-btn:hover{background:rgba(255,0,80,.24);color:#fff;}
+        .vid-hero{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;margin-bottom:28px;}
+        .vid-thumb{position:relative;cursor:pointer;overflow:hidden;background:#111;}
+        .vid-thumb img{width:100%;display:block;transition:transform .4s;}
+        .vid-thumb:hover img{transform:scale(1.03);}
+        .vid-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.3);}
+        .vid-play-btn{width:68px;height:68px;background:rgba(255,0,0,.85);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .3s;}
+        .vid-play:hover .vid-play-btn{background:rgba(255,0,0,1);transform:scale(1.1);}
+        .vid-body{padding:20px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+        .vid-title{font-size:1.15rem;font-weight:800;}
+        .vid-actions{display:flex;gap:10px;flex-wrap:wrap;}
+        .vv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;}
+        .vv-card{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:8px;overflow:hidden;transition:all .3s;}
+        .vv-card:hover{border-color:rgba(212,175,55,.3);transform:translateY(-3px);}
+        .vv-card .thumb{position:relative;aspect-ratio:9/16;background:#111;overflow:hidden;cursor:pointer;}
+        .vv-card .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s;}
+        .vv-card .thumb:hover img{transform:scale(1.04);}
+        .vv-card .thumb .vp{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.3);}
+        .vv-card .thumb .vp-btn{width:52px;height:52px;background:rgba(255,0,0,.85);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .3s;}
+        .vv-card .thumb:hover .vp-btn{background:rgba(255,0,0,1);transform:scale(1.1);}
+        .vv-body{padding:14px 16px;display:flex;flex-direction:column;gap:8px;}
+        .vv-title{font-size:.95rem;font-weight:800;color:var(--gold);}
+        .sg{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
+        .sg img{width:100%;border-radius:6px;border:1px solid rgba(255,255,255,.07);cursor:pointer;transition:all .3s;display:block;}
+        .sg img:hover{transform:scale(1.03);border-color:rgba(212,175,55,.4);}
+        .bn-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+        .bn-card{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:8px;overflow:hidden;}
+        .bn-card img{width:100%;display:block;}
+        .bn-label{padding:12px 16px;font-size:.9rem;font-weight:800;color:var(--gold);}
+        .sec-lbl{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+        .sec-lbl svg{color:var(--gold);}
+        .sec-lbl span{font-size:.82rem;color:var(--gold);font-weight:700;letter-spacing:.5px;}
+        .lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:1000;align-items:center;justify-content:center;cursor:pointer;}
+        .lb.on{display:flex;}
+        .lb img{max-width:90vw;max-height:90vh;border-radius:8px;border:1px solid rgba(212,175,55,.3);}
+        .lb-x{position:absolute;top:20px;left:20px;color:var(--gold);font-size:2rem;cursor:pointer;font-weight:900;}
+        .foot{position:fixed;bottom:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;padding:8px 24px;font-size:.7rem;color:rgba(255,255,255,.3);background:linear-gradient(to top,rgba(5,5,5,.7),transparent);pointer-events:none;}
+        .foot a{pointer-events:auto;color:rgba(255,255,255,.35);text-decoration:none;}
+        @media(max-width:768px){
+            h2.pt{font-size:1.55rem;} .kg{grid-template-columns:1fr 1fr;}
+            .vv-grid,.sg{grid-template-columns:1fr 1fr;}
+            .tab-nav{top:55px;}
+        }
+        .btn-pdf{display:flex;align-items:center;gap:8px;background:linear-gradient(270deg,#D4AF37,#f0d060,#D4AF37);background-size:200% 200%;animation:shimmer 5s ease infinite;color:#0D0D0D;border:none;padding:10px 20px;border-radius:4px;font-family:'Ping',sans-serif;font-weight:900;font-size:.88rem;cursor:pointer;transition:transform .2s,box-shadow .2s;box-shadow:0 8px 24px rgba(212,175,55,.25);text-decoration:none;}
+        .btn-pdf:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(212,175,55,.4);}
+        .btn-pdf svg{flex-shrink:0;}
+        @keyframes shimmer{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+        @page{size:A4 portrait;margin:8mm 8mm 10mm 8mm;}
+        @media print{
+            *{animation:none!important;transition:none!important;}
+            body{background:#0a0a0a!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;font-size:9.5px!important;line-height:1.4!important;}
+            .btn-pdf,.tab-nav,.itab-nav,.bg-noise,.bg-grid,.amb,.amb-c,.amb-g,.amb-m,.orbit,.orbit2,.foot,#lb{display:none!important;}
+            header{position:relative!important;padding:8px 3%!important;border-bottom:1px solid rgba(212,175,55,.3)!important;}
+            .logo{height:22px!important;}
+            .hd-l h1{font-size:.8rem!important;}
+            .hd-r .hbm,.hd-r .hbg{font-size:.65rem!important;padding:2px 6px!important;}
+            .wrap{padding:8px 3% 0!important;max-width:100%!important;}
+
+            .pane{display:block!important;opacity:1!important;transform:none!important;page-break-before:always;margin-bottom:0!important;}
+            .pane:first-child{page-break-before:auto;}
+            .ipane{display:block!important;opacity:1!important;transform:none!important;}
+
+            #cover{min-height:auto!important;}
+            #cover>div{min-height:auto!important;padding:16px 10px!important;gap:6px!important;}
+            #cover h2{font-size:2.2rem!important;}
+            #cover .al{margin:6px auto 12px!important;}
+
+            .pane::before{display:block;content:attr(data-print-title);font-size:.7rem;color:var(--gold);font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:6px 0;border-bottom:1px solid rgba(212,175,55,.2);margin-bottom:10px;}
+            #cover::before{display:none!important;}
+
+            h2.pt{font-size:1.1rem!important;margin-bottom:4px!important;}
+            .ps{font-size:.72rem!important;margin-bottom:12px!important;}
+            h3.st{font-size:.9rem!important;margin:12px 0 8px!important;}
+            .al{margin:6px auto 12px!important;}
+
+            .kc{padding:8px 10px!important;gap:2px!important;font-size:.7rem!important;}
+            .kc .sec-lbl{margin-bottom:2px!important;}
+            .kc .sec-lbl span{font-size:.7rem!important;}
+            .kc .yt-btn{padding:3px 6px!important;font-size:.6rem!important;gap:3px!important;}
+            .kc .yt-btn svg{width:8px!important;height:8px!important;}
+
+            .sg{grid-template-columns:repeat(6,1fr)!important;gap:4px!important;margin-bottom:8px!important;}
+            .sg img{border-radius:3px!important;max-height:auto!important;width:100%!important;}
+
+            .bn-grid{gap:8px!important;}
+            .bn-card img{max-height:120px!important;object-fit:cover!important;}
+            .bn-label{padding:4px 8px!important;font-size:.7rem!important;}
+
+            #c-overview>div:first-child{max-width:500px!important;margin-bottom:12px!important;}
+            #c-overview>div:first-child img{max-height:200px!important;object-fit:cover!important;}
+
+            #c-full,#c-ol-a,#c-ol-b,#c-ol-c{page-break-inside:avoid;}
+            #c-full img,#c-ol-a img,#c-ol-b img,#c-ol-c img{max-height:180px!important;object-fit:cover!important;}
+            #c-full>div:first-child,#c-ol-a>div:first-child,#c-ol-b>div:first-child,#c-ol-c>div:first-child{padding:4px 0 8px!important;}
+            #c-full h3,#c-ol-a h3,#c-ol-b h3,#c-ol-c h3{font-size:1.1rem!important;margin-bottom:2px!important;}
+
+            table{font-size:.7rem!important;}
+            .tbl th{padding:6px 8px!important;font-size:.65rem!important;}
+            .tbl td{padding:5px 8px!important;font-size:.7rem!important;}
+            .tw{margin-bottom:10px!important;}
+
+            .note{padding:8px 10px!important;font-size:.72rem!important;margin-bottom:8px!important;}
+
+            div[style*="grid-template-columns:200px"]{grid-template-columns:140px 1fr auto!important;}
+            div[style*="grid-template-columns:200px"] div[style*="font-size:1.1rem"]{font-size:.85rem!important;}
+            div[style*="grid-template-columns:200px"] div[style*="font-size:1.6rem"]{font-size:1.1rem!important;}
+            div[style*="grid-template-columns:200px"] div[style*="font-size:.7rem"]{font-size:.6rem!important;}
+
+            div[style*="font-size:1rem"][style*="font-weight:800"][style*="margin:28px"]{margin:10px 0 4px!important;padding-bottom:4px!important;font-size:.8rem!important;}
+            div[style*="font-size:.8rem"][style*="font-weight:700"][style*="margin-bottom:8px"]{font-size:.7rem!important;margin-bottom:3px!important;}
+
+            img{max-width:100%!important;}
+            a[href]::after{content:none!important;}
+
+            div[style*="border-radius:14px"][style*="border-top:3px"],
+            div[style*="border-radius:12px"][style*="border-right:4px"]{padding:12px 14px!important;margin-bottom:8px!important;}
+            div[style*="border-radius:14px"][style*="border-top:3px"] div[style*="font-size:1.1rem"],
+            div[style*="border-radius:12px"][style*="border-right:4px"] div[style*="font-size:1.1rem"]{font-size:.85rem!important;}
+            div[style*="border-radius:14px"][style*="border-top:3px"] div[style*="font-size:.9rem"],
+            div[style*="border-radius:12px"][style*="border-right:4px"] div[style*="font-size:.9rem"]{font-size:.7rem!important;}
+
+            div[style*="grid-template-columns:repeat(2,1fr)"][style*="border:1px solid rgba(212,175,55"]{margin-bottom:10px!important;}
+            div[style*="grid-template-columns:repeat(2,1fr)"][style*="border:1px solid rgba(212,175,55"] div[style*="font-size:1.8rem"]{font-size:1.2rem!important;}
+        }
+    </style>
+</head>
+<body>
+<div class="foot"><a href="https://www.results-group.org/" target="_blank">www.results-group.org</a><span>By Results Group</span></div>
+<div class="bg-noise"></div><div class="bg-grid"></div>
+<div class="amb amb-c"></div><div class="amb amb-g"></div><div class="amb amb-m"></div>
+<div class="orbit"></div><div class="orbit2"></div>
+
+<div class="lb" id="lb" onclick="closeLB()">
+    <div class="lb-x" onclick="closeLB()">✕</div>
+    <img id="lb-img" src="" alt="">
+</div>
+
+<header>
+    <div class="hd-l">
+        <img src="https://morevision.ai/wp-content/uploads/2026/03/morevision-logo-full-1.svg" alt="MoreVision" class="logo">
+        <h1>MoreVision – <span>Commercial Overview</span></h1>
+    </div>
+    <div class="hd-r">
+        <button class="btn-pdf" onclick="window.print()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            הורדת PDF
+        </button>
+        <div class="hbm">Campaigns 1/1</div>
+        <div class="hbg">דצמ׳ 2024 – יוני 2026</div>
+    </div>
+</header>
+
+<nav class="tab-nav">
+    <button class="tb on" onclick="showTab('cover',this)">פתיחה</button>
+    <button class="tb" onclick="showTab('media-data',this)">נתוני מדיה</button>
+    <button class="tb" onclick="showTab('campaign',this)">נכסי קריאייטיב</button>
+    <button class="tb" onclick="showTab('strategy',this)">תוכנית הפצה</button>
+</nav>
+
+<div class="wrap">
+
+<!-- COVER -->
+<div id="cover" class="pane on">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:480px;text-align:center;gap:12px;position:relative;padding:40px;">
+        <div style="position:absolute;top:0;right:0;width:40px;height:40px;border-top:2px solid rgba(212,175,55,.35);border-right:2px solid rgba(212,175,55,.35);"></div>
+        <div style="position:absolute;bottom:0;left:0;width:40px;height:40px;border-bottom:2px solid rgba(0,229,255,.35);border-left:2px solid rgba(0,229,255,.35);"></div>
+        <div style="font-size:.8rem;color:var(--gold);letter-spacing:3px;font-weight:700;text-transform:uppercase;display:flex;align-items:center;gap:10px;">
+            <span style="display:inline-block;width:36px;height:1px;background:var(--gold);"></span>
+            Commercials Overview · By Results Group
+            <span style="display:inline-block;width:36px;height:1px;background:var(--gold);"></span>
+        </div>
+        <h2 style="font-size:4rem;font-weight:900;letter-spacing:-2px;margin-top:8px;">MoreVision</h2>
+        <div class="al" style="margin:12px auto;"></div>
+        <p style="font-size:1.55rem;color:var(--gold);font-weight:700;">נתוני מדיה 09.12.24-16.06.26</p>
+
+        <!-- Main KPI Row -->
+        <div style="margin-top:40px;display:flex;gap:32px;flex-wrap:wrap;justify-content:center;">
+            <div style="text-align:center;"><div style="font-size:2.2rem;font-weight:900;color:var(--gold);">8,848</div><div style="font-size:.82rem;color:var(--muted);">סה"כ לידים</div></div>
+            <div style="width:1px;background:rgba(255,255,255,.1);align-self:stretch;"></div>
+            <div style="text-align:center;"><div style="font-size:2.2rem;font-weight:900;color:var(--gold);">488</div><div style="font-size:.82rem;color:var(--muted);">עסקאות</div></div>
+            <div style="width:1px;background:rgba(255,255,255,.1);align-self:stretch;"></div>
+            <div style="text-align:center;"><div style="font-size:2.2rem;font-weight:900;color:var(--gold);">28.8M+</div><div style="font-size:.82rem;color:var(--muted);">חשיפות</div></div>
+            <div style="width:1px;background:rgba(255,255,255,.1);align-self:stretch;"></div>
+            <div style="text-align:center;"><div style="font-size:2.2rem;font-weight:900;color:var(--gold);">5.51%</div><div style="font-size:.82rem;color:var(--muted);">המרה ליד→עסקה</div></div>
+        </div>
+
+    </div>
+</div>
+
+<!-- MEDIA DATA -->
+<div id="media-data" class="pane" data-print-title="נתוני מדיה">
+    <h2 class="pt">נתוני <span>מדיה</span></h2>
+    <p class="ps">סיכום ביצועים לפי פלטפורמה · 09.12.24 – 16.06.26</p>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;border-radius:8px;overflow:hidden;border:1px solid rgba(212,175,55,.25);margin-bottom:32px;">
+        <div style="background:rgba(212,175,55,.1);padding:20px;text-align:center;">
+            <div style="font-size:.78rem;color:var(--muted);margin-bottom:6px;">סה"כ חשיפות</div>
+            <div style="font-size:1.8rem;font-weight:900;color:var(--gold);">28,848,708</div>
+        </div>
+        <div style="background:rgba(255,255,255,.03);padding:20px;text-align:center;">
+            <div style="font-size:.78rem;color:var(--muted);margin-bottom:6px;">סה"כ תפוצה</div>
+            <div style="font-size:1.8rem;font-weight:900;color:var(--gold);">3,253,493</div>
+        </div>
+        <div style="background:rgba(212,175,55,.1);padding:20px;text-align:center;">
+            <div style="font-size:.78rem;color:var(--muted);margin-bottom:6px;">סה"כ לידים</div>
+            <div style="font-size:1.8rem;font-weight:900;color:var(--gold);">8,848</div>
+        </div>
+        <div style="background:rgba(255,255,255,.03);padding:20px;text-align:center;">
+            <div style="font-size:.78rem;color:var(--muted);margin-bottom:6px;">סה"כ עסקאות</div>
+            <div style="font-size:1.8rem;font-weight:900;color:var(--gold);">488</div>
+        </div>
+    </div>
+
+    <!-- Meta -->
+    <div style="background:rgba(255,255,255,.03);border-radius:12px;padding:28px 32px;margin-bottom:20px;border-right:4px solid #D4AF37;">
+        <div style="font-size:1.15rem;font-weight:800;color:#D4AF37;margin-bottom:18px;">Meta</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;">
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">תפוצה</div><div style="font-size:1.1rem;font-weight:800;color:var(--white);">1,501,314</div></div>
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">חשיפות</div><div style="font-size:1.1rem;font-weight:800;color:var(--white);">10,863,485</div></div>
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">תדירות</div><div style="font-size:1.1rem;font-weight:800;color:var(--white);">7.24</div></div>
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">לידים</div><div style="font-size:1.1rem;font-weight:800;color:#D4AF37;">6,368</div></div>
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">עסקאות</div><div style="font-size:1.1rem;font-weight:800;color:#D4AF37;">288</div></div>
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,.06);margin:16px 0;"></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;">
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">לייקים</div><div style="font-size:1.1rem;font-weight:800;color:var(--white);">8,466</div></div>
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">תגובות</div><div style="font-size:1.1rem;font-weight:800;color:var(--white);">711</div></div>
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">שמירות</div><div style="font-size:1.1rem;font-weight:800;color:var(--white);">475</div></div>
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">שיתופים</div><div style="font-size:1.1rem;font-weight:800;color:var(--white);">866</div></div>
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">עוקבים חדשים</div><div style="font-size:1.1rem;font-weight:800;color:var(--cyan);">+420</div></div>
+        </div>
+    </div>
+
+    <!-- TikTok -->
+    <div style="background:rgba(255,255,255,.03);border-radius:12px;padding:28px 32px;margin-bottom:20px;border-right:4px solid #00E5FF;">
+        <div style="font-size:1.15rem;font-weight:800;color:#00E5FF;margin-bottom:18px;">TikTok</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;">
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">תפוצה</div><div style="font-size:1.1rem;font-weight:800;color:var(--white);">1,752,179</div></div>
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">חשיפות</div><div style="font-size:1.1rem;font-weight:800;color:var(--white);">15,493,654</div></div>
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">תדירות</div><div style="font-size:1.1rem;font-weight:800;color:var(--white);">8.84</div></div>
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">לידים</div><div style="font-size:1.1rem;font-weight:800;color:#00E5FF;">895</div></div>
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">עסקאות</div><div style="font-size:1.1rem;font-weight:800;color:#00E5FF;">62</div></div>
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,.06);margin:16px 0;"></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;">
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">לייקים</div><div style="font-size:1.1rem;font-weight:800;color:var(--white);">11,769</div></div>
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">שיתופים</div><div style="font-size:1.1rem;font-weight:800;color:var(--white);">646</div></div>
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">תגובות</div><div style="font-size:1.1rem;font-weight:800;color:var(--white);">493</div></div>
+        </div>
+    </div>
+
+    <!-- Google -->
+    <div style="background:rgba(255,255,255,.03);border-radius:12px;padding:28px 32px;margin-bottom:20px;border-right:4px solid #4285F4;">
+        <div style="font-size:1.15rem;font-weight:800;color:#4285F4;margin-bottom:18px;">Google</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;">
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">חשיפות</div><div style="font-size:1.1rem;font-weight:800;color:var(--white);">2,491,569</div></div>
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">קליקים</div><div style="font-size:1.1rem;font-weight:800;color:var(--white);">27,583</div></div>
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">נתח חשיפה</div><div style="font-size:1.1rem;font-weight:800;color:var(--white);">12%</div></div>
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">לידים</div><div style="font-size:1.1rem;font-weight:800;color:#4285F4;">461</div></div>
+            <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">עסקאות</div><div style="font-size:1.1rem;font-weight:800;color:#4285F4;">25</div></div>
+        </div>
+    </div>
+</div>
+
+<!-- CAMPAIGN -->
+<div id="campaign" class="pane" data-print-title="נכסי קריאייטיב">
+    <h2 class="pt">קמפיין <span>"מיליארד סינים אולי טועים"</span></h2>
+    <p class="ps">קמפיין תקופתי 1/3</p>
+
+    <!-- INNER TABS -->
+    <nav class="itab-nav">
+        <button class="itb on" onclick="showInner('c-overview',this)">סקירה כללית</button>
+        <button class="itb" onclick="showInner('c-full',this)">Full Commercial</button>
+        <button class="itb" onclick="showInner('c-ol-a',this)">One Liner A</button>
+        <button class="itb" onclick="showInner('c-ol-b',this)">One Liner B</button>
+        <button class="itb" onclick="showInner('c-ol-c',this)">One Liner C</button>
+        <button class="itb" onclick="showInner('c-statics',this)">עיצובים סטטיים</button>
+        <button class="itb" onclick="showInner('c-covers',this)">קאברים</button>
+    </nav>
+
+    <!-- OVERVIEW -->
+    <div id="c-overview" class="ipane on">
+        <div style="max-width:700px;margin:0 auto 28px;">
+            <div style="font-size:.8rem;color:var(--gold);font-weight:700;letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:12px;">פרסומת ראשית</div>
+            <div style="position:relative;border-radius:14px;overflow:hidden;box-shadow:0 0 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.07);aspect-ratio:16/9;background:#111;">
+                <img src="https://img.youtube.com/vi/yri2LpcDz0g/maxresdefault.jpg" alt="Full Commercial" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.src='https://img.youtube.com/vi/yri2LpcDz0g/hqdefault.jpg'">
+                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.2);">
+                    <a href="https://youtu.be/yri2LpcDz0g" target="_blank" style="width:70px;height:70px;background:rgba(255,0,0,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;transition:transform .25s;" onmouseover="this.style.transform='scale(1.12)'" onmouseout="this.style.transform='scale(1)'">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:8px;">
+            <div class="kc" style="cursor:pointer;border-color:rgba(212,175,55,.25);" onclick="showInner('c-full',document.querySelector('.itb:nth-child(2)'))">
+                <div class="sec-lbl" style="margin-bottom:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Full Commercial</span></div>
+                <div style="font-size:.85rem;color:rgba(255,255,255,.6);">הפרסומת הראשית</div>
+                <a class="yt-btn" href="https://youtu.be/yri2LpcDz0g" target="_blank" style="font-size:.76rem;margin-top:6px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>YouTube</a>
+            </div>
+            <div class="kc" style="cursor:pointer;" onclick="showInner('c-ol-a',document.querySelector('.itb:nth-child(3)'))">
+                <div class="sec-lbl" style="margin-bottom:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>One Liner A</span></div>
+                <a class="yt-btn" href="https://youtu.be/3NdEVk4hMck" target="_blank" style="font-size:.76rem;margin-top:6px;" onclick="event.stopPropagation()"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>YouTube</a>
+            </div>
+            <div class="kc" style="cursor:pointer;" onclick="showInner('c-ol-b',document.querySelector('.itb:nth-child(4)'))">
+                <div class="sec-lbl" style="margin-bottom:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>One Liner B</span></div>
+                <a class="yt-btn" href="https://youtu.be/n8TEswVS5c8" target="_blank" style="font-size:.76rem;margin-top:6px;" onclick="event.stopPropagation()"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>YouTube</a>
+            </div>
+            <div class="kc" style="cursor:pointer;" onclick="showInner('c-ol-c',document.querySelector('.itb:nth-child(5)'))">
+                <div class="sec-lbl" style="margin-bottom:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>One Liner C</span></div>
+                <a class="yt-btn" href="https://youtu.be/Fbxq-vuXum0" target="_blank" style="font-size:.76rem;margin-top:6px;" onclick="event.stopPropagation()"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>YouTube</a>
+            </div>
+            <div class="kc" style="cursor:pointer;" onclick="showInner('c-statics',document.querySelector('.itb:nth-child(6)'))">
+                <div class="sec-lbl" style="margin-bottom:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>עיצובים סטטיים</span></div>
+                <div style="font-size:.85rem;color:rgba(255,255,255,.6);">17 סטים · 49 פריטים</div>
+            </div>
+            <div class="kc" style="cursor:pointer;" onclick="showInner('c-covers',document.querySelector('.itb:nth-child(7)'))">
+                <div class="sec-lbl" style="margin-bottom:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><span>קאברים</span></div>
+                <div style="font-size:.85rem;color:rgba(255,255,255,.6);">Facebook + YouTube</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FULL COMMERCIAL -->
+    <div id="c-full" class="ipane">
+        <div style="text-align:center;padding:16px 0 32px;">
+            <div style="font-size:.75rem;color:var(--muted);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:12px;">קמפיין "מיליארד סינים אולי טועים"</div>
+            <h3 style="font-size:2rem;font-weight:900;margin-bottom:6px;">Full Commercial</h3>
+            <p style="color:var(--muted);font-size:.9rem;">הפרסומת הראשית · הקריאייטיב המלא</p>
+        </div>
+        <div style="position:relative;max-width:820px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 0 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.07);">
+            <img src="https://img.youtube.com/vi/yri2LpcDz0g/maxresdefault.jpg" alt="Full Commercial" style="width:100%;display:block;" onerror="this.src='https://img.youtube.com/vi/yri2LpcDz0g/hqdefault.jpg'">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);">
+                <a href="https://youtu.be/yri2LpcDz0g" target="_blank" style="width:80px;height:80px;background:rgba(255,0,0,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;transition:transform .25s,background .25s;" onmouseover="this.style.transform='scale(1.12)';this.style.background='rgba(255,0,0,1)'" onmouseout="this.style.transform='scale(1)';this.style.background='rgba(255,0,0,.9)'">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                </a>
+            </div>
+        </div>
+        <div style="text-align:center;margin-top:24px;">
+            <a class="yt-btn" href="https://youtu.be/yri2LpcDz0g" target="_blank" style="font-size:.95rem;padding:10px 24px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>צפה ב-YouTube</a>
+        </div>
+    </div>
+
+    <!-- ONE LINER A -->
+    <div id="c-ol-a" class="ipane">
+        <div style="text-align:center;padding:16px 0 32px;">
+            <div style="font-size:.75rem;color:var(--muted);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:12px;">קמפיין "מיליארד סינים אולי טועים"</div>
+            <h3 style="font-size:2rem;font-weight:900;margin-bottom:6px;">One Liner A</h3>
+        </div>
+        <div style="max-width:820px;margin:0 auto;">
+            <div style="position:relative;border-radius:16px;overflow:hidden;box-shadow:0 0 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.07);aspect-ratio:16/9;background:#111;">
+                <img src="https://img.youtube.com/vi/3NdEVk4hMck/maxresdefault.jpg" alt="One Liner A" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.src='https://img.youtube.com/vi/3NdEVk4hMck/hqdefault.jpg'">
+                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);">
+                    <a href="https://youtu.be/3NdEVk4hMck" target="_blank" style="width:70px;height:70px;background:rgba(255,0,0,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;transition:transform .25s;" onmouseover="this.style.transform='scale(1.12)'" onmouseout="this.style.transform='scale(1)'">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </a>
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:20px;">
+                <a class="yt-btn" href="https://youtu.be/3NdEVk4hMck" target="_blank" style="font-size:.95rem;padding:10px 24px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>צפה ב-YouTube</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ONE LINER B -->
+    <div id="c-ol-b" class="ipane">
+        <div style="text-align:center;padding:16px 0 32px;">
+            <div style="font-size:.75rem;color:var(--muted);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:12px;">קמפיין "מיליארד סינים אולי טועים"</div>
+            <h3 style="font-size:2rem;font-weight:900;margin-bottom:6px;">One Liner B</h3>
+        </div>
+        <div style="max-width:820px;margin:0 auto;">
+            <div style="position:relative;border-radius:16px;overflow:hidden;box-shadow:0 0 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.07);aspect-ratio:16/9;background:#111;">
+                <img src="https://img.youtube.com/vi/n8TEswVS5c8/maxresdefault.jpg" alt="One Liner B" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.src='https://img.youtube.com/vi/n8TEswVS5c8/hqdefault.jpg'">
+                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);">
+                    <a href="https://youtu.be/n8TEswVS5c8" target="_blank" style="width:70px;height:70px;background:rgba(255,0,0,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;transition:transform .25s;" onmouseover="this.style.transform='scale(1.12)'" onmouseout="this.style.transform='scale(1)'">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </a>
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:20px;">
+                <a class="yt-btn" href="https://youtu.be/n8TEswVS5c8" target="_blank" style="font-size:.95rem;padding:10px 24px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>צפה ב-YouTube</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ONE LINER C -->
+    <div id="c-ol-c" class="ipane">
+        <div style="text-align:center;padding:16px 0 32px;">
+            <div style="font-size:.75rem;color:var(--muted);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:12px;">קמפיין "מיליארד סינים אולי טועים"</div>
+            <h3 style="font-size:2rem;font-weight:900;margin-bottom:6px;">One Liner C</h3>
+        </div>
+        <div style="max-width:820px;margin:0 auto;">
+            <div style="position:relative;border-radius:16px;overflow:hidden;box-shadow:0 0 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.07);aspect-ratio:16/9;background:#111;">
+                <img src="https://img.youtube.com/vi/Fbxq-vuXum0/maxresdefault.jpg" alt="One Liner C" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.src='https://img.youtube.com/vi/Fbxq-vuXum0/hqdefault.jpg'">
+                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);">
+                    <a href="https://youtu.be/Fbxq-vuXum0" target="_blank" style="width:70px;height:70px;background:rgba(255,0,0,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;transition:transform .25s;" onmouseover="this.style.transform='scale(1.12)'" onmouseout="this.style.transform='scale(1)'">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </a>
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:20px;">
+                <a class="yt-btn" href="https://youtu.be/Fbxq-vuXum0" target="_blank" style="font-size:.95rem;padding:10px 24px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>צפה ב-YouTube</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATICS -->
+    <div id="c-statics" class="ipane">
+        <p style="text-align:center;color:var(--muted);font-size:.88rem;margin-bottom:18px;">לחץ על כל תמונה להגדלה</p>
+
+        <div style="font-size:1rem;color:var(--gold);font-weight:800;margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid rgba(212,175,55,.2);">סדרת AKI</div>
+
+        <div style="font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;">סט א׳</div>
+        <div class="sg">
+            <img src="morevision-assets/AKI/A1.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/AKI/A2.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/AKI/A3.jpg" onclick="openLB(this.src)" alt="">
+        </div>
+
+        <div style="font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;">סט ב׳</div>
+        <div class="sg">
+            <img src="morevision-assets/AKI/B1.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/AKI/B2.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/AKI/B3.jpg" onclick="openLB(this.src)" alt="">
+        </div>
+
+        <div style="font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;">סט ג׳</div>
+        <div class="sg">
+            <img src="morevision-assets/AKI/C1.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/AKI/C2.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/AKI/C3.jpg" onclick="openLB(this.src)" alt="">
+        </div>
+
+        <div style="font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;">סט ד׳</div>
+        <div class="sg">
+            <img src="morevision-assets/AKI/D1.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/AKI/D2.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/AKI/D3.jpg" onclick="openLB(this.src)" alt="">
+        </div>
+
+        <div style="font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;">סט ה׳</div>
+        <div class="sg">
+            <img src="morevision-assets/AKI/E1.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/AKI/E2.jpg" onclick="openLB(this.src)" alt="">
+        </div>
+
+        <div style="font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;">סט ו׳</div>
+        <div class="sg">
+            <img src="morevision-assets/AKI/F1.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/AKI/F2.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/AKI/F3.jpg" onclick="openLB(this.src)" alt="">
+        </div>
+
+        <div style="font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;">סט ז׳</div>
+        <div class="sg">
+            <img src="morevision-assets/AKI/G1.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/AKI/G2.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/AKI/G3.jpg" onclick="openLB(this.src)" alt="">
+        </div>
+
+        <div style="font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;">סט ח׳</div>
+        <div class="sg">
+            <img src="morevision-assets/AKI/H1.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/AKI/H2.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/AKI/H3.jpg" onclick="openLB(this.src)" alt="">
+        </div>
+
+        <div style="font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;">סט ט׳</div>
+        <div class="sg">
+            <img src="morevision-assets/AKI/J1.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/AKI/J2.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/AKI/J3.jpg" onclick="openLB(this.src)" alt="">
+        </div>
+
+        <div style="font-size:1rem;color:var(--gold);font-weight:800;margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid rgba(212,175,55,.2);">סדרת CN</div>
+
+        <div style="font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;">סט א׳</div>
+        <div class="sg">
+            <img src="morevision-assets/CN/A1.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/CN/A2.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/CN/A3.jpg" onclick="openLB(this.src)" alt="">
+        </div>
+
+        <div style="font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;">סט ב׳</div>
+        <div class="sg">
+            <img src="morevision-assets/CN/B1.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/CN/B2.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/CN/B3.jpg" onclick="openLB(this.src)" alt="">
+        </div>
+
+        <div style="font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;">סט ג׳</div>
+        <div class="sg">
+            <img src="morevision-assets/CN/C1.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/CN/C2.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/CN/C3.jpg" onclick="openLB(this.src)" alt="">
+        </div>
+
+        <div style="font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;">סט ד׳</div>
+        <div class="sg">
+            <img src="morevision-assets/CN/D1.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/CN/D2.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/CN/D3.jpg" onclick="openLB(this.src)" alt="">
+        </div>
+
+        <div style="font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;">סט ה׳</div>
+        <div class="sg">
+            <img src="morevision-assets/CN/E1.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/CN/E2.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/CN/E3.jpg" onclick="openLB(this.src)" alt="">
+        </div>
+
+        <div style="font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;">סט ו׳</div>
+        <div class="sg">
+            <img src="morevision-assets/CN/F1.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/CN/F2.jpg" onclick="openLB(this.src)" alt="">
+        </div>
+
+        <div style="font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;">סט ז׳</div>
+        <div class="sg">
+            <img src="morevision-assets/CN/G1.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/CN/G2.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/CN/G3.jpg" onclick="openLB(this.src)" alt="">
+        </div>
+
+        <div style="font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;">סט ח׳</div>
+        <div class="sg">
+            <img src="morevision-assets/CN/H1.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/CN/H2.jpg" onclick="openLB(this.src)" alt="">
+            <img src="morevision-assets/CN/H3.jpg" onclick="openLB(this.src)" alt="">
+        </div>
+    </div>
+
+    <!-- COVERS -->
+    <div id="c-covers" class="ipane">
+        <div class="bn-grid">
+            <div class="bn-card">
+                <img src="morevision-assets/Social Banners/FaceBook Cover.jpg" alt="Facebook Cover" onclick="openLB(this.src)" style="cursor:pointer;">
+                <div class="bn-label">Facebook Cover</div>
+            </div>
+            <div class="bn-card">
+                <img src="morevision-assets/Social Banners/YouTube Cover.jpg" alt="YouTube Cover" onclick="openLB(this.src)" style="cursor:pointer;">
+                <div class="bn-label">YouTube Cover</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- STRATEGY -->
+<div id="strategy" class="pane" data-print-title="תוכנית הפצה">
+    <h2 class="pt">תוכנית <span>הפצה</span></h2>
+    <p class="ps">60 יום · ₪160,000 · תקציב חודשי ₪80,000 · כלל הפלטפורמות מהיום הראשון</p>
+
+    <!-- GOAL BANNER -->
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:2px;border-radius:8px;overflow:hidden;border:1px solid rgba(212,175,55,.25);margin-bottom:32px;">
+        <div style="background:rgba(212,175,55,.1);padding:20px;text-align:center;">
+            <div style="font-size:.78rem;color:var(--muted);margin-bottom:6px;">תקציב כולל</div>
+            <div style="font-size:1.8rem;font-weight:900;color:var(--gold);">₪160,000</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:4px;">60 יום</div>
+        </div>
+        <div style="background:rgba(255,255,255,.03);padding:20px;text-align:center;">
+            <div style="font-size:.78rem;color:var(--muted);margin-bottom:6px;">תקציב חודשי</div>
+            <div style="font-size:1.8rem;font-weight:900;color:var(--gold);">₪80,000</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:4px;">לחודש</div>
+        </div>
+    </div>
+
+    <!-- CREATIVE NOTE -->
+    <div style="background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.2);border-radius:8px;padding:18px 22px;margin-bottom:24px;display:flex;align-items:flex-start;gap:16px;">
+        <div style="flex-shrink:0;margin-top:2px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+            <div style="font-weight:700;color:var(--cyan);margin-bottom:6px;font-size:.9rem;">פריסת נכסים מדורגת בכל הפלטפורמות</div>
+            <div style="font-size:.84rem;color:rgba(255,255,255,.7);line-height:1.8;">
+                <b style="color:var(--white);">ימים 1–3:</b> Full Commercial + קאטים<br>
+                <b style="color:var(--white);">ימים 4–7:</b> + One Liners A–C<br>
+                <b style="color:var(--white);">ימים 8–60:</b> + 17 סטים גרפיים (סדרות AKI + CN)
+            </div>
+        </div>
+    </div>
+
+    <!-- PHASES -->
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:32px;">
+
+        <!-- PHASE 1 -->
+        <div style="display:grid;grid-template-columns:200px 1fr auto;gap:0;border-radius:8px;overflow:hidden;border:1px solid rgba(0,229,255,.2);">
+            <div style="background:rgba(0,229,255,.06);padding:20px 18px;display:flex;flex-direction:column;justify-content:center;border-left:1px solid rgba(0,229,255,.15);">
+                <div style="font-size:.7rem;color:var(--cyan);font-weight:700;letter-spacing:1px;margin-bottom:6px;">שלב א׳</div>
+                <div style="font-size:1.1rem;font-weight:800;">השקה</div>
+                <div style="font-size:.8rem;color:var(--muted);margin-top:4px;">ימים 1–3</div>
+            </div>
+            <div style="background:rgba(10,10,10,.6);padding:18px 22px;">
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                    <span style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:4px 10px;font-size:.82rem;">פרסומת מלאה</span>
+                    <span style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:4px 10px;font-size:.82rem;">קאטים</span>
+                </div>
+            </div>
+            <div style="background:rgba(0,229,255,.04);padding:20px 24px;display:flex;flex-direction:column;justify-content:center;align-items:center;min-width:130px;border-right:1px solid rgba(0,229,255,.15);">
+                <div style="font-size:1.6rem;font-weight:900;color:var(--cyan);">₪20,000</div>
+                <div style="font-size:.75rem;color:var(--muted);margin-top:4px;">~₪6,667/יום</div>
+            </div>
+        </div>
+
+        <!-- PHASE 2 -->
+        <div style="display:grid;grid-template-columns:200px 1fr auto;gap:0;border-radius:8px;overflow:hidden;border:1px solid rgba(212,175,55,.2);">
+            <div style="background:rgba(212,175,55,.06);padding:20px 18px;display:flex;flex-direction:column;justify-content:center;border-left:1px solid rgba(212,175,55,.15);">
+                <div style="font-size:.7rem;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:6px;">שלב ב׳</div>
+                <div style="font-size:1.1rem;font-weight:800;">חיזוק</div>
+                <div style="font-size:.8rem;color:var(--muted);margin-top:4px;">ימים 4–7</div>
+            </div>
+            <div style="background:rgba(10,10,10,.6);padding:18px 22px;">
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                    <span style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:4px 10px;font-size:.82rem;">פרסומת מלאה</span>
+                    <span style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:4px 10px;font-size:.82rem;">קאטים</span>
+                    <span style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:4px 10px;font-size:.82rem;">וואן ליינרים</span>
+                </div>
+            </div>
+            <div style="background:rgba(212,175,55,.04);padding:20px 24px;display:flex;flex-direction:column;justify-content:center;align-items:center;min-width:130px;border-right:1px solid rgba(212,175,55,.15);">
+                <div style="font-size:1.6rem;font-weight:900;color:var(--gold);">₪15,000</div>
+                <div style="font-size:.75rem;color:var(--muted);margin-top:4px;">~₪3,750/יום</div>
+            </div>
+        </div>
+
+        <!-- PHASE 3 -->
+        <div style="display:grid;grid-template-columns:200px 1fr auto;gap:0;border-radius:8px;overflow:hidden;border:1px solid rgba(74,222,128,.2);">
+            <div style="background:rgba(74,222,128,.05);padding:20px 18px;display:flex;flex-direction:column;justify-content:center;border-left:1px solid rgba(74,222,128,.15);">
+                <div style="font-size:.7rem;color:#4ade80;font-weight:700;letter-spacing:1px;margin-bottom:6px;">שלב ג׳</div>
+                <div style="font-size:1.1rem;font-weight:800;">איזון וסקייל</div>
+                <div style="font-size:.8rem;color:var(--muted);margin-top:4px;">ימים 8–60</div>
+            </div>
+            <div style="background:rgba(10,10,10,.6);padding:18px 22px;">
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                    <span style="background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:4px;padding:4px 10px;font-size:.82rem;color:#4ade80;">פרסומת מלאה</span>
+                    <span style="background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:4px;padding:4px 10px;font-size:.82rem;color:#4ade80;">קאטים</span>
+                    <span style="background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:4px;padding:4px 10px;font-size:.82rem;color:#4ade80;">וואן ליינרים</span>
+                    <span style="background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:4px;padding:4px 10px;font-size:.82rem;color:#4ade80;">גרפיקות</span>
+                </div>
+            </div>
+            <div style="background:rgba(74,222,128,.04);padding:20px 24px;display:flex;flex-direction:column;justify-content:center;align-items:center;min-width:130px;border-right:1px solid rgba(74,222,128,.15);">
+                <div style="font-size:1.6rem;font-weight:900;color:#4ade80;">₪125,000</div>
+                <div style="font-size:.75rem;color:var(--muted);margin-top:4px;">~₪2,358/יום</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- BUDGET SPLIT -->
+    <h3 class="st">חלוקת תקציב לפי ערוץ</h3>
+    <div class="tw" style="margin-bottom:28px;">
+        <table class="tbl">
+            <thead><tr><th>ערוץ</th><th>שלב א׳</th><th>שלב ב׳</th><th>שלב ג׳</th><th class="hl">סה"כ</th><th class="hl">%</th></tr></thead>
+            <tbody>
+                <tr><td><b>Meta</b></td><td>₪8,000 <span style="font-size:.7rem;color:var(--muted);">(40%)</span></td><td>₪8,250 <span style="font-size:.7rem;color:var(--muted);">(55%)</span></td><td colspan="1" rowspan="3" style="text-align:center;vertical-align:middle;color:var(--muted);font-size:.85rem;font-style:italic;background:rgba(255,255,255,.02);">על בסיס<br>תוצאות</td><td class="hl">₪16,250+</td><td class="hl">—</td></tr>
+                <tr><td><b>Google PMax</b></td><td>₪2,000 <span style="font-size:.7rem;color:var(--muted);">(10%)</span></td><td>₪1,500 <span style="font-size:.7rem;color:var(--muted);">(10%)</span></td><td class="hl">₪3,500+</td><td class="hl">—</td></tr>
+                <tr><td><b style="color:#fe2c55;">TikTok</b></td><td>₪10,000 <span style="font-size:.7rem;color:var(--muted);">(50%)</span></td><td>₪5,250 <span style="font-size:.7rem;color:var(--muted);">(35%)</span></td><td class="hl">₪15,250+</td><td class="hl">—</td></tr>
+            </tbody>
+            <tfoot><tr><td>סה"כ</td><td>₪20,000</td><td>₪15,000</td><td>₪125,000</td><td class="hl">₪160,000</td><td class="hl">100%</td></tr></tfoot>
+        </table>
+    </div>
+
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+function showTab(id, btn) {
+    document.querySelectorAll('.pane').forEach(p => p.classList.remove('on'));
+    document.querySelectorAll('.tb').forEach(b => b.classList.remove('on'));
+    document.getElementById(id).classList.add('on');
+    btn.classList.add('on');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function showInner(id, btn) {
+    var parent = document.getElementById('campaign');
+    parent.querySelectorAll('.ipane').forEach(p => p.classList.remove('on'));
+    parent.querySelectorAll('.itb').forEach(b => b.classList.remove('on'));
+    document.getElementById(id).classList.add('on');
+    if (btn) btn.classList.add('on');
+}
+function openLB(src) {
+    document.getElementById('lb-img').src = src;
+    document.getElementById('lb').classList.add('on');
+}
+function closeLB() { document.getElementById('lb').classList.remove('on'); }
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeLB(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TARGO – ליווי אסטרטגי לסטארטאפים</title>
+<style>
+@font-face { font-family: 'Ploni'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/Ploni/ploni-light-aaa.woff2') format('woff2'); font-weight: 300; }
+@font-face { font-family: 'Ploni'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/Ploni/ploni-regular-aaa.woff2') format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Ploni'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/Ploni/ploni-bold-aaa.woff2') format('woff2'); font-weight: 700; }
+
+:root {
+    --navy: #050A14;
+    --dark-blue: #0A1120;
+    --accent: #4B84F0;
+    --accent-hover: #3366CC;
+    --accent-red: #E0513B;
+    --text-dark: #0F172A;
+    --text-light: #ffffff;
+    --text-muted: #94A3B8;
+    --bg-white: #ffffff;
+    --bg-light: #F8FAFC;
+    --border-subtle: #E2E8F0;
+    --success: #22C55E;
+    --danger: #EF4444;
+    --font: 'Ploni', 'Segoe UI', Tahoma, sans-serif;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: var(--font);
+    direction: rtl;
+    color: var(--text-dark);
+    background: var(--bg-white);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* ───── Utilities ───── */
+.container {
+    width: 100%;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+[data-reveal] {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+[data-reveal].visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ───── 1. HERO ───── */
+.hero {
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(160deg, var(--navy) 0%, var(--dark-blue) 100%);
+    position: relative;
+    padding: 60px 24px 80px;
+    overflow: hidden;
+}
+.hero::before {
+    content: '';
+    position: absolute;
+    width: 700px;
+    height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(75,132,240,0.12) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.hero-logo {
+    height: 96px;
+    margin-bottom: 48px;
+    position: relative;
+    z-index: 1;
+}
+
+.hero-headline {
+    font-size: clamp(2.4rem, 5.5vw, 5rem);
+    font-weight: 700;
+    color: var(--text-light);
+    line-height: 1.15;
+    margin-bottom: 28px;
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+}
+
+.hero-sub {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    font-weight: 300;
+    color: var(--text-muted);
+    max-width: 640px;
+    margin-bottom: 44px;
+    position: relative;
+    z-index: 1;
+    line-height: 1.7;
+}
+
+.btn-cta {
+    display: inline-block;
+    padding: 18px 48px;
+    background: var(--accent);
+    color: var(--text-light);
+    font-family: var(--font);
+    font-size: 1.15rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.25s, transform 0.25s, box-shadow 0.25s;
+    position: relative;
+    z-index: 1;
+}
+.btn-cta:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 36px rgba(255,107,44,0.3);
+}
+
+/* ───── 2. STATS STRIP ───── */
+.stats-strip {
+    background: #070D18;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 40px 24px;
+}
+.stats-grid {
+    display: flex;
+    justify-content: center;
+    gap: 80px;
+    flex-wrap: wrap;
+    max-width: 900px;
+    margin: 0 auto;
+}
+.stat-item {
+    text-align: center;
+    min-width: 160px;
+}
+.stat-number {
+    font-size: clamp(2.8rem, 5vw, 4.5rem);
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 8px;
+}
+.stat-label {
+    font-size: 1rem;
+    font-weight: 300;
+    color: var(--text-muted);
+}
+
+/* ───── 3. PROBLEM SECTION ───── */
+.problem-section {
+    background: var(--bg-white);
+    padding: 72px 24px;
+}
+.problem-statement {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 48px;
+}
+.problem-statement h2 {
+    font-size: clamp(1.8rem, 3.5vw, 3rem);
+    font-weight: 700;
+    color: var(--text-dark);
+    line-height: 1.25;
+    margin-bottom: 16px;
+}
+.problem-statement .highlight {
+    color: var(--accent);
+    font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+.comparison-col {
+    padding: 40px 36px;
+    border-radius: 16px;
+}
+
+.comparison-col h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.comparison-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    align-items: flex-start;
+    line-height: 1.65;
+    font-size: 0.95rem;
+    color: #374151;
+}
+.comparison-item:last-child { margin-bottom: 0; }
+
+.comparison-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+}
+.comparison-icon svg { width: 14px; height: 14px; }
+
+.comparison-item strong {
+    font-weight: 700;
+}
+
+/* ───── 4. WHAT YOU GET ───── */
+.deliverables-section {
+    background: var(--navy);
+    padding: 72px 24px;
+    position: relative;
+    overflow: hidden;
+}
+.deliverables-section::before {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(75,132,240,0.08) 0%, transparent 70%);
+    bottom: -200px;
+    right: -200px;
+    pointer-events: none;
+}
+.deliverables-header {
+    text-align: center;
+    margin-bottom: 48px;
+    position: relative;
+    z-index: 1;
+}
+.deliverables-header h2 {
+    font-size: clamp(1.8rem, 3.5vw, 3rem);
+    font-weight: 700;
+    color: var(--text-light);
+    margin-bottom: 16px;
+}
+.deliverables-header p {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    font-weight: 300;
+}
+
+.deliverables-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    max-width: 960px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.deliverable-block {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 40px 36px;
+    transition: background 0.3s, border-color 0.3s;
+}
+.deliverable-block:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(75,132,240,0.3);
+}
+.deliverable-num {
+    font-size: clamp(2.5rem, 4vw, 3.5rem);
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 16px;
+}
+.deliverable-block h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-light);
+    margin-bottom: 12px;
+}
+.deliverable-block p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    font-weight: 300;
+}
+
+/* ───── 5. ABOUT ───── */
+.about-section {
+    background: var(--bg-white);
+    padding: 72px 24px;
+}
+.about-inner {
+    max-width: 780px;
+    margin: 0 auto;
+    text-align: center;
+}
+.about-inner h2 {
+    font-size: clamp(1.8rem, 3.5vw, 3rem);
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 40px;
+}
+.about-inner p {
+    font-size: 1.05rem;
+    line-height: 1.85;
+    color: #4B5563;
+    margin-bottom: 24px;
+    font-weight: 300;
+}
+.about-inner p:last-of-type { margin-bottom: 0; }
+
+/* ───── 6. BOTTOM CTA + FORM ───── */
+.cta-section {
+    background: linear-gradient(160deg, var(--navy) 0%, var(--dark-blue) 100%);
+    padding: 72px 24px;
+    position: relative;
+    overflow: hidden;
+}
+.cta-section::before {
+    content: '';
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(75,132,240,0.1) 0%, transparent 70%);
+    top: -300px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+.cta-inner {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+.cta-inner h2 {
+    font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+    font-weight: 700;
+    color: var(--text-light);
+    margin-bottom: 20px;
+    line-height: 1.3;
+}
+.cta-inner > p {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    font-weight: 300;
+    line-height: 1.7;
+    margin-bottom: 44px;
+}
+
+.form-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 40px 36px 36px;
+    backdrop-filter: blur(12px);
+}
+
+.form-field {
+    margin-bottom: 16px;
+}
+.form-field input {
+    width: 100%;
+    padding: 16px 20px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    font-family: var(--font);
+    font-size: 1rem;
+    color: var(--text-light);
+    transition: border-color 0.25s, background 0.25s;
+}
+.form-field input::placeholder {
+    color: rgba(255,255,255,0.4);
+}
+.form-field input[type="tel"] {
+    direction: ltr;
+    text-align: right;
+}
+.form-field input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(255,255,255,0.12);
+}
+
+.form-submit {
+    width: 100%;
+    padding: 18px;
+    background: var(--accent);
+    color: var(--text-light);
+    border: none;
+    border-radius: 12px;
+    font-family: var(--font);
+    font-size: 1.15rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.25s, transform 0.25s, box-shadow 0.25s;
+    margin-top: 8px;
+}
+.form-submit:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 36px rgba(255,107,44,0.3);
+}
+
+.form-trust {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 300;
+}
+.form-trust svg {
+    flex-shrink: 0;
+    color: var(--success);
+}
+
+/* ───── 7. FOOTER ───── */
+.site-footer {
+    background: #070C18;
+    padding: 28px 24px;
+    text-align: center;
+}
+.site-footer p {
+    font-size: 0.82rem;
+    color: #64748B;
+}
+.site-footer a {
+    color: #64748B;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.site-footer a:hover {
+    color: var(--accent);
+}
+
+/* ───── 8. STICKY MOBILE BAR ───── */
+.sticky-bar {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 12px 20px;
+    background: var(--accent);
+    text-align: center;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.25);
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sticky-bar.visible {
+    transform: translateY(0);
+}
+.sticky-bar a {
+    color: var(--text-light);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.05rem;
+    display: block;
+}
+
+/* ───── RESPONSIVE ───── */
+
+@media (max-width: 992px) {
+    .hero-headline { font-size: clamp(2rem, 4.5vw, 3.2rem); }
+    .stats-grid { gap: 48px; }
+    .comparison-grid { gap: 24px; }
+    .deliverables-grid { gap: 20px; }
+    .deliverable-block { padding: 32px 28px; }
+}
+
+@media (max-width: 768px) {
+    .hero { padding: 48px 20px 64px; min-height: 90vh; }
+    .hero-logo { height: 72px; margin-bottom: 36px; }
+    .hero-sub { font-size: 1rem; margin-bottom: 36px; }
+    .btn-cta { padding: 16px 36px; font-size: 1.05rem; }
+
+    .stats-strip { padding: 32px 20px; }
+    .stats-grid { gap: 32px; }
+    .stat-number { font-size: 2.8rem; }
+
+    .problem-section { padding: 48px 20px; }
+    .comparison-grid { grid-template-columns: 1fr; gap: 20px; }
+    .comparison-col { padding: 24px 20px; }
+
+    .deliverables-section { padding: 48px 20px; }
+    .deliverables-grid { grid-template-columns: 1fr; }
+    .deliverable-block { padding: 24px 20px; }
+
+    .about-section { padding: 48px 20px; }
+
+    .cta-section { padding: 48px 20px 100px; }
+    .form-card { padding: 32px 24px 28px; }
+
+    .sticky-bar { display: block; }
+}
+
+@media (max-width: 380px) {
+    .hero-headline { font-size: 1.8rem; }
+    .hero-sub { font-size: 0.92rem; }
+    .btn-cta { padding: 14px 28px; font-size: 0.95rem; }
+    .stat-number { font-size: 2.2rem; }
+    .stat-label { font-size: 0.88rem; }
+    .problem-statement h2 { font-size: 1.5rem; }
+    .problem-statement .highlight { font-size: 1.05rem; }
+    .deliverables-header h2 { font-size: 1.5rem; }
+    .comparison-col { padding: 24px 20px; }
+    .form-field input { padding: 14px 16px; font-size: 0.95rem; }
+    .form-submit { padding: 16px; font-size: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ────── 1. HERO ────── -->
+<section class="hero">
+    <img src="https://static.wixstatic.com/media/f559f1_c89e141b87d549eeb9530ca30cfa7258~mv2.png" alt="TARGO" class="hero-logo" data-reveal>
+    <h1 class="hero-headline" data-reveal>
+        הופכים רעיונות לסטארטאפים מצליחים.<br>צעד אחר צעד עד לגיוס ההון.
+    </h1>
+    <p class="hero-sub" data-reveal>
+        המומחים שלנו מלווים אותך לכלורך הדרך — מאסטרטגיה חדה ומחקר מעמיק ועד מוכנות מלאה למשקיעים. הדרך שלך להצלחה מתחילה כאן.
+    </p>
+    <a href="#lead" class="btn-cta" data-reveal>לפגישת ייעוץ ראשונית — ללא עלות</a>
+</section>
+
+<!-- ────── 2. STATS STRIP ────── -->
+<section class="stats-strip">
+    <div class="stats-grid" data-reveal>
+        <div class="stat-item">
+            <div class="stat-number" data-target="530">0</div>
+            <div class="stat-label">חברות ומיזמים שליווינו</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" data-target="12">0</div>
+            <div class="stat-label">שנות עשייה</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" data-target="21">0</div>
+            <div class="stat-label">תעשיות שונות</div>
+        </div>
+    </div>
+</section>
+
+<!-- ────── 3. PROBLEM SECTION ────── -->
+<section class="problem-section">
+    <div class="container">
+        <div class="problem-statement" data-reveal>
+            <h2>היתרון האסטרטגי של המיזם שלך.</h2>
+            <p class="highlight">מעטפת מקצועית שלמה שמעניקה לך שקט נפשי, וביטחון מלא למשקיעים.</p>
+        </div>
+
+        <div class="comparison-grid">
+            <div class="comparison-col" style="background:#F4F8FF; border:1px solid #BFD4FF;" data-reveal>
+                <h3 style="color:var(--accent);">
+                    <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m8 12 3 3 5-6"/></svg>
+                    יסודות אסטרטגיים חזקים
+                </h3>
+                <div class="comparison-item">
+                    <span class="comparison-icon" style="background:var(--accent);"><svg fill="none" viewBox="0 0 24 24"><path stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="m6 12 4 4 8-9"/></svg></span>
+                    <span><strong>מחקר שוק מעמיק:</strong> הבנה מדויקת של קהל היעד, המתחרים והפוטנציאל, עוד לפני שמשקיעים משאבי פיתוח.</span>
+                </div>
+                <div class="comparison-item">
+                    <span class="comparison-icon" style="background:var(--accent);"><svg fill="none" viewBox="0 0 24 24"><path stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="m6 12 4 4 8-9"/></svg></span>
+                    <span><strong>החלטות מבוססות נתונים:</strong> בניית אסטרטגיה חכמה על סמך מידע אמיתי מהשטח, שמפחיתה סיכונים למינימום.</span>
+                </div>
+                <div class="comparison-item">
+                    <span class="comparison-icon" style="background:var(--accent);"><svg fill="none" viewBox="0 0 24 24"><path stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="m6 12 4 4 8-9"/></svg></span>
+                    <span><strong>חדירה מדויקת לשוק:</strong> תוכנית פעולה פרקטית (GTM) שמאפשרת הגעה אפקטיבית ומהירה ללקוחות הראשונים.</span>
+                </div>
+            </div>
+
+            <div class="comparison-col" style="background:#FFF5F3; border:1px solid #FFCCBE;" data-reveal>
+                <h3 style="color:var(--accent-red);">
+                    <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m8 12 3 3 5-6"/></svg>
+                    מוכנות מלאה למשקיעים
+                </h3>
+                <div class="comparison-item">
+                    <span class="comparison-icon" style="background:var(--accent-red);"><svg fill="none" viewBox="0 0 24 24"><path stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="m6 12 4 4 8-9"/></svg></span>
+                    <span><strong>תוכנית עסקית מנצחת:</strong> מסמך מקצועי ומרשים שמציג את הערך הייחודי של המיזם בסטנדרט של הון סיכון.</span>
+                </div>
+                <div class="comparison-item">
+                    <span class="comparison-icon" style="background:var(--accent-red);"><svg fill="none" viewBox="0 0 24 24"><path stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="m6 12 4 4 8-9"/></svg></span>
+                    <span><strong>מודל פיננסי חסין:</strong> תחזיות מקיפות והערכת שווי שמעניקות ביטחון מלא ושקיפות למשקיע שמולך.</span>
+                </div>
+                <div class="comparison-item">
+                    <span class="comparison-icon" style="background:var(--accent-red);"><svg fill="none" viewBox="0 0 24 24"><path stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="m6 12 4 4 8-9"/></svg></span>
+                    <span><strong>מצגת משקיעים כובשת:</strong> זיקוק היתרונות והחזון של המיזם למצגת עוצמתית שבולטת ומשאירה חותם.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ────── 4. WHAT YOU GET ────── -->
+<section class="deliverables-section">
+    <div class="container">
+        <div class="deliverables-header" data-reveal>
+            <h2>מה מקבלים בסוף התהליך?</h2>
+            <p>ארגז הכלים המקצועי שאנחנו בונים עבור המיזם שלכם:</p>
+        </div>
+
+        <div class="deliverables-grid">
+            <div class="deliverable-block" data-reveal>
+                <div class="deliverable-num">01</div>
+                <h3>תוכנית עסקית מקצועית</h3>
+                <p>מסמך אסטרטגי מקיף הכולל ניתוח שוק, מודל עסקי, ותוכנית פעולה ברורה להשגת היעדים.</p>
+            </div>
+            <div class="deliverable-block" data-reveal>
+                <div class="deliverable-num">02</div>
+                <h3>מודל פיננסי מלא</h3>
+                <p>תחזיות פיננסיות מדויקות, ניתוח נקודת איזון, והערכת שווי שמוכנה להצגה בפני משקיעים.</p>
+            </div>
+            <div class="deliverable-block" data-reveal>
+                <div class="deliverable-num">03</div>
+                <h3>מצגת משקיעים מנצחת</h3>
+                <p>זיקוק כל המידע למצגת חדה, ויזואלית ומשכנעת שמספרת את הסיפור שלכם בצורה הטובה ביותר.</p>
+            </div>
+            <div class="deliverable-block" data-reveal>
+                <div class="deliverable-num">04</div>
+                <h3>אסטרטגיית חדירה לשוק</h3>
+                <p>תוכנית מוגדרת להשגת הלקוחות הראשונים, הכוללת זיהוי קהלי יעד, מסרים ובחירת ערוצי שיווק.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ────── 5. ABOUT ────── -->
+<section class="about-section">
+    <div class="about-inner" data-reveal>
+        <h2>מי אנחנו?</h2>
+        <p>TARGO היא חברת ייעוץ אסטרטגי לסטארטאפים, שפועלת מ-2012. הצוות שלנו מורכב ממומחים בתחומי אסטרטגיה עסקית, מחקר שוק, מודלים פיננסיים וגיוס הון — עם ניסיון מצטבר של מאות פרויקטים בלמעלה מ-21 תעשיות שונות.</p>
+        <p>ליווינו למעלה מ-530 מיזמים בדרך מהרעיון הראשוני ועד גיוס משקיעים ופיתוח מוצר — כולל כתיבת תוכניות עסקיות, בניית מודלים פיננסיים, הכנת מצגות משקיעים, ואסטרטגיות חדירה לשוק.</p>
+        <p>המשרדים שלנו ממוקמים ברמת גן, ואנחנו עובדים עם יזמים מכל רחבי הארץ — בליווי צמוד, אישי ומקצועי.</p>
+    </div>
+</section>
+
+<!-- ────── 6. CTA + FORM ────── -->
+<section class="cta-section" id="lead">
+    <div class="cta-inner" data-reveal>
+        <h2>מוכנים להפוך את הרעיון שלכם למציאות?</h2>
+        <p>הצעד הראשון להצלחה מתחיל בשיחה אחת. השאירו פרטים ונחזור אליכם לתיאום פגישת ייעוץ ראשונית, ללא עלות וללא התחייבות.</p>
+
+        <div class="form-card">
+            <form action="/lp/targo-thanks" method="GET">
+                <input type="hidden" name="ab_variant" value="H_Bold">
+                <div class="form-field">
+                    <input type="text" name="fullName" placeholder="שם מלא" required minlength="2" title="נא להזין שם מלא">
+                </div>
+                <div class="form-field">
+                    <input type="tel" name="phone" placeholder="מספר טלפון" required pattern="0[0-9]{8,9}" title="נא להזין מספר טלפון תקין">
+                </div>
+                <div class="form-field">
+                    <input type="email" name="email" placeholder="מייל" required title="נא להזין כתובת מייל תקינה">
+                </div>
+                <button type="submit" class="form-submit">לפגישת ייעוץ ראשונית — ללא עלות</button>
+            </form>
+            <div class="form-trust">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                ללא התחייבות · חזרה תוך יום עסקים אחד
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ────── 7. FOOTER ────── -->
+<footer class="site-footer">
+    <p>&copy; TARGO Consulting — כל הזכויות שמורות · <a href="https://www.targo-consulting.co.il/%d7%9e%d7%93%d7%99%d7%a0%d7%99%d7%95%d7%aa-%d7%a4%d7%a8%d7%98%d7%99%d7%95%d7%aa/" target="_blank" rel="noopener">מדיניות פרטיות</a></p>
+</footer>
+
+<!-- ────── 8. STICKY MOBILE BAR ────── -->
+<div class="sticky-bar" id="stickyBar">
+    <a href="#lead">לפגישת ייעוץ — ללא עלות ←</a>
+</div>
+
+<script>
+(function() {
+    /* Scroll reveal */
+    var reveals = document.querySelectorAll('[data-reveal]');
+    if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+        reveals.forEach(function(el) { observer.observe(el); });
+    } else {
+        reveals.forEach(function(el) { el.classList.add('visible'); });
+    }
+
+    /* Counter animation */
+    var counters = document.querySelectorAll('[data-target]');
+    var counterDone = new Set();
+
+    function animateCounter(el) {
+        var target = parseInt(el.getAttribute('data-target'), 10);
+        var duration = 1800;
+        var startTime = null;
+        var suffix = target >= 100 ? '+' : '';
+
+        function step(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var progress = Math.min((timestamp - startTime) / duration, 1);
+            var eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.floor(eased * target) + suffix;
+            if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+
+    if ('IntersectionObserver' in window) {
+        var counterObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting && !counterDone.has(entry.target)) {
+                    counterDone.add(entry.target);
+                    animateCounter(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        counters.forEach(function(c) { counterObserver.observe(c); });
+    }
+
+    /* Sticky bar visibility */
+    var stickyBar = document.getElementById('stickyBar');
+    var heroSection = document.querySelector('.hero');
+    var leadSection = document.getElementById('lead');
+
+    function updateStickyBar() {
+        if (!stickyBar || window.innerWidth > 768) return;
+        var scrollY = window.pageYOffset || document.documentElement.scrollTop;
+        var heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
+        var leadTop = leadSection.offsetTop - window.innerHeight;
+        if (scrollY > heroBottom && scrollY < leadTop) {
+            stickyBar.classList.add('visible');
+        } else {
+            stickyBar.classList.remove('visible');
+        }
+    }
+
+    window.addEventListener('scroll', updateStickyBar, { passive: true });
+    window.addEventListener('resize', updateStickyBar, { passive: true });
+})();
+</script>
+</body>
+</html>
