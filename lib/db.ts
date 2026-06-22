@@ -156,6 +156,67 @@ export async function resetPageViews(pageId: string) {
   if (error) throw error
 }
 
+// ── Versions ──
+
+export interface LandingPageVersion {
+  id: string
+  page_id: string
+  file_path: string
+  created_at: string
+  label: string | null
+}
+
+export async function ensureVersionsTable() {
+  try {
+    await supabase.rpc('exec_sql', {
+      sql: `CREATE TABLE IF NOT EXISTS landing_page_versions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        page_id UUID NOT NULL REFERENCES landing_pages(id) ON DELETE CASCADE,
+        file_path TEXT NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT now(),
+        label TEXT
+      ); ALTER TABLE landing_page_versions ENABLE ROW LEVEL SECURITY; DO $$ BEGIN CREATE POLICY "Service role full access on landing_page_versions" ON landing_page_versions FOR ALL USING (true) WITH CHECK (true); EXCEPTION WHEN duplicate_object THEN NULL; END $$;`
+    })
+  } catch {
+    // Table creation via RPC may not be available — table must be created manually
+  }
+}
+
+export async function createVersion(pageId: string, filePath: string, label?: string) {
+  const { error } = await supabase
+    .from('landing_page_versions')
+    .insert({ page_id: pageId, file_path: filePath, label: label || null })
+  if (error) throw error
+}
+
+export async function getVersions(pageId: string): Promise<LandingPageVersion[]> {
+  const { data, error } = await supabase
+    .from('landing_page_versions')
+    .select('*')
+    .eq('page_id', pageId)
+    .order('created_at', { ascending: false })
+  if (error) return []
+  return data as LandingPageVersion[]
+}
+
+export async function getVersion(versionId: string): Promise<LandingPageVersion | null> {
+  const { data, error } = await supabase
+    .from('landing_page_versions')
+    .select('*')
+    .eq('id', versionId)
+    .single()
+  if (error || !data) return null
+  return data as LandingPageVersion
+}
+
+export async function deleteVersion(versionId: string) {
+  const version = await getVersion(versionId)
+  if (version) {
+    await deleteFile(version.file_path)
+    await supabase.from('landing_page_versions').delete().eq('id', versionId)
+  }
+}
+
 // ── Storage ──
 
 const BUCKET = 'landing-pages'

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Eye, Trash2, ArrowRight, Code2, Upload, ChevronDown, ChevronUp, Check, FileCode2, RotateCcw } from 'lucide-react'
+import { Eye, Trash2, ArrowRight, Code2, Upload, ChevronDown, ChevronUp, Check, FileCode2, RotateCcw, History } from 'lucide-react'
 import Link from 'next/link'
 
 interface PageData {
@@ -15,6 +15,14 @@ interface PageData {
   filePath: string
   createdAt: string
   _count: { views: number }
+}
+
+interface Version {
+  id: string
+  page_id: string
+  file_path: string
+  created_at: string
+  label: string | null
 }
 
 export default function EditPage() {
@@ -46,6 +54,13 @@ export default function EditPage() {
   const [replaceFile, setReplaceFile] = useState<File | null>(null)
   const [uploadingFile, setUploadingFile] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Version history state
+  const [showVersions, setShowVersions] = useState(false)
+  const [versions, setVersions] = useState<Version[]>([])
+  const [versionsLoading, setVersionsLoading] = useState(false)
+  const [versionsLoaded, setVersionsLoaded] = useState(false)
+  const [restoringVersion, setRestoringVersion] = useState<string | null>(null)
 
   useEffect(() => {
     fetch(`/api/pages/${id}`)
@@ -183,6 +198,57 @@ export default function EditPage() {
       setError('שגיאה באיפוס הסטטיסטיקות')
     }
     setResettingStats(false)
+  }
+
+  async function loadVersions() {
+    if (versionsLoaded) return
+    setVersionsLoading(true)
+    try {
+      const res = await fetch(`/api/pages/${id}/versions`)
+      if (res.ok) {
+        const data = await res.json()
+        setVersions(data.versions || [])
+        setVersionsLoaded(true)
+      }
+    } catch {
+      // Graceful degradation — table may not exist yet
+    }
+    setVersionsLoading(false)
+  }
+
+  function toggleVersions() {
+    const next = !showVersions
+    setShowVersions(next)
+    if (next && !versionsLoaded) loadVersions()
+  }
+
+  async function handleRestore(versionId: string) {
+    if (!confirm('לשחזר גרסה זו? הגרסה הנוכחית תישמר בהיסטוריה.')) return
+    setRestoringVersion(versionId)
+    setError('')
+    setSuccessMsg('')
+    try {
+      const res = await fetch(`/api/pages/${id}/versions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ versionId }),
+      })
+      if (res.ok) {
+        setSuccessMsg('הגרסה שוחזרה בהצלחה!')
+        setHtmlLoaded(false)
+        setHtmlContent('')
+        if (showHtmlEditor) loadHtml()
+        setVersionsLoaded(false)
+        loadVersions()
+        setTimeout(() => setSuccessMsg(''), 4000)
+      } else {
+        const data = await res.json()
+        setError(data.error || 'שגיאה בשחזור הגרסה')
+      }
+    } catch {
+      setError('שגיאה בשחזור הגרסה')
+    }
+    setRestoringVersion(null)
   }
 
   const inputStyle = {
@@ -436,6 +502,80 @@ export default function EditPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* ─── Version History ─── */}
+      <div
+        className="mb-8 rounded-2xl overflow-hidden"
+        style={{ border: '1px solid var(--admin-border)' }}
+      >
+        <button
+          type="button"
+          onClick={toggleVersions}
+          className="w-full flex items-center justify-between p-5 text-right transition-colors"
+          style={{ background: 'var(--admin-bg-elevated)' }}
+        >
+          <span>
+            <h3 className="text-base font-black mb-0.5" style={{ color: 'var(--admin-text-primary)' }}>
+              <History className="w-4.5 h-4.5 inline-block ml-2" style={{ verticalAlign: '-2px' }} />
+              היסטוריית גרסאות
+            </h3>
+            <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>שחזור גרסאות קודמות של הדף</p>
+          </span>
+          {showVersions ? <ChevronUp className="w-5 h-5" style={{ color: 'var(--admin-text-muted)' }} /> : <ChevronDown className="w-5 h-5" style={{ color: 'var(--admin-text-muted)' }} />}
+        </button>
+
+        {showVersions && (
+          <div className="px-5 pb-5" style={{ background: 'var(--admin-bg-elevated)' }}>
+            {versionsLoading ? (
+              <div className="flex items-center justify-center py-8" style={{ color: 'var(--admin-text-muted)' }}>
+                <span className="text-sm">טוען היסטוריה...</span>
+              </div>
+            ) : versions.length === 0 ? (
+              <div className="flex items-center justify-center py-8" style={{ color: 'var(--admin-text-muted)' }}>
+                <span className="text-sm">אין גרסאות קודמות</span>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {versions.map(v => (
+                  <div
+                    key={v.id}
+                    className="flex items-center justify-between px-4 py-3 rounded-xl"
+                    style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
+                  >
+                    <div>
+                      <p className="text-sm font-bold" style={{ color: 'var(--admin-text-primary)' }}>
+                        {new Date(v.created_at).toLocaleString('he-IL', {
+                          day: 'numeric', month: 'short', year: 'numeric',
+                          hour: '2-digit', minute: '2-digit',
+                        })}
+                      </p>
+                      {v.label && (
+                        <p className="text-xs mt-0.5" style={{ color: 'var(--admin-text-muted)' }}>{v.label}</p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRestore(v.id)}
+                      disabled={restoringVersion === v.id}
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 disabled:opacity-40"
+                      style={{
+                        background: 'rgba(243, 213, 109, 0.1)',
+                        border: '1px solid rgba(243, 213, 109, 0.25)',
+                        color: 'var(--admin-accent)',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(243, 213, 109, 0.2)' }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(243, 213, 109, 0.1)' }}
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      {restoringVersion === v.id ? 'משחזר...' : 'שחזור'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ─── Page Settings Form ─── */}

@@ -45,6 +45,21 @@ RETURNS TABLE(page_id UUID, count BIGINT) AS $$
   GROUP BY page_id;
 $$ LANGUAGE sql STABLE;
 
+-- ── Version history ──
+
+CREATE TABLE IF NOT EXISTS landing_page_versions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  page_id UUID NOT NULL REFERENCES landing_pages(id) ON DELETE CASCADE,
+  file_path TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  label TEXT
+);
+
+ALTER TABLE landing_page_versions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Service role full access on landing_page_versions"
+  ON landing_page_versions FOR ALL USING (true) WITH CHECK (true);
+
 -- ── Storage bucket ──
 -- Create a storage bucket called "landing-pages" via the Supabase dashboard:
 --   Storage > New Bucket > Name: "landing-pages" > Public: OFF

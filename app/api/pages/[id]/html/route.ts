@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPageById, downloadFile, uploadFile } from '@/lib/db'
+import { getPageById, downloadFile, uploadFile, createVersion } from '@/lib/db'
 import { requireAuth } from '@/lib/auth'
 
 interface Ctx { params: Promise<{ id: string }> }
@@ -48,6 +48,20 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
       return NextResponse.json({ error: 'No HTML content provided' }, { status: 400 })
     }
     htmlContent = body.html
+  }
+
+  // Save current file as a version before overwriting
+  try {
+    const currentHtml = await downloadFile(page.file_path)
+    if (currentHtml) {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+      const pathParts = page.file_path.replace('.html', '')
+      const versionPath = `${pathParts}/versions/${timestamp}.html`
+      await uploadFile(versionPath, Buffer.from(currentHtml, 'utf-8'))
+      await createVersion(page.id, versionPath)
+    }
+  } catch {
+    // Version save failed — continue with the update anyway
   }
 
   const buffer = Buffer.from(htmlContent, 'utf-8')
