@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Eye, Trash2, ArrowRight } from 'lucide-react'
+import { Eye, Trash2, ArrowRight, Code2, Upload, ChevronDown, ChevronUp, Check, FileCode2 } from 'lucide-react'
 import Link from 'next/link'
 
 interface PageData {
@@ -28,6 +28,20 @@ export default function EditPage() {
   const [expiresAt, setExpiresAt] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [successMsg, setSuccessMsg] = useState('')
+
+  // HTML editor state
+  const [showHtmlEditor, setShowHtmlEditor] = useState(false)
+  const [htmlContent, setHtmlContent] = useState('')
+  const [htmlLoading, setHtmlLoading] = useState(false)
+  const [htmlLoaded, setHtmlLoaded] = useState(false)
+  const [savingHtml, setSavingHtml] = useState(false)
+
+  // File replacement state
+  const [showFileReplace, setShowFileReplace] = useState(false)
+  const [replaceFile, setReplaceFile] = useState<File | null>(null)
+  const [uploadingFile, setUploadingFile] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetch(`/api/pages/${id}`)
@@ -42,10 +56,87 @@ export default function EditPage() {
       })
   }, [id])
 
+  async function loadHtml() {
+    if (htmlLoaded) return
+    setHtmlLoading(true)
+    try {
+      const res = await fetch(`/api/pages/${id}/html`)
+      if (res.ok) {
+        const data = await res.json()
+        setHtmlContent(data.html)
+        setHtmlLoaded(true)
+      } else {
+        setError('לא ניתן לטעון את קובץ ה-HTML')
+      }
+    } catch {
+      setError('שגיאה בטעינת ה-HTML')
+    }
+    setHtmlLoading(false)
+  }
+
+  function toggleHtmlEditor() {
+    const next = !showHtmlEditor
+    setShowHtmlEditor(next)
+    if (next && !htmlLoaded) loadHtml()
+  }
+
+  async function handleSaveHtml() {
+    setSavingHtml(true)
+    setError('')
+    setSuccessMsg('')
+    try {
+      const res = await fetch(`/api/pages/${id}/html`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ html: htmlContent }),
+      })
+      if (res.ok) {
+        setSuccessMsg('קוד ה-HTML נשמר בהצלחה!')
+        setTimeout(() => setSuccessMsg(''), 4000)
+      } else {
+        const data = await res.json()
+        setError(data.error || 'שגיאה בשמירת ה-HTML')
+      }
+    } catch {
+      setError('שגיאה בשמירת ה-HTML')
+    }
+    setSavingHtml(false)
+  }
+
+  async function handleUploadReplace() {
+    if (!replaceFile) return
+    setUploadingFile(true)
+    setError('')
+    setSuccessMsg('')
+    try {
+      const formData = new FormData()
+      formData.append('file', replaceFile)
+      const res = await fetch(`/api/pages/${id}/html`, {
+        method: 'PUT',
+        body: formData,
+      })
+      if (res.ok) {
+        setSuccessMsg('הקובץ הוחלף בהצלחה!')
+        setReplaceFile(null)
+        setHtmlLoaded(false)
+        setHtmlContent('')
+        if (showHtmlEditor) loadHtml()
+        setTimeout(() => setSuccessMsg(''), 4000)
+      } else {
+        const data = await res.json()
+        setError(data.error || 'שגיאה בהעלאת הקובץ')
+      }
+    } catch {
+      setError('שגיאה בהעלאת הקובץ')
+    }
+    setUploadingFile(false)
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
     setError('')
+    setSuccessMsg('')
 
     const res = await fetch(`/api/pages/${id}`, {
       method: 'PUT',
@@ -77,7 +168,7 @@ export default function EditPage() {
   if (!page) return <p style={{ color: 'var(--admin-text-muted)' }}>טוען...</p>
 
   return (
-    <div className="max-w-lg">
+    <div className="max-w-2xl">
       <Link
         href="/admin"
         className="inline-flex items-center gap-1.5 text-sm font-bold mb-6 transition-colors"
@@ -108,6 +199,204 @@ export default function EditPage() {
         <code className="text-sm" dir="ltr" style={{ color: 'var(--admin-link)' }}>/pages/{client}/{slug}</code>
       </div>
 
+      {successMsg && (
+        <div
+          className="mb-6 p-4 rounded-xl flex items-center gap-2.5 text-sm font-bold"
+          style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.25)', color: '#22c55e' }}
+        >
+          <Check className="w-4 h-4 flex-shrink-0" />
+          {successMsg}
+        </div>
+      )}
+
+      {/* ─── HTML Content Management ─── */}
+      <div
+        className="mb-8 rounded-2xl overflow-hidden"
+        style={{ border: '1px solid var(--admin-border)' }}
+      >
+        <div
+          className="p-5"
+          style={{ background: 'var(--admin-bg-elevated)' }}
+        >
+          <h3 className="text-base font-black mb-1" style={{ color: 'var(--admin-text-primary)' }}>
+            <FileCode2 className="w-4.5 h-4.5 inline-block ml-2" style={{ verticalAlign: '-2px' }} />
+            ניהול תוכן HTML
+          </h3>
+          <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>ערוך את קוד ה-HTML ישירות או החלף את הקובץ</p>
+        </div>
+
+        <div className="px-5 pb-5" style={{ background: 'var(--admin-bg-elevated)' }}>
+          {/* Toggle: Edit HTML Code */}
+          <button
+            type="button"
+            onClick={toggleHtmlEditor}
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 mb-3"
+            style={{
+              background: showHtmlEditor ? 'rgba(243, 213, 109, 0.08)' : 'var(--admin-bg)',
+              border: showHtmlEditor ? '1px solid rgba(243, 213, 109, 0.3)' : '1px solid var(--admin-border)',
+              color: showHtmlEditor ? 'var(--admin-accent)' : 'var(--admin-text-secondary)',
+            }}
+          >
+            <span className="flex items-center gap-2">
+              <Code2 className="w-4 h-4" />
+              עריכת קוד HTML
+            </span>
+            {showHtmlEditor ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+
+          {showHtmlEditor && (
+            <div className="mb-4">
+              {htmlLoading ? (
+                <div className="flex items-center justify-center py-12" style={{ color: 'var(--admin-text-muted)' }}>
+                  <span className="text-sm">טוען HTML...</span>
+                </div>
+              ) : (
+                <>
+                  <div className="relative rounded-xl overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
+                    <div
+                      className="flex items-center justify-between px-4 py-2"
+                      style={{ background: '#1a1a2e', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+                    >
+                      <span className="text-xs font-mono" style={{ color: 'rgba(255,255,255,0.35)' }}>HTML</span>
+                      <span className="text-xs font-mono" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                        {htmlContent.length.toLocaleString()} תווים
+                      </span>
+                    </div>
+                    <textarea
+                      value={htmlContent}
+                      onChange={e => setHtmlContent(e.target.value)}
+                      dir="ltr"
+                      spellCheck={false}
+                      className="w-full outline-none resize-y text-sm leading-relaxed"
+                      style={{
+                        background: '#0d0d1a',
+                        color: '#e2e8f0',
+                        fontFamily: "'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', Consolas, monospace",
+                        minHeight: '500px',
+                        padding: '16px',
+                        tabSize: 2,
+                        whiteSpace: 'pre',
+                        overflowWrap: 'normal',
+                        overflowX: 'auto',
+                      }}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSaveHtml}
+                    disabled={savingHtml}
+                    className="mt-3 px-6 py-3 rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-40"
+                    style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
+                    onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px var(--admin-accent-glow)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+                    onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
+                  >
+                    {savingHtml ? 'שומר HTML...' : 'שמירת קוד HTML'}
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Toggle: Replace File */}
+          <button
+            type="button"
+            onClick={() => setShowFileReplace(!showFileReplace)}
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200"
+            style={{
+              background: showFileReplace ? 'rgba(243, 213, 109, 0.08)' : 'var(--admin-bg)',
+              border: showFileReplace ? '1px solid rgba(243, 213, 109, 0.3)' : '1px solid var(--admin-border)',
+              color: showFileReplace ? 'var(--admin-accent)' : 'var(--admin-text-secondary)',
+            }}
+          >
+            <span className="flex items-center gap-2">
+              <Upload className="w-4 h-4" />
+              החלפת קובץ HTML
+            </span>
+            {showFileReplace ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+
+          {showFileReplace && (
+            <div className="mt-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".html,text/html"
+                className="hidden"
+                onChange={e => {
+                  const f = e.target.files?.[0] || null
+                  setReplaceFile(f)
+                }}
+              />
+
+              {!replaceFile ? (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full py-10 rounded-xl text-sm transition-all duration-200 cursor-pointer"
+                  style={{
+                    border: '2px dashed var(--admin-border)',
+                    background: 'var(--admin-bg)',
+                    color: 'var(--admin-text-muted)',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.borderColor = 'var(--admin-accent)'
+                    e.currentTarget.style.color = 'var(--admin-accent)'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.borderColor = 'var(--admin-border)'
+                    e.currentTarget.style.color = 'var(--admin-text-muted)'
+                  }}
+                >
+                  <Upload className="w-6 h-6 mx-auto mb-2 opacity-60" />
+                  <span className="font-bold block">לחצו לבחירת קובץ HTML</span>
+                  <span className="text-xs opacity-60 mt-1 block">או גררו קובץ לכאן</span>
+                </button>
+              ) : (
+                <div
+                  className="p-4 rounded-xl"
+                  style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <FileCode2 className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--admin-accent)' }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold truncate" style={{ color: 'var(--admin-text-primary)' }} dir="ltr">
+                        {replaceFile.name}
+                      </p>
+                      <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>
+                        {(replaceFile.size / 1024).toFixed(1)} KB
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { setReplaceFile(null); if (fileInputRef.current) fileInputRef.current.value = '' }}
+                      className="text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+                      style={{ color: 'var(--admin-danger)', background: 'var(--admin-danger-bg)' }}
+                    >
+                      ביטול
+                    </button>
+                  </div>
+                  <p className="text-xs mb-3" style={{ color: 'var(--admin-text-muted)' }}>
+                    הקובץ הנוכחי יוחלף. פעולה זו בלתי הפיכה.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleUploadReplace}
+                    disabled={uploadingFile}
+                    className="w-full py-3 rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-40"
+                    style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
+                    onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px var(--admin-accent-glow)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+                    onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
+                  >
+                    {uploadingFile ? 'מעלה קובץ...' : 'אישור והחלפת הקובץ'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ─── Page Settings Form ─── */}
       <form onSubmit={handleSave} className="space-y-6">
         <div>
           <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>כותרת</label>
