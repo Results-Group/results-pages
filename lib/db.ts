@@ -148,6 +148,14 @@ export async function createPageView(data: {
   await supabase.from('landing_page_views').insert(data)
 }
 
+export async function resetPageViews(pageId: string) {
+  const { error } = await supabase
+    .from('landing_page_views')
+    .delete()
+    .eq('page_id', pageId)
+  if (error) throw error
+}
+
 // ── Storage ──
 
 const BUCKET = 'landing-pages'

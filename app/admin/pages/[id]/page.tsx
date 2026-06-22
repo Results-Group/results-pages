@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Eye, Trash2, ArrowRight, Code2, Upload, ChevronDown, ChevronUp, Check, FileCode2 } from 'lucide-react'
+import { Eye, Trash2, ArrowRight, Code2, Upload, ChevronDown, ChevronUp, Check, FileCode2, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 
 interface PageData {
@@ -37,6 +37,10 @@ export default function EditPage() {
   const [htmlLoaded, setHtmlLoaded] = useState(false)
   const [savingHtml, setSavingHtml] = useState(false)
 
+  // Stats reset state
+  const [resettingStats, setResettingStats] = useState(false)
+  const [viewCount, setViewCount] = useState(0)
+
   // File replacement state
   const [showFileReplace, setShowFileReplace] = useState(false)
   const [replaceFile, setReplaceFile] = useState<File | null>(null)
@@ -53,6 +57,7 @@ export default function EditPage() {
         setSlug(data.slug)
         setActive(data.active)
         setExpiresAt(data.expiresAt ? data.expiresAt.split('T')[0] : '')
+        setViewCount(data._count?.views || 0)
       })
   }, [id])
 
@@ -159,6 +164,27 @@ export default function EditPage() {
     router.push('/admin')
   }
 
+  async function handleResetStats() {
+    if (!confirm('לאפס את כל הסטטיסטיקות של דף זה? פעולה זו בלתי הפיכה.')) return
+    setResettingStats(true)
+    setError('')
+    setSuccessMsg('')
+    try {
+      const res = await fetch(`/api/pages/${id}/views`, { method: 'DELETE' })
+      if (res.ok) {
+        setViewCount(0)
+        setSuccessMsg('הסטטיסטיקות אופסו בהצלחה!')
+        setTimeout(() => setSuccessMsg(''), 4000)
+      } else {
+        const data = await res.json()
+        setError(data.error || 'שגיאה באיפוס הסטטיסטיקות')
+      }
+    } catch {
+      setError('שגיאה באיפוס הסטטיסטיקות')
+    }
+    setResettingStats(false)
+  }
+
   const inputStyle = {
     background: 'var(--admin-bg-elevated)',
     border: '1px solid var(--admin-border)',
@@ -184,8 +210,24 @@ export default function EditPage() {
       <div className="flex items-center gap-3 mb-8">
         <span className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--admin-text-muted)' }}>
           <Eye className="w-3.5 h-3.5" />
-          {page._count.views} צפיות
+          {viewCount} צפיות
         </span>
+        <button
+          type="button"
+          onClick={handleResetStats}
+          disabled={resettingStats || viewCount === 0}
+          className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{
+            color: 'var(--admin-danger)',
+            border: '1px solid var(--admin-danger-border)',
+            background: 'transparent',
+          }}
+          onMouseEnter={e => { if (!resettingStats && viewCount > 0) e.currentTarget.style.background = 'var(--admin-danger-bg)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+        >
+          <RotateCcw className="w-3 h-3" />
+          {resettingStats ? 'מאפס...' : 'איפוס סטטיסטיקה'}
+        </button>
         <span className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>
           נוצר {new Date(page.createdAt).toLocaleDateString('he-IL')}
         </span>
