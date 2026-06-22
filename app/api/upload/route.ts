@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPageByClientSlug, getPageByShortUrl, createPage, uploadFile } from '@/lib/db'
-import { requireAuth } from '@/lib/auth'
+import { requireRole, getSessionFromRequest } from '@/lib/auth'
 import { minifyHtml } from '@/lib/minify'
 
 export async function POST(req: NextRequest) {
-  const authError = requireAuth(req)
-  if (authError) return authError
+  const roleErr = requireRole(req, 'editor')
+  if (roleErr) return roleErr
 
+  const session = getSessionFromRequest(req)
   const formData = await req.formData()
   const file = formData.get('file') as File | null
   const client = (formData.get('client') as string)?.trim().toLowerCase().replace(/\s+/g, '-')
@@ -53,6 +54,7 @@ export async function POST(req: NextRequest) {
     expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
     password,
     short_url: shortUrl,
+    created_by: session?.userId !== 'legacy' ? session?.userId : undefined,
   })
 
   return NextResponse.json(page, { status: 201 })

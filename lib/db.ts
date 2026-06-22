@@ -96,18 +96,22 @@ export async function createPage(data: {
   expires_at?: string | null
   password?: string | null
   short_url?: string | null
+  created_by?: string
 }) {
+  const insertData: Record<string, unknown> = {
+    client: data.client,
+    slug: data.slug,
+    title: data.title,
+    file_path: data.file_path,
+    expires_at: data.expires_at || null,
+    password: data.password || null,
+    short_url: data.short_url || null,
+  }
+  if (data.created_by) insertData.created_by = data.created_by
+
   const { data: page, error } = await supabase
     .from('landing_pages')
-    .insert({
-      client: data.client,
-      slug: data.slug,
-      title: data.title,
-      file_path: data.file_path,
-      expires_at: data.expires_at || null,
-      password: data.password || null,
-      short_url: data.short_url || null,
-    })
+    .insert(insertData)
     .select()
     .single()
 
@@ -117,7 +121,7 @@ export async function createPage(data: {
 
 export async function updatePage(
   id: string,
-  data: Partial<Pick<LandingPage, 'title' | 'client' | 'slug' | 'active' | 'expires_at' | 'file_path' | 'password' | 'short_url'>>
+  data: Partial<Pick<LandingPage, 'title' | 'client' | 'slug' | 'active' | 'expires_at' | 'file_path' | 'password' | 'short_url'>> & { updated_by?: string }
 ) {
   const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() }
   if (data.title !== undefined) updateData.title = data.title
@@ -128,6 +132,7 @@ export async function updatePage(
   if (data.file_path !== undefined) updateData.file_path = data.file_path
   if (data.password !== undefined) updateData.password = data.password
   if (data.short_url !== undefined) updateData.short_url = data.short_url || null
+  if (data.updated_by) updateData.updated_by = data.updated_by
 
   const { data: page, error } = await supabase
     .from('landing_pages')
@@ -198,6 +203,24 @@ export async function ensureVersionsTable() {
     })
   } catch {
     // Table creation via RPC may not be available — table must be created manually
+  }
+}
+
+export async function ensureAdminUsersTable() {
+  try {
+    await supabase.rpc('exec_sql', {
+      sql: `CREATE TABLE IF NOT EXISTS admin_users (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        email TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        name TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'editor' CHECK (role IN ('admin', 'editor', 'viewer')),
+        created_at TIMESTAMPTZ DEFAULT now(),
+        last_login TIMESTAMPTZ
+      ); ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY; DO $$ BEGIN CREATE POLICY "Service role full access on admin_users" ON admin_users FOR ALL USING (true) WITH CHECK (true); EXCEPTION WHEN duplicate_object THEN NULL; END $$; ALTER TABLE landing_pages ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES admin_users(id) DEFAULT NULL; ALTER TABLE landing_pages ADD COLUMN IF NOT EXISTS updated_by UUID REFERENCES admin_users(id) DEFAULT NULL;`
+    })
+  } catch {
+    // Table creation via RPC may not be available
   }
 }
 

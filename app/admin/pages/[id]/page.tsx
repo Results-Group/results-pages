@@ -5,6 +5,22 @@ import { useParams, useRouter } from 'next/navigation'
 import { Eye, Trash2, ArrowRight, Code2, Upload, ChevronDown, ChevronUp, Check, FileCode2, RotateCcw, History } from 'lucide-react'
 import Link from 'next/link'
 
+type UserRole = 'admin' | 'editor' | 'viewer'
+
+function getUserRole(): UserRole {
+  try {
+    const cookie = document.cookie.split('; ').find(c => c.startsWith('rp_session='))
+    if (!cookie) return 'admin'
+    const value = cookie.split('=')[1]
+    const json = atob(decodeURIComponent(value))
+    const parsed = JSON.parse(json)
+    if (parsed.role) return parsed.role as UserRole
+    return 'admin'
+  } catch {
+    return 'admin'
+  }
+}
+
 interface PageData {
   id: string
   client: string
@@ -58,12 +74,18 @@ export default function EditPage() {
   const [uploadingFile, setUploadingFile] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const [userRole, setUserRole] = useState<UserRole>('admin')
+
   // Version history state
   const [showVersions, setShowVersions] = useState(false)
   const [versions, setVersions] = useState<Version[]>([])
   const [versionsLoading, setVersionsLoading] = useState(false)
   const [versionsLoaded, setVersionsLoaded] = useState(false)
   const [restoringVersion, setRestoringVersion] = useState<string | null>(null)
+
+  useEffect(() => {
+    setUserRole(getUserRole())
+  }, [])
 
   useEffect(() => {
     fetch(`/api/pages/${id}`)
@@ -708,17 +730,19 @@ export default function EditPage() {
           >
             {saving ? 'שומר...' : 'שמירה'}
           </button>
-          <button
-            type="button"
-            onClick={handleDelete}
-            className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold transition-all duration-200"
-            style={{ color: 'var(--admin-danger)', border: '1px solid var(--admin-danger-border)' }}
-            onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-danger-bg)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-          >
-            <Trash2 className="w-4 h-4" />
-            מחיקה
-          </button>
+          {userRole === 'admin' && (
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold transition-all duration-200"
+              style={{ color: 'var(--admin-danger)', border: '1px solid var(--admin-danger-border)' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-danger-bg)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              <Trash2 className="w-4 h-4" />
+              מחיקה
+            </button>
+          )}
         </div>
       </form>
     </div>

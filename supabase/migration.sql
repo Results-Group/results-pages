@@ -66,6 +66,24 @@ ALTER TABLE landing_pages ADD COLUMN IF NOT EXISTS password TEXT DEFAULT NULL;
 -- ── Short URLs ──
 ALTER TABLE landing_pages ADD COLUMN IF NOT EXISTS short_url TEXT UNIQUE DEFAULT NULL;
 
+-- ── Admin users (multi-user auth) ──
+
+CREATE TABLE IF NOT EXISTS admin_users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  name TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'editor' CHECK (role IN ('admin', 'editor', 'viewer')),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  last_login TIMESTAMPTZ
+);
+
+ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Service role full access on admin_users" ON admin_users FOR ALL USING (true) WITH CHECK (true);
+
+ALTER TABLE landing_pages ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES admin_users(id) DEFAULT NULL;
+ALTER TABLE landing_pages ADD COLUMN IF NOT EXISTS updated_by UUID REFERENCES admin_users(id) DEFAULT NULL;
+
 -- ── Storage bucket ──
 -- Create a storage bucket called "landing-pages" via the Supabase dashboard:
 --   Storage > New Bucket > Name: "landing-pages" > Public: OFF

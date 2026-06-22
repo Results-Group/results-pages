@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/auth'
+import { requireRole, getSessionFromRequest } from '@/lib/auth'
 import { getPageById, createPage, downloadFile, uploadFile, getPageByClientSlug } from '@/lib/db'
 
 interface Ctx { params: Promise<{ id: string }> }
 
 export async function POST(req: NextRequest, { params }: Ctx) {
-  const authError = requireAuth(req)
-  if (authError) return authError
+  const roleErr = requireRole(req, 'editor')
+  if (roleErr) return roleErr
+
+  const session = getSessionFromRequest(req)
 
   const { id } = await params
   const page = await getPageById(id)
@@ -43,6 +45,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     title: `${page.title} (עותק)`,
     file_path: newFilePath,
     expires_at: page.expires_at,
+    created_by: session?.userId !== 'legacy' ? session?.userId : undefined,
   })
 
   return NextResponse.json(newPage, { status: 201 })

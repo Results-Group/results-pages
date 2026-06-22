@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPageById, resetPageViews } from '@/lib/db'
-import { requireAuth } from '@/lib/auth'
+import { requireRole } from '@/lib/auth'
 
 interface Ctx { params: Promise<{ id: string }> }
 
 export async function DELETE(req: NextRequest, { params }: Ctx) {
-  const authError = requireAuth(req)
-  if (authError) return authError
+  const roleErr = requireRole(req, 'admin')
+  if (roleErr) return roleErr
 
   const { id } = await params
   const page = await getPageById(id)

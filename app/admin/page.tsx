@@ -17,6 +17,22 @@ interface PageItem {
   _count: { views: number }
 }
 
+type UserRole = 'admin' | 'editor' | 'viewer'
+
+function getUserRole(): UserRole {
+  try {
+    const cookie = document.cookie.split('; ').find(c => c.startsWith('rp_session='))
+    if (!cookie) return 'admin'
+    const value = cookie.split('=')[1]
+    const json = atob(decodeURIComponent(value))
+    const parsed = JSON.parse(json)
+    if (parsed.role) return parsed.role as UserRole
+    return 'admin'
+  } catch {
+    return 'admin'
+  }
+}
+
 export default function AdminDashboard() {
   const [pages, setPages] = useState<PageItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -24,6 +40,11 @@ export default function AdminDashboard() {
   const [search, setSearch] = useState('')
   const [previewPage, setPreviewPage] = useState<PageItem | null>(null)
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop')
+  const [userRole, setUserRole] = useState<UserRole>('admin')
+
+  useEffect(() => {
+    setUserRole(getUserRole())
+  }, [])
 
   useEffect(() => {
     fetchPages()
@@ -88,16 +109,18 @@ export default function AdminDashboard() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-2xl font-black" style={{ color: 'var(--admin-text-primary)' }}>דפים</h2>
-        <Link
-          href="/admin/upload"
-          className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-200"
-          style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
-          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px var(--admin-accent-glow)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-          onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
-        >
-          <Plus className="w-4 h-4" />
-          העלאת דף
-        </Link>
+        {userRole !== 'viewer' && (
+          <Link
+            href="/admin/upload"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-200"
+            style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
+            onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px var(--admin-accent-glow)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+            onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
+          >
+            <Plus className="w-4 h-4" />
+            העלאת דף
+          </Link>
+        )}
       </div>
 
       {/* Filters */}
@@ -236,36 +259,42 @@ export default function AdminDashboard() {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        <Link
-                          href={`/admin/pages/${page.id}`}
-                          className="p-1.5 rounded-lg transition-colors"
-                          style={{ color: 'var(--admin-link)' }}
-                          title="עריכה"
-                          onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
-                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Link>
-                        <button
-                          onClick={() => handleToggle(page.id, page.active)}
-                          className="p-1.5 rounded-lg transition-colors"
-                          style={{ color: 'var(--admin-accent)' }}
-                          title={page.active ? 'השבת' : 'הפעל'}
-                          onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
-                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                        >
-                          {page.active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
-                        </button>
-                        <button
-                          onClick={() => handleDuplicate(page.id, page.title)}
-                          className="p-1.5 rounded-lg transition-colors"
-                          style={{ color: 'var(--admin-link)' }}
-                          title="שכפול"
-                          onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
-                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button>
+                        {userRole !== 'viewer' && (
+                          <Link
+                            href={`/admin/pages/${page.id}`}
+                            className="p-1.5 rounded-lg transition-colors"
+                            style={{ color: 'var(--admin-link)' }}
+                            title="עריכה"
+                            onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Link>
+                        )}
+                        {userRole !== 'viewer' && (
+                          <button
+                            onClick={() => handleToggle(page.id, page.active)}
+                            className="p-1.5 rounded-lg transition-colors"
+                            style={{ color: 'var(--admin-accent)' }}
+                            title={page.active ? 'השבת' : 'הפעל'}
+                            onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                          >
+                            {page.active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
+                          </button>
+                        )}
+                        {userRole !== 'viewer' && (
+                          <button
+                            onClick={() => handleDuplicate(page.id, page.title)}
+                            className="p-1.5 rounded-lg transition-colors"
+                            style={{ color: 'var(--admin-link)' }}
+                            title="שכפול"
+                            onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                          >
+                            <Copy className="w-4 h-4" />
+                          </button>
+                        )}
                         <button
                           onClick={() => handleWhatsApp(page)}
                           className="p-1.5 rounded-lg transition-colors"
@@ -276,16 +305,18 @@ export default function AdminDashboard() {
                         >
                           <MessageCircle className="w-4 h-4" />
                         </button>
-                        <button
-                          onClick={() => handleDelete(page.id, page.title)}
-                          className="p-1.5 rounded-lg transition-colors"
-                          style={{ color: 'var(--admin-danger)' }}
-                          title="מחיקה"
-                          onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-danger-bg)'}
-                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {userRole === 'admin' && (
+                          <button
+                            onClick={() => handleDelete(page.id, page.title)}
+                            className="p-1.5 rounded-lg transition-colors"
+                            style={{ color: 'var(--admin-danger)' }}
+                            title="מחיקה"
+                            onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-danger-bg)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

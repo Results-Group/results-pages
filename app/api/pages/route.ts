@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPages, createPage } from '@/lib/db'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, requireRole, getSessionFromRequest } from '@/lib/auth'
 
 export async function GET(req: NextRequest) {
   const authError = requireAuth(req)
@@ -15,9 +15,10 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const authError = requireAuth(req)
-  if (authError) return authError
+  const roleErr = requireRole(req, 'editor')
+  if (roleErr) return roleErr
 
+  const session = getSessionFromRequest(req)
   const body = await req.json()
   const { client, slug, title, filePath, expiresAt } = body
 
@@ -27,6 +28,7 @@ export async function POST(req: NextRequest) {
     title,
     file_path: filePath,
     expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
+    created_by: session?.userId !== 'legacy' ? session?.userId : undefined,
   })
 
   return NextResponse.json(page, { status: 201 })

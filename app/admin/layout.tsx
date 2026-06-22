@@ -11,25 +11,65 @@ import {
   X,
   Sun,
   Moon,
+  Users,
+  Shield,
 } from 'lucide-react'
 
-const navItems = [
-  { href: '/admin', label: 'כל הדפים', icon: FileText },
-  { href: '/admin/upload', label: 'העלאת דף', icon: Upload },
-]
+interface SessionUser {
+  userId: string
+  email: string
+  role: 'admin' | 'editor' | 'viewer'
+  name: string
+}
+
+const ROLE_LABELS: Record<string, string> = {
+  admin: 'אדמין',
+  editor: 'עורך',
+  viewer: 'צופה',
+}
+
+const ROLE_COLORS: Record<string, { color: string; bg: string }> = {
+  admin: { color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.12)' },
+  editor: { color: '#22d3ee', bg: 'rgba(34, 211, 238, 0.12)' },
+  viewer: { color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.12)' },
+}
+
+function getSessionFromCookie(): SessionUser | null {
+  try {
+    const cookie = document.cookie.split('; ').find(c => c.startsWith('rp_session='))
+    if (!cookie) return null
+    const value = cookie.split('=')[1]
+    const json = atob(decodeURIComponent(value))
+    const parsed = JSON.parse(json)
+    if (parsed.userId && parsed.role) return parsed as SessionUser
+    return null
+  } catch {
+    return null
+  }
+}
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+  const [currentUser, setCurrentUser] = useState<SessionUser | null>(null)
 
   useEffect(() => {
     const saved = localStorage.getItem('theme') as 'dark' | 'light' | null
     if (saved === 'light' || saved === 'dark') {
       setTheme(saved)
     }
+    setCurrentUser(getSessionFromCookie())
   }, [])
+
+  const isAdmin = currentUser?.role === 'admin'
+
+  const navItems = [
+    { href: '/admin', label: 'כל הדפים', icon: FileText, show: true },
+    { href: '/admin/upload', label: 'העלאת דף', icon: Upload, show: currentUser?.role !== 'viewer' },
+    { href: '/admin/users', label: 'משתמשים', icon: Users, show: isAdmin },
+  ]
 
   function toggleTheme() {
     const next = theme === 'dark' ? 'light' : 'dark'
@@ -58,6 +98,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push('/admin/login')
   }
 
+  const roleStyle = currentUser ? (ROLE_COLORS[currentUser.role] || ROLE_COLORS.viewer) : null
+
   const sidebarContent = (
     <>
       <div className="p-6 pb-5">
@@ -76,6 +118,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Current user info */}
+        {currentUser && currentUser.userId !== 'legacy' && (
+          <div
+            className="mt-4 px-4 py-3 rounded-xl"
+            style={{ background: 'var(--sidebar-active-bg)', border: '1px solid var(--sidebar-border)' }}
+          >
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 flex-shrink-0" style={{ color: roleStyle?.color }} />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold truncate" style={{ color: 'var(--sidebar-text)' }}>
+                  {currentUser.name}
+                </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span
+                    className="text-[10px] px-2 py-0.5 rounded-full font-bold"
+                    style={{ color: roleStyle?.color, background: roleStyle?.bg }}
+                  >
+                    {ROLE_LABELS[currentUser.role]}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="px-5 mb-4">
@@ -83,7 +150,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
 
       <nav className="flex-1 px-4 py-3 space-y-1 overflow-y-auto">
-        {navItems.map((item) => {
+        {navItems.filter(item => item.show).map((item) => {
           const Icon = item.icon
           const active = isActive(item.href)
           return (

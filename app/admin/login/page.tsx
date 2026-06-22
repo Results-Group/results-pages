@@ -2,9 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Lock } from 'lucide-react'
+import { Lock, Mail } from 'lucide-react'
 
 export default function LoginPage() {
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -18,13 +19,14 @@ export default function LoginPage() {
     const res = await fetch('/api/auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ email: email || undefined, password }),
     })
 
     if (res.ok) {
       router.push('/admin')
     } else {
-      setError('סיסמה שגויה')
+      const data = await res.json()
+      setError(data.error || 'שגיאה בהתחברות')
     }
     setLoading(false)
   }
@@ -48,6 +50,25 @@ export default function LoginPage() {
           <p className="text-center text-sm mb-8" style={{ color: 'var(--admin-text-muted)' }}>
             ניהול דפים
           </p>
+
+          <div className="relative mb-4">
+            <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--admin-text-muted)' }} />
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="אימייל"
+              dir="ltr"
+              className="w-full pr-10 pl-4 py-3 rounded-xl text-sm outline-none transition-colors"
+              style={{
+                background: 'var(--admin-bg-elevated)',
+                border: '1px solid var(--admin-border-input)',
+                color: 'var(--admin-text-primary)',
+              }}
+              onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
+              onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border-input)'}
+            />
+          </div>
 
           <div className="relative mb-5">
             <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--admin-text-muted)' }} />

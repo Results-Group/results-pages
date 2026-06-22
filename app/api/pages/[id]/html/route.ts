@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPageById, downloadFile, uploadFile, createVersion } from '@/lib/db'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, requireRole } from '@/lib/auth'
 import { minifyHtml } from '@/lib/minify'
 
 interface Ctx { params: Promise<{ id: string }> }
@@ -30,8 +30,8 @@ export async function GET(req: NextRequest, { params }: Ctx) {
 }
 
 export async function PUT(req: NextRequest, { params }: Ctx) {
-  const authError = requireAuth(req)
-  if (authError) return authError
+  const roleErr = requireRole(req, 'editor')
+  if (roleErr) return roleErr
 
   const { id } = await params
   const page = await getPageById(id)
