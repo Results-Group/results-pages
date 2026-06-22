@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPageByClientSlug, createPageView, downloadFile } from '@/lib/db'
+import { getPageByClientSlug, createPageView, downloadFile, ensurePasswordColumn } from '@/lib/db'
+
+let schemaReady = false
+async function ensureSchema() {
+  if (schemaReady) return
+  await ensurePasswordColumn()
+  schemaReady = true
+}
 
 interface Ctx { params: Promise<{ path: string[] }> }
 
 export async function GET(req: NextRequest, { params }: Ctx) {
+  await ensureSchema()
   const { path } = await params
 
   if (path.length < 2) {

@@ -201,6 +201,16 @@ export async function ensureVersionsTable() {
   }
 }
 
+export async function ensurePasswordColumn() {
+  try {
+    await supabase.rpc('exec_sql', {
+      sql: `ALTER TABLE landing_pages ADD COLUMN IF NOT EXISTS password TEXT DEFAULT NULL;`
+    })
+  } catch {
+    // Column may already exist or RPC may not be available
+  }
+}
+
 export async function createVersion(pageId: string, filePath: string, label?: string) {
   const { error } = await supabase
     .from('landing_page_versions')
