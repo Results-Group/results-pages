@@ -49,12 +49,50 @@ export async function GET(req: NextRequest, { params }: Ctx) {
   const userAgent = req.headers.get('user-agent') || ''
   createPageView({ page_id: page.id, ip, user_agent: userAgent }).catch(() => {})
 
-  return new NextResponse(html, {
+  const baseUrl = `${req.nextUrl.protocol}//${req.nextUrl.host}`
+  const pageUrl = `${baseUrl}/pages/${client}/${slug}`
+  const ogImageUrl = `${baseUrl}/og-image.png`
+
+  const ogTags = `
+    <meta property="og:title" content="${escapeHtml(page.title)}" />
+    <meta property="og:description" content="Results Group" />
+    <meta property="og:image" content="${ogImageUrl}" />
+    <meta property="og:url" content="${pageUrl}" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${escapeHtml(page.title)}" />
+    <meta name="twitter:description" content="Results Group" />
+    <meta name="twitter:image" content="${ogImageUrl}" />
+  `
+
+  const enrichedHtml = injectOgTags(html, ogTags, page.title)
+
+  return new NextResponse(enrichedHtml, {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': 'public, max-age=60, s-maxage=300',
     },
   })
+}
+
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+function injectOgTags(html: string, ogTags: string, title: string): string {
+  const headClose = html.indexOf('</head>')
+  if (headClose !== -1) {
+    return html.slice(0, headClose) + ogTags + html.slice(headClose)
+  }
+  const htmlTag = html.indexOf('<html')
+  if (htmlTag !== -1) {
+    const afterHtmlTag = html.indexOf('>', htmlTag)
+    if (afterHtmlTag !== -1) {
+      const head = `<head><meta charset="UTF-8"><title>${escapeHtml(title)}</title>${ogTags}</head>`
+      return html.slice(0, afterHtmlTag + 1) + head + html.slice(afterHtmlTag + 1)
+    }
+  }
+  return `<head><meta charset="UTF-8"><title>${escapeHtml(title)}</title>${ogTags}</head>` + html
 }
 
 function expiredPage(message: string): string {
