@@ -17,9 +17,9 @@ export default function UploadPage() {
 
   function handleFileChange(f: File | null) {
     setFile(f)
-    if (f && !title) {
+    if (f) {
       const name = f.name.replace(/\.html$/i, '').replace(/[-_]/g, ' ')
-      setTitle(name)
+      if (!title) setTitle(name)
       setSlug(f.name.replace(/\.html$/i, '').toLowerCase().replace(/\s+/g, '-'))
     }
   }
@@ -148,7 +148,7 @@ export default function UploadPage() {
           />
           {slug && client && (
             <p className="text-xs mt-2" dir="ltr" style={{ color: 'var(--admin-text-muted)' }}>
-              URL: /pages/{client}/{slug}
+              URL: /pages/{client.toLowerCase().replace(/\s+/g, '-')}/{slug}
             </p>
           )}
         </div>

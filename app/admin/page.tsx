@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Plus, Search, Eye, Pencil, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react'
+import { Plus, Search, Eye, ExternalLink, Pencil, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react'
 
 interface PageItem {
   id: string
@@ -145,13 +145,16 @@ export default function AdminDashboard() {
                     <td className="px-5 py-4 font-bold" style={{ color: 'var(--admin-text-primary)' }}>{page.client}</td>
                     <td className="px-5 py-4" style={{ color: 'var(--admin-text-secondary)' }}>{page.title}</td>
                     <td className="px-5 py-4">
-                      <code
-                        className="text-xs px-2.5 py-1 rounded-lg"
+                      <a
+                        href={`/pages/${page.client}/${page.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs px-2.5 py-1 rounded-lg hover:underline"
                         dir="ltr"
                         style={{ background: 'var(--admin-bg-elevated)', color: '#22D3EE' }}
                       >
                         /{page.client}/{page.slug}
-                      </code>
+                      </a>
                     </td>
                     <td className="px-5 py-4">
                       <span
@@ -169,6 +172,18 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
+                        <a
+                          href={`/pages/${page.client}/${page.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1.5 rounded-lg transition-colors"
+                          style={{ color: '#34d399' }}
+                          title="צפייה בדף"
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
                         <Link
                           href={`/admin/pages/${page.id}`}
                           className="p-1.5 rounded-lg transition-colors"
