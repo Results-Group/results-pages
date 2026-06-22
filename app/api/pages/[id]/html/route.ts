@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPageById, downloadFile, uploadFile, createVersion } from '@/lib/db'
 import { requireAuth } from '@/lib/auth'
+import { minifyHtml } from '@/lib/minify'
 
 interface Ctx { params: Promise<{ id: string }> }
+
+function sourcePath(filePath: string): string {
+  return filePath.replace(/\.html$/, '.source.html')
+}
 
 export async function GET(req: NextRequest, { params }: Ctx) {
   const authError = requireAuth(req)
@@ -12,7 +17,11 @@ export async function GET(req: NextRequest, { params }: Ctx) {
   const page = await getPageById(id)
   if (!page) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const html = await downloadFile(page.file_path)
+  // Prefer the un-minified source; fall back to the served file for older pages
+  let html = await downloadFile(sourcePath(page.file_path))
+  if (html === null) {
+    html = await downloadFile(page.file_path)
+  }
   if (html === null) {
     return NextResponse.json({ error: 'File not found in storage' }, { status: 404 })
   }
@@ -50,7 +59,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
     htmlContent = body.html
   }
 
-  // Save current file as a version before overwriting
+  // Save current served file as a version before overwriting
   try {
     const currentHtml = await downloadFile(page.file_path)
     if (currentHtml) {
@@ -64,8 +73,10 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
     // Version save failed — continue with the update anyway
   }
 
-  const buffer = Buffer.from(htmlContent, 'utf-8')
-  await uploadFile(page.file_path, buffer)
+  await Promise.all([
+    uploadFile(page.file_path, Buffer.from(minifyHtml(htmlContent), 'utf-8')),
+    uploadFile(sourcePath(page.file_path), Buffer.from(htmlContent, 'utf-8')),
+  ])
 
   return NextResponse.json({ ok: true, filePath: page.file_path })
 }

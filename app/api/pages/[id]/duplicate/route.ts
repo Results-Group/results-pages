@@ -23,7 +23,19 @@ export async function POST(req: NextRequest, { params }: Ctx) {
   }
 
   const newFilePath = `${page.client}/${newSlug}.html`
-  await uploadFile(newFilePath, Buffer.from(html, 'utf-8'))
+  const newSourcePath = `${page.client}/${newSlug}.source.html`
+
+  const uploads: Promise<void>[] = [
+    uploadFile(newFilePath, Buffer.from(html, 'utf-8')),
+  ]
+
+  const sourcePath = page.file_path.replace(/\.html$/, '.source.html')
+  const sourceHtml = await downloadFile(sourcePath)
+  if (sourceHtml) {
+    uploads.push(uploadFile(newSourcePath, Buffer.from(sourceHtml, 'utf-8')))
+  }
+
+  await Promise.all(uploads)
 
   const newPage = await createPage({
     client: page.client,

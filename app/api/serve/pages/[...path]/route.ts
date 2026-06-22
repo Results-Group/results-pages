@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPageByClientSlug, createPageView, downloadFile } from '@/lib/db'
 
-export const dynamic = 'force-dynamic'
-
 interface Ctx { params: Promise<{ path: string[] }> }
 
 export async function GET(req: NextRequest, { params }: Ctx) {
@@ -72,7 +70,8 @@ export async function GET(req: NextRequest, { params }: Ctx) {
   return new NextResponse(enrichedHtml, {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=3600',
+      'x-vercel-cache-tag': `page-${page.id}`,
     },
   })
 }

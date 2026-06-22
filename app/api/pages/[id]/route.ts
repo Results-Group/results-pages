@@ -32,11 +32,15 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
     const newClient = client || existing.client
     const newSlug = slug || existing.slug
     newFilePath = `${newClient}/${newSlug}.html`
-    try {
-      await moveFile(existing.file_path, newFilePath)
-    } catch {
-      // File may not exist yet in storage
-    }
+
+    const oldSourcePath = existing.file_path.replace(/\.html$/, '.source.html')
+    const newSourcePath = newFilePath.replace(/\.html$/, '.source.html')
+
+    const moves = [
+      moveFile(existing.file_path, newFilePath).catch(() => {}),
+      moveFile(oldSourcePath, newSourcePath).catch(() => {}),
+    ]
+    await Promise.all(moves)
   }
 
   const page = await updatePage(id, {
@@ -60,9 +64,13 @@ export async function DELETE(req: NextRequest, { params }: Ctx) {
   if (!page) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   try {
-    await deleteFile(page.file_path)
+    const sourcePath = page.file_path.replace(/\.html$/, '.source.html')
+    await Promise.all([
+      deleteFile(page.file_path),
+      deleteFile(sourcePath),
+    ])
   } catch {
-    // File may already be deleted
+    // Files may already be deleted
   }
 
   await deletePage(id)

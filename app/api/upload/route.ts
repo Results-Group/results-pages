@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPageByClientSlug, createPage, uploadFile } from '@/lib/db'
 import { requireAuth } from '@/lib/auth'
+import { minifyHtml } from '@/lib/minify'
 
 export async function POST(req: NextRequest) {
   const authError = requireAuth(req)
@@ -26,9 +27,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `דף "${slug}" כבר קיים עבור ${client}` }, { status: 409 })
   }
 
+  const originalHtml = await file.text()
   const filePath = `${client}/${slug}.html`
-  const buffer = Buffer.from(await file.arrayBuffer())
-  await uploadFile(filePath, buffer)
+  const sourcePath = `${client}/${slug}.source.html`
+
+  await Promise.all([
+    uploadFile(filePath, Buffer.from(minifyHtml(originalHtml), 'utf-8')),
+    uploadFile(sourcePath, Buffer.from(originalHtml, 'utf-8')),
+  ])
 
   const page = await createPage({
     client,
