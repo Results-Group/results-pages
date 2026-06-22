@@ -8,6 +8,8 @@ export interface LandingPage {
   file_path: string
   active: boolean
   expires_at: string | null
+  password: string | null
+  short_url: string | null
   created_at: string
   updated_at: string
 }
@@ -92,6 +94,8 @@ export async function createPage(data: {
   title: string
   file_path: string
   expires_at?: string | null
+  password?: string | null
+  short_url?: string | null
 }) {
   const { data: page, error } = await supabase
     .from('landing_pages')
@@ -101,6 +105,8 @@ export async function createPage(data: {
       title: data.title,
       file_path: data.file_path,
       expires_at: data.expires_at || null,
+      password: data.password || null,
+      short_url: data.short_url || null,
     })
     .select()
     .single()
@@ -111,7 +117,7 @@ export async function createPage(data: {
 
 export async function updatePage(
   id: string,
-  data: Partial<Pick<LandingPage, 'title' | 'client' | 'slug' | 'active' | 'expires_at' | 'file_path'>>
+  data: Partial<Pick<LandingPage, 'title' | 'client' | 'slug' | 'active' | 'expires_at' | 'file_path' | 'password' | 'short_url'>>
 ) {
   const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() }
   if (data.title !== undefined) updateData.title = data.title
@@ -120,6 +126,8 @@ export async function updatePage(
   if (data.active !== undefined) updateData.active = data.active
   if (data.expires_at !== undefined) updateData.expires_at = data.expires_at
   if (data.file_path !== undefined) updateData.file_path = data.file_path
+  if (data.password !== undefined) updateData.password = data.password
+  if (data.short_url !== undefined) updateData.short_url = data.short_url || null
 
   const { data: page, error } = await supabase
     .from('landing_pages')
@@ -129,6 +137,17 @@ export async function updatePage(
     .single()
 
   if (error) throw error
+  return page as LandingPage
+}
+
+export async function getPageByShortUrl(shortUrl: string) {
+  const { data: page, error } = await supabase
+    .from('landing_pages')
+    .select('*')
+    .eq('short_url', shortUrl)
+    .single()
+
+  if (error || !page) return null
   return page as LandingPage
 }
 

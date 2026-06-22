@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPageById, updatePage, deletePage, moveFile, deleteFile } from '@/lib/db'
+import { getPageById, updatePage, deletePage, moveFile, deleteFile, getPageByShortUrl } from '@/lib/db'
 import { requireAuth } from '@/lib/auth'
 
 interface Ctx { params: Promise<{ id: string }> }
@@ -20,10 +20,17 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
 
   const { id } = await params
   const body = await req.json()
-  const { title, client, slug, active, expiresAt } = body
+  const { title, client, slug, active, expiresAt, password, shortUrl } = body
 
   const existing = await getPageById(id)
   if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  if (shortUrl !== undefined && shortUrl) {
+    const conflict = await getPageByShortUrl(shortUrl)
+    if (conflict && conflict.id !== id) {
+      return NextResponse.json({ error: 'קישור קצר זה כבר בשימוש' }, { status: 409 })
+    }
+  }
 
   const needsMove = (client && client !== existing.client) || (slug && slug !== existing.slug)
   let newFilePath = existing.file_path
@@ -49,6 +56,8 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
     ...(slug !== undefined && { slug }),
     ...(active !== undefined && { active }),
     ...(expiresAt !== undefined && { expires_at: expiresAt ? new Date(expiresAt).toISOString() : null }),
+    ...(password !== undefined && { password: password || null }),
+    ...(shortUrl !== undefined && { short_url: shortUrl || null }),
     file_path: newFilePath,
   })
 

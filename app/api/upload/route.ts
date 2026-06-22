@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPageByClientSlug, createPage, uploadFile } from '@/lib/db'
+import { getPageByClientSlug, getPageByShortUrl, createPage, uploadFile } from '@/lib/db'
 import { requireAuth } from '@/lib/auth'
 import { minifyHtml } from '@/lib/minify'
 
@@ -13,6 +13,8 @@ export async function POST(req: NextRequest) {
   const title = (formData.get('title') as string)?.trim()
   const slug = (formData.get('slug') as string)?.trim().toLowerCase().replace(/\s+/g, '-').replace(/\.html$/, '')
   const expiresAt = formData.get('expiresAt') as string | null
+  const password = (formData.get('password') as string)?.trim() || null
+  const shortUrl = (formData.get('shortUrl') as string)?.trim().toLowerCase().replace(/[^a-z0-9-]/g, '') || null
 
   if (!file || !client || !title || !slug) {
     return NextResponse.json({ error: 'חסרים שדות חובה' }, { status: 400 })
@@ -25,6 +27,13 @@ export async function POST(req: NextRequest) {
   const existing = await getPageByClientSlug(client, slug)
   if (existing) {
     return NextResponse.json({ error: `דף "${slug}" כבר קיים עבור ${client}` }, { status: 409 })
+  }
+
+  if (shortUrl) {
+    const shortConflict = await getPageByShortUrl(shortUrl)
+    if (shortConflict) {
+      return NextResponse.json({ error: 'קישור קצר זה כבר בשימוש' }, { status: 409 })
+    }
   }
 
   const originalHtml = await file.text()
@@ -42,6 +51,8 @@ export async function POST(req: NextRequest) {
     title,
     file_path: filePath,
     expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
+    password,
+    short_url: shortUrl,
   })
 
   return NextResponse.json(page, { status: 201 })

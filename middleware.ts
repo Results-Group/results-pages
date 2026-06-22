@@ -11,6 +11,15 @@ export function middleware(req: NextRequest) {
     }
   }
 
+  // Short URL redirect: /r/{shortUrl} → API lookup
+  if (pathname.startsWith('/r/')) {
+    const shortSlug = pathname.slice(3)
+    if (shortSlug) {
+      const rewriteUrl = new URL(`/api/serve/short/${shortSlug}`, req.url)
+      return NextResponse.rewrite(rewriteUrl)
+    }
+  }
+
   // For public page requests: rewrite to the page-serve API which handles
   // status checks, expiration, and view tracking
   if (pathname.startsWith('/pages/')) {
@@ -22,5 +31,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/pages/:path*'],
+  matcher: ['/admin/:path*', '/pages/:path*', '/r/:path*'],
 }

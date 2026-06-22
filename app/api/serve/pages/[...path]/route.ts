@@ -36,6 +36,17 @@ export async function GET(req: NextRequest, { params }: Ctx) {
     })
   }
 
+  if (page.password) {
+    const cookieName = `page_access_${page.id}`
+    const accessCookie = req.cookies.get(cookieName)?.value
+    if (accessCookie !== page.password) {
+      return new NextResponse(passwordPage(client, slug, false), {
+        status: 200,
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      })
+    }
+  }
+
   const html = await downloadFile(page.file_path)
   if (!html) {
     return new NextResponse(expiredPage('הקובץ לא נמצא'), {
@@ -44,7 +55,6 @@ export async function GET(req: NextRequest, { params }: Ctx) {
     })
   }
 
-  // Track view (fire and forget)
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
   const userAgent = req.headers.get('user-agent') || ''
   createPageView({ page_id: page.id, ip, user_agent: userAgent }).catch(() => {})
@@ -73,6 +83,53 @@ export async function GET(req: NextRequest, { params }: Ctx) {
       'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=3600',
       'x-vercel-cache-tag': `page-${page.id}`,
     },
+  })
+}
+
+export async function POST(req: NextRequest, { params }: Ctx) {
+  const { path } = await params
+
+  if (path.length < 2) {
+    return new NextResponse('Not Found', { status: 404 })
+  }
+
+  const client = path[0]
+  const slug = path.slice(1).join('/')
+
+  const page = await getPageByClientSlug(client, slug)
+
+  if (!page || !page.password) {
+    return new NextResponse('Not Found', { status: 404 })
+  }
+
+  let submittedPassword = ''
+  const contentType = req.headers.get('content-type') || ''
+  if (contentType.includes('application/x-www-form-urlencoded') || contentType.includes('multipart/form-data')) {
+    const formData = await req.formData()
+    submittedPassword = (formData.get('password') as string) || ''
+  } else {
+    const body = await req.json().catch(() => ({}))
+    submittedPassword = body.password || ''
+  }
+
+  if (submittedPassword === page.password) {
+    const cookieName = `page_access_${page.id}`
+    const baseUrl = `${req.nextUrl.protocol}//${req.nextUrl.host}`
+    const redirectUrl = `${baseUrl}/pages/${client}/${slug}`
+    const response = NextResponse.redirect(redirectUrl, 303)
+    response.cookies.set(cookieName, page.password, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24,
+      path: '/',
+    })
+    return response
+  }
+
+  return new NextResponse(passwordPage(client, slug, true), {
+    status: 200,
+    headers: { 'Content-Type': 'text/html; charset=utf-8' },
   })
 }
 
@@ -106,4 +163,135 @@ function expiredPage(message: string): string {
 <p style="color:#888;font-size:0.9rem">Results Group</p>
 </div>
 </body></html>`
+}
+
+function passwordPage(client: string, slug: string, hasError: boolean): string {
+  return `<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Results Group - דף מוגן</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: #0a0a0f;
+  color: #fff;
+  padding: 20px;
+}
+.container {
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+}
+.logo {
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  margin-bottom: 2.5rem;
+  color: #f3d56d;
+}
+.lock-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 1.5rem;
+  background: rgba(243, 213, 109, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lock-icon svg {
+  width: 24px;
+  height: 24px;
+  color: #f3d56d;
+}
+h1 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+.subtitle {
+  font-size: 0.85rem;
+  color: #888;
+  margin-bottom: 2rem;
+}
+form { width: 100%; }
+.input-wrapper {
+  position: relative;
+  margin-bottom: 1rem;
+}
+input[type="password"] {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1px solid #2a2a35;
+  background: #12121a;
+  color: #fff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+  text-align: center;
+  direction: ltr;
+}
+input[type="password"]:focus {
+  border-color: #f3d56d;
+}
+button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: #f3d56d;
+  color: #0a0a0f;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+button:hover {
+  box-shadow: 0 0 25px rgba(243, 213, 109, 0.3);
+  transform: translateY(-1px);
+}
+button:active {
+  transform: translateY(0);
+}
+.error {
+  color: #ef4444;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="logo">Results</div>
+  <div class="lock-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+    </svg>
+  </div>
+  <h1>דף זה מוגן בסיסמה</h1>
+  <p class="subtitle">יש להזין סיסמה כדי לצפות בתוכן</p>
+  ${hasError ? '<div class="error">סיסמה שגויה, נסה שנית</div>' : ''}
+  <form method="POST" action="/pages/${escapeHtml(client)}/${escapeHtml(slug)}">
+    <div class="input-wrapper">
+      <input type="password" name="password" placeholder="הזן סיסמה" autofocus required />
+    </div>
+    <button type="submit">כניסה</button>
+  </form>
+</div>
+</body>
+</html>`
 }

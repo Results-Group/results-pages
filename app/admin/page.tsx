@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Plus, Search, Eye, ExternalLink, Pencil, ToggleLeft, ToggleRight, Trash2, Monitor, Smartphone, X, Copy, MessageCircle } from 'lucide-react'
+import { Plus, Search, Eye, ExternalLink, Pencil, ToggleLeft, ToggleRight, Trash2, Monitor, Smartphone, X, Copy, MessageCircle, Lock } from 'lucide-react'
 
 interface PageItem {
   id: string
@@ -11,6 +11,8 @@ interface PageItem {
   title: string
   active: boolean
   expiresAt: string | null
+  password: string | null
+  short_url: string | null
   createdAt: string
   _count: { views: number }
 }
@@ -55,8 +57,10 @@ export default function AdminDashboard() {
   }
 
   function handleWhatsApp(page: PageItem) {
-    const fullUrl = `https://results-pages.vercel.app/pages/${page.client}/${page.slug}`
-    const message = `${page.title}\n${fullUrl}`
+    const url = page.short_url
+      ? `https://results-pages.vercel.app/r/${page.short_url}`
+      : `https://results-pages.vercel.app/pages/${page.client}/${page.slug}`
+    const message = `${page.title}\n${url}`
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank')
   }
 
@@ -162,18 +166,37 @@ export default function AdminDashboard() {
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   >
                     <td className="px-5 py-4 font-bold" style={{ color: 'var(--admin-text-primary)' }}>{page.client}</td>
-                    <td className="px-5 py-4" style={{ color: 'var(--admin-text-secondary)' }}>{page.title}</td>
+                    <td className="px-5 py-4" style={{ color: 'var(--admin-text-secondary)' }}>
+                      <span className="flex items-center gap-1.5">
+                        {page.title}
+                        {page.password && <span title="מוגן בסיסמה"><Lock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--admin-accent)' }} /></span>}
+                      </span>
+                    </td>
                     <td className="px-5 py-4">
-                      <a
-                        href={`/pages/${page.client}/${page.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs px-2.5 py-1 rounded-lg hover:underline"
-                        dir="ltr"
-                        style={{ background: 'var(--admin-bg-elevated)', color: 'var(--admin-link)' }}
-                      >
-                        /{page.client}/{page.slug}
-                      </a>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <a
+                          href={`/pages/${page.client}/${page.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs px-2.5 py-1 rounded-lg hover:underline"
+                          dir="ltr"
+                          style={{ background: 'var(--admin-bg-elevated)', color: 'var(--admin-link)' }}
+                        >
+                          /{page.client}/{page.slug}
+                        </a>
+                        {page.short_url && (
+                          <a
+                            href={`/r/${page.short_url}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] px-2 py-0.5 rounded-md hover:underline font-bold"
+                            dir="ltr"
+                            style={{ background: 'rgba(167, 139, 250, 0.12)', color: '#a78bfa' }}
+                          >
+                            /r/{page.short_url}
+                          </a>
+                        )}
+                      </div>
                     </td>
                     <td className="px-5 py-4">
                       <span

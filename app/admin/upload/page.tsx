@@ -10,6 +10,8 @@ export default function UploadPage() {
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
   const [expiresAt, setExpiresAt] = useState('')
+  const [password, setPassword] = useState('')
+  const [shortUrl, setShortUrl] = useState('')
   const [error, setError] = useState('')
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
@@ -40,6 +42,8 @@ export default function UploadPage() {
     formData.append('title', title)
     formData.append('slug', slug)
     if (expiresAt) formData.append('expiresAt', expiresAt)
+    if (password.trim()) formData.append('password', password.trim())
+    if (shortUrl.trim()) formData.append('shortUrl', shortUrl.trim())
 
     const res = await fetch('/api/upload', { method: 'POST', body: formData })
     const data = await res.json()
@@ -166,6 +170,46 @@ export default function UploadPage() {
             onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
+        </div>
+
+        {/* Password */}
+        <div>
+          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>סיסמה לדף (אופציונלי)</label>
+          <input
+            type="text"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="השאר ריק ללא הגנה"
+            dir="ltr"
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            style={inputStyle}
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
+            onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
+          />
+          <p className="text-xs mt-1.5" style={{ color: 'var(--admin-text-muted)' }}>
+            {password.trim() ? '🔒 הדף יהיה מוגן בסיסמה' : 'ללא סיסמה — הדף יהיה נגיש לכולם'}
+          </p>
+        </div>
+
+        {/* Short URL */}
+        <div>
+          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>קישור קצר (אופציונלי)</label>
+          <input
+            type="text"
+            value={shortUrl}
+            onChange={e => setShortUrl(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+            placeholder="cycle-q1"
+            dir="ltr"
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            style={inputStyle}
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
+            onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
+          />
+          {shortUrl && (
+            <p className="text-xs mt-1.5" dir="ltr" style={{ color: '#a78bfa' }}>
+              /r/{shortUrl}
+            </p>
+          )}
         </div>
 
         {error && <p className="text-sm" style={{ color: 'var(--admin-danger)' }}>{error}</p>}

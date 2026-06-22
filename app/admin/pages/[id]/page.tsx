@@ -12,6 +12,7 @@ interface PageData {
   title: string
   active: boolean
   expiresAt: string | null
+  password: string | null
   filePath: string
   createdAt: string
   _count: { views: number }
@@ -34,6 +35,8 @@ export default function EditPage() {
   const [slug, setSlug] = useState('')
   const [active, setActive] = useState(true)
   const [expiresAt, setExpiresAt] = useState('')
+  const [password, setPassword] = useState('')
+  const [shortUrl, setShortUrl] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
@@ -72,6 +75,8 @@ export default function EditPage() {
         setSlug(data.slug)
         setActive(data.active)
         setExpiresAt(data.expiresAt ? data.expiresAt.split('T')[0] : '')
+        setPassword(data.password || '')
+        setShortUrl(data.short_url || '')
         setViewCount(data._count?.views || 0)
       })
   }, [id])
@@ -161,7 +166,7 @@ export default function EditPage() {
     const res = await fetch(`/api/pages/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, client, slug, active, expiresAt: expiresAt || null }),
+      body: JSON.stringify({ title, client, slug, active, expiresAt: expiresAt || null, password: password || null, shortUrl: shortUrl || null }),
     })
 
     if (!res.ok) {
@@ -633,6 +638,44 @@ export default function EditPage() {
             onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>סיסמה לדף (אופציונלי)</label>
+          <input
+            type="text"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="השאר ריק ללא הגנה"
+            dir="ltr"
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            style={inputStyle}
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
+            onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
+          />
+          <p className="text-xs mt-1.5" style={{ color: 'var(--admin-text-muted)' }}>
+            {password ? '🔒 הדף מוגן בסיסמה' : 'ללא סיסמה — הדף נגיש לכולם'}
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>קישור קצר (אופציונלי)</label>
+          <input
+            type="text"
+            value={shortUrl}
+            onChange={e => setShortUrl(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+            placeholder="cycle-q1"
+            dir="ltr"
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            style={inputStyle}
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
+            onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
+          />
+          {shortUrl && (
+            <p className="text-xs mt-1.5" dir="ltr" style={{ color: '#a78bfa' }}>
+              /r/{shortUrl}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-3">

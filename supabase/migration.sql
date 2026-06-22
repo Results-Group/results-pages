@@ -60,6 +60,12 @@ ALTER TABLE landing_page_versions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Service role full access on landing_page_versions"
   ON landing_page_versions FOR ALL USING (true) WITH CHECK (true);
 
+-- ── Password protection ──
+ALTER TABLE landing_pages ADD COLUMN IF NOT EXISTS password TEXT DEFAULT NULL;
+
+-- ── Short URLs ──
+ALTER TABLE landing_pages ADD COLUMN IF NOT EXISTS short_url TEXT UNIQUE DEFAULT NULL;
+
 -- ── Storage bucket ──
 -- Create a storage bucket called "landing-pages" via the Supabase dashboard:
 --   Storage > New Bucket > Name: "landing-pages" > Public: OFF
