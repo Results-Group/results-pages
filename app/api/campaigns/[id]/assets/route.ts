@@ -28,34 +28,28 @@ export async function POST(
     }
 
     const formData = await request.formData()
-    const files = formData.getAll('files') as File[]
+    const file = formData.get('file') as File | null
     const type = (formData.get('type') as string) || 'asset'
 
-    if (!files.length) {
-      return NextResponse.json({ error: 'לא נבחרו קבצים' }, { status: 400 })
+    if (!file) {
+      return NextResponse.json({ error: 'לא נבחר קובץ' }, { status: 400 })
     }
 
-    const results: { file_path: string; public_url: string }[] = []
+    let filePath: string
 
-    for (const file of files) {
-      let filePath: string
-
-      if (type === 'logo') {
-        filePath = await uploadLogoImage(file, campaign.client, campaign.slug)
-        await updateCampaign(id, { logo_path: filePath })
-      } else {
-        const uuid = crypto.randomUUID()
-        const storagePath = `campaigns/${campaign.client}/${campaign.slug}/${uuid}.webp`
-        filePath = await compressAndUploadImage(file, storagePath)
-      }
-
-      results.push({
-        file_path: filePath,
-        public_url: getAssetPublicUrl(filePath),
-      })
+    if (type === 'logo') {
+      filePath = await uploadLogoImage(file, campaign.client, campaign.slug)
+      await updateCampaign(id, { logo_path: filePath })
+    } else {
+      const uuid = crypto.randomUUID()
+      const storagePath = `campaigns/${campaign.client}/${campaign.slug}/${uuid}.webp`
+      filePath = await compressAndUploadImage(file, storagePath)
     }
 
-    return NextResponse.json(results, { status: 201 })
+    return NextResponse.json({
+      file_path: filePath,
+      public_url: getAssetPublicUrl(filePath),
+    }, { status: 201 })
   } catch (error) {
     return NextResponse.json(
       { error: 'שגיאה בהעלאת קבצים' },

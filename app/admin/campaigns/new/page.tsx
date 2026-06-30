@@ -41,6 +41,8 @@ export default function NewCampaignPage() {
   const [logoPath, setLogoPath] = useState<string | null>(null)
   const [sections, setSections] = useState<Section[]>([])
   const [error, setError] = useState('')
+  const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [uploadingSections, setUploadingSections] = useState<Record<string, number>>({})
 
   const inputStyle = {
     background: 'var(--admin-bg-elevated)',
@@ -107,28 +109,11 @@ export default function NewCampaignPage() {
 
   async function handleLogoUpload(file: File) {
     if (!campaignId) return
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('type', 'logo')
-
-    const res = await fetch(`/api/campaigns/${campaignId}/assets`, {
-      method: 'POST',
-      body: formData,
-    })
-    if (res.ok) {
-      const data = await res.json()
-      setLogoPath(data.file_path)
-    }
-  }
-
-  async function handleAssetUpload(sectionId: string, files: FileList) {
-    if (!campaignId) return
-
-    for (const file of Array.from(files)) {
+    setUploadingLogo(true)
+    try {
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('type', 'image')
-      formData.append('section_id', sectionId)
+      formData.append('type', 'logo')
 
       const res = await fetch(`/api/campaigns/${campaignId}/assets`, {
         method: 'POST',
@@ -136,20 +121,62 @@ export default function NewCampaignPage() {
       })
       if (res.ok) {
         const data = await res.json()
-        const newAsset: Asset = {
-          id: crypto.randomUUID(),
-          type: 'image',
-          file_path: data.file_path,
-          url: '',
-          caption: '',
-        }
-        setSections(prev =>
-          prev.map(s =>
-            s.id === sectionId ? { ...s, assets: [...s.assets, newAsset] } : s
-          )
-        )
+        setLogoPath(data.file_path)
+      } else {
+        setError('שגיאה בהעלאת הלוגו')
       }
+    } catch {
+      setError('שגיאה בהעלאת הלוגו')
+    } finally {
+      setUploadingLogo(false)
     }
+  }
+
+  async function handleAssetUpload(sectionId: string, files: FileList) {
+    if (!campaignId) return
+    const fileArr = Array.from(files)
+    setUploadingSections(prev => ({ ...prev, [sectionId]: fileArr.length }))
+
+    let completed = 0
+    for (const file of fileArr) {
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('type', 'image')
+        formData.append('section_id', sectionId)
+
+        const res = await fetch(`/api/campaigns/${campaignId}/assets`, {
+          method: 'POST',
+          body: formData,
+        })
+        if (res.ok) {
+          const data = await res.json()
+          const newAsset: Asset = {
+            id: crypto.randomUUID(),
+            type: 'image',
+            file_path: data.file_path,
+            url: '',
+            caption: '',
+          }
+          setSections(prev =>
+            prev.map(s =>
+              s.id === sectionId ? { ...s, assets: [...s.assets, newAsset] } : s
+            )
+          )
+        } else {
+          setError(`שגיאה בהעלאת ${file.name}`)
+        }
+      } catch {
+        setError(`שגיאה בהעלאת ${file.name}`)
+      }
+      completed++
+      setUploadingSections(prev => ({ ...prev, [sectionId]: fileArr.length - completed }))
+    }
+    setUploadingSections(prev => {
+      const next = { ...prev }
+      delete next[sectionId]
+      return next
+    })
   }
 
   function addSection() {
@@ -302,6 +329,11 @@ export default function NewCampaignPage() {
             <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>
               שמרו טיוטה כדי להעלות לוגו
             </p>
+          ) : uploadingLogo ? (
+            <div className="flex items-center gap-3 py-2">
+              <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--admin-accent)', borderTopColor: 'transparent' }} />
+              <span className="text-sm" style={{ color: 'var(--admin-accent)' }}>מעלה לוגו...</span>
+            </div>
           ) : logoPath ? (
             <div className="flex items-center gap-3">
               <img
@@ -487,40 +519,58 @@ export default function NewCampaignPage() {
                       )}
 
                       {/* Upload Zone */}
-                      <label
-                        className="block rounded-xl p-6 text-center cursor-pointer transition-all duration-200"
-                        style={{ border: '2px dashed var(--admin-border)', background: 'var(--admin-bg)' }}
-                        onDragOver={e => {
-                          e.preventDefault()
-                          e.currentTarget.style.borderColor = 'var(--admin-accent)'
-                        }}
-                        onDragLeave={e => {
-                          e.currentTarget.style.borderColor = 'var(--admin-border)'
-                        }}
-                        onDrop={e => {
-                          e.preventDefault()
-                          e.currentTarget.style.borderColor = 'var(--admin-border)'
-                          if (e.dataTransfer.files.length) {
-                            handleAssetUpload(section.id, e.dataTransfer.files)
-                          }
-                        }}
-                      >
-                        <Upload className="w-6 h-6 mx-auto mb-2" style={{ color: 'var(--admin-text-muted)' }} />
-                        <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>
-                          גררו קבצים לכאן או לחצו לבחירה
-                        </p>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          className="hidden"
-                          onChange={e => {
-                            if (e.target.files?.length) {
-                              handleAssetUpload(section.id, e.target.files)
+                      {uploadingSections[section.id] ? (
+                        <div
+                          className="rounded-xl p-6 text-center"
+                          style={{ border: '2px dashed var(--admin-accent)', background: 'rgba(243,213,109,0.04)' }}
+                        >
+                          <div className="w-8 h-8 border-3 border-t-transparent rounded-full animate-spin mx-auto mb-3" style={{ borderColor: 'var(--admin-accent)', borderTopColor: 'transparent' }} />
+                          <p className="text-sm font-bold" style={{ color: 'var(--admin-accent)' }}>
+                            מעלה {uploadingSections[section.id]} קבצים...
+                          </p>
+                          <p className="text-xs mt-1" style={{ color: 'var(--admin-text-muted)' }}>
+                            הקבצים עוברים דחיסה ואופטימיזציה
+                          </p>
+                        </div>
+                      ) : (
+                        <label
+                          className="block rounded-xl p-6 text-center cursor-pointer transition-all duration-200"
+                          style={{ border: '2px dashed var(--admin-border)', background: 'var(--admin-bg)' }}
+                          onDragOver={e => {
+                            e.preventDefault()
+                            e.currentTarget.style.borderColor = 'var(--admin-accent)'
+                            e.currentTarget.style.background = 'rgba(243,213,109,0.04)'
+                          }}
+                          onDragLeave={e => {
+                            e.currentTarget.style.borderColor = 'var(--admin-border)'
+                            e.currentTarget.style.background = 'var(--admin-bg)'
+                          }}
+                          onDrop={e => {
+                            e.preventDefault()
+                            e.currentTarget.style.borderColor = 'var(--admin-border)'
+                            e.currentTarget.style.background = 'var(--admin-bg)'
+                            if (e.dataTransfer.files.length) {
+                              handleAssetUpload(section.id, e.dataTransfer.files)
                             }
                           }}
-                        />
-                      </label>
+                        >
+                          <Upload className="w-6 h-6 mx-auto mb-2" style={{ color: 'var(--admin-text-muted)' }} />
+                          <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>
+                            גררו קבצים לכאן או לחצו לבחירה
+                          </p>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            onChange={e => {
+                              if (e.target.files?.length) {
+                                handleAssetUpload(section.id, e.target.files)
+                              }
+                            }}
+                          />
+                        </label>
+                      )}
                     </>
                   )}
                 </div>
