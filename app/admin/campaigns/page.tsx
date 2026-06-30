@@ -43,8 +43,17 @@ export default function CampaignsListPage() {
     const params = new URLSearchParams()
     if (search) params.set('search', search)
     fetch(`/api/campaigns?${params}`)
-      .then(r => r.json())
-      .then(data => { setCampaigns(data); setLoading(false) })
+      .then(r => {
+        if (r.status === 401) {
+          window.location.href = '/admin/login'
+          return null
+        }
+        return r.json()
+      })
+      .then(data => {
+        if (Array.isArray(data)) setCampaigns(data)
+        setLoading(false)
+      })
       .catch(() => setLoading(false))
   }, [search])
 
