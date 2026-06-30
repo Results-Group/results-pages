@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowRight, Plus, Trash2, Upload, Link2, Image, Check, Copy, ExternalLink } from 'lucide-react'
+import { ArrowRight, Plus, Trash2, Upload, Link2, Check, Copy, ExternalLink } from 'lucide-react'
 
 interface Asset {
   id: string
@@ -48,6 +48,33 @@ export default function NewCampaignPage() {
     background: 'var(--admin-bg-elevated)',
     border: '1px solid var(--admin-border)',
     color: 'var(--admin-text-primary)',
+  }
+
+  async function ensureCampaignExists(): Promise<string | null> {
+    if (campaignId) return campaignId
+
+    const name = client.trim() || 'טיוטה'
+    const cName = campaignName.trim() || 'קמפיין חדש'
+
+    try {
+      const res = await fetch('/api/campaigns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client: name,
+          campaign_name: cName,
+          concept: concept.trim(),
+          status: 'draft',
+          sections: [],
+        }),
+      })
+      if (!res.ok) return null
+      const data = await res.json()
+      setCampaignId(data.id)
+      return data.id
+    } catch {
+      return null
+    }
   }
 
   async function saveCampaign(status: 'draft' | 'published') {
@@ -108,14 +135,15 @@ export default function NewCampaignPage() {
   }
 
   async function handleLogoUpload(file: File) {
-    if (!campaignId) return
+    const id = await ensureCampaignExists()
+    if (!id) { setError('יש למלא שם לקוח לפני העלאת קבצים'); return }
     setUploadingLogo(true)
     try {
       const formData = new FormData()
       formData.append('file', file)
       formData.append('type', 'logo')
 
-      const res = await fetch(`/api/campaigns/${campaignId}/assets`, {
+      const res = await fetch(`/api/campaigns/${id}/assets`, {
         method: 'POST',
         body: formData,
       })
@@ -133,7 +161,8 @@ export default function NewCampaignPage() {
   }
 
   async function handleAssetUpload(sectionId: string, files: FileList) {
-    if (!campaignId) return
+    const id = await ensureCampaignExists()
+    if (!id) { setError('יש למלא שם לקוח לפני העלאת קבצים'); return }
     const fileArr = Array.from(files)
     setUploadingSections(prev => ({ ...prev, [sectionId]: fileArr.length }))
 
@@ -145,7 +174,7 @@ export default function NewCampaignPage() {
         formData.append('type', 'image')
         formData.append('section_id', sectionId)
 
-        const res = await fetch(`/api/campaigns/${campaignId}/assets`, {
+        const res = await fetch(`/api/campaigns/${id}/assets`, {
           method: 'POST',
           body: formData,
         })
@@ -325,11 +354,7 @@ export default function NewCampaignPage() {
           <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>
             לוגו לקוח
           </label>
-          {!campaignId ? (
-            <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>
-              שמרו טיוטה כדי להעלות לוגו
-            </p>
-          ) : uploadingLogo ? (
+          {uploadingLogo ? (
             <div className="flex items-center gap-3 py-2">
               <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--admin-accent)', borderTopColor: 'transparent' }} />
               <span className="text-sm" style={{ color: 'var(--admin-accent)' }}>מעלה לוגו...</span>
@@ -473,18 +498,6 @@ export default function NewCampaignPage() {
                 </div>
               ) : (
                 <div>
-                  {!campaignId ? (
-                    <div
-                      className="rounded-xl p-6 text-center"
-                      style={{ border: '2px dashed var(--admin-border)', background: 'var(--admin-bg)' }}
-                    >
-                      <Image className="w-6 h-6 mx-auto mb-2" style={{ color: 'var(--admin-text-muted)' }} />
-                      <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>
-                        שמרו טיוטה כדי להעלות קבצים
-                      </p>
-                    </div>
-                  ) : (
-                    <>
                       {/* Asset Grid */}
                       {section.assets.length > 0 && (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-4">
@@ -571,8 +584,6 @@ export default function NewCampaignPage() {
                           />
                         </label>
                       )}
-                    </>
-                  )}
                 </div>
               )}
             </div>
