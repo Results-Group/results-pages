@@ -88,6 +88,16 @@ export default function CampaignsListPage() {
 
   const totalAssets = (c: Campaign) => parseSections(c.sections).reduce((sum, s) => sum + (s.assets?.length || 0), 0)
 
+  const groupedByClient = (() => {
+    const groups = new Map<string, Campaign[]>()
+    for (const c of campaigns) {
+      const key = c.client?.trim() || 'ללא לקוח'
+      if (!groups.has(key)) groups.set(key, [])
+      groups.get(key)!.push(c)
+    }
+    return Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0], 'he'))
+  })()
+
   return (
     <div className="max-w-6xl">
       <div className="flex items-center justify-between mb-8">
@@ -138,95 +148,110 @@ export default function CampaignsListPage() {
           )}
         </div>
       ) : (
-        <div className="space-y-3">
-          {campaigns.map(c => {
-            const ss = STATUS_STYLES[c.status] || STATUS_STYLES.draft
-            return (
-              <div
-                key={c.id}
-                className="flex items-center gap-4 p-5 rounded-2xl transition-all duration-200"
-                style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2.5 mb-1">
-                    <h3 className="text-base font-black truncate" style={{ color: 'var(--admin-text-primary)' }}>{c.campaign_name}</h3>
-                    <span
-                      className="text-[10px] px-2 py-0.5 rounded-full font-bold flex-shrink-0"
-                      style={{ color: ss.color, background: ss.bg }}
-                    >
-                      {STATUS_LABELS[c.status]}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--admin-text-muted)' }}>
-                    <span className="font-bold" style={{ color: 'var(--admin-link)' }}>{c.client}</span>
-                    <span>{totalAssets(c)} תוצרים</span>
-                    <span>{new Date(c.created_at).toLocaleDateString('he-IL')}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  {c.status === 'published' && (
-                    <>
-                      <a
-                        href={getCampaignUrl(c.slug)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2.5 rounded-lg transition-colors"
-                        style={{ color: 'var(--admin-text-muted)' }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-bg)'; e.currentTarget.style.color = 'var(--admin-text-primary)' }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
-                        title="פתיחה"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </a>
-                      <button
-                        onClick={() => handleCopy(c.slug)}
-                        className="p-2.5 rounded-lg transition-colors"
-                        style={{ color: copied === c.slug ? 'var(--admin-success)' : 'var(--admin-text-muted)' }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-bg)' }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-                        title="העתקת לינק"
-                      >
-                        {copied === c.slug ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                      </button>
-                      <button
-                        onClick={() => handleWhatsApp(c)}
-                        className="p-2.5 rounded-lg transition-colors"
-                        style={{ color: 'var(--admin-text-muted)' }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-bg)'; e.currentTarget.style.color = '#25d366' }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
-                        title="שליחה בוואטסאפ"
-                      >
-                        <MessageCircle className="w-4 h-4" />
-                      </button>
-                    </>
-                  )}
-                  <Link
-                    href={`/admin/campaigns/${c.id}`}
-                    className="p-2.5 rounded-lg transition-colors"
-                    style={{ color: 'var(--admin-text-muted)' }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-bg)'; e.currentTarget.style.color = 'var(--admin-accent)' }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
-                    title="עריכה"
-                  >
-                    <Edit3 className="w-4 h-4" />
-                  </Link>
-                  {userRole === 'admin' && (
-                    <button
-                      onClick={() => handleDelete(c.id, c.campaign_name)}
-                      className="p-2.5 rounded-lg transition-colors"
-                      style={{ color: 'var(--admin-text-muted)' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-danger-bg)'; e.currentTarget.style.color = 'var(--admin-danger)' }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
-                      title="מחיקה"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
+        <div className="space-y-8">
+          {groupedByClient.map(([clientName, clientCampaigns]) => (
+            <div key={clientName}>
+              <div className="flex items-center gap-3 mb-3">
+                <h3 className="text-sm font-black" style={{ color: 'var(--admin-accent)' }}>{clientName}</h3>
+                <span
+                  className="text-[10px] px-2 py-0.5 rounded-full font-bold"
+                  style={{ color: 'var(--admin-text-muted)', background: 'var(--admin-bg-elevated)' }}
+                >
+                  {clientCampaigns.length} {clientCampaigns.length === 1 ? 'קמפיין' : 'קמפיינים'}
+                </span>
+                <div className="flex-1 h-px" style={{ background: 'var(--admin-border)' }} />
               </div>
-            )
-          })}
+              <div className="space-y-3">
+                {clientCampaigns.map(c => {
+                  const ss = STATUS_STYLES[c.status] || STATUS_STYLES.draft
+                  return (
+                    <div
+                      key={c.id}
+                      className="flex items-center gap-4 p-5 rounded-2xl transition-all duration-200"
+                      style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2.5 mb-1">
+                          <h3 className="text-base font-black truncate" style={{ color: 'var(--admin-text-primary)' }}>{c.campaign_name}</h3>
+                          <span
+                            className="text-[10px] px-2 py-0.5 rounded-full font-bold flex-shrink-0"
+                            style={{ color: ss.color, background: ss.bg }}
+                          >
+                            {STATUS_LABELS[c.status]}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--admin-text-muted)' }}>
+                          <span>{totalAssets(c)} תוצרים</span>
+                          <span>{new Date(c.created_at).toLocaleDateString('he-IL')}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        {c.status === 'published' && (
+                          <>
+                            <a
+                              href={getCampaignUrl(c.slug)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-2.5 rounded-lg transition-colors"
+                              style={{ color: 'var(--admin-text-muted)' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-bg)'; e.currentTarget.style.color = 'var(--admin-text-primary)' }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
+                              title="פתיחה"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </a>
+                            <button
+                              onClick={() => handleCopy(c.slug)}
+                              className="p-2.5 rounded-lg transition-colors"
+                              style={{ color: copied === c.slug ? 'var(--admin-success)' : 'var(--admin-text-muted)' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-bg)' }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+                              title="העתקת לינק"
+                            >
+                              {copied === c.slug ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                            </button>
+                            <button
+                              onClick={() => handleWhatsApp(c)}
+                              className="p-2.5 rounded-lg transition-colors"
+                              style={{ color: 'var(--admin-text-muted)' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-bg)'; e.currentTarget.style.color = '#25d366' }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
+                              title="שליחה בוואטסאפ"
+                            >
+                              <MessageCircle className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
+                        <Link
+                          href={`/admin/campaigns/${c.id}`}
+                          className="p-2.5 rounded-lg transition-colors"
+                          style={{ color: 'var(--admin-text-muted)' }}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-bg)'; e.currentTarget.style.color = 'var(--admin-accent)' }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
+                          title="עריכה"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </Link>
+                        {userRole === 'admin' && (
+                          <button
+                            onClick={() => handleDelete(c.id, c.campaign_name)}
+                            className="p-2.5 rounded-lg transition-colors"
+                            style={{ color: 'var(--admin-text-muted)' }}
+                            onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-danger-bg)'; e.currentTarget.style.color = 'var(--admin-danger)' }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
+                            title="מחיקה"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

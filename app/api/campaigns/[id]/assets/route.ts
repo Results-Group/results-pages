@@ -38,11 +38,11 @@ export async function POST(
     let filePath: string
 
     if (type === 'logo') {
-      filePath = await uploadLogoImage(file, campaign.client, campaign.slug)
+      filePath = await uploadLogoImage(file, id)
       await updateCampaign(id, { logo_path: filePath })
     } else {
       const uuid = crypto.randomUUID()
-      const storagePath = `campaigns/${campaign.client}/${campaign.slug}/${uuid}.webp`
+      const storagePath = `campaigns/${id}/${uuid}.webp`
       filePath = await compressAndUploadImage(file, storagePath)
     }
 

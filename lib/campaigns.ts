@@ -131,14 +131,8 @@ export async function updateCampaign(
 }
 
 export async function deleteCampaign(id: string) {
-  const campaign = await getCampaignById(id)
-  if (campaign) {
-    // Delete all assets from storage
-    await deleteCampaignAssets(campaign.client, campaign.slug)
-    if (campaign.logo_path) {
-      await supabase.storage.from(ASSETS_BUCKET).remove([campaign.logo_path])
-    }
-  }
+  // Remove the entire campaign storage folder (logo + all assets)
+  await deleteCampaignAssets(id)
   const { error } = await supabase.from('campaigns').delete().eq('id', id)
   if (error) throw error
 }
@@ -178,10 +172,11 @@ export async function compressAndUploadImage(
 
 export async function uploadLogoImage(
   file: File | Blob,
-  client: string,
-  slug: string
+  campaignId: string
 ): Promise<string> {
-  const storagePath = `campaigns/${client}/${slug}/logo.webp`
+  // Storage keys must be ASCII-safe — use the campaign UUID as the folder
+  // (client names may contain Hebrew/spaces which Supabase rejects).
+  const storagePath = `campaigns/${campaignId}/logo.webp`
   return compressAndUploadImage(file, storagePath)
 }
 
@@ -189,11 +184,11 @@ export async function deleteAsset(filePath: string) {
   await supabase.storage.from(ASSETS_BUCKET).remove([filePath])
 }
 
-async function deleteCampaignAssets(client: string, slug: string) {
-  const prefix = `campaigns/${client}/${slug}/`
+export async function deleteCampaignAssets(campaignId: string) {
+  const prefix = `campaigns/${campaignId}`
   const { data } = await supabase.storage.from(ASSETS_BUCKET).list(prefix)
   if (data && data.length > 0) {
-    const paths = data.map(f => `${prefix}${f.name}`)
+    const paths = data.map(f => `${prefix}/${f.name}`)
     await supabase.storage.from(ASSETS_BUCKET).remove(paths)
   }
 }

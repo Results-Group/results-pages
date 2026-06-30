@@ -66,6 +66,10 @@ export default function CampaignPresentation({ slides, clientName, campaignName 
         <div className="ambient-light" />
         <div className="ambient-light-2" />
 
+        <div className="progress-bar">
+          <div className="progress-fill" style={{ width: `${((activeSlide + 1) / slides.length) * 100}%` }} />
+        </div>
+
         <header className="pres-header">
           <div className="brand">Results Digital</div>
           <div className="header-right">
@@ -139,6 +143,7 @@ function CoverSlide({ slide }: { slide: SlideData }) {
   return (
     <div className="cover-slide">
       <div className="cover-glow" />
+      <div className="cover-badge-top">Creative Presentation</div>
       {slide.logoUrl && (
         <img src={slide.logoUrl} alt={slide.title} className="cover-logo" />
       )}
@@ -146,7 +151,6 @@ function CoverSlide({ slide }: { slide: SlideData }) {
       <h2 className="cover-campaign">{slide.subtitle}</h2>
       <div className="cover-divider" />
       {slide.date && <p className="cover-date">{slide.date}</p>}
-      <div className="cover-badge">Creative Presentation</div>
     </div>
   )
 }
@@ -240,9 +244,9 @@ function AssetRenderer({ asset, mockupType, clientLogoUrl, clientName }: {
 }
 
 const STYLES = `
-  @font-face{font-family:'Ping';src:url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/Ping-Regular.woff2') format('woff2');font-weight:400}
-  @font-face{font-family:'Ping';src:url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/Ping-Bold.woff2') format('woff2');font-weight:700}
-  @font-face{font-family:'Ping';src:url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/Ping-Light.woff2') format('woff2');font-weight:300}
+  @font-face{font-family:'Ping';src:url('/fonts/ping-regular.otf') format('opentype');font-weight:400;font-display:swap}
+  @font-face{font-family:'Ping';src:url('/fonts/ping-bold.otf') format('opentype');font-weight:700;font-display:swap}
+  @font-face{font-family:'Ping';src:url('/fonts/ping-heavy.otf') format('opentype');font-weight:900;font-display:swap}
 
   .campaign-pres{
     --bg-dark:#0d1112;
@@ -254,7 +258,7 @@ const STYLES = `
     --text-primary:#f0f0f0;
     --text-secondary:#a0aab0;
     --border-color:rgba(64,225,211,0.15);
-    font-family:'Ping',sans-serif;
+    font-family:'Ping','Heebo','Assistant',sans-serif;
     background:var(--bg-dark);
     color:var(--text-primary);
     line-height:1.7;
@@ -263,6 +267,9 @@ const STYLES = `
     position:relative;
     overflow-x:hidden;
   }
+
+  .campaign-pres .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,0.04);z-index:1100}
+  .campaign-pres .progress-fill{height:100%;background:linear-gradient(90deg,var(--brand-cyan),var(--brand-yellow));transition:width 0.4s ease;box-shadow:0 0 12px rgba(64,225,211,0.5)}
 
   .campaign-pres .bg-noise{position:fixed;inset:0;opacity:0.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
   .campaign-pres .bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(64,225,211,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(64,225,211,0.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
@@ -291,14 +298,17 @@ const STYLES = `
   .campaign-pres .slide-title::before{content:'';display:block;width:4px;height:28px;background:var(--brand-yellow);border-radius:2px;flex-shrink:0}
 
   /* Cover Slide */
-  .campaign-pres .cover-slide{text-align:center;padding:80px 20px 60px;position:relative}
-  .campaign-pres .cover-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(243,213,109,0.06) 0%,transparent 60%);pointer-events:none}
-  .campaign-pres .cover-logo{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid rgba(243,213,109,0.3);box-shadow:0 0 40px rgba(243,213,109,0.15);margin:0 auto 28px;display:block;position:relative}
-  .campaign-pres .cover-client{font-size:3rem;font-weight:700;color:var(--brand-yellow);margin-bottom:10px;position:relative}
-  .campaign-pres .cover-campaign{font-size:1.5rem;font-weight:400;color:var(--text-primary);margin-bottom:20px;position:relative}
-  .campaign-pres .cover-divider{width:80px;height:3px;background:linear-gradient(90deg,var(--brand-cyan),var(--brand-yellow));border-radius:2px;margin:24px auto}
-  .campaign-pres .cover-date{font-size:0.9rem;color:var(--text-secondary);margin-bottom:20px;position:relative}
-  .campaign-pres .cover-badge{display:inline-block;background:rgba(64,225,211,0.1);border:1px solid rgba(64,225,211,0.3);border-radius:24px;padding:8px 24px;font-size:0.85rem;color:var(--brand-cyan);font-weight:700;position:relative}
+  .campaign-pres .cover-slide{text-align:center;padding:90px 20px 80px;position:relative;min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .campaign-pres .cover-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:700px;height:700px;background:radial-gradient(circle,rgba(243,213,109,0.08) 0%,transparent 60%);pointer-events:none;animation:glowPulse 5s ease-in-out infinite}
+  @keyframes glowPulse{0%,100%{opacity:0.6;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}}
+  .campaign-pres .cover-badge-top{position:relative;display:inline-block;background:rgba(64,225,211,0.08);border:1px solid rgba(64,225,211,0.3);border-radius:24px;padding:6px 22px;font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;color:var(--brand-cyan);font-weight:700;margin-bottom:32px;animation:fadeUp 0.6s ease both}
+  .campaign-pres .cover-logo{width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid rgba(243,213,109,0.4);box-shadow:0 0 60px rgba(243,213,109,0.2);margin:0 auto 32px;display:block;position:relative;animation:fadeUp 0.6s 0.1s ease both}
+  .campaign-pres .cover-client{font-size:4rem;font-weight:900;margin-bottom:12px;position:relative;line-height:1.1;background:linear-gradient(120deg,var(--brand-yellow),#fff,var(--brand-cyan),var(--brand-yellow));background-size:300% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:fadeUp 0.6s 0.2s ease both,shimmer 6s linear infinite}
+  @keyframes shimmer{to{background-position:300% center}}
+  .campaign-pres .cover-campaign{font-size:1.6rem;font-weight:300;color:var(--text-primary);margin-bottom:20px;position:relative;animation:fadeUp 0.6s 0.3s ease both}
+  .campaign-pres .cover-divider{width:100px;height:3px;background:linear-gradient(90deg,transparent,var(--brand-cyan),var(--brand-yellow),transparent);border-radius:2px;margin:24px auto;animation:fadeUp 0.6s 0.4s ease both}
+  .campaign-pres .cover-date{font-size:0.95rem;color:var(--text-secondary);position:relative;animation:fadeUp 0.6s 0.5s ease both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
   /* Concept Slide */
   .campaign-pres .concept-slide{padding:40px 0}
@@ -307,9 +317,9 @@ const STYLES = `
   .campaign-pres .concept-card p{font-size:1.05rem;color:var(--text-secondary);line-height:2;white-space:pre-wrap}
 
   /* Divider Slide */
-  .campaign-pres .divider-slide{text-align:center;padding:100px 20px 80px;position:relative}
+  .campaign-pres .divider-slide{text-align:center;padding:100px 20px 80px;position:relative;min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
   .campaign-pres .divider-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:400px;height:400px;background:radial-gradient(circle,rgba(64,225,211,0.05) 0%,transparent 60%);pointer-events:none}
-  .campaign-pres .divider-title{font-size:2.4rem;font-weight:700;color:var(--brand-cyan);margin-bottom:16px;position:relative}
+  .campaign-pres .divider-title{font-size:2.8rem;font-weight:900;color:var(--brand-cyan);margin-bottom:16px;position:relative;line-height:1.15}
   .campaign-pres .divider-desc{font-size:1.1rem;color:var(--text-secondary);max-width:600px;margin:0 auto 24px;line-height:1.8;position:relative;white-space:pre-wrap}
   .campaign-pres .divider-line{width:60px;height:2px;background:linear-gradient(90deg,var(--brand-cyan),var(--brand-yellow));border-radius:2px;margin:0 auto}
 
@@ -317,14 +327,15 @@ const STYLES = `
   .campaign-pres .assets-grid{display:grid;gap:24px}
   .campaign-pres .assets-grid.story-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
   .campaign-pres .assets-grid.standard-grid{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
-  .campaign-pres .mockup-wrapper{background:var(--card-bg);backdrop-filter:blur(12px);border:1px solid var(--border-color);border-radius:14px;padding:20px;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .campaign-pres .mockup-wrapper{background:var(--card-bg);backdrop-filter:blur(12px);border:1px solid var(--border-color);border-radius:16px;padding:20px;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform 0.3s ease,box-shadow 0.3s ease,border-color 0.3s ease}
+  .campaign-pres .mockup-wrapper:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(0,0,0,0.4),0 0 30px rgba(64,225,211,0.08);border-color:rgba(64,225,211,0.35)}
   .campaign-pres .mockup-wrapper::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--brand-cyan),var(--brand-yellow))}
-  .campaign-pres .asset-caption{font-size:0.82rem;color:var(--text-secondary);text-align:center;margin-top:12px;line-height:1.6}
+  .campaign-pres .asset-caption{font-size:0.85rem;color:var(--text-secondary);text-align:center;margin-top:14px;line-height:1.6}
 
   /* Closing Slide */
-  .campaign-pres .closing-slide{text-align:center;padding:100px 20px 80px;position:relative}
+  .campaign-pres .closing-slide{text-align:center;padding:100px 20px 80px;position:relative;min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
   .campaign-pres .closing-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(243,213,109,0.08) 0%,transparent 60%);pointer-events:none}
-  .campaign-pres .closing-title{font-size:3rem;font-weight:700;color:var(--brand-yellow);margin-bottom:12px;position:relative}
+  .campaign-pres .closing-title{font-size:3.4rem;font-weight:900;color:var(--brand-yellow);margin-bottom:12px;position:relative;line-height:1.1}
   .campaign-pres .closing-subtitle{font-size:1.3rem;color:var(--text-primary);margin-bottom:40px;position:relative}
   .campaign-pres .closing-divider{width:80px;height:3px;background:linear-gradient(90deg,var(--brand-cyan),var(--brand-yellow));border-radius:2px;margin:0 auto 32px}
   .campaign-pres .closing-brand{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px}
