@@ -15,14 +15,28 @@ export async function POST() {
       }, { status: 500 })
     }
 
+    const passwordHash = await hashPassword('Results0806!')
+
     if ((count ?? 0) > 0) {
-      return NextResponse.json({ message: 'המערכת כבר אותחלה. משתמש אדמין קיים.' })
+      // Update existing admin or upsert the correct one
+      await supabase.from('admin_users').delete().eq('role', 'admin')
+      const { error: insertErr } = await supabase.from('admin_users').insert({
+        email: 'info@resultsdigital.org',
+        password_hash: passwordHash,
+        name: 'Admin',
+        role: 'admin',
+      })
+      if (insertErr) {
+        return NextResponse.json({ error: 'שגיאה בעדכון המשתמש', details: insertErr.message }, { status: 500 })
+      }
+      return NextResponse.json({
+        message: 'משתמש אדמין עודכן בהצלחה!',
+        email: 'info@resultsdigital.org',
+      }, { status: 200 })
     }
 
-    const passwordHash = await hashPassword('Results2026!')
-
     const { error: insertErr } = await supabase.from('admin_users').insert({
-      email: 'admin@results.co.il',
+      email: 'info@resultsdigital.org',
       password_hash: passwordHash,
       name: 'Admin',
       role: 'admin',
@@ -34,8 +48,8 @@ export async function POST() {
 
     return NextResponse.json({
       message: 'משתמש אדמין נוצר בהצלחה!',
-      email: 'admin@results.co.il',
-      password: 'Results2026!',
+      email: 'info@resultsdigital.org',
+      password: 'Results0806!',
     }, { status: 201 })
   } catch {
     return NextResponse.json({ error: 'שגיאה באתחול המערכת' }, { status: 500 })
