@@ -80,7 +80,13 @@ export default function CampaignsListPage() {
     setCampaigns(prev => prev.filter(c => c.id !== id))
   }
 
-  const totalAssets = (c: Campaign) => c.sections?.reduce((sum, s) => sum + (s.assets?.length || 0), 0) || 0
+  function parseSections(raw: unknown): { assets: unknown[] }[] {
+    if (Array.isArray(raw)) return raw
+    if (typeof raw === 'string') { try { const p = JSON.parse(raw); if (Array.isArray(p)) return p } catch {} }
+    return []
+  }
+
+  const totalAssets = (c: Campaign) => parseSections(c.sections).reduce((sum, s) => sum + (s.assets?.length || 0), 0)
 
   return (
     <div className="max-w-6xl">

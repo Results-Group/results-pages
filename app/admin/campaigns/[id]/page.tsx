@@ -68,8 +68,9 @@ export default function EditCampaignPage() {
         setLogoPath(data.logo_path || null)
         setSlug(data.slug || '')
         setStatus(data.status || 'draft')
+        const rawSections = typeof data.sections === 'string' ? JSON.parse(data.sections) : (data.sections || [])
         setSections(
-          (data.sections || []).map((s: Section) => ({
+          rawSections.map((s: Section) => ({
             id: s.id || crypto.randomUUID(),
             title: s.title || '',
             mockup_type: s.mockup_type || 'general',

@@ -124,7 +124,8 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     day: 'numeric',
   })
 
-  const sections = (campaign.sections || []) as CampaignSection[]
+  const rawSections = typeof campaign.sections === 'string' ? JSON.parse(campaign.sections) : (campaign.sections || [])
+  const sections = rawSections as CampaignSection[]
 
   return (
     <>

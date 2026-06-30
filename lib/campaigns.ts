@@ -87,7 +87,7 @@ export async function createCampaign(data: {
     slug: data.slug,
     concept: data.concept || null,
     logo_path: data.logo_path || null,
-    sections: JSON.stringify(data.sections || []),
+    sections: data.sections || [],
     status: data.status || 'draft',
     password: data.password || null,
   }
@@ -113,7 +113,7 @@ export async function updateCampaign(
   if (data.slug !== undefined) updateData.slug = data.slug
   if (data.concept !== undefined) updateData.concept = data.concept
   if (data.logo_path !== undefined) updateData.logo_path = data.logo_path
-  if (data.sections !== undefined) updateData.sections = JSON.stringify(data.sections)
+  if (data.sections !== undefined) updateData.sections = data.sections
   if (data.status !== undefined) updateData.status = data.status
   if (data.password !== undefined) updateData.password = data.password
 
