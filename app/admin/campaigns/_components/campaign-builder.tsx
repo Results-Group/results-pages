@@ -17,6 +17,12 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { assetProxyUrl, assetDirectUrl } from '@/lib/asset-url'
+import dynamic from 'next/dynamic'
+
+const CampaignPresentation = dynamic(
+  () => import('@/app/c/[slug]/presentation'),
+  { ssr: false }
+)
 
 // ── Types ──
 
@@ -158,8 +164,7 @@ export default function CampaignBuilder({ mode, initial }: { mode: 'new' | 'edit
   const [error, setError] = useState('')
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [uploadingSections, setUploadingSections] = useState<Record<string, number>>({})
-  const [showPreview, setShowPreview] = useState(false)
-  const [previewKey, setPreviewKey] = useState(0)
+  const [showLivePreview, setShowLivePreview] = useState(false)
   const [copied, setCopied] = useState(false)
 
   const sensors = useSensors(
@@ -332,9 +337,6 @@ export default function CampaignBuilder({ mode, initial }: { mode: 'new' | 'edit
   function removeAsset(sectionId: string, assetId: string) {
     setSections(prev => prev.map(s => s.id === sectionId ? { ...s, assets: s.assets.filter(a => a.id !== assetId) } : s))
   }
-  function updateAssetCaption(sectionId: string, assetId: string, caption: string) {
-    setSections(prev => prev.map(s => s.id === sectionId ? { ...s, assets: s.assets.map(a => a.id === assetId ? { ...a, caption } : a) } : s))
-  }
   function addVideoLink(sectionId: string) {
     const newAsset: Asset = { id: crypto.randomUUID(), type: 'video', file_path: '', public_url: '', url: '', caption: '' }
     setSections(prev => prev.map(s => s.id === sectionId ? { ...s, assets: [...s.assets, newAsset] } : s))
@@ -374,12 +376,8 @@ export default function CampaignBuilder({ mode, initial }: { mode: 'new' | 'edit
     setTimeout(() => setCopied(false), 2000)
   }
 
-  async function togglePreview() {
-    if (!showPreview) {
-      await saveCampaign('draft', { redirect: false })
-      setPreviewKey(k => k + 1)
-    }
-    setShowPreview(p => !p)
+  function toggleLivePreview() {
+    setShowLivePreview(p => !p)
   }
 
   const focusBorder = (e: React.FocusEvent<HTMLElement>) => (e.currentTarget.style.borderColor = 'var(--admin-accent)')
@@ -529,7 +527,7 @@ export default function CampaignBuilder({ mode, initial }: { mode: 'new' | 'edit
                       <textarea
                         value={section.description || ''}
                         onChange={e => updateSection(section.id, { description: e.target.value })}
-                        placeholder={section.mockup_type === 'divider' ? 'טקסט שיופיע על שקף הביניים...' : 'טקסט / הסבר שיופיע בשקף (אופציונלי)...'}
+                        placeholder={section.mockup_type === 'divider' ? 'טקסט שיופיע על שקף הביניים...' : 'טקסט / קופי שיופיע מעל כל הקריאייטיבים בשקף הזה (אופציונלי)...'}
                         rows={2}
                         className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors resize-none mb-4"
                         style={inputStyle} onFocus={focusBorder} onBlur={blurBorder}
@@ -586,8 +584,6 @@ export default function CampaignBuilder({ mode, initial }: { mode: 'new' | 'edit
                                             style={{ background: 'rgba(0,0,0,0.7)', color: '#ef4444' }}>
                                             <Trash2 className="w-3.5 h-3.5" />
                                           </button>
-                                          <textarea value={asset.caption} onChange={e => updateAssetCaption(section.id, asset.id, e.target.value)} placeholder="כיתוב..." rows={2}
-                                            className="w-full mt-1.5 px-2.5 py-1.5 rounded-lg text-xs outline-none resize-none transition-colors" style={inputStyle} onFocus={focusBorder} onBlur={blurBorder} />
                                         </div>
                                       )}
                                     </SortableAsset>
@@ -635,29 +631,35 @@ export default function CampaignBuilder({ mode, initial }: { mode: 'new' | 'edit
 
       {error && <p className="text-sm mb-4" style={{ color: 'var(--admin-danger)' }}>{error}</p>}
 
-      {/* Preview */}
-      {campaignId && slug && (
-        <div className="mb-6">
-          <button onClick={togglePreview} className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-200 w-full justify-center"
-            style={{ background: showPreview ? 'rgba(64,225,211,0.08)' : 'var(--admin-bg-elevated)', border: `1px solid ${showPreview ? 'rgba(64,225,211,0.3)' : 'var(--admin-border)'}`, color: showPreview ? 'var(--admin-accent)' : 'var(--admin-text-primary)' }}>
-            {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            {showPreview ? 'הסתר תצוגה מקדימה' : 'תצוגה מקדימה'}
-          </button>
+      {/* Live Preview */}
+      <div className="mb-6">
+        <button onClick={toggleLivePreview} className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-200 w-full justify-center"
+          style={{ background: showLivePreview ? 'rgba(64,225,211,0.08)' : 'var(--admin-bg-elevated)', border: `1px solid ${showLivePreview ? 'rgba(64,225,211,0.3)' : 'var(--admin-border)'}`, color: showLivePreview ? 'var(--admin-accent)' : 'var(--admin-text-primary)' }}>
+          {showLivePreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          {showLivePreview ? 'הסתר תצוגה מקדימה' : 'תצוגה מקדימה חיה'}
+        </button>
 
-          {showPreview && (
-            <div className="mt-4 rounded-2xl overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
-              <div className="px-4 py-2.5 flex items-center justify-between" style={{ background: 'var(--admin-bg)', borderBottom: '1px solid var(--admin-border)' }}>
-                <span className="text-xs font-bold" style={{ color: 'var(--admin-text-muted)' }}>תצוגה מקדימה – כך הלקוח יראה את הקמפיין</span>
+        {showLivePreview && (
+          <div className="mt-4 rounded-2xl overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
+            <div className="px-4 py-2.5 flex items-center justify-between" style={{ background: 'var(--admin-bg)', borderBottom: '1px solid var(--admin-border)' }}>
+              <span className="text-xs font-bold" style={{ color: 'var(--admin-text-muted)' }}>תצוגה מקדימה חיה — מתעדכנת בזמן אמת</span>
+              {slug && (
                 <a href={`${typeof window !== 'undefined' ? window.location.origin : ''}/c/${slug}?preview=1`} target="_blank" rel="noopener noreferrer"
                   className="text-xs flex items-center gap-1 transition-colors" style={{ color: 'var(--admin-accent)' }}>
                   <ExternalLink className="w-3 h-3" /> פתח בחלון חדש
                 </a>
-              </div>
-              <iframe key={previewKey} src={`/c/${slug}?preview=1`} className="w-full bg-[#0d1112]" style={{ height: '700px', border: 'none' }} />
+              )}
             </div>
-          )}
-        </div>
-      )}
+            <LivePreviewPanel
+              client={client}
+              campaignName={campaignName}
+              concept={concept}
+              logoPath={logoPath}
+              sections={sections}
+            />
+          </div>
+        )}
+      </div>
 
       {/* Footer actions */}
       <div className="flex items-center flex-wrap gap-3 pt-4 pb-8" style={{ borderTop: '1px solid var(--admin-border)' }}>
@@ -675,6 +677,55 @@ export default function CampaignBuilder({ mode, initial }: { mode: 'new' | 'edit
           {saving ? 'שומר...' : (status === 'published' ? 'עדכן ופרסם' : 'פרסום וקבלת לינק')}
         </button>
       </div>
+    </div>
+  )
+}
+
+// ── Live Preview Panel ──
+
+function LivePreviewPanel({ client, campaignName, concept, logoPath, sections }: {
+  client: string
+  campaignName: string
+  concept: string
+  logoPath: string | null
+  sections: Section[]
+}) {
+  const clientLogoUrl = logoPath ? assetProxyUrl(logoPath) : null
+  const formattedDate = new Date().toLocaleDateString('he-IL', { year: 'numeric', month: 'long', day: 'numeric' })
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const slides: any[] = []
+
+  slides.push({ type: 'cover', title: client || 'שם לקוח', subtitle: campaignName || 'שם קמפיין', logoUrl: clientLogoUrl, date: formattedDate })
+  if (concept) {
+    slides.push({ type: 'concept', title: 'קונספט הקמפיין', content: concept })
+  }
+
+  for (const section of sections) {
+    if (section.mockup_type === 'divider') {
+      slides.push({ type: 'divider', title: section.title || 'חוצץ', content: section.description })
+    } else if (section.assets.length > 0) {
+      slides.push({
+        type: 'creatives',
+        title: section.title,
+        content: section.description,
+        mockupType: section.mockup_type,
+        assets: section.assets.map(a => ({ ...a, type: a.type as 'image' | 'video' })),
+        clientLogoUrl,
+        clientName: client,
+      })
+    }
+  }
+
+  slides.push({ type: 'closing', title: 'תודה רבה!', subtitle: client || 'שם לקוח' })
+
+  return (
+    <div style={{ height: '700px', overflow: 'auto', background: '#090c0e' }}>
+      <CampaignPresentation
+        slides={slides}
+        clientName={client || 'שם לקוח'}
+        campaignName={campaignName || 'שם קמפיין'}
+      />
     </div>
   )
 }
