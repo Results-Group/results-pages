@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, requireRole } from '@/lib/auth'
-import { getCampaignById, updateCampaign, deleteCampaign } from '@/lib/campaigns'
+import { getCampaignById, updateCampaign, deleteCampaign, enrichCampaignUrls } from '@/lib/campaigns'
 
 export async function GET(
   request: NextRequest,
@@ -16,7 +16,7 @@ export async function GET(
     if (!campaign) {
       return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
     }
-    return NextResponse.json(campaign)
+    return NextResponse.json(enrichCampaignUrls(campaign))
   } catch (error) {
     return NextResponse.json(
       { error: 'שגיאה בטעינת קמפיין' },

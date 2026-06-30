@@ -9,6 +9,7 @@ interface Asset {
   id: string
   type: 'image' | 'video'
   file_path: string
+  public_url: string
   url: string
   caption: string
 }
@@ -17,6 +18,7 @@ interface Section {
   id: string
   title: string
   mockup_type: string
+  description: string
   assets: Asset[]
 }
 
@@ -26,6 +28,7 @@ const MOCKUP_TYPES: Record<string, string> = {
   facebook_feed: 'פיד פייסבוק',
   video: 'סרטונים',
   general: 'כללי',
+  divider: 'חוצץ / שקף ביניים',
 }
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
@@ -43,6 +46,7 @@ export default function EditCampaignPage() {
   const [campaignName, setCampaignName] = useState('')
   const [concept, setConcept] = useState('')
   const [logoPath, setLogoPath] = useState<string | null>(null)
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [slug, setSlug] = useState('')
   const [status, setStatus] = useState<'draft' | 'published' | 'archived'>('draft')
   const [sections, setSections] = useState<Section[]>([])
@@ -66,6 +70,7 @@ export default function EditCampaignPage() {
         setCampaignName(data.campaign_name || '')
         setConcept(data.concept || '')
         setLogoPath(data.logo_path || null)
+        setLogoUrl(data.logo_url || null)
         setSlug(data.slug || '')
         setStatus(data.status || 'draft')
         const rawSections = typeof data.sections === 'string' ? JSON.parse(data.sections) : (data.sections || [])
@@ -74,10 +79,12 @@ export default function EditCampaignPage() {
             id: s.id || crypto.randomUUID(),
             title: s.title || '',
             mockup_type: s.mockup_type || 'general',
+            description: s.description || '',
             assets: (s.assets || []).map((a: Asset) => ({
               id: a.id || crypto.randomUUID(),
               type: a.type || 'image',
               file_path: a.file_path || '',
+              public_url: a.public_url || '',
               url: a.url || '',
               caption: a.caption || '',
             })),
@@ -154,6 +161,7 @@ export default function EditCampaignPage() {
       if (res.ok) {
         const data = await res.json()
         setLogoPath(data.file_path)
+        setLogoUrl(data.public_url)
       } else {
         setError('שגיאה בהעלאת הלוגו')
       }
@@ -186,6 +194,7 @@ export default function EditCampaignPage() {
             id: crypto.randomUUID(),
             type: 'image',
             file_path: data.file_path,
+            public_url: data.public_url || '',
             url: '',
             caption: '',
           }
@@ -213,7 +222,7 @@ export default function EditCampaignPage() {
   function addSection() {
     setSections(prev => [
       ...prev,
-      { id: crypto.randomUUID(), title: '', mockup_type: 'general', assets: [] },
+      { id: crypto.randomUUID(), title: '', mockup_type: 'general', description: '', assets: [] },
     ])
   }
 
@@ -250,6 +259,7 @@ export default function EditCampaignPage() {
       id: crypto.randomUUID(),
       type: 'video',
       file_path: '',
+      public_url: '',
       url: '',
       caption: '',
     }
@@ -384,7 +394,7 @@ export default function EditCampaignPage() {
           ) : logoPath ? (
             <div className="flex items-center gap-3">
               <img
-                src={getAssetUrl(logoPath)}
+                src={logoUrl || getAssetUrl(logoPath)}
                 alt="Logo"
                 className="w-16 h-16 rounded-lg object-contain"
                 style={{ background: 'var(--admin-bg)' }}
@@ -469,7 +479,20 @@ export default function EditCampaignPage() {
               </div>
 
               {/* Section Content */}
-              {section.mockup_type === 'video' ? (
+              {section.mockup_type === 'divider' ? (
+                <div>
+                  <textarea
+                    value={section.description || ''}
+                    onChange={e => updateSection(section.id, { description: e.target.value })}
+                    placeholder="תיאור / טקסט לשקף הביניים..."
+                    rows={3}
+                    className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors resize-none"
+                    style={inputStyle}
+                    onFocus={e => (e.currentTarget.style.borderColor = 'var(--admin-accent)')}
+                    onBlur={e => (e.currentTarget.style.borderColor = 'var(--admin-border)')}
+                  />
+                </div>
+              ) : section.mockup_type === 'video' ? (
                 <div className="space-y-3">
                   {section.assets.map(asset => (
                     <div key={asset.id} className="flex items-start gap-3">
@@ -526,7 +549,7 @@ export default function EditCampaignPage() {
                       {section.assets.map(asset => (
                         <div key={asset.id} className="relative group">
                           <img
-                            src={getAssetUrl(asset.file_path)}
+                            src={asset.public_url || getAssetUrl(asset.file_path)}
                             alt=""
                             className="w-full h-[120px] object-cover rounded-lg"
                             style={{ background: 'var(--admin-bg)' }}

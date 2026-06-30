@@ -7,6 +7,7 @@ export interface CampaignAsset {
   id: string
   type: 'image' | 'video'
   file_path?: string
+  public_url?: string
   url?: string
   caption?: string
 }
@@ -14,7 +15,8 @@ export interface CampaignAsset {
 export interface CampaignSection {
   id: string
   title: string
-  mockup_type: 'instagram_feed' | 'instagram_story' | 'facebook_feed' | 'video' | 'general'
+  mockup_type: 'instagram_feed' | 'instagram_story' | 'facebook_feed' | 'video' | 'general' | 'divider'
+  description?: string
   assets: CampaignAsset[]
 }
 
@@ -25,6 +27,7 @@ export interface Campaign {
   slug: string
   concept: string | null
   logo_path: string | null
+  logo_url?: string
   sections: CampaignSection[]
   status: 'draft' | 'published' | 'archived'
   password: string | null
@@ -193,6 +196,26 @@ async function deleteCampaignAssets(client: string, slug: string) {
     const paths = data.map(f => `${prefix}${f.name}`)
     await supabase.storage.from(ASSETS_BUCKET).remove(paths)
   }
+}
+
+// ── Enrich campaign with public URLs ──
+
+export function enrichCampaignUrls(campaign: Campaign): Campaign {
+  const sections = (typeof campaign.sections === 'string'
+    ? JSON.parse(campaign.sections)
+    : campaign.sections || []) as CampaignSection[]
+
+  return {
+    ...campaign,
+    logo_url: campaign.logo_path ? getAssetPublicUrl(campaign.logo_path) : undefined,
+    sections: sections.map(s => ({
+      ...s,
+      assets: (s.assets || []).map(a => ({
+        ...a,
+        public_url: a.file_path ? getAssetPublicUrl(a.file_path) : undefined,
+      })),
+    })),
+  } as Campaign
 }
 
 // ── Video URL helpers ──
