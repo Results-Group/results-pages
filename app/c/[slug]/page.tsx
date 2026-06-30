@@ -1,12 +1,7 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
-import { getCampaignBySlug, getAssetPublicUrl, parseVideoUrl, enrichCampaignUrls } from '@/lib/campaigns'
+import { getCampaignBySlug, getAssetPublicUrl, enrichCampaignUrls } from '@/lib/campaigns'
 import type { CampaignSection, CampaignAsset } from '@/lib/campaigns'
-import InstagramFeedMockup from './mockups/instagram-feed'
-import InstagramStoryMockup from './mockups/instagram-story'
-import FacebookFeedMockup from './mockups/facebook-feed'
-import VideoCard from './mockups/video-card'
-import GeneralCard from './mockups/general-card'
 import CampaignPresentation from './presentation'
 
 interface PageProps {
@@ -47,8 +42,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     year: 'numeric', month: 'long', day: 'numeric',
   })
 
-  const rawSections = typeof campaign.sections === 'string' ? JSON.parse(campaign.sections) : (campaign.sections || [])
-  const sections = rawSections as CampaignSection[]
+  const sections = (campaign.sections || []) as CampaignSection[]
 
   const slides: SlideData[] = []
 
@@ -61,7 +55,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
   for (const section of sections) {
     if (section.mockup_type === 'divider') {
       slides.push({ type: 'divider', title: section.title, content: section.description })
-    } else {
+    } else if ((section.assets || []).length > 0) {
       slides.push({
         type: 'creatives',
         title: section.title,

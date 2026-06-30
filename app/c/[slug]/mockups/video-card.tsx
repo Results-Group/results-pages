@@ -38,19 +38,38 @@ export default function VideoCard({ url, embedUrl, platform, caption }: VideoCar
               <img src={thumbnailUrl} alt="Video thumbnail" className="absolute inset-0 w-full h-full object-cover" />
             )}
 
-            <button
-              onClick={() => embedUrl && setShowEmbed(true)}
-              className="absolute inset-0 flex items-center justify-center group"
-            >
-              <div
-                className="w-16 h-16 rounded-full flex items-center justify-center transition-all group-hover:scale-110"
-                style={{ background: 'rgba(64,225,211,0.15)', border: '2px solid rgba(64,225,211,0.4)' }}
+            {embedUrl ? (
+              <button
+                onClick={() => setShowEmbed(true)}
+                className="absolute inset-0 flex items-center justify-center group"
               >
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="#40e1d3" className="ml-1">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </div>
-            </button>
+                <div
+                  className="w-16 h-16 rounded-full flex items-center justify-center transition-all group-hover:scale-110"
+                  style={{ background: 'rgba(64,225,211,0.15)', border: '2px solid rgba(64,225,211,0.4)' }}
+                >
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="#40e1d3" className="ml-1">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+              </button>
+            ) : (
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute inset-0 flex flex-col items-center justify-center gap-3 group"
+              >
+                <div
+                  className="w-16 h-16 rounded-full flex items-center justify-center transition-all group-hover:scale-110"
+                  style={{ background: 'rgba(64,225,211,0.15)', border: '2px solid rgba(64,225,211,0.4)' }}
+                >
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="#40e1d3" className="ml-1">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+                <span className="text-xs font-bold" style={{ color: '#40e1d3' }}>צפייה בסרטון</span>
+              </a>
+            )}
 
             {platform !== 'other' && (
               <div

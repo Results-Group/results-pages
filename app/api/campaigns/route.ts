@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { client, campaign_name, concept, status, password } = body
+    const { client, campaign_name, concept, status, password, sections, logo_path } = body
 
     if (!client || !campaign_name) {
       return NextResponse.json(
@@ -60,6 +60,8 @@ export async function POST(request: NextRequest) {
       campaign_name,
       slug,
       concept: concept || undefined,
+      logo_path: logo_path || undefined,
+      sections: sections || undefined,
       status: status || 'draft',
       password: password || undefined,
       created_by: session?.userId !== 'legacy' ? session?.userId : undefined,

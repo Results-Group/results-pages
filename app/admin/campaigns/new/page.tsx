@@ -60,16 +60,17 @@ export default function NewCampaignPage() {
   async function ensureCampaignExists(): Promise<string | null> {
     if (campaignId) return campaignId
 
-    const name = client.trim() || 'טיוטה'
-    const cName = campaignName.trim() || 'קמפיין חדש'
+    if (!client.trim() || !campaignName.trim()) {
+      return null
+    }
 
     try {
       const res = await fetch('/api/campaigns', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          client: name,
-          campaign_name: cName,
+          client: client.trim(),
+          campaign_name: campaignName.trim(),
           concept: concept.trim(),
           status: 'draft',
           sections: [],
@@ -104,6 +105,7 @@ export default function NewCampaignPage() {
           id: s.id,
           title: s.title,
           mockup_type: s.mockup_type,
+          description: s.description,
           assets: s.assets.map(a => ({
             id: a.id,
             type: a.type,
@@ -142,7 +144,7 @@ export default function NewCampaignPage() {
 
   async function handleLogoUpload(file: File) {
     const id = await ensureCampaignExists()
-    if (!id) { setError('יש למלא שם לקוח לפני העלאת קבצים'); return }
+    if (!id) { setError('יש למלא שם לקוח ושם קמפיין לפני העלאת קבצים'); return }
     setUploadingLogo(true)
     try {
       const formData = new FormData()
@@ -169,7 +171,7 @@ export default function NewCampaignPage() {
 
   async function handleAssetUpload(sectionId: string, files: FileList) {
     const id = await ensureCampaignExists()
-    if (!id) { setError('יש למלא שם לקוח לפני העלאת קבצים'); return }
+    if (!id) { setError('יש למלא שם לקוח ושם קמפיין לפני העלאת קבצים'); return }
     const fileArr = Array.from(files)
     setUploadingSections(prev => ({ ...prev, [sectionId]: fileArr.length }))
 

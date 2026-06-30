@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { SlideData } from './page'
 import type { CampaignAsset } from '@/lib/campaigns'
 import InstagramFeedMockup from './mockups/instagram-feed'
@@ -18,10 +18,35 @@ interface Props {
 
 export default function CampaignPresentation({ slides, clientName, campaignName }: Props) {
   const [activeSlide, setActiveSlide] = useState(0)
+  const [exporting, setExporting] = useState(false)
 
   function goSlide(n: number) {
     setActiveSlide(n)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      // RTL: ArrowLeft advances, ArrowRight goes back
+      if (e.key === 'ArrowLeft') setActiveSlide(s => Math.min(slides.length - 1, s + 1))
+      if (e.key === 'ArrowRight') setActiveSlide(s => Math.max(0, s - 1))
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [slides.length])
+
+  async function handleExportPdf() {
+    setExporting(true)
+    document.body.classList.add('printing-all-slides')
+    try {
+      if (document.fonts?.ready) await document.fonts.ready
+      await new Promise(r => setTimeout(r, 150))
+      window.print()
+    } finally {
+      document.body.classList.remove('printing-all-slides')
+      setExporting(false)
+    }
   }
 
   function getSlideLabel(slide: SlideData, i: number): string {
@@ -43,7 +68,17 @@ export default function CampaignPresentation({ slides, clientName, campaignName 
 
         <header className="pres-header">
           <div className="brand">Results Digital</div>
-          <div className="campaign-badge">{clientName} — {campaignName}</div>
+          <div className="header-right">
+            <div className="campaign-badge">{clientName} — {campaignName}</div>
+            <button className="pdf-btn" onClick={handleExportPdf} disabled={exporting}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              {exporting ? 'מכין...' : 'ייצוא PDF'}
+            </button>
+          </div>
         </header>
 
         <nav className="slide-nav">
@@ -105,7 +140,7 @@ function CoverSlide({ slide }: { slide: SlideData }) {
     <div className="cover-slide">
       <div className="cover-glow" />
       {slide.logoUrl && (
-        <img src={slide.logoUrl} alt="" className="cover-logo" />
+        <img src={slide.logoUrl} alt={slide.title} className="cover-logo" />
       )}
       <h1 className="cover-client">{slide.title}</h1>
       <h2 className="cover-campaign">{slide.subtitle}</h2>
@@ -184,7 +219,9 @@ function ClosingSlide({ slide }: { slide: SlideData }) {
 function AssetRenderer({ asset, mockupType, clientLogoUrl, clientName }: {
   asset: CampaignAsset; mockupType: string; clientLogoUrl: string | null; clientName: string
 }) {
-  const imageUrl = asset.public_url || (asset.file_path ? `https://${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('https://', '')}/storage/v1/object/public/campaign-assets/${asset.file_path}` : '')
+  const encodedPath = asset.file_path ? asset.file_path.split('/').map(encodeURIComponent).join('/') : ''
+  const supabaseHost = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/^https?:\/\//, '')
+  const imageUrl = asset.public_url || (encodedPath && supabaseHost ? `https://${supabaseHost}/storage/v1/object/public/campaign-assets/${encodedPath}` : '')
   const videoInfo = asset.url ? parseVideoUrl(asset.url) : null
 
   switch (mockupType) {
@@ -234,7 +271,11 @@ const STYLES = `
 
   .campaign-pres .pres-header{position:sticky;top:0;z-index:1000;background:rgba(13,17,18,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border-color);padding:14px 40px;display:flex;align-items:center;justify-content:space-between}
   .campaign-pres .pres-header .brand{font-size:1.3rem;font-weight:700;color:var(--brand-cyan)}
+  .campaign-pres .pres-header .header-right{display:flex;align-items:center;gap:12px}
   .campaign-pres .pres-header .campaign-badge{background:rgba(64,225,211,0.1);border:1px solid rgba(64,225,211,0.3);border-radius:20px;padding:4px 16px;font-size:0.82rem;color:var(--brand-cyan)}
+  .campaign-pres .pdf-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(243,213,109,0.1);border:1px solid rgba(243,213,109,0.3);border-radius:20px;padding:5px 16px;font-size:0.82rem;color:var(--brand-yellow);font-family:'Ping',sans-serif;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+  .campaign-pres .pdf-btn:hover:not(:disabled){background:rgba(243,213,109,0.18);box-shadow:0 0 16px rgba(243,213,109,0.15)}
+  .campaign-pres .pdf-btn:disabled{opacity:0.5;cursor:default}
 
   .campaign-pres .slide-nav{position:sticky;top:56px;z-index:999;background:rgba(13,17,18,0.95);backdrop-filter:blur(16px);display:flex;gap:0;overflow-x:auto;border-bottom:1px solid rgba(255,255,255,0.06);padding:0 20px}
   .campaign-pres .slide-nav button{background:none;border:none;border-bottom:3px solid transparent;color:var(--text-secondary);font-family:'Ping',sans-serif;font-size:0.85rem;padding:12px 18px;cursor:pointer;white-space:nowrap;transition:all 0.3s}
@@ -307,6 +348,7 @@ const STYLES = `
 
   @media(max-width:768px){
     .campaign-pres .pres-header{padding:12px 16px}
+    .campaign-pres .pres-header .campaign-badge{display:none}
     .campaign-pres .pres-main{padding:20px 12px 80px}
     .campaign-pres .cover-client{font-size:2rem}
     .campaign-pres .cover-campaign{font-size:1.1rem}
@@ -316,5 +358,22 @@ const STYLES = `
     .campaign-pres .assets-grid.story-grid{grid-template-columns:repeat(2,1fr)}
     .campaign-pres .slide-nav button{font-size:0.75rem;padding:10px 12px}
     .campaign-pres .pres-footer{padding:16px 16px 60px;flex-direction:column;gap:8px;text-align:center}
+  }
+
+  @media print{
+    body.printing-all-slides .campaign-pres .pres-header,
+    body.printing-all-slides .campaign-pres .slide-nav,
+    body.printing-all-slides .campaign-pres .slide-footer-nav,
+    body.printing-all-slides .campaign-pres .pres-footer{display:none !important}
+    body.printing-all-slides .campaign-pres .bg-noise,
+    body.printing-all-slides .campaign-pres .bg-grid,
+    body.printing-all-slides .campaign-pres .ambient-light,
+    body.printing-all-slides .campaign-pres .ambient-light-2{display:none !important}
+    body.printing-all-slides .campaign-pres{background:#0d1112 !important}
+    body.printing-all-slides .campaign-pres .pres-main{padding:0 !important;max-width:100% !important}
+    body.printing-all-slides .campaign-pres .slide{display:block !important;page-break-after:always;break-after:page;padding:40px 30px;min-height:auto}
+    body.printing-all-slides .campaign-pres .slide:last-child{page-break-after:auto}
+    body.printing-all-slides *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
+    @page{size:landscape;margin:0}
   }
 `

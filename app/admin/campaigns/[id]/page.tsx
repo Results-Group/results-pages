@@ -64,8 +64,16 @@ export default function EditCampaignPage() {
 
   useEffect(() => {
     fetch(`/api/campaigns/${campaignId}`)
-      .then(r => r.json())
+      .then(r => {
+        if (r.status === 401) {
+          window.location.href = '/admin/login'
+          return null
+        }
+        if (!r.ok) throw new Error('load failed')
+        return r.json()
+      })
       .then(data => {
+        if (!data) return
         setClient(data.client || '')
         setCampaignName(data.campaign_name || '')
         setConcept(data.concept || '')
@@ -117,6 +125,7 @@ export default function EditCampaignPage() {
           id: s.id,
           title: s.title,
           mockup_type: s.mockup_type,
+          description: s.description,
           assets: s.assets.map(a => ({
             id: a.id,
             type: a.type,
