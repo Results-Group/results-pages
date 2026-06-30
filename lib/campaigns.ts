@@ -159,9 +159,15 @@ export async function compressAndUploadImage(
 
   const finalPath = storagePath.replace(/\.[^.]+$/, '.webp')
 
+  // Wrap the binary in a Blob so supabase-js uploads it via the multipart
+  // (FormData) path. Passing a raw Node Buffer makes supabase-js send it as a
+  // plain request body, which Vercel's runtime mangles through UTF-8 encoding
+  // (corrupting the bytes with U+FFFD). A Blob is binary-safe everywhere.
+  const blob = new Blob([new Uint8Array(compressed)], { type: 'image/webp' })
+
   const { error } = await supabase.storage
     .from(ASSETS_BUCKET)
-    .upload(finalPath, compressed, {
+    .upload(finalPath, blob, {
       contentType: 'image/webp',
       upsert: true,
       cacheControl: '31536000',

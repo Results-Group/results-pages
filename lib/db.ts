@@ -274,9 +274,13 @@ export async function deleteVersion(versionId: string) {
 const BUCKET = 'landing-pages'
 
 export async function uploadFile(filePath: string, buffer: Buffer, contentType = 'text/html') {
+  // Wrap in a Blob so supabase-js uploads via the binary-safe multipart path.
+  // A raw Node Buffer gets sent as a plain body which Vercel's runtime mangles
+  // through UTF-8 encoding (corrupting bytes, including non-ASCII Hebrew text).
+  const blob = new Blob([new Uint8Array(buffer)], { type: contentType })
   const { error } = await supabase.storage
     .from(BUCKET)
-    .upload(filePath, buffer, { contentType, upsert: true, cacheControl: 'no-cache' })
+    .upload(filePath, blob, { contentType, upsert: true, cacheControl: 'no-cache' })
   if (error) throw error
 }
 
