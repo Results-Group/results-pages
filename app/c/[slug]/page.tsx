@@ -85,6 +85,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
       slides.push({
         type: 'creatives',
         title: section.title,
+        content: section.description,
         mockupType: section.mockup_type,
         assets: section.assets || [],
         clientLogoUrl,

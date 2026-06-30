@@ -184,6 +184,7 @@ function CreativesSlide({ slide }: { slide: SlideData }) {
   return (
     <div>
       {slide.title && <h2 className="slide-title">{slide.title}</h2>}
+      {slide.content && <p className="slide-intro">{slide.content}</p>}
       {assets.length > 0 && (
         <div className={`assets-grid ${isStory ? 'story-grid' : 'standard-grid'}`}>
           {assets.map((asset) => (
@@ -296,6 +297,7 @@ const STYLES = `
 
   .campaign-pres .slide-title{font-size:1.6rem;font-weight:700;margin-bottom:24px;color:var(--text-primary);display:flex;align-items:center;gap:12px}
   .campaign-pres .slide-title::before{content:'';display:block;width:4px;height:28px;background:var(--brand-yellow);border-radius:2px;flex-shrink:0}
+  .campaign-pres .slide-intro{font-size:1.05rem;line-height:1.7;color:var(--text-secondary);margin:-12px 0 28px;max-width:760px;white-space:pre-wrap}
 
   /* Cover Slide */
   .campaign-pres .cover-slide{text-align:center;padding:90px 20px 80px;position:relative;min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
