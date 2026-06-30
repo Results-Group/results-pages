@@ -9,6 +9,7 @@ import FacebookFeedMockup from './mockups/facebook-feed'
 import VideoCard from './mockups/video-card'
 import GeneralCard from './mockups/general-card'
 import { parseVideoUrl } from '@/lib/video-utils'
+import { assetProxyUrl } from '@/lib/asset-url'
 
 interface Props {
   slides: SlideData[]
@@ -224,9 +225,9 @@ function ClosingSlide({ slide }: { slide: SlideData }) {
 function AssetRenderer({ asset, mockupType, clientLogoUrl, clientName }: {
   asset: CampaignAsset; mockupType: string; clientLogoUrl: string | null; clientName: string
 }) {
-  const encodedPath = asset.file_path ? asset.file_path.split('/').map(encodeURIComponent).join('/') : ''
-  const supabaseHost = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/^https?:\/\//, '')
-  const imageUrl = asset.public_url || (encodedPath && supabaseHost ? `https://${supabaseHost}/storage/v1/object/public/campaign-assets/${encodedPath}` : '')
+  // Serve through our own domain so the client's browser never has to reach
+  // the Supabase domain directly (falls back to the direct URL if needed).
+  const imageUrl = asset.file_path ? assetProxyUrl(asset.file_path) : (asset.public_url || '')
   const videoInfo = asset.url ? parseVideoUrl(asset.url) : null
 
   switch (mockupType) {

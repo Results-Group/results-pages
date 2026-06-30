@@ -16,6 +16,7 @@ import {
   verticalListSortingStrategy, rectSortingStrategy, arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { assetProxyUrl, assetDirectUrl } from '@/lib/asset-url'
 
 // ── Types ──
 
@@ -58,14 +59,6 @@ const MOCKUP_TYPES: Record<string, string> = {
   divider: 'חוצץ / שקף ביניים',
 }
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-
-function buildAssetUrl(filePath: string): string {
-  if (!filePath) return ''
-  const encoded = filePath.split('/').map(encodeURIComponent).join('/')
-  return `${SUPABASE_URL}/storage/v1/object/public/campaign-assets/${encoded}`
-}
-
 const inputStyle = {
   background: 'var(--admin-bg-elevated)',
   border: '1px solid var(--admin-border)',
@@ -75,12 +68,14 @@ const inputStyle = {
 // ── Resilient thumbnail (tries public_url, falls back to constructed URL) ──
 
 function Thumb({ asset, className, style }: { asset: Asset; className?: string; style?: React.CSSProperties }) {
-  const primary = asset.public_url || buildAssetUrl(asset.file_path)
-  const fallback = buildAssetUrl(asset.file_path)
-  const [src, setSrc] = useState(primary)
-  const [failed, setFailed] = useState(false)
+  // Try same-origin proxy first, then the direct Supabase URL as a fallback.
+  const candidates = [
+    assetProxyUrl(asset.file_path),
+    asset.public_url || assetDirectUrl(asset.file_path),
+  ].filter(Boolean)
+  const [idx, setIdx] = useState(0)
 
-  if (failed && !src) {
+  if (candidates.length === 0 || idx >= candidates.length) {
     return (
       <div className={className} style={{ ...style, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <ImageIcon className="w-6 h-6" style={{ color: 'var(--admin-text-muted)' }} />
@@ -90,14 +85,11 @@ function Thumb({ asset, className, style }: { asset: Asset; className?: string; 
 
   return (
     <img
-      src={src}
+      src={candidates[idx]}
       alt={asset.caption || ''}
       className={className}
       style={style}
-      onError={() => {
-        if (src !== fallback && fallback) setSrc(fallback)
-        else setFailed(true)
-      }}
+      onError={() => setIdx(i => i + 1)}
     />
   )
 }

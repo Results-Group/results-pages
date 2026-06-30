@@ -1,9 +1,10 @@
 import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { Metadata } from 'next'
-import { getCampaignBySlug, getAssetPublicUrl, enrichCampaignUrls } from '@/lib/campaigns'
+import { getCampaignBySlug, enrichCampaignUrls } from '@/lib/campaigns'
 import type { CampaignSection, CampaignAsset } from '@/lib/campaigns'
 import { getSession } from '@/lib/auth'
+import { assetProxyUrl } from '@/lib/asset-url'
 import CampaignPresentation from './presentation'
 import PasswordGate from './password-gate'
 
@@ -63,7 +64,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
   }
 
   const campaign = enrichCampaignUrls(rawCampaign)
-  const clientLogoUrl = campaign.logo_url || (campaign.logo_path ? getAssetPublicUrl(campaign.logo_path) : null)
+  const clientLogoUrl = campaign.logo_path ? assetProxyUrl(campaign.logo_path) : null
   const formattedDate = new Date(campaign.created_at).toLocaleDateString('he-IL', {
     year: 'numeric', month: 'long', day: 'numeric',
   })
