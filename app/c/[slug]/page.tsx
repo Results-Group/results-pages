@@ -1,8 +1,11 @@
 import { notFound } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { Metadata } from 'next'
 import { getCampaignBySlug, getAssetPublicUrl, enrichCampaignUrls } from '@/lib/campaigns'
 import type { CampaignSection, CampaignAsset } from '@/lib/campaigns'
+import { getSession } from '@/lib/auth'
 import CampaignPresentation from './presentation'
+import PasswordGate from './password-gate'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -14,6 +17,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const campaign = await getCampaignBySlug(slug)
 
   if (!campaign) return { title: 'Campaign Not Found' }
+
+  // Don't leak content for drafts or password-protected campaigns
+  if (campaign.status === 'draft' || campaign.password) {
+    return { title: 'Results Digital', robots: { index: false, follow: false } }
+  }
 
   return {
     title: `${campaign.client} – ${campaign.campaign_name} | Results Digital`,
@@ -29,11 +37,29 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function CampaignPage({ params, searchParams }: PageProps) {
   const { slug } = await params
   const sp = await searchParams
-  const isPreview = sp.preview === '1'
   const rawCampaign = await getCampaignBySlug(slug)
 
-  if (!rawCampaign || (!isPreview && rawCampaign.status === 'draft')) {
+  if (!rawCampaign) {
     notFound()
+  }
+
+  // Only logged-in admins/editors may preview, and preview is the only way to view drafts.
+  const session = await getSession()
+  const isAdmin = !!session
+  const isPreview = sp.preview === '1' && isAdmin
+
+  if (rawCampaign.status === 'draft' && !isPreview) {
+    notFound()
+  }
+
+  // Password gate: published campaigns with a password require the visitor to
+  // enter it (admins bypass since they're authenticated).
+  if (rawCampaign.password && !isAdmin) {
+    const cookieStore = await cookies()
+    const access = cookieStore.get(`cmp_${rawCampaign.id}`)?.value
+    if (access !== rawCampaign.password) {
+      return <PasswordGate slug={slug} clientName={rawCampaign.client} />
+    }
   }
 
   const campaign = enrichCampaignUrls(rawCampaign)

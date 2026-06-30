@@ -41,6 +41,7 @@ export default function NewCampaignPage() {
   const [client, setClient] = useState('')
   const [campaignName, setCampaignName] = useState('')
   const [concept, setConcept] = useState('')
+  const [password, setPassword] = useState('')
   const [logoPath, setLogoPath] = useState<string | null>(null)
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [sections, setSections] = useState<Section[]>([])
@@ -99,6 +100,7 @@ export default function NewCampaignPage() {
         client: client.trim(),
         campaign_name: campaignName.trim(),
         concept: concept.trim(),
+        password: password.trim() || null,
         logo_path: logoPath,
         status,
         sections: sections.map(s => ({
@@ -359,6 +361,26 @@ export default function NewCampaignPage() {
             onFocus={e => (e.currentTarget.style.borderColor = 'var(--admin-accent)')}
             onBlur={e => (e.currentTarget.style.borderColor = 'var(--admin-border)')}
           />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>
+            סיסמת הגנה (אופציונלי)
+          </label>
+          <input
+            type="text"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="השאירו ריק לקמפיין ציבורי"
+            dir="ltr"
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            style={inputStyle}
+            onFocus={e => (e.currentTarget.style.borderColor = 'var(--admin-accent)')}
+            onBlur={e => (e.currentTarget.style.borderColor = 'var(--admin-border)')}
+          />
+          <p className="text-xs mt-1.5" style={{ color: 'var(--admin-text-muted)' }}>
+            אם תגדירו סיסמה, הלקוח יידרש להזין אותה לפני הצפייה בקמפיין
+          </p>
         </div>
 
         {/* Logo Upload */}
