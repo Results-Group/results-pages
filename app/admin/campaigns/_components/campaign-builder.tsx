@@ -573,7 +573,7 @@ export default function CampaignBuilder({ mode, initial }: { mode: 'new' | 'edit
                                     <SortableAsset key={asset.id} id={asset.id}>
                                       {(handleProps) => (
                                         <div className="relative group">
-                                          <Thumb asset={asset} className="w-full h-[120px] object-cover rounded-lg" style={{ background: 'var(--admin-bg)' }} />
+                                          <Thumb asset={asset} className="w-full h-[120px] object-contain rounded-lg" style={{ background: 'var(--admin-bg)' }} />
                                           <span className="absolute top-1.5 right-1.5 flex items-center justify-center w-5 h-5 rounded text-[10px] font-black"
                                             style={{ background: 'rgba(0,0,0,0.65)', color: '#fff' }}>{aIdx + 1}</span>
                                           <button {...handleProps as Record<string, unknown>} type="button" aria-label="גרור תמונה"
