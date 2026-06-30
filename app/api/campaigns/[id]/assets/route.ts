@@ -1,0 +1,100 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { requireRole } from '@/lib/auth'
+import {
+  getCampaignById,
+  updateCampaign,
+  compressAndUploadImage,
+  uploadLogoImage,
+  getAssetPublicUrl,
+  deleteAsset,
+} from '@/lib/campaigns'
+
+export const runtime = 'nodejs'
+export const maxDuration = 60
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const roleErr = requireRole(request, 'editor')
+  if (roleErr) return roleErr
+
+  const { id } = await params
+
+  try {
+    const campaign = await getCampaignById(id)
+    if (!campaign) {
+      return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
+    }
+
+    const formData = await request.formData()
+    const files = formData.getAll('files') as File[]
+    const type = (formData.get('type') as string) || 'asset'
+
+    if (!files.length) {
+      return NextResponse.json({ error: 'לא נבחרו קבצים' }, { status: 400 })
+    }
+
+    const results: { file_path: string; public_url: string }[] = []
+
+    for (const file of files) {
+      let filePath: string
+
+      if (type === 'logo') {
+        filePath = await uploadLogoImage(file, campaign.client, campaign.slug)
+        await updateCampaign(id, { logo_path: filePath })
+      } else {
+        const uuid = crypto.randomUUID()
+        const storagePath = `campaigns/${campaign.client}/${campaign.slug}/${uuid}.webp`
+        filePath = await compressAndUploadImage(file, storagePath)
+      }
+
+      results.push({
+        file_path: filePath,
+        public_url: getAssetPublicUrl(filePath),
+      })
+    }
+
+    return NextResponse.json(results, { status: 201 })
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'שגיאה בהעלאת קבצים' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const roleErr = requireRole(request, 'editor')
+  if (roleErr) return roleErr
+
+  const { id } = await params
+
+  try {
+    const campaign = await getCampaignById(id)
+    if (!campaign) {
+      return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
+    }
+
+    const body = await request.json()
+    const { file_path } = body
+
+    if (!file_path) {
+      return NextResponse.json(
+        { error: 'נדרש נתיב קובץ למחיקה' },
+        { status: 400 }
+      )
+    }
+
+    await deleteAsset(file_path)
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'שגיאה במחיקת קובץ' },
+      { status: 500 }
+    )
+  }
+}

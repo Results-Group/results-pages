@@ -84,10 +84,34 @@ CREATE POLICY "Service role full access on admin_users" ON admin_users FOR ALL U
 ALTER TABLE landing_pages ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES admin_users(id) DEFAULT NULL;
 ALTER TABLE landing_pages ADD COLUMN IF NOT EXISTS updated_by UUID REFERENCES admin_users(id) DEFAULT NULL;
 
--- ── Storage bucket ──
--- Create a storage bucket called "landing-pages" via the Supabase dashboard:
---   Storage > New Bucket > Name: "landing-pages" > Public: OFF
--- Or run:
+-- ── Campaigns (creative approval system) ──
+
+CREATE TABLE IF NOT EXISTS campaigns (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  client TEXT NOT NULL,
+  campaign_name TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  concept TEXT,
+  logo_path TEXT,
+  sections JSONB NOT NULL DEFAULT '[]',
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published', 'archived')),
+  password TEXT,
+  created_by UUID REFERENCES admin_users(id),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE campaigns ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Service role full access on campaigns" ON campaigns FOR ALL USING (true) WITH CHECK (true);
+
+-- ── Storage buckets ──
+
+-- Private bucket for landing page HTML files
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('landing-pages', 'landing-pages', false)
+ON CONFLICT (id) DO NOTHING;
+
+-- Public bucket for campaign creative assets (images accessible via CDN)
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('campaign-assets', 'campaign-assets', true)
 ON CONFLICT (id) DO NOTHING;

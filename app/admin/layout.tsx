@@ -13,6 +13,7 @@ import {
   Moon,
   Users,
   Shield,
+  Megaphone,
 } from 'lucide-react'
 
 interface SessionUser {
@@ -68,6 +69,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navItems = [
     { href: '/admin', label: 'כל הדפים', icon: FileText, show: true },
     { href: '/admin/upload', label: 'העלאת דף', icon: Upload, show: currentUser?.role !== 'viewer' },
+    { href: '/admin/campaigns', label: 'קמפיינים', icon: Megaphone, show: currentUser?.role !== 'viewer' },
     { href: '/admin/users', label: 'משתמשים', icon: Users, show: isAdmin },
   ]
 

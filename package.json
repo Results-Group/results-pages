@@ -15,6 +15,7 @@
     "postcss": "^8.5.15",
     "react": "latest",
     "react-dom": "latest",
+    "sharp": "^0.35.2",
     "tailwindcss": "^4.3.1"
   },
   "devDependencies": {

@@ -3,6 +3,9 @@ import { getPageByClientSlug, getPageByShortUrl, createPage, uploadFile } from '
 import { requireRole, getSessionFromRequest } from '@/lib/auth'
 import { minifyHtml } from '@/lib/minify'
 
+export const runtime = 'nodejs'
+export const maxDuration = 60
+
 export async function POST(req: NextRequest) {
   const roleErr = requireRole(req, 'editor')
   if (roleErr) return roleErr
