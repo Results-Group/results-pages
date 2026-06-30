@@ -38,10 +38,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const slug = (body.slug || campaign_name)
+    const baseSlug = (body.slug || campaign_name)
       .toLowerCase()
       .replace(/\s+/g, '-')
       .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+    const suffix = crypto.randomUUID().slice(0, 6)
+    const slug = baseSlug ? `${baseSlug}-${suffix}` : suffix
 
     const existing = await getCampaignBySlug(slug)
     if (existing) {

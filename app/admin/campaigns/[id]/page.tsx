@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowRight, Plus, Trash2, Upload, Link2, Image, Check, Copy, ExternalLink } from 'lucide-react'
+import { ArrowRight, Plus, Trash2, Upload, Link2, Image, Check, Copy, ExternalLink, Eye, EyeOff } from 'lucide-react'
 
 interface Asset {
   id: string
@@ -49,6 +49,8 @@ export default function EditCampaignPage() {
   const [error, setError] = useState('')
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [uploadingSections, setUploadingSections] = useState<Record<string, number>>({})
+  const [showPreview, setShowPreview] = useState(false)
+  const [previewKey, setPreviewKey] = useState(0)
 
   const inputStyle = {
     background: 'var(--admin-bg-elevated)',
@@ -123,16 +125,13 @@ export default function EditCampaignPage() {
         body: JSON.stringify(body),
       })
 
+      const data = await res.json()
       if (!res.ok) {
-        const data = await res.json()
         throw new Error(data.error || 'שגיאה בשמירה')
       }
 
       setStatus(newStatus)
-      if (newStatus === 'published') {
-        const data = await res.json()
-        if (data.slug) setSlug(data.slug)
-      }
+      if (data.slug) setSlug(data.slug)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'שגיאה בשמירה')
     } finally {
@@ -271,7 +270,8 @@ export default function EditCampaignPage() {
   }
 
   function getAssetUrl(filePath: string) {
-    return `${SUPABASE_URL}/storage/v1/object/public/campaign-assets/${filePath}`
+    const encoded = filePath.split('/').map(encodeURIComponent).join('/')
+    return `${SUPABASE_URL}/storage/v1/object/public/campaign-assets/${encoded}`
   }
 
   function getCampaignUrl() {
@@ -628,8 +628,56 @@ export default function EditCampaignPage() {
         <p className="text-sm mb-4" style={{ color: 'var(--admin-danger)' }}>{error}</p>
       )}
 
+      {/* Preview */}
+      <div className="mb-6">
+        <button
+          onClick={async () => {
+            if (!showPreview) {
+              await saveCampaign('draft')
+              setPreviewKey(k => k + 1)
+            }
+            setShowPreview(p => !p)
+          }}
+          className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-200 w-full justify-center"
+          style={{
+            background: showPreview ? 'rgba(64,225,211,0.08)' : 'var(--admin-bg-elevated)',
+            border: `1px solid ${showPreview ? 'rgba(64,225,211,0.3)' : 'var(--admin-border)'}`,
+            color: showPreview ? 'var(--admin-accent)' : 'var(--admin-text-primary)',
+          }}
+        >
+          {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          {showPreview ? 'הסתר תצוגה מקדימה' : 'תצוגה מקדימה'}
+        </button>
+
+        {showPreview && slug && (
+          <div className="mt-4 rounded-2xl overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
+            <div className="px-4 py-2.5 flex items-center justify-between" style={{ background: 'var(--admin-bg)', borderBottom: '1px solid var(--admin-border)' }}>
+              <span className="text-xs font-bold" style={{ color: 'var(--admin-text-muted)' }}>
+                תצוגה מקדימה – כך הלקוח יראה את הקמפיין
+              </span>
+              <a
+                href={getCampaignUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs flex items-center gap-1 transition-colors"
+                style={{ color: 'var(--admin-accent)' }}
+              >
+                <ExternalLink className="w-3 h-3" />
+                פתח בחלון חדש
+              </a>
+            </div>
+            <iframe
+              key={previewKey}
+              src={`${getCampaignUrl()}?preview=1`}
+              className="w-full bg-[#0d1112]"
+              style={{ height: '700px', border: 'none' }}
+            />
+          </div>
+        )}
+      </div>
+
       {/* Footer Actions */}
-      <div className="flex items-center gap-3 pt-4 pb-8" style={{ borderTop: '1px solid var(--admin-border)' }}>
+      <div className="flex items-center flex-wrap gap-3 pt-4 pb-8" style={{ borderTop: '1px solid var(--admin-border)' }}>
         <button
           onClick={() => saveCampaign('draft')}
           disabled={saving}
