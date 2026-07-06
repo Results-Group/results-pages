@@ -372,6 +372,50 @@ export async function fetchPayments(r: DateRange) {
   }
 }
 
+// ── Order processing time ──
+
+export async function fetchOrderTiming(r: DateRange) {
+  const [summary] = await pizzaHouseQuery<{ avg_minutes: number }>(
+    `SELECT ROUND(AVG(TIMESTAMPDIFF(SECOND, tm_open, tm_close)) / 60, 1) as avg_minutes
+     FROM deals
+     WHERE tm_open >= ? AND tm_open < ? AND sum > 0 AND tm_close > tm_open
+       AND TIMESTAMPDIFF(MINUTE, tm_open, tm_close) BETWEEN 1 AND 180`,
+    [r.from, r.to]
+  )
+
+  const byHour = await pizzaHouseQuery<{ hour: number; avg_minutes: number; orders: number }>(
+    `SELECT HOUR(tm_open) as hour,
+            ROUND(AVG(TIMESTAMPDIFF(SECOND, tm_open, tm_close)) / 60, 1) as avg_minutes,
+            COUNT(*) as orders
+     FROM deals
+     WHERE tm_open >= ? AND tm_open < ? AND sum > 0 AND tm_close > tm_open
+       AND TIMESTAMPDIFF(MINUTE, tm_open, tm_close) BETWEEN 1 AND 180
+     GROUP BY hour ORDER BY hour`,
+    [r.from, r.to]
+  )
+
+  return { avg_minutes: summary?.avg_minutes ?? 0, byHour }
+}
+
+// ── Dead items (in catalog but not sold in range) ──
+
+export async function fetchDeadItems(r: DateRange) {
+  return pizzaHouseQuery<{ name: string; sale_price: number; category: string }>(
+    `SELECT i.name, i.sale_price,
+            COALESCE(NULLIF(TRIM(g.name), ''), 'ללא קטגוריה') as category
+     FROM items i
+     LEFT JOIN \`groups\` g ON i.grp = g.id
+     WHERE i.sale_price > 0
+       AND i.name NOT IN (
+         SELECT DISTINCT name FROM paymentitm
+         WHERE date >= ? AND date < ? AND sum > 0
+       )
+     ORDER BY i.sale_price DESC
+     LIMIT 20`,
+    [r.from, r.to]
+  )
+}
+
 // ── Data freshness ──
 
 export async function fetchFreshness() {

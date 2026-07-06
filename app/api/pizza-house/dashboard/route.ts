@@ -8,6 +8,8 @@ import {
   fetchProducts,
   fetchChannels,
   fetchPayments,
+  fetchOrderTiming,
+  fetchDeadItems,
   fetchFreshness,
   type DateRange,
 } from '@/lib/pizza-house-queries'
@@ -62,7 +64,7 @@ export async function GET(req: NextRequest) {
   const prevRange: DateRange = { from: `${prevFrom} 00:00:00`, to: `${from} 00:00:00` }
 
   try {
-    const [summary, prevSummary, timeseries, heatmap, weekdays, customers, products, channels, payments, freshness] =
+    const [summary, prevSummary, timeseries, heatmap, weekdays, customers, products, channels, payments, orderTiming, deadItems, freshness] =
       await Promise.all([
         fetchSummary(range),
         fetchSummary(prevRange),
@@ -73,6 +75,8 @@ export async function GET(req: NextRequest) {
         fetchProducts(range, prevRange),
         fetchChannels(range),
         fetchPayments(range),
+        fetchOrderTiming(range),
+        fetchDeadItems(range),
         fetchFreshness(),
       ])
 
@@ -88,6 +92,8 @@ export async function GET(req: NextRequest) {
       products,
       channels,
       payments,
+      orderTiming,
+      deadItems,
       freshness,
       generated_at: new Date().toISOString(),
     }

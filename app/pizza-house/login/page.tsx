@@ -34,50 +34,63 @@ export default function PizzaHouseLoginPage() {
     <div
       dir="rtl"
       className="flex items-center justify-center min-h-screen"
-      style={{ background: 'linear-gradient(135deg, #0f0f23 0%, #16213e 100%)', fontFamily: 'Heebo, sans-serif' }}
+      style={{ background: '#050505' }}
     >
       <div className="w-full max-w-sm px-4">
         <form
           onSubmit={handleSubmit}
           className="rounded-2xl p-10"
-          style={{ background: 'rgba(26,26,46,0.9)', border: '1px solid rgba(255,255,255,0.08)' }}
+          style={{ background: '#0f0f0f', border: '1px solid rgba(255,255,255,0.08)' }}
         >
           <div className="flex justify-center mb-6">
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }}
+              style={{ background: 'rgba(243,213,109,0.12)' }}
             >
-              <Pizza className="w-8 h-8 text-white" />
+              <Pizza className="w-8 h-8" style={{ color: '#F3D56D' }} />
             </div>
           </div>
 
-          <h1 className="text-xl font-black text-center mb-1 text-slate-100">Pizza House</h1>
-          <p className="text-center text-sm mb-8 text-slate-400">דאשבורד מכירות ושיווק</p>
+          <h1 className="text-xl font-black text-center mb-1 text-white">Pizza House</h1>
+          <p className="text-center text-sm mb-8" style={{ color: 'rgba(255,255,255,0.4)' }}>דאשבורד מכירות ושיווק</p>
 
           <div className="relative mb-5">
-            <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'rgba(255,255,255,0.4)' }} />
             <input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="סיסמה"
               autoFocus
-              className="w-full pr-10 pl-4 py-3 rounded-xl text-sm outline-none text-slate-100"
-              style={{ background: 'rgba(15,15,35,0.8)', border: '1px solid rgba(255,255,255,0.1)' }}
+              className="w-full pr-10 pl-4 py-3 rounded-xl text-sm outline-none text-white"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.15)' }}
             />
           </div>
 
-          {error && <p className="text-sm mb-4 text-center text-red-400">{error}</p>}
+          {error && <p className="text-sm mb-4 text-center" style={{ color: '#f87171' }}>{error}</p>}
 
           <button
             type="submit"
             disabled={loading || !password}
-            className="w-full py-3.5 rounded-xl text-sm font-bold text-white transition-all duration-200 disabled:opacity-40"
-            style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }}
+            className="w-full py-3.5 rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-40"
+            style={{ background: '#F3D56D', color: '#050505' }}
           >
             {loading ? '...' : 'כניסה לדאשבורד'}
           </button>
         </form>
+
+        <div className="flex items-center justify-between mt-6 px-2">
+          <a
+            href="https://www.resultsdigital.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs transition-opacity hover:opacity-100"
+            style={{ color: 'rgba(255,255,255,0.4)', opacity: 0.6, textDecoration: 'none' }}
+          >
+            www.resultsdigital.org
+          </a>
+          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)', opacity: 0.6, margin: 0 }}>By Results Group</p>
+        </div>
       </div>
     </div>
   )
