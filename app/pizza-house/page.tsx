@@ -164,7 +164,7 @@ const tooltipStyle = {
 
 // ── Page ──
 
-export default function MederaDashboard() {
+export default function PizzaHouseDashboard() {
   const router = useRouter()
   const [preset, setPreset] = useState('7d')
   const [from, setFrom] = useState(PRESETS.find(p => p.id === '7d')!.range().from)
@@ -178,9 +178,9 @@ export default function MederaDashboard() {
       setLoading(true)
       setError('')
       try {
-        const res = await fetch(`/api/medera/dashboard?from=${f}&to=${t}${refresh ? '&refresh=1' : ''}`)
+        const res = await fetch(`/api/pizza-house/dashboard?from=${f}&to=${t}${refresh ? '&refresh=1' : ''}`)
         if (res.status === 401) {
-          router.push('/medera/login')
+          router.push('/pizza-house/login')
           return
         }
         if (!res.ok) throw new Error((await res.json()).error || 'שגיאה בטעינת נתונים')
@@ -216,8 +216,8 @@ export default function MederaDashboard() {
   }
 
   async function logout() {
-    await fetch('/api/medera/auth', { method: 'DELETE' })
-    router.push('/medera/login')
+    await fetch('/api/pizza-house/auth', { method: 'DELETE' })
+    router.push('/pizza-house/login')
   }
 
   // Heatmap matrix
@@ -242,7 +242,7 @@ export default function MederaDashboard() {
           </div>
           <div>
             <h1 className="text-2xl font-black" style={{ background: 'linear-gradient(135deg, #667eea, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              Medera — דאשבורד שיווק
+              Pizza House — דאשבורד שיווק
             </h1>
             {data?.freshness.last_deal && (
               <p className="text-xs text-slate-500">עסקה אחרונה בקופה: {data.freshness.last_deal.replace('T', ' ').slice(0, 16)}</p>

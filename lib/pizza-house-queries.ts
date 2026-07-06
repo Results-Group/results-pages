@@ -1,4 +1,4 @@
-import { mederaQuery } from './medera-db'
+import { pizzaHouseQuery } from './pizza-house-db'
 
 /*
  * All queries work on a [from, toExclusive) datetime window.
@@ -44,7 +44,7 @@ const CARD_BRANDS: Record<string, string> = {
 // ── KPI summary ──
 
 export async function fetchSummary(r: DateRange) {
-  const [deals] = await mederaQuery<{
+  const [deals] = await pizzaHouseQuery<{
     revenue: number | null
     orders: number
     avg_order: number | null
@@ -61,7 +61,7 @@ export async function fetchSummary(r: DateRange) {
     [r.from, r.to]
   )
 
-  const [items] = await mederaQuery<{
+  const [items] = await pizzaHouseQuery<{
     items_sold: number | null
     discounts: number | null
     discounted_lines: number
@@ -74,14 +74,14 @@ export async function fetchSummary(r: DateRange) {
     [r.from, r.to]
   )
 
-  const [delivery] = await mederaQuery<{ delivery_orders: number }>(
+  const [delivery] = await pizzaHouseQuery<{ delivery_orders: number }>(
     `SELECT COUNT(DISTINCT id_deal) as delivery_orders
      FROM paymentitm
      WHERE date >= ? AND date < ? AND ${DELIVERY_PATTERN}`,
     [r.from, r.to]
   )
 
-  const [customers] = await mederaQuery<{ unique_customers: number }>(
+  const [customers] = await pizzaHouseQuery<{ unique_customers: number }>(
     `SELECT COUNT(DISTINCT CONCAT(id_card, '|', validto)) as unique_customers
      FROM creditcard
      WHERE date >= ? AND date < ? AND id_card != '' AND sum > 0`,
@@ -89,7 +89,7 @@ export async function fetchSummary(r: DateRange) {
   )
 
   // Cards seen in range that were also seen before the range = returning
-  const [returning] = await mederaQuery<{ returning_customers: number }>(
+  const [returning] = await pizzaHouseQuery<{ returning_customers: number }>(
     `SELECT COUNT(DISTINCT CONCAT(c.id_card, '|', c.validto)) as returning_customers
      FROM creditcard c
      WHERE c.date >= ? AND c.date < ? AND c.id_card != '' AND c.sum > 0
@@ -138,7 +138,7 @@ export async function fetchTimeseries(r: DateRange, rangeDays: number) {
     granularity = 'week'
   }
 
-  const rows = await mederaQuery<{ bucket: string; revenue: number; orders: number }>(
+  const rows = await pizzaHouseQuery<{ bucket: string; revenue: number; orders: number }>(
     `SELECT ${bucketExpr} as bucket,
             ROUND(SUM(CASE WHEN sum > 0 THEN sum ELSE 0 END), 2) as revenue,
             COUNT(CASE WHEN sum > 0 THEN 1 END) as orders
@@ -153,7 +153,7 @@ export async function fetchTimeseries(r: DateRange, rangeDays: number) {
 // ── Heatmap: day of week x hour ──
 
 export async function fetchHeatmap(r: DateRange) {
-  return mederaQuery<{ dow: number; hour: number; orders: number; revenue: number }>(
+  return pizzaHouseQuery<{ dow: number; hour: number; orders: number; revenue: number }>(
     `SELECT DAYOFWEEK(tm_open) as dow, HOUR(tm_open) as hour,
             COUNT(*) as orders,
             ROUND(SUM(sum), 2) as revenue
@@ -165,7 +165,7 @@ export async function fetchHeatmap(r: DateRange) {
 }
 
 export async function fetchWeekdays(r: DateRange) {
-  return mederaQuery<{ dow: number; orders: number; revenue: number; avg_order: number }>(
+  return pizzaHouseQuery<{ dow: number; orders: number; revenue: number; avg_order: number }>(
     `SELECT DAYOFWEEK(tm_open) as dow,
             COUNT(*) as orders,
             ROUND(SUM(sum), 2) as revenue,
@@ -181,7 +181,7 @@ export async function fetchWeekdays(r: DateRange) {
 
 export async function fetchCustomers(r: DateRange) {
   // New vs returning within range
-  const newVsReturning = await mederaQuery<{ kind: string; customers: number; revenue: number }>(
+  const newVsReturning = await pizzaHouseQuery<{ kind: string; customers: number; revenue: number }>(
     `SELECT
        CASE WHEN first_seen >= ? THEN 'new' ELSE 'returning' END as kind,
        COUNT(*) as customers,
@@ -200,7 +200,7 @@ export async function fetchCustomers(r: DateRange) {
   )
 
   // Visit frequency distribution (all-time behavior of customers active in range)
-  const frequency = await mederaQuery<{ bucket: string; customers: number }>(
+  const frequency = await pizzaHouseQuery<{ bucket: string; customers: number }>(
     `SELECT
        CASE
          WHEN visits = 1 THEN '1'
@@ -222,7 +222,7 @@ export async function fetchCustomers(r: DateRange) {
   )
 
   // VIP customers active in range: total all-time spend
-  const vip = await mederaQuery<{
+  const vip = await pizzaHouseQuery<{
     last4: string
     nm_card: string
     visits: number
@@ -247,7 +247,7 @@ export async function fetchCustomers(r: DateRange) {
   )
 
   // Institutional segment: meal cards by company
-  const mealCards = await mederaQuery<{ company: string; orders: number; revenue: number }>(
+  const mealCards = await pizzaHouseQuery<{ company: string; orders: number; revenue: number }>(
     `SELECT
        CASE WHEN name_company IS NULL OR name_company = '' THEN 'כרטיס סועד כללי' ELSE name_company END as company,
        COUNT(*) as orders,
@@ -264,7 +264,7 @@ export async function fetchCustomers(r: DateRange) {
 // ── Products, promos, categories ──
 
 export async function fetchProducts(r: DateRange, prev: DateRange) {
-  const top = await mederaQuery<{
+  const top = await pizzaHouseQuery<{
     name: string
     qty: number
     revenue: number
@@ -288,7 +288,7 @@ export async function fetchProducts(r: DateRange, prev: DateRange) {
     [r.from, r.to, prev.from, prev.to]
   )
 
-  const categories = await mederaQuery<{ category: string; qty: number; revenue: number }>(
+  const categories = await pizzaHouseQuery<{ category: string; qty: number; revenue: number }>(
     `SELECT
        COALESCE(NULLIF(TRIM(g.name), ''), 'ללא קטגוריה') as category,
        ROUND(SUM(p.count), 0) as qty,
@@ -301,7 +301,7 @@ export async function fetchProducts(r: DateRange, prev: DateRange) {
   )
 
   // Bundles/promos: names matching typical bundle patterns
-  const bundles = await mederaQuery<{ name: string; qty: number; revenue: number }>(
+  const bundles = await pizzaHouseQuery<{ name: string; qty: number; revenue: number }>(
     `SELECT name, ROUND(SUM(count), 0) as qty, ROUND(SUM(sum), 2) as revenue
      FROM paymentitm
      WHERE date >= ? AND date < ? AND sum > 0
@@ -310,7 +310,7 @@ export async function fetchProducts(r: DateRange, prev: DateRange) {
     [r.from, r.to]
   )
 
-  const discountedItems = await mederaQuery<{ name: string; times: number; discount_total: number }>(
+  const discountedItems = await pizzaHouseQuery<{ name: string; times: number; discount_total: number }>(
     `SELECT name, COUNT(*) as times, ROUND(SUM(sum_discount), 2) as discount_total
      FROM paymentitm
      WHERE date >= ? AND date < ? AND sum_discount > 0
@@ -324,7 +324,7 @@ export async function fetchProducts(r: DateRange, prev: DateRange) {
 // ── Channels: delivery vs pickup ──
 
 export async function fetchChannels(r: DateRange) {
-  const rows = await mederaQuery<{
+  const rows = await pizzaHouseQuery<{
     channel: string
     orders: number
     revenue: number
@@ -350,7 +350,7 @@ export async function fetchChannels(r: DateRange) {
 // ── Payments ──
 
 export async function fetchPayments(r: DateRange) {
-  const methods = await mederaQuery<{ id_pay: number; count: number; total: number }>(
+  const methods = await pizzaHouseQuery<{ id_pay: number; count: number; total: number }>(
     `SELECT id_pay, COUNT(*) as count, ROUND(SUM(sum), 2) as total
      FROM payment
      WHERE date >= ? AND date < ? AND sum > 0
@@ -358,7 +358,7 @@ export async function fetchPayments(r: DateRange) {
     [r.from, r.to]
   )
 
-  const brands = await mederaQuery<{ brand: string; count: number; total: number }>(
+  const brands = await pizzaHouseQuery<{ brand: string; count: number; total: number }>(
     `SELECT brand, COUNT(*) as count, ROUND(SUM(sum), 2) as total
      FROM creditcard
      WHERE date >= ? AND date < ? AND sum > 0
@@ -375,7 +375,7 @@ export async function fetchPayments(r: DateRange) {
 // ── Data freshness ──
 
 export async function fetchFreshness() {
-  const [row] = await mederaQuery<{ last_deal: string | null; last_z_update: string | null }>(
+  const [row] = await pizzaHouseQuery<{ last_deal: string | null; last_z_update: string | null }>(
     `SELECT
        (SELECT MAX(tm_open) FROM deals) as last_deal,
        (SELECT MAX(date_z_update) FROM z_info) as last_z_update`

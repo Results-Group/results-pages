@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { mederaQuery } from '@/lib/medera-db'
+import { pizzaHouseQuery } from '@/lib/pizza-house-db'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
-  if (!req.cookies.get('medera_session')?.value && !req.cookies.get('rp_session')?.value) {
+  if (!req.cookies.get('ph_session')?.value && !req.cookies.get('rp_session')?.value) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const startedAt = Date.now()
   try {
-    const rows = await mederaQuery<{ total: number; last_deal: string }>(
+    const rows = await pizzaHouseQuery<{ total: number; last_deal: string }>(
       'SELECT COUNT(*) as total, MAX(tm_open) as last_deal FROM deals'
     )
     return NextResponse.json({

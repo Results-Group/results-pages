@@ -112,7 +112,7 @@ export default function UploadPage() {
             type="text"
             value={client}
             onChange={e => setClient(e.target.value)}
-            placeholder="medera"
+            placeholder="pizza-house"
             dir="ltr"
             className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
             style={inputStyle}

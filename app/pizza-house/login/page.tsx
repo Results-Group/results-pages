@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Lock, Pizza } from 'lucide-react'
 
-export default function MederaLoginPage() {
+export default function PizzaHouseLoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -15,14 +15,14 @@ export default function MederaLoginPage() {
     setLoading(true)
     setError('')
 
-    const res = await fetch('/api/medera/auth', {
+    const res = await fetch('/api/pizza-house/auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password }),
     })
 
     if (res.ok) {
-      router.push('/medera')
+      router.push('/pizza-house')
     } else {
       const data = await res.json()
       setError(data.error || 'שגיאה בהתחברות')
@@ -51,7 +51,7 @@ export default function MederaLoginPage() {
             </div>
           </div>
 
-          <h1 className="text-xl font-black text-center mb-1 text-slate-100">Medera</h1>
+          <h1 className="text-xl font-black text-center mb-1 text-slate-100">Pizza House</h1>
           <p className="text-center text-sm mb-8 text-slate-400">דאשבורד מכירות ושיווק</p>
 
           <div className="relative mb-5">

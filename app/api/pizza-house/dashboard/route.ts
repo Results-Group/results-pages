@@ -10,7 +10,7 @@ import {
   fetchPayments,
   fetchFreshness,
   type DateRange,
-} from '@/lib/medera-queries'
+} from '@/lib/pizza-house-queries'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -21,7 +21,7 @@ const cache = new Map<string, { data: unknown; at: number }>()
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
 function isAuthorized(req: NextRequest): boolean {
-  return !!req.cookies.get('medera_session')?.value || !!req.cookies.get('rp_session')?.value
+  return !!req.cookies.get('ph_session')?.value || !!req.cookies.get('rp_session')?.value
 }
 
 function addDays(dateStr: string, days: number): string {
@@ -101,7 +101,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(data)
   } catch (err) {
-    console.error('medera dashboard error:', err)
+    console.error('pizza-house dashboard error:', err)
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Database error' },
       { status: 500 }

@@ -11,12 +11,12 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // Protect Medera dashboard (separate client password, admin session also accepted)
-  if (pathname.startsWith('/medera') && !pathname.startsWith('/medera/login')) {
-    const mederaSession = req.cookies.get('medera_session')?.value
+  // Protect Pizza House dashboard (separate client password, admin session also accepted)
+  if (pathname.startsWith('/pizza-house') && !pathname.startsWith('/pizza-house/login')) {
+    const clientSession = req.cookies.get('ph_session')?.value
     const adminSession = req.cookies.get('rp_session')?.value
-    if (!mederaSession && !adminSession) {
-      return NextResponse.redirect(new URL('/medera/login', req.url))
+    if (!clientSession && !adminSession) {
+      return NextResponse.redirect(new URL('/pizza-house/login', req.url))
     }
   }
 
@@ -40,5 +40,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/pages/:path*', '/r/:path*', '/medera/:path*', '/medera'],
+  matcher: ['/admin/:path*', '/pages/:path*', '/r/:path*', '/pizza-house/:path*', '/pizza-house'],
 }
