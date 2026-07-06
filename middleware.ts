@@ -11,6 +11,15 @@ export function middleware(req: NextRequest) {
     }
   }
 
+  // Protect Medera dashboard (separate client password, admin session also accepted)
+  if (pathname.startsWith('/medera') && !pathname.startsWith('/medera/login')) {
+    const mederaSession = req.cookies.get('medera_session')?.value
+    const adminSession = req.cookies.get('rp_session')?.value
+    if (!mederaSession && !adminSession) {
+      return NextResponse.redirect(new URL('/medera/login', req.url))
+    }
+  }
+
   // Short URL redirect: /r/{shortUrl} → API lookup
   if (pathname.startsWith('/r/')) {
     const shortSlug = pathname.slice(3)
@@ -31,5 +40,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/pages/:path*', '/r/:path*'],
+  matcher: ['/admin/:path*', '/pages/:path*', '/r/:path*', '/medera/:path*', '/medera'],
 }
