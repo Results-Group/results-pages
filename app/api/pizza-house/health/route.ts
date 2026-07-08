@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { verifySessionToken } from '@/lib/auth'
 import { pizzaHouseQuery } from '@/lib/pizza-house-db'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
-  if (!req.cookies.get('ph_session')?.value && !req.cookies.get('rp_session')?.value) {
+  const phToken = req.cookies.get('ph_session')?.value
+  const rpToken = req.cookies.get('rp_session')?.value
+  const phValid = phToken ? await verifySessionToken(phToken) : null
+  const rpValid = rpToken ? await verifySessionToken(rpToken) : null
+  if (!phValid && !rpValid) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const startedAt = Date.now()

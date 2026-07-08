@@ -10,7 +10,7 @@ function sourcePath(filePath: string): string {
 }
 
 export async function GET(req: NextRequest, { params }: Ctx) {
-  const authError = requireAuth(req)
+  const authError = await requireAuth(req)
   if (authError) return authError
 
   const { id } = await params
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
 }
 
 export async function PUT(req: NextRequest, { params }: Ctx) {
-  const roleErr = requireRole(req, 'editor')
+  const roleErr = await requireRole(req, 'editor')
   if (roleErr) return roleErr
 
   const { id } = await params

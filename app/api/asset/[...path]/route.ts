@@ -1,17 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import sharp from 'sharp'
 import { getAssetPublicUrl } from '@/lib/campaigns'
+import { rateLimit } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
 
-// Streams campaign assets through our own domain so the browser never needs to
-// reach the Supabase storage domain directly. It also serves a universally
-// compatible JPEG to browsers that don't support WebP (older Safari / webviews),
-// while modern browsers keep getting the smaller WebP.
+const CACHE_HEADERS = {
+  'Cache-Control': 'public, max-age=31536000, immutable',
+  Vary: 'Accept',
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> }
 ) {
+  const rl = rateLimit(request, { windowMs: 60_000, max: 200, prefix: 'asset' })
+  if (rl) return rl
+
   const { path } = await params
   const filePath = (path || []).map(decodeURIComponent).join('/')
 
@@ -25,6 +30,19 @@ export async function GET(
   const wantsJpeg = forceJpeg || !supportsWebp
 
   try {
+    if (wantsJpeg) {
+      // Try the pre-generated JPEG first to avoid runtime sharp conversion
+      const jpegPath = filePath.replace(/\.webp$/, '.jpeg')
+      const jpegRes = await fetch(getAssetPublicUrl(jpegPath))
+      if (jpegRes.ok) {
+        const buf = new Uint8Array(await jpegRes.arrayBuffer())
+        return new NextResponse(buf, {
+          status: 200,
+          headers: { 'Content-Type': 'image/jpeg', ...CACHE_HEADERS },
+        })
+      }
+    }
+
     const upstream = await fetch(getAssetPublicUrl(filePath))
     if (!upstream.ok) {
       return new NextResponse('Not found', { status: 404 })
@@ -32,16 +50,11 @@ export async function GET(
 
     const buffer = Buffer.from(await upstream.arrayBuffer())
 
-    const cacheHeaders = {
-      'Cache-Control': 'public, max-age=31536000, immutable',
-      Vary: 'Accept',
-    }
-
     if (wantsJpeg) {
       const jpeg = await sharp(buffer).jpeg({ quality: 88 }).toBuffer()
       return new NextResponse(new Uint8Array(jpeg), {
         status: 200,
-        headers: { 'Content-Type': 'image/jpeg', ...cacheHeaders },
+        headers: { 'Content-Type': 'image/jpeg', ...CACHE_HEADERS },
       })
     }
 
@@ -49,7 +62,7 @@ export async function GET(
       status: 200,
       headers: {
         'Content-Type': upstream.headers.get('content-type') || 'image/webp',
-        ...cacheHeaders,
+        ...CACHE_HEADERS,
       },
     })
   } catch {

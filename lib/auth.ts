@@ -1,7 +1,5 @@
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from './supabase'
-import { verifyPassword as verifyHash } from './hash'
 
 const SESSION_COOKIE = 'rp_session'
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
@@ -15,13 +13,47 @@ export interface SessionUser {
   name: string
 }
 
-function encodeSession(user: SessionUser): string {
-  return Buffer.from(JSON.stringify(user)).toString('base64')
+// ── HMAC signing (Web Crypto — works in Edge + Node) ──
+
+function getSecret(): string {
+  const s = process.env.SESSION_SECRET
+  if (!s) throw new Error('SESSION_SECRET env var is required')
+  return s
 }
 
-function decodeSession(token: string): SessionUser | null {
+async function hmacSign(payload: string): Promise<string> {
+  const enc = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw', enc.encode(getSecret()), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'],
+  )
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(payload))
+  return btoa(String.fromCharCode(...new Uint8Array(sig)))
+}
+
+async function hmacVerify(payload: string, signature: string): Promise<boolean> {
+  const expected = await hmacSign(payload)
+  if (expected.length !== signature.length) return false
+  let mismatch = 0
+  for (let i = 0; i < expected.length; i++) {
+    mismatch |= expected.charCodeAt(i) ^ signature.charCodeAt(i)
+  }
+  return mismatch === 0
+}
+
+async function encodeSession(user: SessionUser): Promise<string> {
+  const payload = btoa(JSON.stringify(user))
+  const sig = await hmacSign(payload)
+  return `${payload}.${sig}`
+}
+
+async function decodeSession(token: string): Promise<SessionUser | null> {
   try {
-    const json = Buffer.from(token, 'base64').toString('utf-8')
+    const dotIdx = token.lastIndexOf('.')
+    if (dotIdx < 1) return null
+    const payload = token.slice(0, dotIdx)
+    const sig = token.slice(dotIdx + 1)
+    if (!(await hmacVerify(payload, sig))) return null
+    const json = atob(payload)
     const parsed = JSON.parse(json)
     if (parsed.userId && parsed.email && parsed.role) return parsed as SessionUser
     return null
@@ -30,28 +62,17 @@ function decodeSession(token: string): SessionUser | null {
   }
 }
 
-// Legacy single-password check (fallback when admin_users table is empty/missing)
-export function verifyLegacyPassword(input: string): boolean {
-  const stored = process.env.ADMIN_PASSWORD
-  if (!stored) return false
-  return input === stored
-}
+// ── Public API ──
 
 export async function getSession(): Promise<SessionUser | null> {
   const cookieStore = await cookies()
   const token = cookieStore.get(SESSION_COOKIE)?.value
   if (!token) return null
-
-  const user = decodeSession(token)
-  if (user) return user
-
-  // Legacy session — any non-empty value means logged in with old system
-  return { userId: 'legacy', email: 'admin', role: 'admin', name: 'Admin' }
+  return decodeSession(token)
 }
 
 export async function isAuthenticated(): Promise<boolean> {
-  const session = await getSession()
-  return !!session
+  return !!(await getSession())
 }
 
 export async function destroySession(): Promise<void> {
@@ -59,19 +80,14 @@ export async function destroySession(): Promise<void> {
   cookieStore.delete(SESSION_COOKIE)
 }
 
-export function getSessionFromRequest(request: NextRequest): SessionUser | null {
+export async function getSessionFromRequest(request: NextRequest): Promise<SessionUser | null> {
   const token = request.cookies.get(SESSION_COOKIE)?.value
   if (!token) return null
-
-  const user = decodeSession(token)
-  if (user) return user
-
-  // Legacy fallback
-  return { userId: 'legacy', email: 'admin', role: 'admin', name: 'Admin' }
+  return decodeSession(token)
 }
 
-export function requireAuth(request: NextRequest): NextResponse | null {
-  const session = getSessionFromRequest(request)
+export async function requireAuth(request: NextRequest): Promise<NextResponse | null> {
+  const session = await getSessionFromRequest(request)
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -80,8 +96,8 @@ export function requireAuth(request: NextRequest): NextResponse | null {
 
 const ROLE_LEVEL: Record<UserRole, number> = { viewer: 0, editor: 1, admin: 2 }
 
-export function requireRole(request: NextRequest, minimumRole: UserRole): NextResponse | null {
-  const session = getSessionFromRequest(request)
+export async function requireRole(request: NextRequest, minimumRole: UserRole): Promise<NextResponse | null> {
+  const session = await getSessionFromRequest(request)
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -91,10 +107,10 @@ export function requireRole(request: NextRequest, minimumRole: UserRole): NextRe
   return null
 }
 
-export function createSessionCookie(user: SessionUser): { name: string; value: string; options: Record<string, unknown> } {
+export async function createSessionCookie(user: SessionUser): Promise<{ name: string; value: string; options: Record<string, unknown> }> {
   return {
     name: SESSION_COOKIE,
-    value: encodeSession(user),
+    value: await encodeSession(user),
     options: {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -106,6 +122,7 @@ export function createSessionCookie(user: SessionUser): { name: string; value: s
 }
 
 export async function hasAdminUsers(): Promise<boolean> {
+  const { supabase } = await import('./supabase')
   try {
     const { count, error } = await supabase
       .from('admin_users')
@@ -115,4 +132,9 @@ export async function hasAdminUsers(): Promise<boolean> {
   } catch {
     return false
   }
+}
+
+// Verify a signed session token (for middleware — Edge compatible)
+export async function verifySessionToken(token: string): Promise<SessionUser | null> {
+  return decodeSession(token)
 }

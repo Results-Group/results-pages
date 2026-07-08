@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import bcrypt from 'bcryptjs'
 
 export interface LandingPage {
   id: string
@@ -39,7 +40,10 @@ export async function getPages(filters?: { client?: string; search?: string }) {
   let query = supabase.from('landing_pages').select('*').order('created_at', { ascending: false })
 
   if (filters?.client) query = query.eq('client', filters.client)
-  if (filters?.search) query = query.ilike('title', `%${filters.search}%`)
+  if (filters?.search) {
+    const s = filters.search.replace(/[%_\\]/g, c => `\\${c}`)
+    query = query.ilike('title', `%${s}%`)
+  }
 
   const { data: pages, error } = await query
   if (error) throw error
@@ -98,13 +102,14 @@ export async function createPage(data: {
   short_url?: string | null
   created_by?: string
 }) {
+  const hashedPw = data.password ? await bcrypt.hash(data.password, 12) : null
   const insertData: Record<string, unknown> = {
     client: data.client,
     slug: data.slug,
     title: data.title,
     file_path: data.file_path,
     expires_at: data.expires_at || null,
-    password: data.password || null,
+    password: hashedPw,
     short_url: data.short_url || null,
   }
   if (data.created_by) insertData.created_by = data.created_by
@@ -130,7 +135,9 @@ export async function updatePage(
   if (data.active !== undefined) updateData.active = data.active
   if (data.expires_at !== undefined) updateData.expires_at = data.expires_at
   if (data.file_path !== undefined) updateData.file_path = data.file_path
-  if (data.password !== undefined) updateData.password = data.password
+  if (data.password !== undefined) {
+    updateData.password = data.password ? await bcrypt.hash(data.password, 12) : null
+  }
   if (data.short_url !== undefined) updateData.short_url = data.short_url || null
   if (data.updated_by) updateData.updated_by = data.updated_by
 
@@ -190,49 +197,6 @@ export interface LandingPageVersion {
   label: string | null
 }
 
-export async function ensureVersionsTable() {
-  try {
-    await supabase.rpc('exec_sql', {
-      sql: `CREATE TABLE IF NOT EXISTS landing_page_versions (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        page_id UUID NOT NULL REFERENCES landing_pages(id) ON DELETE CASCADE,
-        file_path TEXT NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT now(),
-        label TEXT
-      ); ALTER TABLE landing_page_versions ENABLE ROW LEVEL SECURITY; DO $$ BEGIN CREATE POLICY "Service role full access on landing_page_versions" ON landing_page_versions FOR ALL USING (true) WITH CHECK (true); EXCEPTION WHEN duplicate_object THEN NULL; END $$;`
-    })
-  } catch {
-    // Table creation via RPC may not be available — table must be created manually
-  }
-}
-
-export async function ensureAdminUsersTable() {
-  try {
-    await supabase.rpc('exec_sql', {
-      sql: `CREATE TABLE IF NOT EXISTS admin_users (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        email TEXT UNIQUE NOT NULL,
-        password_hash TEXT NOT NULL,
-        name TEXT NOT NULL,
-        role TEXT NOT NULL DEFAULT 'editor' CHECK (role IN ('admin', 'editor', 'viewer')),
-        created_at TIMESTAMPTZ DEFAULT now(),
-        last_login TIMESTAMPTZ
-      ); ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY; DO $$ BEGIN CREATE POLICY "Service role full access on admin_users" ON admin_users FOR ALL USING (true) WITH CHECK (true); EXCEPTION WHEN duplicate_object THEN NULL; END $$; ALTER TABLE landing_pages ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES admin_users(id) DEFAULT NULL; ALTER TABLE landing_pages ADD COLUMN IF NOT EXISTS updated_by UUID REFERENCES admin_users(id) DEFAULT NULL;`
-    })
-  } catch {
-    // Table creation via RPC may not be available
-  }
-}
-
-export async function ensurePasswordColumn() {
-  try {
-    await supabase.rpc('exec_sql', {
-      sql: `ALTER TABLE landing_pages ADD COLUMN IF NOT EXISTS password TEXT DEFAULT NULL;`
-    })
-  } catch {
-    // Column may already exist or RPC may not be available
-  }
-}
 
 export async function createVersion(pageId: string, filePath: string, label?: string) {
   const { error } = await supabase

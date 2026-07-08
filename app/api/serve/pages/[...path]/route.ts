@@ -1,17 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPageByClientSlug, createPageView, downloadFile, ensurePasswordColumn } from '@/lib/db'
-
-let schemaReady = false
-async function ensureSchema() {
-  if (schemaReady) return
-  await ensurePasswordColumn()
-  schemaReady = true
-}
+import bcrypt from 'bcryptjs'
+import { getPageByClientSlug, createPageView, downloadFile } from '@/lib/db'
+import { signAccessToken, verifyAccessToken, CONTENT_ACCESS_MAX_AGE } from '@/lib/content-access'
+import { rateLimit } from '@/lib/rate-limit'
 
 interface Ctx { params: Promise<{ path: string[] }> }
 
 export async function GET(req: NextRequest, { params }: Ctx) {
-  await ensureSchema()
   const { path } = await params
 
   if (path.length < 2) {
@@ -47,7 +42,8 @@ export async function GET(req: NextRequest, { params }: Ctx) {
   if (page.password) {
     const cookieName = `page_access_${page.id}`
     const accessCookie = req.cookies.get(cookieName)?.value
-    if (accessCookie !== page.password) {
+    const tokenValid = accessCookie ? await verifyAccessToken(accessCookie, page.id) : false
+    if (!tokenValid) {
       return new NextResponse(passwordPage(client, slug, false), {
         status: 200,
         headers: { 'Content-Type': 'text/html; charset=utf-8' },
@@ -95,6 +91,9 @@ export async function GET(req: NextRequest, { params }: Ctx) {
 }
 
 export async function POST(req: NextRequest, { params }: Ctx) {
+  const rl = rateLimit(req, { windowMs: 60_000, max: 10, prefix: 'page-pw' })
+  if (rl) return new NextResponse(null, { status: 429 })
+
   const { path } = await params
 
   if (path.length < 2) {
@@ -120,16 +119,24 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     submittedPassword = body.password || ''
   }
 
-  if (submittedPassword === page.password) {
+  let passwordMatch = false
+  if (page.password.startsWith('$2')) {
+    passwordMatch = await bcrypt.compare(submittedPassword, page.password)
+  } else {
+    passwordMatch = submittedPassword === page.password
+  }
+
+  if (passwordMatch) {
     const cookieName = `page_access_${page.id}`
+    const token = await signAccessToken(page.id)
     const baseUrl = `${req.nextUrl.protocol}//${req.nextUrl.host}`
     const redirectUrl = `${baseUrl}/pages/${client}/${slug}`
     const response = NextResponse.redirect(redirectUrl, 303)
-    response.cookies.set(cookieName, page.password, {
+    response.cookies.set(cookieName, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24,
+      maxAge: CONTENT_ACCESS_MAX_AGE,
       path: '/',
     })
     return response

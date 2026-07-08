@@ -7,10 +7,10 @@ export const runtime = 'nodejs'
 export const maxDuration = 60
 
 export async function POST(req: NextRequest) {
-  const roleErr = requireRole(req, 'editor')
+  const roleErr = await requireRole(req, 'editor')
   if (roleErr) return roleErr
 
-  const session = getSessionFromRequest(req)
+  const session = await getSessionFromRequest(req)
   const formData = await req.formData()
   const file = formData.get('file') as File | null
   const client = (formData.get('client') as string)?.trim().toLowerCase().replace(/\s+/g, '-')

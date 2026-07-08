@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { verifySessionToken } from '@/lib/auth'
 import {
   fetchSummary,
   fetchTimeseries,
@@ -22,8 +23,12 @@ const cache = new Map<string, { data: unknown; at: number }>()
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
-function isAuthorized(req: NextRequest): boolean {
-  return !!req.cookies.get('ph_session')?.value || !!req.cookies.get('rp_session')?.value
+async function isAuthorized(req: NextRequest): Promise<boolean> {
+  const ph = req.cookies.get('ph_session')?.value
+  if (ph && (await verifySessionToken(ph))) return true
+  const rp = req.cookies.get('rp_session')?.value
+  if (rp && (await verifySessionToken(rp))) return true
+  return false
 }
 
 function addDays(dateStr: string, days: number): string {
@@ -37,7 +42,7 @@ function daysBetween(from: string, to: string): number {
 }
 
 export async function GET(req: NextRequest) {
-  if (!isAuthorized(req)) {
+  if (!(await isAuthorized(req))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

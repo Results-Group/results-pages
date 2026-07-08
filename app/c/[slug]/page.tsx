@@ -2,9 +2,11 @@ import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { Metadata } from 'next'
 import { getCampaignBySlug, enrichCampaignUrls } from '@/lib/campaigns'
-import type { CampaignSection, CampaignAsset } from '@/lib/campaigns'
+import type { CampaignSection } from '@/lib/campaigns'
 import { getSession } from '@/lib/auth'
+import { verifyAccessToken } from '@/lib/content-access'
 import { assetProxyUrl } from '@/lib/asset-url'
+import { buildCampaignSlides } from '@/lib/slides'
 import CampaignPresentation from './presentation'
 import PasswordGate from './password-gate'
 
@@ -19,7 +21,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!campaign) return { title: 'Campaign Not Found' }
 
-  // Don't leak content for drafts or password-protected campaigns
   if (campaign.status === 'draft' || campaign.password) {
     return { title: 'Results Digital', robots: { index: false, follow: false } }
   }
@@ -44,21 +45,19 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     notFound()
   }
 
-  // Only logged-in admins/editors may preview, and preview is the only way to view drafts.
   const session = await getSession()
-  const isAdmin = !!session
-  const isPreview = sp.preview === '1' && isAdmin
+  const isEditorOrAdmin = !!session && (session.role === 'admin' || session.role === 'editor')
+  const isPreview = sp.preview === '1' && isEditorOrAdmin
 
   if (rawCampaign.status === 'draft' && !isPreview) {
     notFound()
   }
 
-  // Password gate: published campaigns with a password require the visitor to
-  // enter it (admins bypass since they're authenticated).
-  if (rawCampaign.password && !isAdmin) {
+  if (rawCampaign.password && !isEditorOrAdmin) {
     const cookieStore = await cookies()
-    const access = cookieStore.get(`cmp_${rawCampaign.id}`)?.value
-    if (access !== rawCampaign.password) {
+    const accessToken = cookieStore.get(`cmp_${rawCampaign.id}`)?.value
+    const tokenValid = accessToken ? await verifyAccessToken(accessToken, rawCampaign.id) : false
+    if (!tokenValid) {
       return <PasswordGate slug={slug} clientName={rawCampaign.client} />
     }
   }
@@ -69,33 +68,14 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     year: 'numeric', month: 'long', day: 'numeric',
   })
 
-  const sections = (campaign.sections || []) as CampaignSection[]
-
-  const slides: SlideData[] = []
-
-  slides.push({ type: 'cover', title: campaign.client, subtitle: campaign.campaign_name, logoUrl: clientLogoUrl, date: formattedDate })
-
-  if (campaign.concept) {
-    slides.push({ type: 'concept', title: 'קונספט הקמפיין', content: campaign.concept })
-  }
-
-  for (const section of sections) {
-    if (section.mockup_type === 'divider') {
-      slides.push({ type: 'divider', title: section.title, content: section.description })
-    } else if ((section.assets || []).length > 0) {
-      slides.push({
-        type: 'creatives',
-        title: section.title,
-        content: section.description,
-        mockupType: section.mockup_type,
-        assets: section.assets || [],
-        clientLogoUrl,
-        clientName: campaign.client,
-      })
-    }
-  }
-
-  slides.push({ type: 'closing', title: 'תודה רבה!', subtitle: campaign.client })
+  const slides = buildCampaignSlides({
+    client: campaign.client,
+    campaignName: campaign.campaign_name,
+    concept: campaign.concept,
+    clientLogoUrl,
+    date: formattedDate,
+    sections: (campaign.sections || []) as CampaignSection[],
+  })
 
   return (
     <CampaignPresentation
@@ -106,15 +86,4 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
   )
 }
 
-export interface SlideData {
-  type: 'cover' | 'concept' | 'divider' | 'creatives' | 'closing'
-  title: string
-  subtitle?: string
-  content?: string
-  logoUrl?: string | null
-  date?: string
-  mockupType?: string
-  assets?: CampaignAsset[]
-  clientLogoUrl?: string | null
-  clientName?: string
-}
+export type { SlideData } from '@/lib/slides'

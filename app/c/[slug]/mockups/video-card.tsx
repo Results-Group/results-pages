@@ -35,7 +35,7 @@ export default function VideoCard({ url, embedUrl, platform, caption }: VideoCar
         ) : (
           <>
             {thumbnailUrl && (
-              <img src={thumbnailUrl} alt="Video thumbnail" className="absolute inset-0 w-full h-full object-cover" />
+              <img src={thumbnailUrl} alt="Video thumbnail" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
             )}
 
             {embedUrl ? (

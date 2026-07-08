@@ -4,7 +4,7 @@ import { requireRole, getSessionFromRequest } from '@/lib/auth'
 import { hashPassword } from '@/lib/hash'
 
 export async function GET(req: NextRequest) {
-  const roleErr = requireRole(req, 'admin')
+  const roleErr = await requireRole(req, 'admin')
   if (roleErr) return roleErr
 
   const { data: users, error } = await supabase
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const roleErr = requireRole(req, 'admin')
+  const roleErr = await requireRole(req, 'admin')
   if (roleErr) return roleErr
 
   const { email, password, name, role } = await req.json()
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-  const roleErr = requireRole(req, 'admin')
+  const roleErr = await requireRole(req, 'admin')
   if (roleErr) return roleErr
 
   const { id, name, role, password } = await req.json()
@@ -103,7 +103,7 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const roleErr = requireRole(req, 'admin')
+  const roleErr = await requireRole(req, 'admin')
   if (roleErr) return roleErr
 
   const { id } = await req.json()
@@ -111,7 +111,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: 'חסר מזהה משתמש' }, { status: 400 })
   }
 
-  const session = getSessionFromRequest(req)
+  const session = await getSessionFromRequest(req)
   if (session?.userId === id) {
     return NextResponse.json({ error: 'לא ניתן למחוק את עצמך' }, { status: 400 })
   }

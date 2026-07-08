@@ -5,10 +5,10 @@ import { getPageById, createPage, downloadFile, uploadFile, getPageByClientSlug 
 interface Ctx { params: Promise<{ id: string }> }
 
 export async function POST(req: NextRequest, { params }: Ctx) {
-  const roleErr = requireRole(req, 'editor')
+  const roleErr = await requireRole(req, 'editor')
   if (roleErr) return roleErr
 
-  const session = getSessionFromRequest(req)
+  const session = await getSessionFromRequest(req)
 
   const { id } = await params
   const page = await getPageById(id)

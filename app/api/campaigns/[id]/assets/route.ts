@@ -16,7 +16,7 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const roleErr = requireRole(request, 'editor')
+  const roleErr = await requireRole(request, 'editor')
   if (roleErr) return roleErr
 
   const { id } = await params
@@ -62,7 +62,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const roleErr = requireRole(request, 'editor')
+  const roleErr = await requireRole(request, 'editor')
   if (roleErr) return roleErr
 
   const { id } = await params
@@ -79,6 +79,14 @@ export async function DELETE(
     if (!file_path) {
       return NextResponse.json(
         { error: 'נדרש נתיב קובץ למחיקה' },
+        { status: 400 }
+      )
+    }
+
+    const expectedPrefix = `campaigns/${id}/`
+    if (!file_path.startsWith(expectedPrefix) || file_path.includes('..')) {
+      return NextResponse.json(
+        { error: 'נתיב קובץ לא חוקי' },
         { status: 400 }
       )
     }

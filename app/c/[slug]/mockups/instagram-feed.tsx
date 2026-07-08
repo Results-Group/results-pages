@@ -44,7 +44,7 @@ export default function InstagramFeed({ imageUrl, clientName, logoUrl, caption }
 
           {/* Image */}
           <div className="w-full aspect-square bg-gray-100">
-            <img src={imageUrl} alt="Post" className="w-full h-full object-cover" />
+            <img src={imageUrl} alt="Post" className="w-full h-full object-cover" loading="lazy" />
           </div>
 
           {/* Actions */}

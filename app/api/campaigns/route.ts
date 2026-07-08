@@ -3,7 +3,7 @@ import { requireAuth, requireRole, getSessionFromRequest } from '@/lib/auth'
 import { getCampaigns, getCampaignBySlug, createCampaign } from '@/lib/campaigns'
 
 export async function GET(request: NextRequest) {
-  const authErr = requireAuth(request)
+  const authErr = await requireAuth(request)
   if (authErr) return authErr
 
   const { searchParams } = new URL(request.url)
@@ -12,7 +12,8 @@ export async function GET(request: NextRequest) {
 
   try {
     const campaigns = await getCampaigns({ search, status })
-    return NextResponse.json(campaigns)
+    const safe = campaigns.map(c => ({ ...c, has_password: !!c.password, password: undefined }))
+    return NextResponse.json(safe)
   } catch (error) {
     return NextResponse.json(
       { error: 'שגיאה בטעינת קמפיינים' },
@@ -22,10 +23,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const roleErr = requireRole(request, 'editor')
+  const roleErr = await requireRole(request, 'editor')
   if (roleErr) return roleErr
 
-  const session = getSessionFromRequest(request)
+  const session = await getSessionFromRequest(request)
 
   try {
     const body = await request.json()

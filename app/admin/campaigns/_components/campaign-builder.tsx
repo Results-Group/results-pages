@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -17,6 +17,8 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { assetProxyUrl, assetDirectUrl } from '@/lib/asset-url'
+import { buildCampaignSlides } from '@/lib/slides'
+import type { CampaignSection } from '@/lib/campaigns'
 import dynamic from 'next/dynamic'
 
 const CampaignPresentation = dynamic(
@@ -454,7 +456,7 @@ export default function CampaignBuilder({ mode, initial }: { mode: 'new' | 'edit
 
         <div className="mb-4">
           <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>סיסמת הגנה (אופציונלי)</label>
-          <input type="text" value={password} onChange={e => setPassword(e.target.value)} placeholder="השאירו ריק לקמפיין ציבורי" dir="ltr"
+          <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="השאירו ריק לקמפיין ציבורי" dir="ltr" autoComplete="off"
             className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors" style={inputStyle} onFocus={focusBorder} onBlur={blurBorder} />
           <p className="text-xs mt-1.5" style={{ color: 'var(--admin-text-muted)' }}>אם תגדירו סיסמה, הלקוח יידרש להזין אותה לפני הצפייה בקמפיין</p>
         </div>
@@ -683,6 +685,8 @@ export default function CampaignBuilder({ mode, initial }: { mode: 'new' | 'edit
 
 // ── Live Preview Panel ──
 
+const MemoizedPresentation = React.memo(CampaignPresentation)
+
 function LivePreviewPanel({ client, campaignName, concept, logoPath, sections }: {
   client: string
   campaignName: string
@@ -690,41 +694,42 @@ function LivePreviewPanel({ client, campaignName, concept, logoPath, sections }:
   logoPath: string | null
   sections: Section[]
 }) {
-  const clientLogoUrl = logoPath ? assetProxyUrl(logoPath) : null
-  const formattedDate = new Date().toLocaleDateString('he-IL', { year: 'numeric', month: 'long', day: 'numeric' })
+  const [debouncedProps, setDebouncedProps] = useState({ client, campaignName, concept, logoPath, sections })
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const slides: any[] = []
+  useEffect(() => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => {
+      setDebouncedProps({ client, campaignName, concept, logoPath, sections })
+    }, 300)
+    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
+  }, [client, campaignName, concept, logoPath, sections])
 
-  slides.push({ type: 'cover', title: client || 'שם לקוח', subtitle: campaignName || 'שם קמפיין', logoUrl: clientLogoUrl, date: formattedDate })
-  if (concept) {
-    slides.push({ type: 'concept', title: 'קונספט הקמפיין', content: concept })
-  }
+  const slides = useMemo(() => {
+    const { client: c, campaignName: cn, concept: co, logoPath: lp, sections: ss } = debouncedProps
+    const clientLogoUrl = lp ? assetProxyUrl(lp) : null
+    const formattedDate = new Date().toLocaleDateString('he-IL', { year: 'numeric', month: 'long', day: 'numeric' })
 
-  for (const section of sections) {
-    if (section.mockup_type === 'divider') {
-      slides.push({ type: 'divider', title: section.title || 'חוצץ', content: section.description })
-    } else if (section.assets.length > 0) {
-      slides.push({
-        type: 'creatives',
-        title: section.title,
-        content: section.description,
-        mockupType: section.mockup_type,
-        assets: section.assets.map(a => ({ ...a, type: a.type as 'image' | 'video' })),
-        clientLogoUrl,
-        clientName: client,
-      })
-    }
-  }
-
-  slides.push({ type: 'closing', title: 'תודה רבה!', subtitle: client || 'שם לקוח' })
+    return buildCampaignSlides({
+      client: c || 'שם לקוח',
+      campaignName: cn || 'שם קמפיין',
+      concept: co || null,
+      clientLogoUrl,
+      date: formattedDate,
+      sections: ss.map(s => ({
+        ...s,
+        mockup_type: s.mockup_type as CampaignSection['mockup_type'],
+        assets: s.assets.map(a => ({ ...a, type: a.type as 'image' | 'video' })),
+      })),
+    })
+  }, [debouncedProps])
 
   return (
     <div style={{ height: '700px', overflow: 'auto', background: '#090c0e' }}>
-      <CampaignPresentation
+      <MemoizedPresentation
         slides={slides}
-        clientName={client || 'שם לקוח'}
-        campaignName={campaignName || 'שם קמפיין'}
+        clientName={debouncedProps.client || 'שם לקוח'}
+        campaignName={debouncedProps.campaignName || 'שם קמפיין'}
       />
     </div>
   )

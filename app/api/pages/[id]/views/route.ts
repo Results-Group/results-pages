@@ -5,7 +5,7 @@ import { requireRole } from '@/lib/auth'
 interface Ctx { params: Promise<{ id: string }> }
 
 export async function DELETE(req: NextRequest, { params }: Ctx) {
-  const roleErr = requireRole(req, 'admin')
+  const roleErr = await requireRole(req, 'admin')
   if (roleErr) return roleErr
 
   const { id } = await params

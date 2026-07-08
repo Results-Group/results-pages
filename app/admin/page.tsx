@@ -10,10 +10,10 @@ interface PageItem {
   slug: string
   title: string
   active: boolean
-  expiresAt: string | null
-  password: string | null
+  expires_at: string | null
+  has_password: boolean
   short_url: string | null
-  createdAt: string
+  created_at: string
   _count: { views: number }
 }
 
@@ -101,7 +101,7 @@ export default function AdminDashboard() {
 
   function getStatus(page: PageItem): { label: string; colorVar: string; bgVar: string } {
     if (!page.active) return { label: 'מושבת', colorVar: 'var(--admin-disabled-text)', bgVar: 'var(--admin-disabled-bg)' }
-    if (page.expiresAt && new Date(page.expiresAt) < new Date()) return { label: 'פג תוקף', colorVar: 'var(--admin-danger)', bgVar: 'var(--admin-danger-bg)' }
+    if (page.expires_at && new Date(page.expires_at) < new Date()) return { label: 'פג תוקף', colorVar: 'var(--admin-danger)', bgVar: 'var(--admin-danger-bg)' }
     return { label: 'פעיל', colorVar: 'var(--admin-success)', bgVar: 'var(--admin-success-bg)' }
   }
 
@@ -192,7 +192,7 @@ export default function AdminDashboard() {
                     <td className="px-5 py-4" style={{ color: 'var(--admin-text-secondary)' }}>
                       <span className="flex items-center gap-1.5">
                         {page.title}
-                        {page.password && <span title="מוגן בסיסמה"><Lock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--admin-accent)' }} /></span>}
+                        {page.has_password && <span title="מוגן בסיסמה"><Lock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--admin-accent)' }} /></span>}
                       </span>
                     </td>
                     <td className="px-5 py-4">

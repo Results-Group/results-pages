@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, MessageCircle } from 'lucide-react'
 
@@ -39,22 +39,28 @@ export default function CampaignsListPage() {
 
   useEffect(() => { setUserRole(getUserRole()) }, [])
 
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   useEffect(() => {
-    const params = new URLSearchParams()
-    if (search) params.set('search', search)
-    fetch(`/api/campaigns?${params}`)
-      .then(r => {
-        if (r.status === 401) {
-          window.location.href = '/admin/login'
-          return null
-        }
-        return r.json()
-      })
-      .then(data => {
-        if (Array.isArray(data)) setCampaigns(data)
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    searchTimerRef.current = setTimeout(() => {
+      const params = new URLSearchParams()
+      if (search) params.set('search', search)
+      fetch(`/api/campaigns?${params}`)
+        .then(r => {
+          if (r.status === 401) {
+            window.location.href = '/admin/login'
+            return null
+          }
+          return r.json()
+        })
+        .then(data => {
+          if (Array.isArray(data)) setCampaigns(data)
+          setLoading(false)
+        })
+        .catch(() => setLoading(false))
+    }, search ? 300 : 0)
+    return () => { if (searchTimerRef.current) clearTimeout(searchTimerRef.current) }
   }, [search])
 
   function getCampaignUrl(slug: string) {

@@ -6,7 +6,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const authErr = requireAuth(request)
+  const authErr = await requireAuth(request)
   if (authErr) return authErr
 
   const { id } = await params
@@ -16,7 +16,8 @@ export async function GET(
     if (!campaign) {
       return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
     }
-    return NextResponse.json(enrichCampaignUrls(campaign))
+    const enriched = enrichCampaignUrls(campaign)
+    return NextResponse.json({ ...enriched, has_password: !!enriched.password, password: undefined })
   } catch (error) {
     return NextResponse.json(
       { error: 'שגיאה בטעינת קמפיין' },
@@ -29,7 +30,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const roleErr = requireRole(request, 'editor')
+  const roleErr = await requireRole(request, 'editor')
   if (roleErr) return roleErr
 
   const { id } = await params
@@ -55,7 +56,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const roleErr = requireRole(request, 'admin')
+  const roleErr = await requireRole(request, 'admin')
   if (roleErr) return roleErr
 
   const { id } = await params

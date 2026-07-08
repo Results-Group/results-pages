@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createSessionCookie, type SessionUser } from '@/lib/auth'
+import { rateLimit } from '@/lib/rate-limit'
 
-const COOKIE_NAME = 'ph_session'
+const PH_COOKIE = 'ph_session'
 const MAX_AGE = 60 * 60 * 24 * 30 // 30 days
 
 export async function POST(req: NextRequest) {
+  const rl = rateLimit(req, { windowMs: 60_000, max: 10, prefix: 'ph-auth' })
+  if (rl) return rl
+
   const { password } = await req.json()
   const expected = process.env.PIZZAHOUSE_DASHBOARD_PASSWORD
 
@@ -11,8 +16,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'סיסמה שגויה' }, { status: 401 })
   }
 
+  const phUser: SessionUser = {
+    userId: 'pizza-house',
+    email: 'pizza-house@client',
+    role: 'viewer',
+    name: 'Pizza House',
+  }
+
+  const cookie = await createSessionCookie(phUser)
   const response = NextResponse.json({ ok: true })
-  response.cookies.set(COOKIE_NAME, Buffer.from(`pizza-house:${Date.now()}`).toString('base64'), {
+  response.cookies.set(PH_COOKIE, cookie.value, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -24,6 +37,6 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE() {
   const response = NextResponse.json({ ok: true })
-  response.cookies.delete(COOKIE_NAME)
+  response.cookies.delete(PH_COOKIE)
   return response
 }

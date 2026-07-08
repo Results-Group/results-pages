@@ -3,7 +3,7 @@ import { getPages, createPage } from '@/lib/db'
 import { requireAuth, requireRole, getSessionFromRequest } from '@/lib/auth'
 
 export async function GET(req: NextRequest) {
-  const authError = requireAuth(req)
+  const authError = await requireAuth(req)
   if (authError) return authError
 
   const { searchParams } = req.nextUrl
@@ -11,14 +11,15 @@ export async function GET(req: NextRequest) {
   const search = searchParams.get('search') || undefined
 
   const pages = await getPages({ client, search })
-  return NextResponse.json(pages)
+  const safe = pages.map(p => ({ ...p, has_password: !!p.password, password: undefined }))
+  return NextResponse.json(safe)
 }
 
 export async function POST(req: NextRequest) {
-  const roleErr = requireRole(req, 'editor')
+  const roleErr = await requireRole(req, 'editor')
   if (roleErr) return roleErr
 
-  const session = getSessionFromRequest(req)
+  const session = await getSessionFromRequest(req)
   const body = await req.json()
   const { client, slug, title, filePath, expiresAt } = body
 

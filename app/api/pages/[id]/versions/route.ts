@@ -5,7 +5,7 @@ import { requireAuth, requireRole } from '@/lib/auth'
 interface Ctx { params: Promise<{ id: string }> }
 
 export async function GET(req: NextRequest, { params }: Ctx) {
-  const authError = requireAuth(req)
+  const authError = await requireAuth(req)
   if (authError) return authError
 
   const { id } = await params
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
 }
 
 export async function POST(req: NextRequest, { params }: Ctx) {
-  const roleErr = requireRole(req, 'editor')
+  const roleErr = await requireRole(req, 'editor')
   if (roleErr) return roleErr
 
   const { id } = await params
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 }
 
 export async function DELETE(req: NextRequest, { params }: Ctx) {
-  const roleErr = requireRole(req, 'admin')
+  const roleErr = await requireRole(req, 'admin')
   if (roleErr) return roleErr
 
   const { id } = await params

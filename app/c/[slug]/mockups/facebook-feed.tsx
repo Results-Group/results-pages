@@ -61,7 +61,7 @@ export default function FacebookFeed({ imageUrl, clientName, logoUrl, caption }:
 
           {/* Image */}
           <div className="w-full bg-gray-100">
-            <img src={imageUrl} alt="Post" className="w-full h-auto object-cover" />
+            <img src={imageUrl} alt="Post" className="w-full h-auto object-cover" loading="lazy" />
           </div>
 
           {/* Reactions */}

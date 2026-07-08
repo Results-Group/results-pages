@@ -5,20 +5,20 @@ import { requireAuth, requireRole, getSessionFromRequest } from '@/lib/auth'
 interface Ctx { params: Promise<{ id: string }> }
 
 export async function GET(req: NextRequest, { params }: Ctx) {
-  const authError = requireAuth(req)
+  const authError = await requireAuth(req)
   if (authError) return authError
 
   const { id } = await params
   const page = await getPageById(id)
   if (!page) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  return NextResponse.json(page)
+  return NextResponse.json({ ...page, has_password: !!page.password, password: undefined })
 }
 
 export async function PUT(req: NextRequest, { params }: Ctx) {
-  const roleErr = requireRole(req, 'editor')
+  const roleErr = await requireRole(req, 'editor')
   if (roleErr) return roleErr
 
-  const session = getSessionFromRequest(req)
+  const session = await getSessionFromRequest(req)
   const { id } = await params
   const body = await req.json()
   const { title, client, slug, active, expiresAt, password, shortUrl } = body
@@ -67,7 +67,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
 }
 
 export async function DELETE(req: NextRequest, { params }: Ctx) {
-  const roleErr = requireRole(req, 'admin')
+  const roleErr = await requireRole(req, 'admin')
   if (roleErr) return roleErr
 
   const { id } = await params

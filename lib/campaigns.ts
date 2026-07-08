@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import bcrypt from 'bcryptjs'
 import sharp from 'sharp'
 
 // ── Types ──
@@ -39,10 +40,13 @@ export interface Campaign {
 // ── Queries ──
 
 export async function getCampaigns(filters?: { search?: string; status?: string }) {
-  let query = supabase.from('campaigns').select('*').order('created_at', { ascending: false })
+  let query = supabase.from('campaigns')
+    .select('id,client,campaign_name,slug,concept,logo_path,status,password,created_by,created_at,updated_at')
+    .order('created_at', { ascending: false })
 
   if (filters?.search) {
-    query = query.or(`campaign_name.ilike.%${filters.search}%,client.ilike.%${filters.search}%`)
+    const s = filters.search.replace(/[%_\\]/g, c => `\\${c}`)
+    query = query.or(`campaign_name.ilike.%${s}%,client.ilike.%${s}%`)
   }
   if (filters?.status) {
     query = query.eq('status', filters.status)
@@ -84,6 +88,7 @@ export async function createCampaign(data: {
   password?: string
   created_by?: string
 }): Promise<Campaign> {
+  const hashedPw = data.password ? await bcrypt.hash(data.password, 12) : null
   const insertData: Record<string, unknown> = {
     client: data.client,
     campaign_name: data.campaign_name,
@@ -92,7 +97,7 @@ export async function createCampaign(data: {
     logo_path: data.logo_path || null,
     sections: data.sections || [],
     status: data.status || 'draft',
-    password: data.password || null,
+    password: hashedPw,
   }
   if (data.created_by) insertData.created_by = data.created_by
 
@@ -118,7 +123,9 @@ export async function updateCampaign(
   if (data.logo_path !== undefined) updateData.logo_path = data.logo_path
   if (data.sections !== undefined) updateData.sections = data.sections
   if (data.status !== undefined) updateData.status = data.status
-  if (data.password !== undefined) updateData.password = data.password
+  if (data.password !== undefined) {
+    updateData.password = data.password ? await bcrypt.hash(data.password, 12) : null
+  }
 
   const { data: campaign, error } = await supabase
     .from('campaigns')
@@ -152,27 +159,31 @@ export async function compressAndUploadImage(
 ): Promise<string> {
   const buffer = Buffer.from(await file.arrayBuffer())
 
-  const compressed = await sharp(buffer)
-    .resize(1920, 1920, { fit: 'inside', withoutEnlargement: true })
-    .webp({ quality: 90 })
-    .toBuffer()
+  const resized = sharp(buffer).resize(1920, 1920, { fit: 'inside', withoutEnlargement: true })
+
+  const [webpBuf, jpegBuf] = await Promise.all([
+    resized.clone().webp({ quality: 90 }).toBuffer(),
+    resized.clone().jpeg({ quality: 85, progressive: true }).toBuffer(),
+  ])
 
   const finalPath = storagePath.replace(/\.[^.]+$/, '.webp')
+  const jpegPath = finalPath.replace(/\.webp$/, '.jpeg')
 
-  // Wrap the binary in a Blob so supabase-js uploads it via the multipart
-  // (FormData) path. Passing a raw Node Buffer makes supabase-js send it as a
-  // plain request body, which Vercel's runtime mangles through UTF-8 encoding
-  // (corrupting the bytes with U+FFFD). A Blob is binary-safe everywhere.
-  const blob = new Blob([new Uint8Array(compressed)], { type: 'image/webp' })
+  const webpBlob = new Blob([new Uint8Array(webpBuf)], { type: 'image/webp' })
+  const jpegBlob = new Blob([new Uint8Array(jpegBuf)], { type: 'image/jpeg' })
 
-  const { error } = await supabase.storage
-    .from(ASSETS_BUCKET)
-    .upload(finalPath, blob, {
-      contentType: 'image/webp',
-      upsert: true,
-      cacheControl: '31536000',
-    })
-  if (error) throw error
+  const uploads = [
+    supabase.storage.from(ASSETS_BUCKET).upload(finalPath, webpBlob, {
+      contentType: 'image/webp', upsert: true, cacheControl: '31536000',
+    }),
+    supabase.storage.from(ASSETS_BUCKET).upload(jpegPath, jpegBlob, {
+      contentType: 'image/jpeg', upsert: true, cacheControl: '31536000',
+    }),
+  ]
+
+  const results = await Promise.all(uploads)
+  if (results[0].error) throw results[0].error
+  // JPEG variant failure is non-critical — fall back to runtime conversion
   return finalPath
 }
 
@@ -219,27 +230,3 @@ export function enrichCampaignUrls(campaign: Campaign): Campaign {
   } as Campaign
 }
 
-// ── Video URL helpers ──
-
-export function parseVideoUrl(url: string): { platform: 'youtube' | 'vimeo' | 'other'; videoId?: string; embedUrl?: string } {
-  // YouTube
-  const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
-  if (ytMatch) {
-    return { platform: 'youtube', videoId: ytMatch[1], embedUrl: `https://www.youtube.com/embed/${ytMatch[1]}` }
-  }
-
-  // Vimeo
-  const vimeoMatch = url.match(/(?:vimeo\.com\/)(\d+)/)
-  if (vimeoMatch) {
-    return { platform: 'vimeo', videoId: vimeoMatch[1], embedUrl: `https://player.vimeo.com/video/${vimeoMatch[1]}` }
-  }
-
-  return { platform: 'other' }
-}
-
-// ── Table bootstrap ──
-
-export async function ensureCampaignsTable(): Promise<boolean> {
-  const { error } = await supabase.from('campaigns').select('id').limit(1)
-  return !error
-}
