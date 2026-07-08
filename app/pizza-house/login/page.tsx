@@ -22,7 +22,8 @@ export default function PizzaHouseLoginPage() {
     })
 
     if (res.ok) {
-      router.push('/pizza-house')
+      window.location.href = '/pizza-house'
+      return
     } else {
       const data = await res.json()
       setError(data.error || 'שגיאה בהתחברות')

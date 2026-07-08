@@ -23,7 +23,8 @@ export default function LoginPage() {
     })
 
     if (res.ok) {
-      router.push('/admin')
+      window.location.href = '/admin'
+      return
     } else {
       const data = await res.json()
       setError(data.error || 'שגיאה בהתחברות')
