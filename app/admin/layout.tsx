@@ -379,43 +379,74 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 function AdminFooter() {
   return (
     <footer
-      className="mt-auto px-6 py-4 flex items-center justify-between gap-4 flex-wrap"
+      className="mt-auto px-8 py-6"
       style={{ borderTop: '1px solid var(--admin-border)' }}
     >
-      <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>
-        © {new Date().getFullYear()} Results Group
-      </p>
+      <div className="flex items-start justify-between gap-6 flex-wrap">
 
-      <div className="flex items-center gap-3">
-        <a
-          href="https://www.instagram.com/results_group/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="p-1.5 rounded-lg transition-opacity hover:opacity-70"
-          style={{ color: 'var(--admin-text-muted)' }}
-          title="Instagram"
-        >
-          {/* Instagram icon */}
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-            <circle cx="12" cy="12" r="4"/>
-            <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
-          </svg>
-        </a>
+        {/* Left — copyright + website */}
+        <div className="flex flex-col gap-1.5">
+          <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>
+            © {new Date().getFullYear()} by Results Group
+          </p>
+          <a
+            href="https://www.resultsdigital.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs transition-opacity hover:opacity-80"
+            style={{ color: 'var(--admin-text-muted)' }}
+          >
+            www.resultsdigital.org
+          </a>
+        </div>
 
-        <a
-          href="https://www.tiktok.com/@resultsgroup?_r=1&_t=ZS-92QnmolMOoC"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="p-1.5 rounded-lg transition-opacity hover:opacity-70"
-          style={{ color: 'var(--admin-text-muted)' }}
-          title="TikTok"
-        >
-          {/* TikTok icon */}
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/>
-          </svg>
-        </a>
+        {/* Center — contact details */}
+        <div className="flex flex-col items-center gap-0.5 text-center">
+          <a
+            href="mailto:info@resultsdigital.org"
+            className="text-xs transition-opacity hover:opacity-80"
+            style={{ color: 'var(--admin-text-muted)' }}
+          >
+            info@resultsdigital.org
+          </a>
+          <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>US – (213) 679 6699</p>
+          <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>IL – 1-700-501-229</p>
+          <div className="mt-2 flex flex-col items-center gap-0.5">
+            <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>Los Angeles: 750 N San Vicente Blvd</p>
+            <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>Israel: 17 Abraham Pachurnik St, Ness Ziona</p>
+          </div>
+        </div>
+
+        {/* Right — social icons */}
+        <div className="flex items-center gap-3">
+          <a
+            href="https://www.facebook.com/resultsdigitalgroup"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-1.5 rounded-lg transition-opacity hover:opacity-70"
+            style={{ color: 'var(--admin-text-muted)' }}
+            title="Facebook"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+            </svg>
+          </a>
+          <a
+            href="https://www.instagram.com/results_group/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-1.5 rounded-lg transition-opacity hover:opacity-70"
+            style={{ color: 'var(--admin-text-muted)' }}
+            title="Instagram"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <circle cx="12" cy="12" r="4"/>
+              <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+            </svg>
+          </a>
+        </div>
+
       </div>
     </footer>
   )
