@@ -36,6 +36,7 @@ export default function EditCampaignPage() {
           title: s.title || '',
           mockup_type: (s.mockup_type || 'general') as MockupType,
           description: s.description || '',
+          copies: (s as { copies?: string[] }).copies || [],
           assets: (s.assets || []).map((a: Partial<EditorAsset>) => ({
             id: a.id || crypto.randomUUID(),
             type: (a.type || 'image') as 'image' | 'video',

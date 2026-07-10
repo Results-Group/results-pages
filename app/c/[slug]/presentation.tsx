@@ -389,31 +389,98 @@ function ApprovalBar({ slideKey, current, error, onSubmit }: {
   )
 }
 
+function PartnerLogos() {
+  return (
+    <div className="partner-logos">
+      <div className="partner-logo google">
+        <span className="partner-g">G</span>
+        <span className="partner-text">Partner</span>
+      </div>
+      <div className="partner-logo tiktok">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.37 6.37 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.82a8.23 8.23 0 0 0 4.81 1.54V6.9a4.85 4.85 0 0 1-1.05-.21z"/></svg>
+        <span className="partner-text">Marketing Partners</span>
+      </div>
+      <div className="partner-logo meta">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.5 6.5c-.9 0-1.6.4-2.2 1.1-.4-.7-1-1.1-1.8-1.1-.7 0-1.3.3-1.7.9V8.7H9.3v6.6h1.5v-3.8c0-.8.4-1.3 1-1.3s.9.5.9 1.3v3.8h1.5v-3.8c0-.8.4-1.3 1-1.3s.9.5.9 1.3v3.8H17V11c0-1.4-.8-2.5-2.5-2.5z"/></svg>
+        <span className="partner-text">Business Partners</span>
+      </div>
+      <div className="partner-logo wix">
+        <span className="partner-wix">WiX</span>
+        <span className="partner-text">Partner</span>
+      </div>
+    </div>
+  )
+}
+
+function ResultsLogo() {
+  return (
+    <div className="results-logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <rect x="2" y="14" width="4" height="8" rx="1" fill="#F3D56D"/>
+        <rect x="8" y="9" width="4" height="13" rx="1" fill="#F3D56D" opacity="0.85"/>
+        <rect x="14" y="5" width="4" height="17" rx="1" fill="#F3D56D" opacity="0.7"/>
+        <rect x="20" y="1" width="4" height="21" rx="1" fill="#F3D56D" opacity="0.55"/>
+      </svg>
+      <span className="results-logo-text">Results</span>
+    </div>
+  )
+}
+
 function CoverSlide({ slide }: { slide: SlideData }) {
   return (
-    <div className="cover-slide">
-      <div className="cover-glow" />
-      <div className="cover-glow-2" />
-      <motion.div className="cover-badge-top" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.6 }}>
-        Creative Presentation
+    <div className="cover-slide-v2">
+      {/* Corner decorations */}
+      <div className="cover-corner tl" />
+      <div className="cover-corner tr" />
+      <div className="cover-corner bl" />
+      <div className="cover-corner br" />
+
+      {/* Top bar */}
+      <motion.div className="cover-top-bar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05, duration: 0.5 }}>
+        <ResultsLogo />
+        <div className="cover-badge-pill">Creative Presentation</div>
       </motion.div>
-      {slide.logoUrl && (
-        <motion.div className="cover-logo-wrap" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 0.6 }}>
-          <img src={slide.logoUrl} alt={slide.title} className="cover-logo" />
+
+      {/* Main content */}
+      <div className="cover-body">
+        {/* Left: campaign info */}
+        <div className="cover-left">
+          <motion.div className="cover-eyebrow" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
+            {slide.date || ''}
+          </motion.div>
+          <motion.h1 className="cover-headline" initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3, duration: 0.6 }}>
+            {slide.subtitle || 'New Creative'}
+          </motion.h1>
+          <motion.div className="cover-meta-line" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5, duration: 0.5 }}>
+            <span className="cover-client-name">{slide.title}</span>
+            <span className="cover-meta-sep">·</span>
+            <span className="cover-by">By Results Group</span>
+          </motion.div>
+          <motion.div className="cover-h-rule" initial={{ scaleX: 0, originX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.65, duration: 0.5 }} />
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75, duration: 0.5 }}>
+            <PartnerLogos />
+          </motion.div>
+        </div>
+
+        {/* Right: client logo */}
+        <motion.div className="cover-right" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.25, duration: 0.7 }}>
+          {slide.logoUrl ? (
+            <img src={slide.logoUrl} alt={slide.title} className="cover-client-logo" />
+          ) : (
+            <div className="cover-client-initials">
+              {(slide.title || '?').slice(0, 2).toUpperCase()}
+            </div>
+          )}
         </motion.div>
-      )}
-      <motion.h1 className="cover-client" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.7 }}>
-        {slide.title}
-      </motion.h1>
-      <motion.h2 className="cover-campaign" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 0.6 }}>
-        {slide.subtitle}
-      </motion.h2>
-      <motion.div className="cover-divider" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.55, duration: 0.6 }} />
-      {slide.date && (
-        <motion.p className="cover-date" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7, duration: 0.5 }}>
-          {slide.date}
-        </motion.p>
-      )}
+      </div>
+
+      {/* Bottom bar */}
+      <motion.div className="cover-bottom-bar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9, duration: 0.5 }}>
+        <span />
+        <a href="https://www.resultsdigital.org" target="_blank" rel="noopener noreferrer" className="cover-url">
+          www.resultsdigital.org
+        </a>
+      </motion.div>
     </div>
   )
 }
@@ -453,6 +520,9 @@ function DividerSlide({ slide, index }: { slide: SlideData; index: number }) {
 function CreativesSlide({ slide, onAssetClick }: { slide: SlideData; onAssetClick: (a: { url: string; caption?: string }) => void }) {
   const assets = slide.assets || []
   const isStory = slide.mockupType === 'instagram_story'
+  const copies = slide.copies || []
+  const [activeCopyIdx, setActiveCopyIdx] = useState(0)
+  const activeCopy = copies.length > 0 ? (copies[activeCopyIdx] || '') : undefined
 
   return (
     <div>
@@ -466,6 +536,24 @@ function CreativesSlide({ slide, onAssetClick }: { slide: SlideData; onAssetClic
           {slide.content}
         </motion.p>
       )}
+
+      {/* Copy switcher tabs — shown when multiple copies exist */}
+      {copies.length > 0 && (
+        <motion.div className="copy-switcher" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.4 }}>
+          <span className="copy-switcher-label">ורסיית טקסט:</span>
+          <div className="copy-tabs">
+            {copies.map((_, i) => (
+              <button key={i} className={`copy-tab${activeCopyIdx === i ? ' active' : ''}`} onClick={() => setActiveCopyIdx(i)}>
+                {i + 1}
+              </button>
+            ))}
+          </div>
+          {activeCopy && (
+            <div className="copy-text-preview" dir="auto">{activeCopy}</div>
+          )}
+        </motion.div>
+      )}
+
       {assets.length > 0 && (
         <div className={`assets-grid ${isStory ? 'story-grid' : 'standard-grid'}`}>
           {assets.map((asset, i) => (
@@ -478,7 +566,7 @@ function CreativesSlide({ slide, onAssetClick }: { slide: SlideData; onAssetClic
               variants={staggerChild}
               onClick={() => {
                 const url = asset.file_path ? assetProxyUrl(asset.file_path) : (asset.public_url || '')
-                if (url && asset.type !== 'video') onAssetClick({ url, caption: asset.caption })
+                if (url && asset.type !== 'video') onAssetClick({ url, caption: activeCopy || asset.caption })
               }}
               style={{ cursor: asset.type !== 'video' ? 'pointer' : 'default' }}
             >
@@ -487,6 +575,7 @@ function CreativesSlide({ slide, onAssetClick }: { slide: SlideData; onAssetClic
                 mockupType={slide.mockupType || 'general'}
                 clientLogoUrl={slide.clientLogoUrl || null}
                 clientName={slide.clientName || ''}
+                captionOverride={activeCopy}
               />
             </motion.div>
           ))}
@@ -498,41 +587,86 @@ function CreativesSlide({ slide, onAssetClick }: { slide: SlideData; onAssetClic
 
 function ClosingSlide({ slide }: { slide: SlideData }) {
   return (
-    <div className="closing-slide">
-      <div className="closing-glow" />
-      <motion.h2 className="closing-title" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6 }}>
-        {slide.title}
-      </motion.h2>
-      <motion.p className="closing-subtitle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.5 }}>
-        {slide.subtitle}
-      </motion.p>
-      <motion.div className="closing-divider" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.35, duration: 0.5 }} />
-      <motion.div className="closing-brand" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.5 }}>
-        <span className="closing-by">Presented by</span>
-        <span className="closing-name">Results Digital</span>
+    <div className="closing-slide-v2">
+      {/* Corner decorations */}
+      <div className="cover-corner tl" />
+      <div className="cover-corner tr" />
+      <div className="cover-corner bl" />
+      <div className="cover-corner br" />
+
+      {/* Top bar */}
+      <motion.div className="cover-top-bar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05, duration: 0.5 }}>
+        <ResultsLogo />
+        <div className="cover-badge-pill">Thank You</div>
+      </motion.div>
+
+      {/* Main content */}
+      <div className="cover-body">
+        {/* Left */}
+        <div className="cover-left">
+          <motion.div className="cover-eyebrow" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15, duration: 0.5 }}>
+            Results Digital
+          </motion.div>
+          <motion.h1 className="cover-headline" initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25, duration: 0.6 }}>
+            {slide.title}
+          </motion.h1>
+          <motion.p className="closing-client" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.5 }}>
+            {slide.subtitle}
+          </motion.p>
+          <motion.div className="cover-h-rule" initial={{ scaleX: 0, originX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.55, duration: 0.5 }} />
+          <motion.div className="closing-contact" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65, duration: 0.5 }}>
+            <a href="https://www.resultsdigital.org" target="_blank" rel="noopener noreferrer">www.resultsdigital.org</a>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75, duration: 0.5 }}>
+            <PartnerLogos />
+          </motion.div>
+        </div>
+
+        {/* Right: large Results branding */}
+        <motion.div className="cover-right closing-brand-right" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 0.7 }}>
+          <div className="closing-brand-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+              <rect x="2" y="14" width="4" height="8" rx="1" fill="#F3D56D"/>
+              <rect x="8" y="9" width="4" height="13" rx="1" fill="#F3D56D" opacity="0.85"/>
+              <rect x="14" y="5" width="4" height="17" rx="1" fill="#F3D56D" opacity="0.7"/>
+              <rect x="20" y="1" width="4" height="21" rx="1" fill="#F3D56D" opacity="0.55"/>
+            </svg>
+          </div>
+          <div className="closing-brand-name">Results Group</div>
+          <div className="closing-brand-tagline">Digital Marketing Excellence</div>
+        </motion.div>
+      </div>
+
+      {/* Bottom */}
+      <motion.div className="cover-bottom-bar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9, duration: 0.5 }}>
+        <span />
+        <a href="https://www.resultsdigital.org" target="_blank" rel="noopener noreferrer" className="cover-url">
+          www.resultsdigital.org
+        </a>
       </motion.div>
     </div>
   )
 }
 
-function AssetRenderer({ asset, mockupType, clientLogoUrl, clientName }: {
-  asset: CampaignAsset; mockupType: string; clientLogoUrl: string | null; clientName: string
+function AssetRenderer({ asset, mockupType, clientLogoUrl, clientName, captionOverride }: {
+  asset: CampaignAsset; mockupType: string; clientLogoUrl: string | null; clientName: string; captionOverride?: string
 }) {
   const imageUrl = asset.file_path ? assetProxyUrl(asset.file_path) : (asset.public_url || '')
   const videoInfo = asset.url ? parseVideoUrl(asset.url) : null
+  const caption = captionOverride !== undefined ? captionOverride : (asset.caption || '')
 
   switch (mockupType) {
     case 'instagram_feed':
-      return <InstagramFeedMockup imageUrl={imageUrl} clientName={clientName} logoUrl={clientLogoUrl ?? undefined} caption={asset.caption} />
+      return <InstagramFeedMockup imageUrl={imageUrl} clientName={clientName} logoUrl={clientLogoUrl ?? undefined} caption={caption} />
     case 'instagram_story':
       return <InstagramStoryMockup imageUrl={imageUrl} clientName={clientName} logoUrl={clientLogoUrl ?? undefined} />
     case 'facebook_feed':
-      return <FacebookFeedMockup imageUrl={imageUrl} clientName={clientName} logoUrl={clientLogoUrl ?? undefined} caption={asset.caption} />
+      return <FacebookFeedMockup imageUrl={imageUrl} clientName={clientName} logoUrl={clientLogoUrl ?? undefined} caption={caption} />
     case 'video':
-      return <VideoCard url={asset.url || ''} embedUrl={videoInfo?.embedUrl} platform={videoInfo?.platform || 'other'} caption={asset.caption} />
+      return <VideoCard url={asset.url || ''} embedUrl={videoInfo?.embedUrl} platform={videoInfo?.platform || 'other'} caption={caption} />
     case 'general':
     default:
-      return <GeneralCard imageUrl={imageUrl} caption={asset.caption} />
+      return <GeneralCard imageUrl={imageUrl} caption={caption} />
   }
 }
 

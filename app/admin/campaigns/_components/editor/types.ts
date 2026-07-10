@@ -20,6 +20,7 @@ export interface EditorSection {
   title: string
   mockup_type: MockupType
   description: string
+  copies: string[]
   assets: EditorAsset[]
 }
 
@@ -57,6 +58,7 @@ export function newSection(): EditorSection {
     title: '',
     mockup_type: 'general',
     description: '',
+    copies: [],
     assets: [],
   }
 }

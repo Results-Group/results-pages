@@ -6,6 +6,7 @@ export interface SlideData {
   title: string
   subtitle?: string
   content?: string
+  copies?: string[]
   logoUrl?: string | null
   date?: string
   mockupType?: string
@@ -40,6 +41,7 @@ export function buildCampaignSlides(opts: {
         key: section.id,
         title: section.title,
         content: section.description,
+        copies: (section as { copies?: string[] }).copies || [],
         mockupType: section.mockup_type,
         assets: section.assets || [],
         clientLogoUrl,

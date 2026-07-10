@@ -18,6 +18,7 @@ export interface CampaignSection {
   title: string
   mockup_type: 'instagram_feed' | 'instagram_story' | 'facebook_feed' | 'video' | 'general' | 'divider'
   description?: string
+  copies?: string[]
   assets: CampaignAsset[]
 }
 

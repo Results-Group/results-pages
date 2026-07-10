@@ -69,25 +69,131 @@
 .campaign-pres .slide-title::before{content:'';display:block;width:4px;height:32px;background:linear-gradient(to bottom,var(--brand-cyan),var(--brand-yellow));border-radius:2px;flex-shrink:0}
 .campaign-pres .slide-intro{font-size:1.1rem;line-height:1.85;color:var(--text-secondary);margin:-16px 0 32px;max-width:760px;white-space:pre-wrap}
 
-/* ── Cover Slide ── */
+/* ── Cover Slide v2 ── */
+.campaign-pres .cover-slide-v2{
+  position:relative;min-height:75vh;display:flex;flex-direction:column;
+  padding:28px 40px 24px;background:transparent;overflow:hidden;
+  direction:ltr;text-align:left;
+}
+
+/* Corner brackets */
+.campaign-pres .cover-corner{position:absolute;width:24px;height:24px;pointer-events:none}
+.campaign-pres .cover-corner.tl{top:20px;left:20px;border-top:2px solid rgba(255,255,255,0.5);border-left:2px solid rgba(255,255,255,0.5)}
+.campaign-pres .cover-corner.tr{top:20px;right:20px;border-top:2px solid rgba(255,255,255,0.5);border-right:2px solid rgba(255,255,255,0.5)}
+.campaign-pres .cover-corner.bl{bottom:20px;left:20px;border-bottom:2px solid rgba(255,255,255,0.2);border-left:2px solid rgba(255,255,255,0.2)}
+.campaign-pres .cover-corner.br{bottom:20px;right:20px;border-bottom:2px solid rgba(255,255,255,0.2);border-right:2px solid rgba(255,255,255,0.2)}
+
+/* Top bar */
+.campaign-pres .cover-top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:auto;padding-bottom:28px}
+
+/* Results logo */
+.campaign-pres .results-logo{display:flex;align-items:center;gap:8px}
+.campaign-pres .results-logo-text{font-size:1rem;font-weight:900;color:#fff;letter-spacing:0.5px}
+
+/* Badge pill */
+.campaign-pres .cover-badge-pill{
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
+  border-radius:24px;padding:5px 20px;font-size:0.7rem;letter-spacing:2.5px;
+  text-transform:uppercase;color:rgba(255,255,255,0.55);font-weight:600;
+}
+
+/* Body: two-column */
+.campaign-pres .cover-body{display:flex;align-items:center;gap:48px;flex:1;padding:8px 0}
+
+/* Left column */
+.campaign-pres .cover-left{flex:1;min-width:0;display:flex;flex-direction:column;gap:0}
+.campaign-pres .cover-eyebrow{font-size:0.78rem;color:rgba(255,255,255,0.4);letter-spacing:0.04em;margin-bottom:12px;font-weight:500}
+.campaign-pres .cover-headline{font-size:clamp(2.4rem,5vw,4.2rem);font-weight:900;line-height:1.05;color:#fff;letter-spacing:-0.03em;margin-bottom:20px}
+.campaign-pres .cover-meta-line{display:flex;align-items:center;gap:8px;margin-bottom:24px}
+.campaign-pres .cover-client-name{font-size:1rem;font-weight:700;color:rgba(255,255,255,0.85)}
+.campaign-pres .cover-meta-sep{color:rgba(255,255,255,0.25)}
+.campaign-pres .cover-by{font-size:0.9rem;color:rgba(255,255,255,0.45);font-weight:400}
+.campaign-pres .cover-h-rule{height:1px;background:linear-gradient(90deg,rgba(255,255,255,0.15),transparent);margin-bottom:24px;width:100%}
+
+/* Right column: client logo */
+.campaign-pres .cover-right{
+  width:280px;height:240px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  border-radius:20px;overflow:hidden;
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);
+}
+.campaign-pres .cover-client-logo{max-width:100%;max-height:100%;object-fit:contain;padding:24px}
+.campaign-pres .cover-client-initials{
+  font-size:3.5rem;font-weight:900;color:rgba(255,255,255,0.12);
+  letter-spacing:-0.04em;
+}
+
+/* Partner logos */
+.campaign-pres .partner-logos{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.campaign-pres .partner-logo{display:flex;align-items:center;gap:5px;opacity:0.55;transition:opacity 0.2s}
+.campaign-pres .partner-logo:hover{opacity:0.85}
+.campaign-pres .partner-logo .partner-text{font-size:0.65rem;letter-spacing:0.03em;color:#fff;font-weight:600;white-space:nowrap}
+.campaign-pres .partner-logo.google .partner-g{
+  font-size:0.85rem;font-weight:900;letter-spacing:-0.04em;
+  background:linear-gradient(135deg,#4285F4,#EA4335,#FBBC05,#34A853);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.campaign-pres .partner-logo.tiktok{color:#fff}
+.campaign-pres .partner-logo.tiktok svg{fill:#fff}
+.campaign-pres .partner-logo.meta svg{fill:rgba(255,255,255,0.9)}
+.campaign-pres .partner-logo.wix .partner-wix{
+  font-size:0.85rem;font-weight:900;color:#fff;font-style:italic;letter-spacing:-0.02em;
+}
+
+/* Bottom bar */
+.campaign-pres .cover-bottom-bar{
+  display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:20px;
+}
+.campaign-pres .cover-url{
+  font-size:0.7rem;color:rgba(255,255,255,0.3);text-decoration:none;letter-spacing:0.02em;
+  transition:color 0.2s;
+}
+.campaign-pres .cover-url:hover{color:rgba(255,255,255,0.6)}
+
+/* ── Closing Slide v2 ── */
+.campaign-pres .closing-slide-v2{
+  position:relative;min-height:75vh;display:flex;flex-direction:column;
+  padding:28px 40px 24px;background:transparent;overflow:hidden;
+  direction:ltr;text-align:left;
+}
+.campaign-pres .closing-client{font-size:1.1rem;color:rgba(255,255,255,0.5);margin-bottom:20px;margin-top:-8px}
+.campaign-pres .closing-contact a{
+  font-size:0.85rem;color:rgba(64,225,211,0.7);text-decoration:none;letter-spacing:0.02em;
+  margin-bottom:20px;display:inline-block;transition:color 0.2s;
+}
+.campaign-pres .closing-contact a:hover{color:#40e1d3}
+.campaign-pres .closing-brand-right{
+  flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(243,213,109,0.03);border-color:rgba(243,213,109,0.08) !important;
+  gap:12px;
+}
+.campaign-pres .closing-brand-icon{opacity:0.85}
+.campaign-pres .closing-brand-name{font-size:1.8rem;font-weight:900;color:#fff;letter-spacing:-0.02em}
+.campaign-pres .closing-brand-tagline{font-size:0.75rem;color:rgba(255,255,255,0.35);letter-spacing:0.05em;text-transform:uppercase;font-weight:600}
+
+/* Legacy cover slide — keep for safety (old data may reference it) */
 .campaign-pres .cover-slide{text-align:center;padding:80px 20px 60px;position:relative;min-height:75vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.campaign-pres .cover-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:800px;background:radial-gradient(circle,rgba(64,225,211,0.07) 0%,rgba(243,213,109,0.03) 30%,transparent 60%);pointer-events:none;animation:glowPulse 6s ease-in-out infinite}
-.campaign-pres .cover-glow-2{position:absolute;top:30%;left:30%;width:500px;height:500px;background:radial-gradient(circle,rgba(167,139,250,0.04) 0%,transparent 60%);pointer-events:none;animation:glowPulse 8s ease-in-out 2s infinite}
-@keyframes glowPulse{0%,100%{opacity:0.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}}
 
-.campaign-pres .cover-badge-top{position:relative;display:inline-block;background:rgba(var(--brand-rgb),0.06);border:1px solid rgba(var(--brand-rgb),0.2);border-radius:32px;padding:8px 28px;font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;color:var(--brand-cyan);font-weight:700;margin-bottom:40px}
-
-.campaign-pres .cover-logo-wrap{position:relative;margin-bottom:40px}
-.campaign-pres .cover-logo-wrap::before{content:'';position:absolute;inset:-6px;border-radius:50%;background:linear-gradient(135deg,var(--brand-cyan),var(--brand-yellow),var(--brand-purple));opacity:0.4;animation:logoRingSpin 8s linear infinite}
-@keyframes logoRingSpin{to{transform:rotate(360deg)}}
-.campaign-pres .cover-logo{width:110px;height:110px;border-radius:50%;object-fit:cover;position:relative;z-index:1;border:4px solid var(--bg-dark);box-shadow:0 0 60px rgba(64,225,211,0.15)}
-
-.campaign-pres .cover-client{font-size:4.5rem;font-weight:900;margin-bottom:16px;position:relative;line-height:1.05;letter-spacing:-0.03em;background:linear-gradient(120deg,var(--brand-yellow),#fff,var(--brand-cyan),var(--brand-yellow));background-size:300% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 6s linear infinite}
-@keyframes shimmer{to{background-position:300% center}}
-
-.campaign-pres .cover-campaign{font-size:1.5rem;font-weight:300;color:var(--text-secondary);margin-bottom:24px;position:relative;letter-spacing:0.02em}
-.campaign-pres .cover-divider{width:120px;height:2px;background:linear-gradient(90deg,transparent,var(--brand-cyan),var(--brand-yellow),transparent);margin:0 auto 28px}
-.campaign-pres .cover-date{font-size:0.9rem;color:var(--text-secondary);position:relative;opacity:0.7}
+/* ── Copy Switcher ── */
+.campaign-pres .copy-switcher{
+  display:flex;flex-direction:column;gap:10px;
+  margin:-8px 0 28px;padding:16px 20px;
+  background:rgba(64,225,211,0.04);
+  border:1px solid rgba(64,225,211,0.12);border-radius:14px;
+}
+.campaign-pres .copy-switcher-label{font-size:0.72rem;font-weight:700;color:rgba(64,225,211,0.7);text-transform:uppercase;letter-spacing:0.08em}
+.campaign-pres .copy-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.campaign-pres .copy-tab{
+  padding:6px 18px;border-radius:20px;font-size:0.78rem;font-weight:700;cursor:pointer;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+  color:var(--text-secondary);transition:all 0.2s;
+}
+.campaign-pres .copy-tab:hover{background:rgba(64,225,211,0.08);color:var(--brand-cyan);border-color:rgba(64,225,211,0.2)}
+.campaign-pres .copy-tab.active{background:rgba(64,225,211,0.12);color:var(--brand-cyan);border-color:rgba(64,225,211,0.35)}
+.campaign-pres .copy-text-preview{
+  font-size:0.95rem;color:var(--text-secondary);line-height:1.75;
+  padding:10px 14px;background:rgba(255,255,255,0.03);border-radius:10px;
+  white-space:pre-wrap;
+}
 
 /* ── Concept Slide ── */
 .campaign-pres .concept-slide{padding:50px 0}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { LayoutGrid, Settings2, Upload, Lock, Trash2, Clock } from 'lucide-react'
+import { LayoutGrid, Settings2, Upload, Lock, Trash2, Clock, Plus, X } from 'lucide-react'
 import ClientAutocomplete from '../../../_components/client-autocomplete'
 import WorkspaceSelector from '../../../_components/workspace-selector'
 import { MOCKUP_TYPES, type CampaignMeta, type EditorSection, type MockupType } from './types'
@@ -98,14 +98,65 @@ export default function Inspector({
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>טקסט / קופי</label>
+                <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>תיאור קצר על השקף</label>
                 <textarea
                   value={section.description} onChange={e => onUpdateSection({ description: e.target.value })}
-                  rows={4} placeholder="טקסט שיופיע מעל הקריאייטיבים" dir="auto"
+                  rows={3} placeholder="תיאור קצר על השקף (לא חובה)" dir="auto"
                   className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none resize-none transition-all duration-200" style={fieldStyle}
                   onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
                   onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
                 />
+              </div>
+
+              <SectionDivider label="קופי / ווריאציות טקסט" />
+              <div className="space-y-2.5">
+                <p className="text-[10px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                  הוסף ורסיות טקסט. הלקוח יוכל לעבור בין הוורסיות ולראות כיצד כל טקסט נראה על הגרפיקות.
+                </p>
+                {(section.copies || []).map((copy, idx) => (
+                  <div key={idx} className="relative">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="text-[10px] font-bold" style={{ color: 'rgba(64,225,211,0.6)' }}>ורסיה {idx + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const next = section.copies.filter((_, i) => i !== idx)
+                          onUpdateSection({ copies: next })
+                        }}
+                        className="p-0.5 rounded transition-colors ml-auto"
+                        style={{ color: 'rgba(255,255,255,0.2)' }}
+                        onMouseEnter={e => { e.currentTarget.style.color = '#ef4444' }}
+                        onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.2)' }}
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <textarea
+                      value={copy}
+                      onChange={e => {
+                        const next = section.copies.map((c, i) => i === idx ? e.target.value : c)
+                        onUpdateSection({ copies: next })
+                      }}
+                      rows={3}
+                      placeholder={`טקסט ורסיה ${idx + 1}...`}
+                      dir="auto"
+                      className="w-full px-3 py-2.5 rounded-lg text-sm outline-none resize-none transition-all duration-200"
+                      style={fieldStyle}
+                      onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
+                      onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
+                    />
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => onUpdateSection({ copies: [...(section.copies || []), ''] })}
+                  className="flex items-center gap-1.5 w-full px-3 py-2.5 rounded-lg text-xs font-bold transition-all duration-200"
+                  style={{ color: '#40e1d3', border: '1px dashed rgba(64,225,211,0.2)', background: 'rgba(64,225,211,0.03)' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.08)' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.03)' }}
+                >
+                  <Plus className="w-3.5 h-3.5" /> הוסף ורסיית קופי
+                </button>
               </div>
             </>
           ) : (

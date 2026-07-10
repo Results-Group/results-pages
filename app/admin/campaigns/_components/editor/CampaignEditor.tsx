@@ -116,6 +116,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
       title: s.title,
       mockup_type: s.mockup_type,
       description: s.description,
+      copies: s.copies || [],
       assets: s.assets.map(a => ({ id: a.id, type: a.type, file_path: a.file_path, url: a.url, caption: a.caption })),
     })),
   }), [doc, status, passwordDirty])
@@ -292,6 +293,8 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
     return await res.json()
   }, [])
 
+  const MAX_ASSETS_PER_SLIDE = 4
+
   const uploadFiles = useCallback(async (files: FileList | File[]) => {
     if (!activeSection) return
     const sectionId = activeSection.id
@@ -306,14 +309,23 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
     }
     if (!valid.length) return
 
+    // 4-image limit
+    const existing = activeSection.assets.length
+    const available = Math.max(0, MAX_ASSETS_PER_SLIDE - existing)
+    if (available === 0) { toast('הגעת למגבלת 4 תמונות לשקף. הוסף שקף חדש כדי להמשיך.', 'error'); return }
+    const limited = valid.slice(0, available)
+    if (valid.length > available) {
+      toast(`ניתן להוסיף רק ${available} תמונה נוספת לשקף זה (מגבלה: ${MAX_ASSETS_PER_SLIDE}).`, 'error')
+    }
+
     const id = await ensureCampaignExists()
     if (!id) { toast('יש למלא שם לקוח ושם קמפיין לפני העלאת קבצים', 'error'); return }
 
-    initProgress(sectionId, valid.length)
+    initProgress(sectionId, limited.length)
 
     // Upload all files in parallel
     await Promise.allSettled(
-      valid.map(async file => {
+      limited.map(async file => {
         try {
           const data = await uploadOneFile(file, id)
           if (data) {

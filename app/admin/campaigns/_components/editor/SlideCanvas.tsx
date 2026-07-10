@@ -151,6 +151,8 @@ export default function SlideCanvas({
   const total = uploadProgress?.total ?? 0
   const isUploading = uploading > 0
   const progressPct = total > 0 ? Math.round((settled / total) * 100) : 0
+  const MAX_ASSETS = 4
+  const atLimit = section.assets.length >= MAX_ASSETS
 
   return (
     <div className="h-full overflow-auto" style={{ background: '#050505' }}>
@@ -175,7 +177,7 @@ export default function SlideCanvas({
         <textarea
           value={section.description}
           onChange={e => onUpdateSection({ description: e.target.value })}
-          placeholder={isDivider ? 'טקסט שיופיע על שקף הביניים...' : 'טקסט / קופי שיופיע מעל הקריאייטיבים...'}
+          placeholder={isDivider ? 'טקסט שיופיע על שקף הביניים...' : 'תיאור קצר על השקף (לא חובה)...'}
           rows={2}
           dir="auto"
           className="w-full bg-transparent outline-none text-sm mb-8 resize-none leading-relaxed"
@@ -276,60 +278,77 @@ export default function SlideCanvas({
               </div>
             )}
 
-            {/* Drop zone — always visible so you can keep adding files */}
-            <label
-              className="relative block rounded-2xl cursor-pointer transition-all duration-300"
-              style={{
-                padding: section.assets.length === 0 ? '3rem 2rem' : '1.25rem 1.5rem',
-                border: isDragOver
-                  ? '2px dashed rgba(64,225,211,0.6)'
-                  : '2px dashed rgba(255,255,255,0.07)',
-                background: isDragOver ? 'rgba(64,225,211,0.06)' : 'rgba(255,255,255,0.01)',
-              }}
-              onDragOver={e => { e.preventDefault(); setIsDragOver(true) }}
-              onDragLeave={() => setIsDragOver(false)}
-              onDrop={handleDrop}
-            >
-              <div className="absolute top-0 right-0 w-8 h-8" style={{ borderTop: `2px solid ${isDragOver ? 'rgba(64,225,211,0.4)' : 'rgba(64,225,211,0.12)'}`, borderRight: `2px solid ${isDragOver ? 'rgba(64,225,211,0.4)' : 'rgba(64,225,211,0.12)'}` }} />
-              <div className="absolute bottom-0 left-0 w-8 h-8" style={{ borderBottom: `2px solid ${isDragOver ? 'rgba(64,225,211,0.3)' : 'rgba(64,225,211,0.06)'}`, borderLeft: `2px solid ${isDragOver ? 'rgba(64,225,211,0.3)' : 'rgba(64,225,211,0.06)'}` }} />
-
-              {section.assets.length === 0 ? (
-                // Large empty state
-                <div className="text-center">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                    <Upload className="w-5 h-5" style={{ color: isDragOver ? '#40e1d3' : 'rgba(255,255,255,0.25)' }} />
-                  </div>
-                  <p className="text-sm font-semibold mb-1" style={{ color: isDragOver ? '#40e1d3' : 'rgba(255,255,255,0.35)' }}>
-                    {isDragOver ? 'שחרר להעלאה' : 'גררו תמונות לכאן או לחצו לבחירה'}
-                  </p>
-                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.18)' }}>
-                    PNG, JPG, WebP, HEIC — עד {MAX_FILE_MB} MB לקובץ
-                  </p>
+            {/* Drop zone / at-limit indicator */}
+            {atLimit ? (
+              <div className="rounded-2xl px-5 py-4 flex items-center gap-3" style={{ border: '2px dashed rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.01)' }}>
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)' }}>
+                  <span className="text-sm font-black" style={{ color: '#ef4444' }}>4</span>
                 </div>
-              ) : (
-                // Compact zone when assets exist
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                    <ImageIcon className="w-4 h-4" style={{ color: isDragOver ? '#40e1d3' : 'rgba(255,255,255,0.25)' }} />
+                <div>
+                  <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>הגעת למגבלת 4 תמונות לשקף</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.18)' }}>הוסף שקף חדש כדי להוסיף תמונות נוספות</p>
+                </div>
+              </div>
+            ) : (
+              <label
+                className="relative block rounded-2xl cursor-pointer transition-all duration-300"
+                style={{
+                  padding: section.assets.length === 0 ? '3rem 2rem' : '1.25rem 1.5rem',
+                  border: isDragOver
+                    ? '2px dashed rgba(64,225,211,0.6)'
+                    : '2px dashed rgba(255,255,255,0.07)',
+                  background: isDragOver ? 'rgba(64,225,211,0.06)' : 'rgba(255,255,255,0.01)',
+                }}
+                onDragOver={e => { e.preventDefault(); setIsDragOver(true) }}
+                onDragLeave={() => setIsDragOver(false)}
+                onDrop={handleDrop}
+              >
+                <div className="absolute top-0 right-0 w-8 h-8" style={{ borderTop: `2px solid ${isDragOver ? 'rgba(64,225,211,0.4)' : 'rgba(64,225,211,0.12)'}`, borderRight: `2px solid ${isDragOver ? 'rgba(64,225,211,0.4)' : 'rgba(64,225,211,0.12)'}` }} />
+                <div className="absolute bottom-0 left-0 w-8 h-8" style={{ borderBottom: `2px solid ${isDragOver ? 'rgba(64,225,211,0.3)' : 'rgba(64,225,211,0.06)'}`, borderLeft: `2px solid ${isDragOver ? 'rgba(64,225,211,0.3)' : 'rgba(64,225,211,0.06)'}` }} />
+
+                {/* Asset count badge */}
+                {section.assets.length > 0 && (
+                  <div className="absolute top-2 right-10 text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)' }}>
+                    {section.assets.length}/{MAX_ASSETS}
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold" style={{ color: isDragOver ? '#40e1d3' : 'rgba(255,255,255,0.35)' }}>
-                      {isDragOver ? 'שחרר להוסיף' : 'הוסף תמונות נוספות'}
+                )}
+
+                {section.assets.length === 0 ? (
+                  <div className="text-center">
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                      <Upload className="w-5 h-5" style={{ color: isDragOver ? '#40e1d3' : 'rgba(255,255,255,0.25)' }} />
+                    </div>
+                    <p className="text-sm font-semibold mb-1" style={{ color: isDragOver ? '#40e1d3' : 'rgba(255,255,255,0.35)' }}>
+                      {isDragOver ? 'שחרר להעלאה' : 'גררו תמונות לכאן או לחצו לבחירה'}
                     </p>
-                    <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.18)' }}>גרור או לחץ לבחירה</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.18)' }}>
+                      PNG, JPG, WebP, HEIC — עד {MAX_FILE_MB} MB לקובץ · עד {MAX_ASSETS} תמונות לשקף
+                    </p>
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                      <ImageIcon className="w-4 h-4" style={{ color: isDragOver ? '#40e1d3' : 'rgba(255,255,255,0.25)' }} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold" style={{ color: isDragOver ? '#40e1d3' : 'rgba(255,255,255,0.35)' }}>
+                        {isDragOver ? 'שחרר להוסיף' : `הוסף עוד תמונות (${MAX_ASSETS - section.assets.length} נותרו)`}
+                      </p>
+                      <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.18)' }}>גרור או לחץ לבחירה</p>
+                    </div>
+                  </div>
+                )}
 
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={handleFileChange}
-              />
-            </label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+              </label>
+            )}
           </>
         )}
       </div>
