@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
+import { useT, useLocale } from '@/lib/i18n'
 import { Plus, Search, Contact, Trash2, Edit3, X, RefreshCw, GitMerge, ArrowRight, CheckCircle } from 'lucide-react'
 
 interface Client {
@@ -38,6 +39,8 @@ function similarityScore(a: string, b: string): number {
 interface DuplicatePair { a: Client; b: Client; score: number }
 
 export default function ClientsPage() {
+  const t = useT()
+  const locale = useLocale()
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -93,16 +96,16 @@ export default function ClientsPage() {
   const filtered = clients.filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()))
 
   async function handleDelete(id: string) {
-    if (!confirm('למחוק את הלקוח? דפים וקמפיינים משויכים לא יימחקו אך יאבדו את השיוך.')) return
+    if (!confirm(t('clients.deleteConfirm'))) return
     try {
       const res = await fetch(`/api/clients/${id}`, { method: 'DELETE' })
       if (!res.ok) {
-        alert('שגיאה במחיקת הלקוח')
+        alert(t('clients.deleteError'))
         return
       }
       await load()
     } catch {
-      alert('שגיאה במחיקת הלקוח')
+      alert(t('clients.deleteError'))
     }
   }
 
@@ -111,10 +114,10 @@ export default function ClientsPage() {
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-semibold flex items-center gap-2" style={{ color: 'var(--admin-text-primary)' }}>
-            <Contact className="w-5 h-5" /> לקוחות
+            <Contact className="w-5 h-5" /> {t('clients.title')}
           </h2>
           <p className="text-sm mt-1" style={{ color: 'var(--admin-text-muted)' }}>
-            ניהול לקוחות, לוגו, צבע מותג ואנשי קשר
+            {t('clients.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -124,7 +127,7 @@ export default function ClientsPage() {
               className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-opacity"
               style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)' }}
             >
-              <GitMerge className="w-4 h-4" /> מיזוג כפילויות
+              <GitMerge className="w-4 h-4" /> {t('clients.mergeDuplicates')}
             </button>
           )}
           {mondayAvailable && (
@@ -133,10 +136,10 @@ export default function ClientsPage() {
               disabled={syncing}
               className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50"
               style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)' }}
-              title="סנכרן לקוחות מ-Monday.com"
+              title={t('clients.syncMonday')}
             >
               <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-              {syncing ? 'מסנכרן...' : 'סנכרן מ-Monday'}
+              {syncing ? t('clients.syncing') : t('clients.syncMonday')}
             </button>
           )}
           <button
@@ -144,7 +147,7 @@ export default function ClientsPage() {
             className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-opacity"
             style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
           >
-            <Plus className="w-4 h-4" /> לקוח חדש
+            <Plus className="w-4 h-4" /> {t('clients.newClient')}
           </button>
         </div>
       </div>
@@ -169,18 +172,18 @@ export default function ClientsPage() {
           type="text"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="חיפוש לקוח..."
+          placeholder={t('clients.search')}
           className="w-full max-w-xs pr-10 pl-3.5 py-2.5 rounded-lg text-sm outline-none"
           style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)' }}
         />
       </div>
 
       {loading ? (
-        <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>טוען...</p>
+        <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>{t('common.loading')}</p>
       ) : filtered.length === 0 ? (
         <div className="rounded-xl p-10 text-center" style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}>
           <Contact className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--admin-text-muted)' }} />
-          <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>אין לקוחות עדיין</p>
+          <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>{t('clients.noClients')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -258,6 +261,8 @@ function ClientAvatar({ client }: { client: Client }) {
 }
 
 function MergeModal({ clients, onClose, onMerged }: { clients: Client[]; onClose: () => void; onMerged: () => void }) {
+  const t = useT()
+  const locale = useLocale()
   const [merging, setMerging] = useState<string | null>(null)
   const [done, setDone] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
@@ -294,13 +299,13 @@ function MergeModal({ clients, onClose, onMerged }: { clients: Client[]; onClose
       })
       if (!res.ok) {
         const d = await res.json() as { error?: string }
-        setError(d.error ?? 'שגיאה במיזוג')
+        setError(d.error ?? t('clients.mergeError'))
         return
       }
       mergedAway.add(deleteId)
       setDone(prev => new Set([...prev, pairKey(p)]))
     } catch {
-      setError('שגיאה במיזוג הלקוחות')
+      setError(t('clients.mergeError'))
     } finally {
       setMerging(null)
     }
@@ -313,10 +318,10 @@ function MergeModal({ clients, onClose, onMerged }: { clients: Client[]; onClose
         <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--admin-border)' }}>
           <div>
             <h3 className="text-base font-semibold flex items-center gap-2" style={{ color: 'var(--admin-text-primary)' }}>
-              <GitMerge className="w-4 h-4" /> מיזוג כפילויות
+              <GitMerge className="w-4 h-4" /> {t('clients.mergeTitle')}
             </h3>
             <p className="text-xs mt-0.5" style={{ color: 'var(--admin-text-muted)' }}>
-              לחץ על הצד שרוצים לשמור, אחר-כך לחץ מזג
+              {t('clients.mergeHint')}
             </p>
           </div>
           <button onClick={onClose} style={{ color: 'var(--admin-text-muted)' }}><X className="w-4 h-4" /></button>
@@ -327,8 +332,8 @@ function MergeModal({ clients, onClose, onMerged }: { clients: Client[]; onClose
           {activePairs.length === 0 ? (
             <div className="text-center py-10">
               <CheckCircle className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--admin-accent)' }} />
-              <p className="text-sm font-medium" style={{ color: 'var(--admin-text-primary)' }}>לא נמצאו כפילויות</p>
-              <p className="text-xs mt-1" style={{ color: 'var(--admin-text-muted)' }}>כל הלקוחות נראים ייחודיים</p>
+              <p className="text-sm font-medium" style={{ color: 'var(--admin-text-primary)' }}>{t('clients.noDuplicates')}</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--admin-text-muted)' }}>{t('clients.noDuplicatesHint')}</p>
             </div>
           ) : (
             activePairs.map(p => {
@@ -371,7 +376,7 @@ function MergeModal({ clients, onClose, onMerged }: { clients: Client[]; onClose
 
                   <div className="flex items-center justify-between">
                     <span className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>
-                      דמיון: {Math.round(p.score * 100)}%
+                      {t('clients.similarity')}: {Math.round(p.score * 100)}%
                     </span>
                     <button
                       onClick={() => handleMerge(p)}
@@ -380,7 +385,7 @@ function MergeModal({ clients, onClose, onMerged }: { clients: Client[]; onClose
                       style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
                     >
                       <GitMerge className="w-3.5 h-3.5" />
-                      {isMergingThis ? 'ממזג...' : 'מזג'}
+                      {isMergingThis ? t('clients.merging') : t('clients.merge')}
                     </button>
                   </div>
                 </div>
@@ -397,7 +402,7 @@ function MergeModal({ clients, onClose, onMerged }: { clients: Client[]; onClose
 
         <div className="p-5 border-t" style={{ borderColor: 'var(--admin-border)' }}>
           <button onClick={onMerged} className="w-full py-2.5 rounded-lg text-sm font-medium" style={{ background: 'var(--admin-bg-elevated)', color: 'var(--admin-text-primary)', border: '1px solid var(--admin-border)' }}>
-            סיום
+            {t('common.done')}
           </button>
         </div>
       </div>
@@ -406,13 +411,15 @@ function MergeModal({ clients, onClose, onMerged }: { clients: Client[]; onClose
 }
 
 function CreateClientModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+  const t = useT()
+  const locale = useLocale()
   const [name, setName] = useState('')
   const [brandColor, setBrandColor] = useState('#40e1d3')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
   async function handleSave() {
-    if (!name.trim()) { setError('שם לקוח הוא שדה חובה'); return }
+    if (!name.trim()) { setError(t('clients.clientNameRequired')); return }
     setSaving(true)
     setError('')
     try {
@@ -422,9 +429,9 @@ function CreateClientModal({ onClose, onCreated }: { onClose: () => void; onCrea
         body: JSON.stringify({ name: name.trim(), brand_color: brandColor }),
       })
       if (res.ok) onCreated()
-      else { setError('שגיאה ביצירת לקוח'); setSaving(false) }
+      else { setError(t('clients.createError')); setSaving(false) }
     } catch {
-      setError('שגיאה ביצירת לקוח')
+      setError(t('clients.createError'))
       setSaving(false)
     }
   }
@@ -433,18 +440,18 @@ function CreateClientModal({ onClose, onCreated }: { onClose: () => void; onCrea
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={onClose}>
       <div className="w-full max-w-sm rounded-xl p-5" style={{ background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)' }} onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold" style={{ color: 'var(--admin-text-primary)' }}>לקוח חדש</h3>
+          <h3 className="text-base font-semibold" style={{ color: 'var(--admin-text-primary)' }}>{t('clients.createTitle')}</h3>
           <button onClick={onClose} style={{ color: 'var(--admin-text-muted)' }}><X className="w-4 h-4" /></button>
         </div>
 
-        <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>שם הלקוח</label>
+        <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>{t('clients.clientName')}</label>
         <input
           type="text" value={name} onChange={e => setName(e.target.value)} autoFocus
           className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none mb-4"
           style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)' }}
         />
 
-        <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>צבע מותג</label>
+        <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>{t('clients.brandColor')}</label>
         <div className="flex items-center gap-2 mb-4">
           <input type="color" value={brandColor} onChange={e => setBrandColor(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border-0" />
           <input type="text" value={brandColor} onChange={e => setBrandColor(e.target.value)} dir="ltr"
@@ -457,7 +464,7 @@ function CreateClientModal({ onClose, onCreated }: { onClose: () => void; onCrea
         <button onClick={handleSave} disabled={saving}
           className="w-full py-2.5 rounded-lg text-sm font-medium transition-opacity disabled:opacity-40"
           style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}>
-          {saving ? 'שומר...' : 'צור לקוח'}
+          {saving ? t('clients.saving') : t('clients.createBtn')}
         </button>
       </div>
     </div>

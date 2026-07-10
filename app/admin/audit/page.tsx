@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { ScrollText, Megaphone, FileText, Contact, Users, Building } from 'lucide-react'
+import { useT, useLocale } from '@/lib/i18n'
 
 interface AuditEntry {
   id: string
@@ -13,14 +14,8 @@ interface AuditEntry {
   created_at: string
 }
 
-const ACTION_LABELS: Record<string, string> = {
-  create: 'יצירה', update: 'עדכון', delete: 'מחיקה', restore: 'שחזור', publish: 'פרסום', purge: 'מחיקה לצמיתות',
-}
 const ACTION_COLORS: Record<string, string> = {
   create: '#2EC4B6', update: '#5B8CDB', delete: '#f59e0b', restore: '#22c55e', publish: '#40e1d3', purge: '#ef4444',
-}
-const ENTITY_LABELS: Record<string, string> = {
-  campaign: 'קמפיין', page: 'דף', client: 'לקוח', user: 'משתמש', workspace: 'סביבה',
 }
 function entityIcon(type: string) {
   if (type === 'campaign') return <Megaphone className="w-3.5 h-3.5" />
@@ -30,11 +25,23 @@ function entityIcon(type: string) {
   return <Building className="w-3.5 h-3.5" />
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString('he-IL', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-}
-
 export default function AuditPage() {
+  const t = useT()
+  const locale = useLocale()
+
+  const ACTION_LABELS: Record<string, string> = {
+    create: t('audit.actionCreate'), update: t('audit.actionUpdate'), delete: t('audit.actionDelete'),
+    restore: t('audit.actionRestore'), publish: t('audit.actionPublish'), purge: t('audit.actionPurge'),
+  }
+  const ENTITY_LABELS: Record<string, string> = {
+    campaign: t('audit.entityCampaign'), page: t('audit.entityPage'), client: t('audit.entityClient'),
+    user: t('audit.entityUser'), workspace: t('audit.entityWorkspace'),
+  }
+
+  function formatDate(iso: string) {
+    return new Date(iso).toLocaleString(locale === 'en' ? 'en-US' : 'he-IL', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+  }
+
   const [entries, setEntries] = useState<AuditEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [entityFilter, setEntityFilter] = useState('')
@@ -63,28 +70,28 @@ export default function AuditPage() {
     <div className="max-w-4xl">
       <div className="mb-6">
         <h2 className="text-xl font-semibold flex items-center gap-2" style={{ color: 'var(--admin-text-primary)' }}>
-          <ScrollText className="w-5 h-5" /> יומן פעילות
+          <ScrollText className="w-5 h-5" /> {t('audit.title')}
         </h2>
-        <p className="text-sm mt-1" style={{ color: 'var(--admin-text-muted)' }}>מי עשה מה ומתי במערכת</p>
+        <p className="text-sm mt-1" style={{ color: 'var(--admin-text-muted)' }}>{t('audit.subtitle')}</p>
       </div>
 
       <div className="flex gap-2 mb-5 flex-wrap">
         <select value={entityFilter} onChange={e => setEntityFilter(e.target.value)} className="px-3 py-2 rounded-lg text-sm outline-none" style={selectStyle}>
-          <option value="">כל הסוגים</option>
+          <option value="">{t('audit.allTypes')}</option>
           {Object.entries(ENTITY_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
         </select>
         <select value={actionFilter} onChange={e => setActionFilter(e.target.value)} className="px-3 py-2 rounded-lg text-sm outline-none" style={selectStyle}>
-          <option value="">כל הפעולות</option>
+          <option value="">{t('audit.allActions')}</option>
           {Object.entries(ACTION_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
         </select>
       </div>
 
       {loading ? (
-        <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>טוען...</p>
+        <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>{t('common.loading')}</p>
       ) : entries.length === 0 ? (
         <div className="rounded-xl p-10 text-center" style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}>
           <ScrollText className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--admin-text-muted)' }} />
-          <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>אין פעילות מתועדת</p>
+          <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>{t('audit.noActivity')}</p>
         </div>
       ) : (
         <div className="space-y-1.5">
@@ -102,7 +109,7 @@ export default function AuditPage() {
                   {e.entity_label || e.entity_id || '—'}
                 </p>
               </div>
-              <span className="text-xs shrink-0" style={{ color: 'var(--admin-text-muted)' }}>{e.user_email || 'מערכת'}</span>
+              <span className="text-xs shrink-0" style={{ color: 'var(--admin-text-muted)' }}>{e.user_email || t('audit.system')}</span>
               <span className="text-xs shrink-0 hidden sm:block" style={{ color: 'var(--admin-text-muted)' }}>{formatDate(e.created_at)}</span>
             </div>
           ))}

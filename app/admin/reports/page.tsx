@@ -67,7 +67,7 @@ export default function ReportsListPage() {
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`למחוק את הדוח "${name}"?`)) return
+    if (!confirm(locale === 'en' ? `Delete report "${name}"?` : `למחוק את הדוח "${name}"?`)) return
     await fetch(`/api/reports/${id}`, { method: 'DELETE' })
     setReports(prev => prev.filter(r => r.id !== id))
   }
@@ -79,7 +79,7 @@ export default function ReportsListPage() {
       if (!groups.has(key)) groups.set(key, [])
       groups.get(key)!.push(r)
     }
-    return Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0], 'he'))
+    return Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0], locale === 'en' ? 'en' : 'he'))
   })()
 
   return (

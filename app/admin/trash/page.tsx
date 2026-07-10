@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Trash2, RotateCcw, FileText, Megaphone, AlertTriangle } from 'lucide-react'
+import { useT, useLocale } from '@/lib/i18n'
 
 interface TrashedPage {
   id: string
@@ -17,12 +18,15 @@ interface TrashedCampaign {
   deleted_at: string | null
 }
 
-function formatDate(iso: string | null) {
-  if (!iso) return ''
-  return new Date(iso).toLocaleDateString('he-IL', { year: 'numeric', month: 'short', day: 'numeric' })
-}
-
 export default function TrashPage() {
+  const t = useT()
+  const locale = useLocale()
+
+  function formatDate(iso: string | null) {
+    if (!iso) return ''
+    return new Date(iso).toLocaleDateString(locale === 'en' ? 'en-US' : 'he-IL', { year: 'numeric', month: 'short', day: 'numeric' })
+  }
+
   const [pages, setPages] = useState<TrashedPage[]>([])
   const [campaigns, setCampaigns] = useState<TrashedCampaign[]>([])
   const [loading, setLoading] = useState(true)
@@ -55,7 +59,7 @@ export default function TrashPage() {
   }
 
   async function purge(kind: 'pages' | 'campaigns', id: string) {
-    if (!confirm('למחוק לצמיתות? פעולה זו אינה הפיכה והקבצים יימחקו.')) return
+    if (!confirm(t('trash.purgeConfirm'))) return
     setBusy(id)
     try {
       const res = await fetch(`/api/${kind}/${id}?purge=1`, { method: 'DELETE' })
@@ -71,26 +75,26 @@ export default function TrashPage() {
     <div className="max-w-4xl">
       <div className="mb-6">
         <h2 className="text-xl font-semibold flex items-center gap-2" style={{ color: 'var(--admin-text-primary)' }}>
-          <Trash2 className="w-5 h-5" /> סל מיחזור
+          <Trash2 className="w-5 h-5" /> {t('trash.title')}
         </h2>
         <p className="text-sm mt-1" style={{ color: 'var(--admin-text-muted)' }}>
-          פריטים שנמחקו נשמרים כאן וניתן לשחזר אותם. מחיקה לצמיתות אינה הפיכה.
+          {t('trash.subtitle')}
         </p>
       </div>
 
       {loading ? (
-        <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>טוען...</p>
+        <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>{t('common.loading')}</p>
       ) : isEmpty ? (
         <div className="rounded-xl p-10 text-center" style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}>
           <Trash2 className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--admin-text-muted)' }} />
-          <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>סל המיחזור ריק</p>
+          <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>{t('trash.empty')}</p>
         </div>
       ) : (
         <div className="space-y-6">
           {campaigns.length > 0 && (
             <section>
               <h3 className="text-sm font-semibold mb-2 flex items-center gap-1.5" style={{ color: 'var(--admin-text-secondary)' }}>
-                <Megaphone className="w-4 h-4" /> קמפיינים ({campaigns.length})
+                <Megaphone className="w-4 h-4" /> {t('trash.campaigns')} ({campaigns.length})
               </h3>
               <div className="space-y-2">
                 {campaigns.map(c => (
@@ -111,7 +115,7 @@ export default function TrashPage() {
           {pages.length > 0 && (
             <section>
               <h3 className="text-sm font-semibold mb-2 flex items-center gap-1.5" style={{ color: 'var(--admin-text-secondary)' }}>
-                <FileText className="w-4 h-4" /> דפים ({pages.length})
+                <FileText className="w-4 h-4" /> {t('trash.pages')} ({pages.length})
               </h3>
               <div className="space-y-2">
                 {pages.map(p => (
@@ -142,12 +146,20 @@ function TrashRow({ title, subtitle, deletedAt, busy, onRestore, onPurge }: {
   onRestore: () => void
   onPurge: () => void
 }) {
+  const t = useT()
+  const locale = useLocale()
+
+  function formatDate(iso: string | null) {
+    if (!iso) return ''
+    return new Date(iso).toLocaleDateString(locale === 'en' ? 'en-US' : 'he-IL', { year: 'numeric', month: 'short', day: 'numeric' })
+  }
+
   return (
     <div className="rounded-xl p-3.5 flex items-center gap-3" style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate" style={{ color: 'var(--admin-text-primary)' }}>{title}</p>
         <p className="text-xs truncate" style={{ color: 'var(--admin-text-muted)' }}>
-          {subtitle}{deletedAt ? ` · נמחק ${formatDate(deletedAt)}` : ''}
+          {subtitle}{deletedAt ? ` · ${t('trash.deleted')} ${formatDate(deletedAt)}` : ''}
         </p>
       </div>
       <button
@@ -156,7 +168,7 @@ function TrashRow({ title, subtitle, deletedAt, busy, onRestore, onPurge }: {
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-40"
         style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)', color: 'var(--admin-accent)' }}
       >
-        <RotateCcw className="w-3.5 h-3.5" /> שחזר
+        <RotateCcw className="w-3.5 h-3.5" /> {t('trash.restore')}
       </button>
       <button
         onClick={onPurge}
@@ -164,7 +176,7 @@ function TrashRow({ title, subtitle, deletedAt, busy, onRestore, onPurge }: {
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-40"
         style={{ background: 'var(--admin-danger-bg)', color: 'var(--admin-danger)' }}
       >
-        <AlertTriangle className="w-3.5 h-3.5" /> מחק לצמיתות
+        <AlertTriangle className="w-3.5 h-3.5" /> {t('trash.purge')}
       </button>
     </div>
   )

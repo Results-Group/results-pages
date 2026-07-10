@@ -204,7 +204,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <img src="/logo.png" alt="Results" className="h-7 w-auto" />
           <div className="flex-1 min-w-0">
             <h1 className="text-sm font-semibold tracking-tight" style={{ color: 'var(--sidebar-text)' }}>Results Pages</h1>
-            <p className="text-[11px]" style={{ color: 'var(--sidebar-text-muted)' }}>ניהול דפים</p>
+            <p className="text-[11px]" style={{ color: 'var(--sidebar-text-muted)' }}>{t('layout.managePages')}</p>
           </div>
           <button
             onClick={() => setMobileOpen(false)}
@@ -224,7 +224,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   {currentUser.name}
                 </p>
                 <span className="text-[10px]" style={{ color: 'var(--sidebar-text-muted)' }}>
-                  {isOwner ? 'בעלים' : ROLE_LABELS[currentUser.role]}
+                  {isOwner ? t('layout.owner') : t(('role.' + currentUser.role) as any)}
                 </span>
               </div>
             </div>
@@ -247,7 +247,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 className="w-2 h-2 rounded-full flex-shrink-0"
                 style={{ background: activeWs?.color || '#40e1d3' }}
               />
-              <span className="flex-1 text-right truncate">{activeWs?.name || 'בחר סביבת עבודה'}</span>
+              <span className="flex-1 text-right truncate">{activeWs?.name || t('layout.chooseWorkspace')}</span>
               <ChevronDown className={`w-3.5 h-3.5 transition-transform ${wsDropdownOpen ? 'rotate-180' : ''}`} style={{ color: 'var(--sidebar-text-muted)' }} />
             </button>
 
@@ -379,7 +379,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         onClick={() => setMobileOpen(true)}
         className="lg:hidden fixed top-4 right-4 z-50 p-3 rounded-xl shadow-lg"
         style={{ background: 'var(--sidebar-bg)', border: '1px solid var(--sidebar-border)', color: 'var(--sidebar-text)' }}
-        aria-label="פתח תפריט"
+        aria-label={locale === 'en' ? 'Open menu' : 'פתח תפריט'}
       >
         <Menu className="w-5 h-5" />
       </button>

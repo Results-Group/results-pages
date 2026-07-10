@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, Users, X, Save, Building } from 'lucide-react'
+import { useT, useLocale } from '@/lib/i18n'
 
 interface Workspace {
   id: string
@@ -17,6 +18,8 @@ const WORKSPACE_COLORS = [
 ]
 
 export default function WorkspacesPage() {
+  const t = useT()
+  const locale = useLocale()
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
@@ -60,7 +63,7 @@ export default function WorkspacesPage() {
       fetchWorkspaces()
     } else {
       const err = await res.json()
-      alert(err.error || 'שגיאה')
+      alert(err.error || t('common.error'))
     }
   }
 
@@ -81,7 +84,7 @@ export default function WorkspacesPage() {
   }
 
   async function handleDelete(ws: Workspace) {
-    if (!confirm(`למחוק את סביבת העבודה "${ws.name}"? כל התוכן בסביבה יאבד את השיוך.`)) return
+    if (!confirm(locale === 'en' ? `Delete workspace "${ws.name}"? ${t('workspaces.deleteConfirm')}` : `למחוק את סביבת העבודה "${ws.name}"? ${t('workspaces.deleteConfirm')}`)) return
     await fetch(`/api/workspaces/${ws.id}`, { method: 'DELETE' })
     fetchWorkspaces()
   }
@@ -99,14 +102,14 @@ export default function WorkspacesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold" style={{ color: 'var(--admin-text-primary)' }}>סביבות עבודה</h2>
+        <h2 className="text-xl font-semibold" style={{ color: 'var(--admin-text-primary)' }}>{t('workspaces.title')}</h2>
         <button
           onClick={() => { setShowCreate(true); setEditingId(null); setForm({ name: '', slug: '', color: '#40e1d3' }) }}
           className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all"
           style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
         >
           <Plus className="w-4 h-4" />
-          סביבת עבודה חדשה
+          {t('workspaces.newWorkspace')}
         </button>
       </div>
 
@@ -118,7 +121,7 @@ export default function WorkspacesPage() {
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-medium" style={{ color: 'var(--admin-text-primary)' }}>
-              {editingId ? 'עריכת סביבת עבודה' : 'יצירת סביבת עבודה'}
+              {editingId ? t('workspaces.editWorkspace') : t('workspaces.createWorkspace')}
             </h3>
             <button
               onClick={() => { setShowCreate(false); setEditingId(null) }}
@@ -131,7 +134,7 @@ export default function WorkspacesPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>שם</label>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>{t('workspaces.nameLabel')}</label>
               <input
                 type="text"
                 value={form.name}
@@ -145,12 +148,12 @@ export default function WorkspacesPage() {
                 }}
                 className="w-full px-3.5 py-2 rounded-lg text-sm outline-none"
                 style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)' }}
-                placeholder="שם הסביבה"
+                placeholder={t('workspaces.namePlaceholder')}
               />
             </div>
             {showCreate && (
               <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>סלאג (URL)</label>
+                <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>{t('workspaces.slugLabel')}</label>
                 <input
                   type="text"
                   value={form.slug}
@@ -165,7 +168,7 @@ export default function WorkspacesPage() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-xs font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>צבע</label>
+            <label className="block text-xs font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>{t('workspaces.colorLabel')}</label>
             <div className="flex gap-2">
               {WORKSPACE_COLORS.map(c => (
                 <button
@@ -189,18 +192,18 @@ export default function WorkspacesPage() {
             style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
           >
             <Save className="w-4 h-4" />
-            {saving ? 'שומר...' : editingId ? 'שמור שינויים' : 'צור סביבת עבודה'}
+            {saving ? t('workspaces.saving') : editingId ? t('workspaces.saveChanges') : t('workspaces.create')}
           </button>
         </div>
       )}
 
       {loading ? (
-        <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>טוען...</p>
+        <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>{t('common.loading')}</p>
       ) : workspaces.length === 0 ? (
         <div className="text-center py-20" style={{ color: 'var(--admin-text-muted)' }}>
           <Building className="w-12 h-12 mx-auto mb-3 opacity-50" />
-          <p className="text-lg font-medium mb-1">אין סביבות עבודה</p>
-          <p className="text-sm">צור סביבת עבודה ראשונה להפרדת תוכן</p>
+          <p className="text-lg font-medium mb-1">{t('workspaces.noWorkspaces')}</p>
+          <p className="text-sm">{t('workspaces.noWorkspacesHint')}</p>
         </div>
       ) : (
         <div className="grid gap-4">
@@ -221,7 +224,7 @@ export default function WorkspacesPage() {
                 <p className="text-xs mt-0.5" style={{ color: 'var(--admin-text-muted)' }}>
                   <span dir="ltr">/{ws.slug}</span>
                   <span className="mx-2">·</span>
-                  <Users className="w-3 h-3 inline-block" /> {memberCounts[ws.id] ?? '...'} חברים
+                  <Users className="w-3 h-3 inline-block" /> {memberCounts[ws.id] ?? '...'} {t('workspaces.members')}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -229,7 +232,7 @@ export default function WorkspacesPage() {
                   onClick={() => startEdit(ws)}
                   className="p-2 rounded-xl transition-colors"
                   style={{ color: 'var(--admin-link)' }}
-                  title="עריכה"
+                  title={t('common.edit')}
                   onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                 >
@@ -239,7 +242,7 @@ export default function WorkspacesPage() {
                   onClick={() => handleDelete(ws)}
                   className="p-2 rounded-xl transition-colors"
                   style={{ color: 'var(--admin-danger)' }}
-                  title="מחיקה"
+                  title={t('common.delete')}
                   onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-danger-bg)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                 >

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { Plus, Search, Eye, ExternalLink, Pencil, ToggleLeft, ToggleRight, Trash2, Monitor, Smartphone, X, Copy, MessageCircle, Lock, Building, CheckSquare, Square } from 'lucide-react'
 import { whatsappShareUrl } from '@/lib/share'
+import { useT, useLocale } from '@/lib/i18n'
 
 interface PageItem {
   id: string
@@ -39,6 +40,8 @@ interface Workspace {
 }
 
 export default function AdminDashboard() {
+  const t = useT()
+  const locale = useLocale()
   const [pages, setPages] = useState<PageItem[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('')
@@ -72,19 +75,19 @@ export default function AdminDashboard() {
   }
 
   async function handleDelete(id: string, title: string) {
-    if (!confirm(`למחוק את "${title}"?`)) return
+    if (!confirm(locale === 'en' ? `Delete "${title}"?` : `למחוק את "${title}"?`)) return
     await fetch(`/api/pages/${id}`, { method: 'DELETE' })
     fetchPages()
   }
 
   async function handleDuplicate(id: string, title: string) {
-    if (!confirm(`לשכפל את "${title}"?`)) return
+    if (!confirm(locale === 'en' ? `Duplicate "${title}"?` : `לשכפל את "${title}"?`)) return
     const res = await fetch(`/api/pages/${id}/duplicate`, { method: 'POST' })
     if (res.ok) {
       fetchPages()
     } else {
       const err = await res.json()
-      alert(`שגיאה בשכפול: ${err.error || 'Unknown error'}`)
+      alert(`${locale === 'en' ? 'Duplication error:' : 'שגיאה בשכפול:'} ${err.error || 'Unknown error'}`)
     }
   }
 
@@ -144,15 +147,15 @@ export default function AdminDashboard() {
   )
 
   function getStatus(page: PageItem): { label: string; colorVar: string; bgVar: string } {
-    if (!page.active) return { label: 'מושבת', colorVar: 'var(--admin-disabled-text)', bgVar: 'var(--admin-disabled-bg)' }
-    if (page.expires_at && new Date(page.expires_at) < new Date()) return { label: 'פג תוקף', colorVar: 'var(--admin-danger)', bgVar: 'var(--admin-danger-bg)' }
-    return { label: 'פעיל', colorVar: 'var(--admin-success)', bgVar: 'var(--admin-success-bg)' }
+    if (!page.active) return { label: t('pages.statusDisabled'), colorVar: 'var(--admin-disabled-text)', bgVar: 'var(--admin-disabled-bg)' }
+    if (page.expires_at && new Date(page.expires_at) < new Date()) return { label: t('pages.statusExpired'), colorVar: 'var(--admin-danger)', bgVar: 'var(--admin-danger-bg)' }
+    return { label: t('pages.statusActive'), colorVar: 'var(--admin-success)', bgVar: 'var(--admin-success-bg)' }
   }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold" style={{ color: 'var(--admin-text-primary)' }}>דפים</h2>
+        <h2 className="text-xl font-semibold" style={{ color: 'var(--admin-text-primary)' }}>{t('pages.title')}</h2>
         {userRole !== 'viewer' && (
           <Link
             href="/admin/upload"
@@ -162,7 +165,7 @@ export default function AdminDashboard() {
             onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
           >
             <Plus className="w-4 h-4" />
-            העלאת דף
+            {t('pages.uploadPage')}
           </Link>
         )}
       </div>
@@ -170,13 +173,13 @@ export default function AdminDashboard() {
       {/* Filters */}
       <div className="flex gap-3 mb-6">
         <div className="relative flex-1 max-w-xs">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--admin-text-muted)' }} />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--admin-text-muted)' }} />
           <input
             type="text"
-            placeholder="חיפוש..."
+            placeholder={t('pages.searchPlaceholder')}
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pr-10 pl-3.5 py-2 rounded-lg text-sm outline-none transition-colors"
+            className="w-full ps-10 pe-3.5 py-2 rounded-lg text-sm outline-none transition-colors"
             style={{
               background: 'var(--admin-bg-elevated)',
               border: '1px solid var(--admin-border)',
@@ -196,7 +199,7 @@ export default function AdminDashboard() {
             color: 'var(--admin-text-primary)',
           }}
         >
-          <option value="">כל הלקוחות</option>
+          <option value="">{t('pages.allClients')}</option>
           {clients.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
       </div>
@@ -209,7 +212,7 @@ export default function AdminDashboard() {
         >
           <Building className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--admin-accent)' }} />
           <span className="text-sm font-medium" style={{ color: 'var(--admin-text-primary)' }}>
-            {selectedIds.size} דפים נבחרו
+            {selectedIds.size} {t('pages.selectedPages')}
           </span>
           <select
             value={moveTarget}
@@ -221,7 +224,7 @@ export default function AdminDashboard() {
               color: 'var(--admin-text-primary)',
             }}
           >
-            <option value="">העבר לסביבה...</option>
+            <option value="">{t('pages.moveToWorkspace')}</option>
             {workspaces.map(ws => (
               <option key={ws.id} value={ws.id}>{ws.name}</option>
             ))}
@@ -232,13 +235,13 @@ export default function AdminDashboard() {
             className="px-4 py-1.5 rounded-lg text-sm font-medium disabled:opacity-40"
             style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
           >
-            {moving ? 'מעביר...' : 'העבר'}
+            {moving ? t('pages.moving') : t('pages.move')}
           </button>
           <button
             onClick={() => setSelectedIds(new Set())}
             className="p-1.5 rounded-lg mr-auto"
             style={{ color: 'var(--admin-text-muted)' }}
-            title="בטל בחירה"
+            title={t('pages.cancelSelection')}
           >
             <X className="w-4 h-4" />
           </button>
@@ -246,11 +249,11 @@ export default function AdminDashboard() {
       )}
 
       {loading ? (
-        <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>טוען...</p>
+        <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>{t('common.loading')}</p>
       ) : filtered.length === 0 ? (
         <div className="text-center py-20" style={{ color: 'var(--admin-text-muted)' }}>
-          <p className="text-lg font-medium mb-1">אין דפים</p>
-          <p className="text-sm">לחץ &quot;העלאת דף&quot; להתחיל</p>
+          <p className="text-lg font-medium mb-1">{t('pages.noPages')}</p>
+          <p className="text-sm">{t('pages.noPagesHint')}</p>
         </div>
       ) : (
         <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
@@ -266,15 +269,15 @@ export default function AdminDashboard() {
                     </button>
                   </th>
                 )}
-                <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>לקוח</th>
-                <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>כותרת</th>
+                <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('pages.thClient')}</th>
+                <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('pages.thTitle')}</th>
                 {workspaces.length > 0 && (
-                  <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>סביבה</th>
+                  <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('pages.thWorkspace')}</th>
                 )}
                 <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>URL</th>
-                <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>סטטוס</th>
-                <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>צפיות</th>
-                <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>פעולות</th>
+                <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('pages.thStatus')}</th>
+                <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('pages.thViews')}</th>
+                <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('pages.thActions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -301,7 +304,7 @@ export default function AdminDashboard() {
                     <td className="px-4 py-3" style={{ color: 'var(--admin-text-secondary)' }}>
                       <span className="flex items-center gap-1.5">
                         {page.title}
-                        {page.has_password && <span title="מוגן בסיסמה"><Lock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--admin-accent)' }} /></span>}
+                        {page.has_password && <span title={t('pages.passwordProtected')}><Lock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--admin-accent)' }} /></span>}
                       </span>
                     </td>
                     {workspaces.length > 0 && (
@@ -366,7 +369,7 @@ export default function AdminDashboard() {
                           rel="noopener noreferrer"
                           className="p-1.5 rounded-lg transition-colors"
                           style={{ color: 'var(--admin-view)' }}
-                          title="צפייה בדף"
+                          title={t('pages.viewPage')}
                           onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         >
@@ -376,7 +379,7 @@ export default function AdminDashboard() {
                           onClick={() => { setPreviewPage(page); setPreviewMode('desktop') }}
                           className="p-1.5 rounded-lg transition-colors"
                           style={{ color: 'var(--admin-info)' }}
-                          title="תצוגה מקדימה"
+                          title={t('pages.preview')}
                           onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         >
@@ -399,7 +402,7 @@ export default function AdminDashboard() {
                             onClick={() => handleToggle(page.id, page.active)}
                             className="p-1.5 rounded-lg transition-colors"
                             style={{ color: 'var(--admin-accent)' }}
-                            title={page.active ? 'השבת' : 'הפעל'}
+                            title={page.active ? t('pages.disable') : t('pages.enable')}
                             onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
                             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                           >
@@ -411,7 +414,7 @@ export default function AdminDashboard() {
                             onClick={() => handleDuplicate(page.id, page.title)}
                             className="p-1.5 rounded-lg transition-colors"
                             style={{ color: 'var(--admin-link)' }}
-                            title="שכפול"
+                            title={t('pages.duplicate')}
                             onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
                             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                           >
@@ -422,7 +425,7 @@ export default function AdminDashboard() {
                           onClick={() => handleWhatsApp(page)}
                           className="p-1.5 rounded-lg transition-colors"
                           style={{ color: '#25D366' }}
-                          title="שליחה בוואטסאפ"
+                          title={t('pages.sendWhatsapp')}
                           onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         >
@@ -433,7 +436,7 @@ export default function AdminDashboard() {
                             onClick={() => handleDelete(page.id, page.title)}
                             className="p-1.5 rounded-lg transition-colors"
                             style={{ color: 'var(--admin-danger)' }}
-                            title="מחיקה"
+                            title={t('common.delete')}
                             onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-danger-bg)'}
                             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                           >
@@ -469,7 +472,7 @@ export default function AdminDashboard() {
             >
               <div className="flex items-center gap-4">
                 <h3 className="text-sm font-medium" style={{ color: 'var(--admin-text-primary)' }}>
-                  תצוגה מקדימה: {previewPage.title}
+                  {t('pages.previewTitle')}: {previewPage.title}
                 </h3>
                 <span className="text-xs px-2.5 py-1 rounded-lg" dir="ltr" style={{ background: 'var(--admin-bg)', color: 'var(--admin-link)' }}>
                   /{previewPage.client}/{previewPage.slug}
@@ -487,7 +490,7 @@ export default function AdminDashboard() {
                     }}
                   >
                     <Monitor className="w-4 h-4" />
-                    דסקטופ
+                    {t('pages.desktop')}
                   </button>
                   <button
                     onClick={() => setPreviewMode('mobile')}
@@ -498,7 +501,7 @@ export default function AdminDashboard() {
                     }}
                   >
                     <Smartphone className="w-4 h-4" />
-                    מובייל
+                    {t('pages.mobile')}
                   </button>
                 </div>
                 {/* Close Button */}
@@ -508,7 +511,7 @@ export default function AdminDashboard() {
                   style={{ color: 'var(--admin-text-muted)' }}
                   onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-hover-bg)'; e.currentTarget.style.color = 'var(--admin-danger)' }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
-                  title="סגירה"
+                  title={t('common.close')}
                 >
                   <X className="w-5 h-5" />
                 </button>

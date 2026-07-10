@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, FileUp } from 'lucide-react'
 import ClientAutocomplete from '../_components/client-autocomplete'
+import { useT, useLocale } from '@/lib/i18n'
 
 function getWorkspaceCookie(): string | null {
   try {
@@ -14,6 +15,8 @@ function getWorkspaceCookie(): string | null {
 }
 
 export default function UploadPage() {
+  const t = useT()
+  const locale = useLocale()
   const [file, setFile] = useState<File | null>(null)
   const [client, setClient] = useState('')
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null)
@@ -41,7 +44,7 @@ export default function UploadPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!file || !client || !title || !slug) {
-      setError('יש למלא את כל השדות ולבחור קובץ')
+      setError(t('upload.fillRequired'))
       return
     }
 
@@ -61,7 +64,7 @@ export default function UploadPage() {
     const data = await res.json()
 
     if (!res.ok) {
-      setError(data.error || 'שגיאה בהעלאה')
+      setError(data.error || t('upload.error'))
       setUploading(false)
       return
     }
@@ -77,12 +80,12 @@ export default function UploadPage() {
 
   return (
     <div className="max-w-lg">
-      <h2 className="text-xl font-semibold mb-6" style={{ color: 'var(--admin-text-primary)' }}>העלאת דף חדש</h2>
+      <h2 className="text-xl font-semibold mb-6" style={{ color: 'var(--admin-text-primary)' }}>{t('upload.title')}</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* File upload */}
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>קובץ HTML</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>{t('upload.htmlFile')}</label>
           <div
             className="rounded-xl p-7 text-center cursor-pointer transition-colors"
             style={{
@@ -104,7 +107,7 @@ export default function UploadPage() {
             ) : (
               <div>
                 <Upload className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--admin-text-muted)' }} />
-                <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>גרור קובץ HTML לכאן או לחץ לבחירה</p>
+                <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>{t('upload.dragHint')}</p>
               </div>
             )}
           </div>
@@ -119,18 +122,18 @@ export default function UploadPage() {
 
         {/* Client */}
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>לקוח (שם תיקייה)</label>
-          <ClientAutocomplete value={client} onChange={setClient} workspaceId={activeWorkspaceId} placeholder="בחר לקוח קיים או הקלד שם חדש" dir="ltr" />
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>{t('upload.clientFolder')}</label>
+          <ClientAutocomplete value={client} onChange={setClient} workspaceId={activeWorkspaceId} placeholder={t('upload.clientPlaceholder')} dir="ltr" />
         </div>
 
         {/* Title */}
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>כותרת</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>{t('upload.titleLabel')}</label>
           <input
             type="text"
             value={title}
             onChange={e => setTitle(e.target.value)}
-            placeholder="דוח קמפיינים מאי 2026"
+            placeholder={t('upload.titlePlaceholder')}
             className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
             style={inputStyle}
             onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
@@ -140,7 +143,7 @@ export default function UploadPage() {
 
         {/* Slug */}
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>Slug (חלק ב-URL)</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>{t('upload.slugLabel')}</label>
           <input
             type="text"
             value={slug}
@@ -161,7 +164,7 @@ export default function UploadPage() {
 
         {/* Expiration */}
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>תאריך תוקף (אופציונלי)</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>{t('upload.expirationLabel')}</label>
           <input
             type="date"
             value={expiresAt}
@@ -176,12 +179,12 @@ export default function UploadPage() {
 
         {/* Password */}
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>סיסמה לדף (אופציונלי)</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>{t('upload.passwordLabel')}</label>
           <input
             type="text"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            placeholder="השאר ריק ללא הגנה"
+            placeholder={t('upload.passwordPlaceholder')}
             dir="ltr"
             className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
             style={inputStyle}
@@ -189,13 +192,13 @@ export default function UploadPage() {
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
           <p className="text-xs mt-1.5" style={{ color: 'var(--admin-text-muted)' }}>
-            {password.trim() ? '🔒 הדף יהיה מוגן בסיסמה' : 'ללא סיסמה — הדף יהיה נגיש לכולם'}
+            {password.trim() ? `🔒 ${t('upload.passwordHintSet')}` : t('upload.passwordHintEmpty')}
           </p>
         </div>
 
         {/* Short URL */}
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>קישור קצר (אופציונלי)</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>{t('upload.shortUrlLabel')}</label>
           <input
             type="text"
             value={shortUrl}
@@ -224,7 +227,7 @@ export default function UploadPage() {
           onMouseEnter={e => { e.currentTarget.style.opacity = '0.9' }}
           onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
         >
-          {uploading ? 'מעלה...' : 'העלאה'}
+          {uploading ? t('upload.uploading') : t('upload.submit')}
         </button>
       </form>
     </div>

@@ -94,7 +94,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
   const addTab = () => {
     setTabs(prev => [...prev, {
       id: crypto.randomUUID(),
-      title: `טאב ${prev.length + 1}`,
+      title: locale === 'en' ? `Tab ${prev.length + 1}` : `טאב ${prev.length + 1}`,
       subtitle: '',
       blocks: [],
     }])
@@ -102,7 +102,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
   }
 
   const removeTab = (idx: number) => {
-    if (!confirm('למחוק את הטאב?')) return
+    if (!confirm(t('reports.deleteTab'))) return
     setTabs(prev => prev.filter((_, i) => i !== idx))
     if (activeTabIdx >= tabs.length - 1) setActiveTabIdx(Math.max(0, tabs.length - 2))
   }
@@ -155,8 +155,8 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
 
   // Load template
   const loadTemplate = () => {
-    if (tabs.length > 0 && tabs.some(t => t.blocks.length > 0)) {
-      if (!confirm('הפעולה תחליף את כל הטאבים הקיימים. להמשיך?')) return
+    if (tabs.length > 0 && tabs.some(tb => tb.blocks.length > 0)) {
+      if (!confirm(t('reports.replaceConfirm'))) return
     }
     setTabs(createStandardTemplate())
     setActiveTabIdx(0)
@@ -165,7 +165,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
   // Save
   const save = useCallback(async (newStatus?: 'draft' | 'published' | 'archived') => {
     if (!client.trim() || !reportName.trim()) {
-      alert('שם לקוח ושם דוח הם שדות חובה')
+      alert(t('reports.requiredFields'))
       return
     }
     setSaving(true)
@@ -186,7 +186,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        alert(err.error || 'שגיאה בשמירה')
+        alert(err.error || t('reports.saveError'))
         return
       }
 
@@ -202,8 +202,8 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
   }, [client, clientId, reportName, periodLabel, tabs, status, password, mode, reportId, router])
 
   const importExcel = useCallback(async (file: File) => {
-    if (tabs.length > 0 && tabs.some(t => t.blocks.length > 0)) {
-      if (!confirm('ייבוא יחליף את כל הטאבים הקיימים. להמשיך?')) return
+    if (tabs.length > 0 && tabs.some(tb => tb.blocks.length > 0)) {
+      if (!confirm(t('reports.importConfirm'))) return
     }
     setImporting(true)
     try {
@@ -212,7 +212,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
       const res = await fetch('/api/reports/import-excel', { method: 'POST', body: formData })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        alert(err.error || 'שגיאה בייבוא')
+        alert(err.error || t('reports.importError'))
         return
       }
       const { tabs: imported } = await res.json()
@@ -226,7 +226,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
 
   const translate = useCallback(async (direction: 'he-to-en' | 'en-to-he') => {
     if (mode === 'new') {
-      alert('יש לשמור את הדוח לפני תרגום')
+      alert(t('reports.saveBeforeTranslate'))
       return
     }
     setTranslating(true)
@@ -240,14 +240,14 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        alert(err.error || 'שגיאה בתרגום')
+        alert(err.error || t('reports.translateError'))
         return
       }
       const result = await res.json()
       if (direction === 'en-to-he') {
         setTabs(result.tabs)
       }
-      alert(direction === 'he-to-en' ? 'גרסה אנגלית נוצרה בהצלחה' : 'גרסה עברית נוצרה בהצלחה')
+      alert(direction === 'he-to-en' ? t('reports.enCreated') : t('reports.heCreated'))
     } finally {
       setTranslating(false)
     }
@@ -320,7 +320,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
             <input value={client}
               onChange={e => { setClient(e.target.value); setClientId(null); setClientSearch(e.target.value); setShowClientDropdown(true) }}
               onFocus={() => setShowClientDropdown(true)}
-              placeholder="שם לקוח..." className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle} />
+              placeholder={locale === 'en' ? 'Client name...' : 'שם לקוח...'} className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle} />
             {showClientDropdown && filteredClients.length > 0 && (
               <div className="absolute z-20 top-full mt-1 w-full max-h-48 overflow-y-auto rounded-lg shadow-xl"
                 style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)' }}>
@@ -336,19 +336,19 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
           <div>
             <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('reports.reportName')}</label>
             <input value={reportName} onChange={e => setReportName(e.target.value)}
-              placeholder="למשל: סקירה שנתית Q1 2026" className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle} />
+              placeholder={t('reports.reportNamePlaceholder')} className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('reports.period')}</label>
             <input value={periodLabel} onChange={e => setPeriodLabel(e.target.value)}
-              placeholder="למשל: מאי 2025 – מאי 2026" className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle} />
+              placeholder={t('reports.periodPlaceholder')} className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle} />
           </div>
           <div>
             <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('common.password')} ({locale === 'en' ? 'optional' : 'לא חובה'})</label>
             <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-              placeholder="להגנת הדוח..." className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle} />
+              placeholder={locale === 'en' ? 'Protect report...' : 'להגנת הדוח...'} className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle} />
           </div>
         </div>
       </div>
@@ -367,7 +367,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
                 color: activeTabIdx === idx ? '#40e1d3' : 'rgba(255,255,255,0.5)',
               }}
             >
-              {tab.title || `טאב ${idx + 1}`}
+              {tab.title || (locale === 'en' ? `Tab ${idx + 1}` : `טאב ${idx + 1}`)}
             </button>
           </div>
         ))}
@@ -386,9 +386,9 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
           <div className="flex items-center gap-3 mb-4">
             <div className="flex-1 grid grid-cols-2 gap-3">
               <input value={activeTab.title} onChange={e => updateTab(activeTabIdx, { title: e.target.value })}
-                placeholder="כותרת הטאב" className="px-3 py-2 rounded-lg text-sm outline-none" style={fieldStyle} />
+                placeholder={t('reports.tabTitle')} className="px-3 py-2 rounded-lg text-sm outline-none" style={fieldStyle} />
               <input value={activeTab.subtitle || ''} onChange={e => updateTab(activeTabIdx, { subtitle: e.target.value })}
-                placeholder="תת-כותרת (לא חובה)" className="px-3 py-2 rounded-lg text-sm outline-none" style={fieldStyle} />
+                placeholder={t('reports.tabSubtitle')} className="px-3 py-2 rounded-lg text-sm outline-none" style={fieldStyle} />
             </div>
             <button onClick={() => moveTab(activeTabIdx, -1)} disabled={activeTabIdx === 0}
               className="p-1.5 rounded disabled:opacity-20" style={{ color: 'rgba(255,255,255,0.4)' }}><ChevronUp className="w-4 h-4" /></button>
