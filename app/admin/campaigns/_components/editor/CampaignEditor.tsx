@@ -9,6 +9,7 @@ import {
   Undo2, Redo2, Save, Send, Loader2, CheckCircle2, MessageSquare, X,
 } from 'lucide-react'
 import { assetProxyUrl } from '@/lib/asset-url'
+import { compressImageClient, isImageFile, MAX_FILE_BYTES } from '@/lib/image-compress'
 import { buildCampaignSlides } from '@/lib/slides'
 import type { CampaignSection } from '@/lib/campaigns'
 import { useCampaignDocument } from './useCampaignDocument'
@@ -39,7 +40,12 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
   const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop')
   const [showFullPreview, setShowFullPreview] = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
-  const [uploadCounts, setUploadCounts] = useState<Record<string, number>>({})
+  // Per-section upload tracking: { sectionId: { total, done, failed } }
+  const [uploadProgress, setUploadProgress] = useState<Record<string, { total: number; done: number; failed: number }>>({})
+  // Derived scalar for SlideCanvas (total still in flight)
+  const uploadCounts = Object.fromEntries(
+    Object.entries(uploadProgress).map(([k, v]) => [k, Math.max(0, v.total - v.done - v.failed)])
+  )
   const [passwordDirty, setPasswordDirty] = useState(false)
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [copied, setCopied] = useState(false)
@@ -228,8 +234,24 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
 
   // ── Uploads ──
 
-  const bumpUpload = useCallback((sectionId: string, delta: number) => {
-    setUploadCounts(m => ({ ...m, [sectionId]: Math.max(0, (m[sectionId] || 0) + delta) }))
+  const initProgress = useCallback((sectionId: string, count: number) => {
+    setUploadProgress(m => ({
+      ...m,
+      [sectionId]: { total: (m[sectionId]?.total ?? 0) + count, done: m[sectionId]?.done ?? 0, failed: m[sectionId]?.failed ?? 0 },
+    }))
+  }, [])
+
+  const tickProgress = useCallback((sectionId: string, outcome: 'done' | 'failed') => {
+    setUploadProgress(m => {
+      const prev = m[sectionId] ?? { total: 0, done: 0, failed: 0 }
+      const next = { ...prev, [outcome]: prev[outcome] + 1 }
+      // Clear entry once all files are settled
+      if (next.done + next.failed >= next.total) {
+        const { [sectionId]: _removed, ...rest } = m
+        return rest
+      }
+      return { ...m, [sectionId]: next }
+    })
   }, [])
 
   // Best-effort storage cleanup when an asset is removed/replaced — never blocks the UI
@@ -244,57 +266,92 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
     } catch { /* best-effort */ }
   }, [])
 
+  /** Upload a single file (with client-side compression). Returns the server response or null on failure. */
+  const uploadOneFile = useCallback(async (file: File, campaignId: string): Promise<{ file_path: string; public_url: string } | null> => {
+    let uploadBlob: Blob = file
+    let uploadName = file.name
+
+    try {
+      const compressed = await compressImageClient(file)
+      uploadBlob = compressed.blob
+      uploadName = compressed.filename
+    } catch {
+      // If canvas compression fails (unlikely), fall back to raw file
+    }
+
+    const uploadFile = new File([uploadBlob], uploadName, { type: uploadBlob.type || 'image/jpeg' })
+    const fd = new FormData()
+    fd.append('file', uploadFile)
+    fd.append('type', 'image')
+
+    const res = await fetch(`/api/campaigns/${campaignId}/assets`, { method: 'POST', body: fd })
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      throw new Error(body?.error || `HTTP ${res.status}`)
+    }
+    return await res.json()
+  }, [])
+
   const uploadFiles = useCallback(async (files: FileList | File[]) => {
     if (!activeSection) return
     const sectionId = activeSection.id
+
+    // Client-side validation
+    const arr = Array.from(files)
+    const valid: File[] = []
+    for (const f of arr) {
+      if (!isImageFile(f)) { toast(`${f.name} — סוג קובץ לא נתמך`, 'error'); continue }
+      if (f.size > MAX_FILE_BYTES) { toast(`${f.name} — הקובץ גדול מדי`, 'error'); continue }
+      valid.push(f)
+    }
+    if (!valid.length) return
+
     const id = await ensureCampaignExists()
     if (!id) { toast('יש למלא שם לקוח ושם קמפיין לפני העלאת קבצים', 'error'); return }
-    const arr = Array.from(files)
-    bumpUpload(sectionId, arr.length)
-    for (const file of arr) {
-      try {
-        const fd = new FormData()
-        fd.append('file', file)
-        fd.append('type', 'image')
-        const res = await fetch(`/api/campaigns/${id}/assets`, { method: 'POST', body: fd })
-        if (res.ok) {
-          const data = await res.json()
-          const asset: EditorAsset = { id: crypto.randomUUID(), type: 'image', file_path: data.file_path, public_url: data.public_url || '', url: '', caption: '' }
-          addAsset(sectionId, asset)
-        } else {
-          toast(`שגיאה בהעלאת ${file.name}`, 'error')
+
+    initProgress(sectionId, valid.length)
+
+    // Upload all files in parallel
+    await Promise.allSettled(
+      valid.map(async file => {
+        try {
+          const data = await uploadOneFile(file, id)
+          if (data) {
+            addAsset(sectionId, { id: crypto.randomUUID(), type: 'image', file_path: data.file_path, public_url: data.public_url || '', url: '', caption: '' })
+          } else {
+            throw new Error('empty response')
+          }
+          tickProgress(sectionId, 'done')
+        } catch (err) {
+          tickProgress(sectionId, 'failed')
+          const msg = err instanceof Error ? err.message : ''
+          toast(`שגיאה בהעלאת ${file.name}${msg ? ` — ${msg}` : ''}`, 'error')
         }
-      } catch {
-        toast(`שגיאה בהעלאת ${file.name}`, 'error')
-      } finally {
-        bumpUpload(sectionId, -1)
-      }
-    }
-  }, [activeSection, ensureCampaignExists, addAsset, bumpUpload, toast])
+      })
+    )
+  }, [activeSection, ensureCampaignExists, addAsset, initProgress, tickProgress, uploadOneFile, toast])
 
   const replaceAsset = useCallback(async (assetId: string, file: File) => {
     if (!activeSection) return
     const sectionId = activeSection.id
     const oldPath = activeSection.assets.find(a => a.id === assetId)?.file_path || ''
     const id = await ensureCampaignExists()
-    if (!id) return
-    bumpUpload(sectionId, 1)
+    if (!id) { toast('יש למלא שם לקוח ושם קמפיין לפני העלאת קבצים', 'error'); return }
+    initProgress(sectionId, 1)
     try {
-      const fd = new FormData()
-      fd.append('file', file)
-      fd.append('type', 'image')
-      const res = await fetch(`/api/campaigns/${id}/assets`, { method: 'POST', body: fd })
-      if (res.ok) {
-        const data = await res.json()
+      const data = await uploadOneFile(file, id)
+      if (data) {
         updateAsset(sectionId, assetId, { file_path: data.file_path, public_url: data.public_url || '' })
         if (oldPath && oldPath !== data.file_path) deleteStoredAsset(id, oldPath)
-      } else toast('שגיאה בהחלפת התמונה', 'error')
+      } else {
+        throw new Error('empty response')
+      }
+      tickProgress(sectionId, 'done')
     } catch {
+      tickProgress(sectionId, 'failed')
       toast('שגיאה בהחלפת התמונה', 'error')
-    } finally {
-      bumpUpload(sectionId, -1)
     }
-  }, [activeSection, ensureCampaignExists, updateAsset, bumpUpload, deleteStoredAsset, toast])
+  }, [activeSection, ensureCampaignExists, updateAsset, initProgress, tickProgress, uploadOneFile, deleteStoredAsset, toast])
 
   const handleRemoveAsset = useCallback((assetId: string) => {
     if (!activeSection) return
@@ -308,14 +365,27 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
     if (!id) { toast('יש למלא שם לקוח ושם קמפיין לפני העלאת לוגו', 'error'); return }
     setUploadingLogo(true)
     try {
+      let uploadBlob: Blob = file
+      let uploadName = file.name
+      try {
+        const compressed = await compressImageClient(file)
+        uploadBlob = compressed.blob
+        uploadName = compressed.filename
+      } catch { /* fallback to raw */ }
+      const uploadFile = new File([uploadBlob], uploadName, { type: uploadBlob.type || 'image/jpeg' })
       const fd = new FormData()
-      fd.append('file', file)
+      fd.append('file', uploadFile)
       fd.append('type', 'logo')
       const res = await fetch(`/api/campaigns/${id}/assets`, { method: 'POST', body: fd })
       if (res.ok) {
         const data = await res.json()
         setMeta({ logoPath: data.file_path, logoUrl: data.public_url })
-      } else toast('שגיאה בהעלאת הלוגו', 'error')
+      } else {
+        const body = await res.json().catch(() => ({}))
+        toast(body?.error || 'שגיאה בהעלאת הלוגו', 'error')
+      }
+    } catch {
+      toast('שגיאה בהעלאת הלוגו', 'error')
     } finally {
       setUploadingLogo(false)
     }
@@ -488,6 +558,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
               clientLogoUrl={clientLogoUrl}
               device={device}
               uploading={activeSection ? (uploadCounts[activeSection.id] ?? 0) : 0}
+              uploadProgress={activeSection ? uploadProgress[activeSection.id] : undefined}
               onUpdateSection={patch => activeSection && updateSection(activeSection.id, patch)}
               onUpdateAsset={(assetId, patch) => activeSection && updateAsset(activeSection.id, assetId, patch)}
               onRemoveAsset={handleRemoveAsset}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import {
   DndContext, closestCenter, PointerSensor, KeyboardSensor,
   useSensor, useSensors, type DragEndEvent,
@@ -9,9 +9,16 @@ import {
   SortableContext, sortableKeyboardCoordinates, useSortable, rectSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Upload, Trash2, GripVertical, Link2, RefreshCw, LayoutTemplate } from 'lucide-react'
+import { Upload, Trash2, GripVertical, Link2, RefreshCw, LayoutTemplate, ImageIcon } from 'lucide-react'
 import CanvasAsset from './CanvasAsset'
 import type { EditorAsset, EditorSection } from './types'
+import { isImageFile, MAX_FILE_BYTES, MAX_FILE_MB } from '@/lib/image-compress'
+
+interface UploadProgress {
+  total: number
+  done: number
+  failed: number
+}
 
 interface CanvasProps {
   section: EditorSection | null
@@ -19,6 +26,7 @@ interface CanvasProps {
   clientLogoUrl: string | null
   device: 'desktop' | 'mobile'
   uploading: number
+  uploadProgress?: UploadProgress
   onUpdateSection: (patch: Partial<EditorSection>) => void
   onUpdateAsset: (assetId: string, patch: Partial<EditorAsset>) => void
   onRemoveAsset: (assetId: string) => void
@@ -92,13 +100,15 @@ function SortableAssetCard({ asset, section, clientName, clientLogoUrl, onUpdate
 }
 
 export default function SlideCanvas({
-  section, clientName, clientLogoUrl, device, uploading,
+  section, clientName, clientLogoUrl, device, uploading, uploadProgress,
   onUpdateSection, onUpdateAsset, onRemoveAsset, onMoveAsset, onUploadFiles, onReplaceAsset, onAddVideo,
 }: CanvasProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
+  const [isDragOver, setIsDragOver] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   if (!section) {
     return (
@@ -124,6 +134,23 @@ export default function SlideCanvas({
     const to = section.assets.findIndex(a => a.id === over.id)
     if (from >= 0 && to >= 0) onMoveAsset(from, to)
   }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault()
+    setIsDragOver(false)
+    const files = Array.from(e.dataTransfer.files).filter(isImageFile)
+    if (files.length) onUploadFiles(files)
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (e.target.files?.length) onUploadFiles(e.target.files)
+    e.target.value = ''
+  }
+
+  const settled = uploadProgress ? uploadProgress.done + uploadProgress.failed : 0
+  const total = uploadProgress?.total ?? 0
+  const isUploading = uploading > 0
+  const progressPct = total > 0 ? Math.round((settled / total) * 100) : 0
 
   return (
     <div className="h-full overflow-auto" style={{ background: '#050505' }}>
@@ -225,28 +252,84 @@ export default function SlideCanvas({
               </DndContext>
             )}
 
-            {uploading > 0 ? (
-              <div className="rounded-2xl p-8 text-center" style={{ border: '2px dashed rgba(64,225,211,0.4)', background: 'rgba(64,225,211,0.04)' }}>
-                <div className="w-8 h-8 border-2 rounded-full animate-spin mx-auto mb-3" style={{ borderColor: 'rgba(64,225,211,0.3)', borderTopColor: '#40e1d3' }} />
-                <p className="text-sm font-bold" style={{ color: '#40e1d3' }}>מעלה {uploading} קבצים...</p>
+            {/* Upload progress banner — shown while uploading, above the drop zone */}
+            {isUploading && (
+              <div className="rounded-xl px-4 py-3 mb-4 flex items-center gap-3" style={{ background: 'rgba(64,225,211,0.06)', border: '1px solid rgba(64,225,211,0.15)' }}>
+                <div className="w-4 h-4 border-2 rounded-full animate-spin shrink-0" style={{ borderColor: 'rgba(64,225,211,0.25)', borderTopColor: '#40e1d3' }} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-bold" style={{ color: '#40e1d3' }}>
+                      מעלה {settled}/{total} תמונות...
+                    </span>
+                    {uploadProgress?.failed ? (
+                      <span className="text-xs font-semibold" style={{ color: '#ef4444' }}>{uploadProgress.failed} נכשלו</span>
+                    ) : null}
+                  </div>
+                  {/* Progress bar */}
+                  <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                    <div
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{ width: `${progressPct}%`, background: 'linear-gradient(90deg, #40e1d3, #22c55e)' }}
+                    />
+                  </div>
+                </div>
               </div>
-            ) : (
-              <label
-                className="relative block rounded-2xl p-8 text-center cursor-pointer transition-all duration-300"
-                style={{ border: '2px dashed rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.015)' }}
-                onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor = 'rgba(64,225,211,0.4)'; e.currentTarget.style.background = 'rgba(64,225,211,0.04)' }}
-                onDragLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.015)' }}
-                onDrop={e => { e.preventDefault(); e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.015)'; if (e.dataTransfer.files.length) onUploadFiles(e.dataTransfer.files) }}
-              >
-                <div className="absolute top-0 right-0 w-10 h-10" style={{ borderTop: '2px solid rgba(64,225,211,0.15)', borderRight: '2px solid rgba(64,225,211,0.15)' }} />
-                <div className="absolute bottom-0 left-0 w-10 h-10" style={{ borderBottom: '2px solid rgba(64,225,211,0.08)', borderLeft: '2px solid rgba(64,225,211,0.08)' }} />
-                <Upload className="w-7 h-7 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.2)' }} />
-                <p className="text-sm font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>גררו תמונות לכאן או לחצו לבחירה</p>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>PNG, JPG, WebP</p>
-                <input type="file" accept="image/*" multiple className="hidden"
-                  onChange={e => { if (e.target.files?.length) onUploadFiles(e.target.files); e.target.value = '' }} />
-              </label>
             )}
+
+            {/* Drop zone — always visible so you can keep adding files */}
+            <label
+              className="relative block rounded-2xl cursor-pointer transition-all duration-300"
+              style={{
+                padding: section.assets.length === 0 ? '3rem 2rem' : '1.25rem 1.5rem',
+                border: isDragOver
+                  ? '2px dashed rgba(64,225,211,0.6)'
+                  : '2px dashed rgba(255,255,255,0.07)',
+                background: isDragOver ? 'rgba(64,225,211,0.06)' : 'rgba(255,255,255,0.01)',
+              }}
+              onDragOver={e => { e.preventDefault(); setIsDragOver(true) }}
+              onDragLeave={() => setIsDragOver(false)}
+              onDrop={handleDrop}
+            >
+              <div className="absolute top-0 right-0 w-8 h-8" style={{ borderTop: `2px solid ${isDragOver ? 'rgba(64,225,211,0.4)' : 'rgba(64,225,211,0.12)'}`, borderRight: `2px solid ${isDragOver ? 'rgba(64,225,211,0.4)' : 'rgba(64,225,211,0.12)'}` }} />
+              <div className="absolute bottom-0 left-0 w-8 h-8" style={{ borderBottom: `2px solid ${isDragOver ? 'rgba(64,225,211,0.3)' : 'rgba(64,225,211,0.06)'}`, borderLeft: `2px solid ${isDragOver ? 'rgba(64,225,211,0.3)' : 'rgba(64,225,211,0.06)'}` }} />
+
+              {section.assets.length === 0 ? (
+                // Large empty state
+                <div className="text-center">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                    <Upload className="w-5 h-5" style={{ color: isDragOver ? '#40e1d3' : 'rgba(255,255,255,0.25)' }} />
+                  </div>
+                  <p className="text-sm font-semibold mb-1" style={{ color: isDragOver ? '#40e1d3' : 'rgba(255,255,255,0.35)' }}>
+                    {isDragOver ? 'שחרר להעלאה' : 'גררו תמונות לכאן או לחצו לבחירה'}
+                  </p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.18)' }}>
+                    PNG, JPG, WebP, HEIC — עד {MAX_FILE_MB} MB לקובץ
+                  </p>
+                </div>
+              ) : (
+                // Compact zone when assets exist
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                    <ImageIcon className="w-4 h-4" style={{ color: isDragOver ? '#40e1d3' : 'rgba(255,255,255,0.25)' }} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold" style={{ color: isDragOver ? '#40e1d3' : 'rgba(255,255,255,0.35)' }}>
+                      {isDragOver ? 'שחרר להוסיף' : 'הוסף תמונות נוספות'}
+                    </p>
+                    <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.18)' }}>גרור או לחץ לבחירה</p>
+                  </div>
+                </div>
+              )}
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleFileChange}
+              />
+            </label>
           </>
         )}
       </div>
