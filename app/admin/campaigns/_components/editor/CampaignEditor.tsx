@@ -550,6 +550,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
             sections={doc.sections}
             activeId={activeId}
             feedback={feedbackStatusMap}
+            meta={doc.meta}
             onSelect={setActiveId}
             onAdd={() => { addSection(); }}
             onDuplicate={duplicateSection}
