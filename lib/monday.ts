@@ -2,7 +2,7 @@ import { getClients, createClient, updateClient } from './clients'
 
 const MONDAY_API_URL = 'https://api.monday.com/v2'
 
-export interface MondaySyncResult {
+export interface MondaySyncResult extends Record<string, unknown> {
   created: number
   skipped: number
   total: number
@@ -52,13 +52,13 @@ export async function fetchMondayClients(): Promise<MondayItem[]> {
   const boardId = process.env.MONDAY_BOARD_ID
   if (!boardId) throw new Error('MONDAY_BOARD_ID is not configured')
 
+  type PageData = { boards: { items_page: MondayItemsPage }[] }
+
   const items: MondayItem[] = []
   let cursor: string | null = null
 
   do {
-    type PageData = { boards: { items_page: MondayItemsPage }[] }
-
-    const data = await mondayGraphQL<PageData>(
+    const result: PageData = await mondayGraphQL<PageData>(
       `query($boardId: [ID!]!, $limit: Int!, $cursor: String) {
         boards(ids: $boardId) {
           items_page(limit: $limit, cursor: $cursor) {
@@ -70,11 +70,11 @@ export async function fetchMondayClients(): Promise<MondayItem[]> {
       { boardId: [boardId], limit: 500, cursor: cursor ?? undefined },
     )
 
-    const page = data.boards[0]?.items_page
+    const page: MondayItemsPage | undefined = result.boards[0]?.items_page
     if (!page) break
 
     items.push(...page.items)
-    cursor = page.cursor
+    cursor = page.cursor ?? null
   } while (cursor)
 
   return items

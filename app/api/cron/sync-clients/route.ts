@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
       entity_type: 'client',
       entity_label: `Monday cron sync: ${result.created} created, ${result.skipped} skipped`,
       workspace_id: process.env.MONDAY_SYNC_WORKSPACE_ID ?? null,
-      meta: { ...result, source: 'cron' },
+      meta: { created: result.created, skipped: result.skipped, total: result.total, source: 'cron' },
     })
 
     return NextResponse.json({ ok: true, ...result })

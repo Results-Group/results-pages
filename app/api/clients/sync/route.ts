@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
       entity_type: 'client',
       entity_label: `Monday sync: ${result.created} created, ${result.skipped} skipped`,
       workspace_id: syncWorkspaceId,
-      meta: result,
+      meta: { created: result.created, skipped: result.skipped, total: result.total },
     })
 
     return NextResponse.json(result)
