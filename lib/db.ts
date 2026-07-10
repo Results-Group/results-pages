@@ -4,13 +4,17 @@ import bcrypt from 'bcryptjs'
 export interface LandingPage {
   id: string
   client: string
+  client_id: string | null
   slug: string
   title: string
   file_path: string
   active: boolean
   expires_at: string | null
+  publish_at: string | null
   password: string | null
   short_url: string | null
+  workspace_id: string | null
+  deleted_at: string | null
   created_at: string
   updated_at: string
 }
@@ -36,9 +40,14 @@ function toApiFormat(row: LandingPage, viewCount: number): PageWithViews {
 
 // ── Queries ──
 
-export async function getPages(filters?: { client?: string; search?: string }) {
+export async function getPages(filters?: { client?: string; search?: string; workspace_id?: string; deleted?: boolean }) {
   let query = supabase.from('landing_pages').select('*').order('created_at', { ascending: false })
 
+  // Default to live rows; opt into the recycle bin with deleted: true
+  if (filters?.deleted) query = query.not('deleted_at', 'is', null)
+  else query = query.is('deleted_at', null)
+
+  if (filters?.workspace_id) query = query.eq('workspace_id', filters.workspace_id)
   if (filters?.client) query = query.eq('client', filters.client)
   if (filters?.search) {
     const s = filters.search.replace(/[%_\\]/g, c => `\\${c}`)
@@ -80,13 +89,14 @@ export async function getPageById(id: string) {
   return toApiFormat(page, count || 0)
 }
 
-export async function getPageByClientSlug(client: string, slug: string) {
-  const { data: page, error } = await supabase
+export async function getPageByClientSlug(client: string, slug: string, opts?: { includeDeleted?: boolean }) {
+  let query = supabase
     .from('landing_pages')
     .select('*')
     .eq('client', client)
     .eq('slug', slug)
-    .single()
+  if (!opts?.includeDeleted) query = query.is('deleted_at', null)
+  const { data: page, error } = await query.maybeSingle()
 
   if (error || !page) return null
   return page as LandingPage
@@ -98,9 +108,12 @@ export async function createPage(data: {
   title: string
   file_path: string
   expires_at?: string | null
+  publish_at?: string | null
   password?: string | null
   short_url?: string | null
   created_by?: string
+  workspace_id?: string
+  client_id?: string | null
 }) {
   const hashedPw = data.password ? await bcrypt.hash(data.password, 12) : null
   const insertData: Record<string, unknown> = {
@@ -109,10 +122,13 @@ export async function createPage(data: {
     title: data.title,
     file_path: data.file_path,
     expires_at: data.expires_at || null,
+    publish_at: data.publish_at || null,
     password: hashedPw,
     short_url: data.short_url || null,
   }
   if (data.created_by) insertData.created_by = data.created_by
+  if (data.workspace_id) insertData.workspace_id = data.workspace_id
+  if (data.client_id !== undefined) insertData.client_id = data.client_id
 
   const { data: page, error } = await supabase
     .from('landing_pages')
@@ -126,19 +142,22 @@ export async function createPage(data: {
 
 export async function updatePage(
   id: string,
-  data: Partial<Pick<LandingPage, 'title' | 'client' | 'slug' | 'active' | 'expires_at' | 'file_path' | 'password' | 'short_url'>> & { updated_by?: string }
+  data: Partial<Pick<LandingPage, 'title' | 'client' | 'client_id' | 'slug' | 'active' | 'expires_at' | 'publish_at' | 'file_path' | 'password' | 'short_url' | 'workspace_id'>> & { updated_by?: string }
 ) {
   const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() }
   if (data.title !== undefined) updateData.title = data.title
   if (data.client !== undefined) updateData.client = data.client
+  if (data.client_id !== undefined) updateData.client_id = data.client_id
   if (data.slug !== undefined) updateData.slug = data.slug
   if (data.active !== undefined) updateData.active = data.active
   if (data.expires_at !== undefined) updateData.expires_at = data.expires_at
+  if (data.publish_at !== undefined) updateData.publish_at = data.publish_at
   if (data.file_path !== undefined) updateData.file_path = data.file_path
   if (data.password !== undefined) {
     updateData.password = data.password ? await bcrypt.hash(data.password, 12) : null
   }
   if (data.short_url !== undefined) updateData.short_url = data.short_url || null
+  if (data.workspace_id !== undefined) updateData.workspace_id = data.workspace_id
   if (data.updated_by) updateData.updated_by = data.updated_by
 
   const { data: page, error } = await supabase
@@ -152,23 +171,52 @@ export async function updatePage(
   return page as LandingPage
 }
 
-export async function getPageByShortUrl(shortUrl: string) {
-  const { data: page, error } = await supabase
+export async function getPageByShortUrl(shortUrl: string, opts?: { includeDeleted?: boolean }) {
+  let query = supabase
     .from('landing_pages')
     .select('*')
     .eq('short_url', shortUrl)
-    .single()
+  if (!opts?.includeDeleted) query = query.is('deleted_at', null)
+  const { data: page, error } = await query.maybeSingle()
 
   if (error || !page) return null
   return page as LandingPage
 }
 
+/** Soft-delete: move a page to the recycle bin (reversible). */
 export async function deletePage(id: string) {
+  const { error } = await supabase
+    .from('landing_pages')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', id)
+  if (error) throw error
+}
+
+/** Restore a page from the recycle bin. */
+export async function restorePage(id: string) {
+  const { error } = await supabase
+    .from('landing_pages')
+    .update({ deleted_at: null })
+    .eq('id', id)
+  if (error) throw error
+}
+
+/** Permanently delete a page and its stored HTML files (main, source, versions). */
+export async function purgePage(id: string) {
+  const page = await getPageById(id)
+  const versions = await getVersions(id)
   const { error } = await supabase
     .from('landing_pages')
     .delete()
     .eq('id', id)
   if (error) throw error
+  if (page?.file_path) {
+    try { await deleteFile(page.file_path) } catch { /* best-effort */ }
+    try { await deleteFile(page.file_path.replace(/\.html$/, '.source.html')) } catch { /* best-effort */ }
+  }
+  for (const version of versions) {
+    try { await deleteFile(version.file_path) } catch { /* best-effort */ }
+  }
 }
 
 export async function createPageView(data: {

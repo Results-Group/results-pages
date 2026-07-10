@@ -45,20 +45,20 @@
   --sidebar-accent-border: #F3D56D;
 
   --admin-bg: #0a0a0a;
-  --admin-bg-card: #0f0f0f;
-  --admin-bg-elevated: rgba(255,255,255,0.04);
-  --admin-text-primary: #ffffff;
-  --admin-text-secondary: #d1d1d1;
-  --admin-text-muted: rgba(255,255,255,0.4);
-  --admin-border: rgba(255,255,255,0.08);
-  --admin-border-input: rgba(255,255,255,0.15);
-  --admin-hover-bg: rgba(255,255,255,0.04);
+  --admin-bg-card: #111111;
+  --admin-bg-elevated: #141414;
+  --admin-text-primary: #f5f5f5;
+  --admin-text-secondary: #a3a3a3;
+  --admin-text-muted: rgba(255,255,255,0.35);
+  --admin-border: rgba(255,255,255,0.07);
+  --admin-border-input: rgba(255,255,255,0.12);
+  --admin-hover-bg: rgba(255,255,255,0.03);
   --admin-input-bg: transparent;
 
   --admin-accent: #F3D56D;
   --admin-accent-text: #050505;
-  --admin-accent-glow: rgba(243,213,109,0.4);
-  --admin-accent-subtle: rgba(243,213,109,0.06);
+  --admin-accent-glow: rgba(243,213,109,0.18);
+  --admin-accent-subtle: rgba(243,213,109,0.05);
   --admin-link: #22D3EE;
   --admin-success: #4ade80;
   --admin-success-bg: rgba(74,222,128,0.1);
@@ -96,21 +96,21 @@
   --sidebar-accent: #b8860b;
   --sidebar-accent-border: #b8860b;
 
-  --admin-bg: #f5f5f5;
+  --admin-bg: #f7f7f7;
   --admin-bg-card: #ffffff;
-  --admin-bg-elevated: rgba(0,0,0,0.03);
-  --admin-text-primary: #1a1a1a;
-  --admin-text-secondary: #555555;
-  --admin-text-muted: rgba(0,0,0,0.4);
-  --admin-border: rgba(0,0,0,0.1);
-  --admin-border-input: rgba(0,0,0,0.2);
-  --admin-hover-bg: rgba(0,0,0,0.03);
+  --admin-bg-elevated: #ffffff;
+  --admin-text-primary: #171717;
+  --admin-text-secondary: #737373;
+  --admin-text-muted: rgba(0,0,0,0.38);
+  --admin-border: rgba(0,0,0,0.08);
+  --admin-border-input: rgba(0,0,0,0.14);
+  --admin-hover-bg: rgba(0,0,0,0.025);
   --admin-input-bg: #ffffff;
 
-  --admin-accent: #d4a843;
+  --admin-accent: #c9a227;
   --admin-accent-text: #ffffff;
-  --admin-accent-glow: rgba(212,168,67,0.35);
-  --admin-accent-subtle: rgba(212,168,67,0.1);
+  --admin-accent-glow: rgba(201,162,39,0.16);
+  --admin-accent-subtle: rgba(201,162,39,0.08);
   --admin-link: #0891b2;
   --admin-success: #16a34a;
   --admin-success-bg: rgba(22,163,74,0.1);
@@ -150,13 +150,20 @@ body {
 }
 
 h1, h2, h3 {
-  font-weight: 900;
+  font-weight: 700;
   font-family: 'Ping', sans-serif;
 }
 
 h4, h5, h6 {
-  font-weight: 700;
+  font-weight: 600;
   font-family: 'Ping', sans-serif;
+}
+
+.admin-content h1,
+.admin-content h2,
+.admin-content h3 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 * {

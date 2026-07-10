@@ -2,6 +2,7 @@ import type { CampaignSection, CampaignAsset } from './campaigns'
 
 export interface SlideData {
   type: 'cover' | 'concept' | 'divider' | 'creatives' | 'closing'
+  key?: string
   title: string
   subtitle?: string
   content?: string
@@ -32,10 +33,11 @@ export function buildCampaignSlides(opts: {
 
   for (const section of sections) {
     if (section.mockup_type === 'divider') {
-      slides.push({ type: 'divider', title: section.title, content: section.description })
+      slides.push({ type: 'divider', key: section.id, title: section.title, content: section.description })
     } else if ((section.assets || []).length > 0) {
       slides.push({
         type: 'creatives',
+        key: section.id,
         title: section.title,
         content: section.description,
         mockupType: section.mockup_type,

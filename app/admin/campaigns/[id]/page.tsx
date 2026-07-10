@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import CampaignBuilder, { type BuilderInitial, type Section, type Asset } from '../_components/campaign-builder'
+import CampaignEditor, { type EditorInitial } from '../_components/editor/CampaignEditor'
+import type { CampaignDocument, EditorSection, EditorAsset, MockupType } from '../_components/editor/types'
+
+/** Format a UTC ISO string as a LOCAL 'YYYY-MM-DDTHH:mm' value for datetime-local inputs. */
+function isoToLocalDatetimeInput(iso: string): string {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
 
 export default function EditCampaignPage() {
   const params = useParams()
@@ -10,53 +19,52 @@ export default function EditCampaignPage() {
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [initial, setInitial] = useState<BuilderInitial | null>(null)
+  const [initial, setInitial] = useState<EditorInitial | null>(null)
 
   useEffect(() => {
     fetch(`/api/campaigns/${campaignId}`)
       .then(r => {
-        if (r.status === 401) {
-          window.location.href = '/admin/login'
-          return null
-        }
+        if (r.status === 401) { window.location.href = '/admin/login'; return null }
         if (!r.ok) throw new Error('load failed')
         return r.json()
       })
       .then(data => {
         if (!data) return
         const rawSections = typeof data.sections === 'string' ? JSON.parse(data.sections) : (data.sections || [])
-        const sections: Section[] = rawSections.map((s: Section) => ({
+        const sections: EditorSection[] = rawSections.map((s: Partial<EditorSection>) => ({
           id: s.id || crypto.randomUUID(),
           title: s.title || '',
-          mockup_type: s.mockup_type || 'general',
+          mockup_type: (s.mockup_type || 'general') as MockupType,
           description: s.description || '',
-          assets: (s.assets || []).map((a: Asset) => ({
+          assets: (s.assets || []).map((a: Partial<EditorAsset>) => ({
             id: a.id || crypto.randomUUID(),
-            type: a.type || 'image',
+            type: (a.type || 'image') as 'image' | 'video',
             file_path: a.file_path || '',
             public_url: a.public_url || '',
             url: a.url || '',
             caption: a.caption || '',
           })),
         }))
-        setInitial({
-          campaignId,
-          client: data.client || '',
-          campaignName: data.campaign_name || '',
-          concept: data.concept || '',
-          password: data.password || '',
-          logoPath: data.logo_path || null,
-          logoUrl: data.logo_url || null,
-          slug: data.slug || null,
-          status: data.status || 'draft',
+
+        const doc: CampaignDocument = {
+          meta: {
+            client: data.client || '',
+            clientId: data.client_id || null,
+            campaignName: data.campaign_name || '',
+            concept: data.concept || '',
+            password: '',
+            hasPassword: !!data.has_password,
+            logoPath: data.logo_path || null,
+            logoUrl: data.logo_url || null,
+            workspaceId: data.workspace_id || null,
+            publishAt: data.publish_at ? isoToLocalDatetimeInput(data.publish_at) || null : null,
+          },
           sections,
-        })
+        }
+        setInitial({ campaignId, doc, slug: data.slug || null, status: data.status || 'draft' })
         setLoading(false)
       })
-      .catch(() => {
-        setError('שגיאה בטעינת הקמפיין')
-        setLoading(false)
-      })
+      .catch(() => { setError('שגיאה בטעינת הקמפיין'); setLoading(false) })
   }, [campaignId])
 
   if (loading) {
@@ -71,5 +79,5 @@ export default function EditCampaignPage() {
     return <p className="text-sm py-10" style={{ color: 'var(--admin-danger)' }}>{error || 'שגיאה בטעינת הקמפיין'}</p>
   }
 
-  return <CampaignBuilder mode="edit" initial={initial} />
+  return <CampaignEditor mode="edit" initial={initial} />
 }

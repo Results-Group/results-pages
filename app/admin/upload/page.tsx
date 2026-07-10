@@ -1,12 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, FileUp } from 'lucide-react'
+import ClientAutocomplete from '../_components/client-autocomplete'
+
+function getWorkspaceCookie(): string | null {
+  try {
+    const cookie = document.cookie.split('; ').find(c => c.startsWith('rp_workspace='))
+    if (!cookie) return null
+    return cookie.substring('rp_workspace='.length)
+  } catch { return null }
+}
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null)
   const [client, setClient] = useState('')
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null)
+
+  useEffect(() => { setActiveWorkspaceId(getWorkspaceCookie()) }, [])
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
   const [expiresAt, setExpiresAt] = useState('')
@@ -65,14 +77,14 @@ export default function UploadPage() {
 
   return (
     <div className="max-w-lg">
-      <h2 className="text-2xl font-black mb-8" style={{ color: 'var(--admin-text-primary)' }}>העלאת דף חדש</h2>
+      <h2 className="text-xl font-semibold mb-6" style={{ color: 'var(--admin-text-primary)' }}>העלאת דף חדש</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* File upload */}
         <div>
-          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>קובץ HTML</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>קובץ HTML</label>
           <div
-            className="rounded-2xl p-10 text-center cursor-pointer transition-all duration-200"
+            className="rounded-xl p-7 text-center cursor-pointer transition-colors"
             style={{
               border: `2px dashed ${dragOver ? 'var(--admin-accent)' : 'var(--admin-border)'}`,
               background: dragOver ? 'var(--admin-accent-subtle)' : 'var(--admin-bg-elevated)',
@@ -85,7 +97,7 @@ export default function UploadPage() {
             {file ? (
               <div className="flex items-center justify-center gap-2">
                 <FileUp className="w-5 h-5" style={{ color: 'var(--admin-accent)' }} />
-                <p className="text-sm font-bold" style={{ color: 'var(--admin-text-primary)' }}>
+                <p className="text-sm font-medium" style={{ color: 'var(--admin-text-primary)' }}>
                   {file.name} <span style={{ color: 'var(--admin-text-muted)' }}>({(file.size / 1024).toFixed(0)} KB)</span>
                 </p>
               </div>
@@ -107,29 +119,19 @@ export default function UploadPage() {
 
         {/* Client */}
         <div>
-          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>לקוח (שם תיקייה)</label>
-          <input
-            type="text"
-            value={client}
-            onChange={e => setClient(e.target.value)}
-            placeholder="pizza-house"
-            dir="ltr"
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
-            style={inputStyle}
-            onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
-            onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
-          />
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>לקוח (שם תיקייה)</label>
+          <ClientAutocomplete value={client} onChange={setClient} workspaceId={activeWorkspaceId} placeholder="בחר לקוח קיים או הקלד שם חדש" dir="ltr" />
         </div>
 
         {/* Title */}
         <div>
-          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>כותרת</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>כותרת</label>
           <input
             type="text"
             value={title}
             onChange={e => setTitle(e.target.value)}
             placeholder="דוח קמפיינים מאי 2026"
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
             style={inputStyle}
             onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
@@ -138,14 +140,14 @@ export default function UploadPage() {
 
         {/* Slug */}
         <div>
-          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>Slug (חלק ב-URL)</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>Slug (חלק ב-URL)</label>
           <input
             type="text"
             value={slug}
             onChange={e => setSlug(e.target.value)}
             placeholder="campaign-report-may26"
             dir="ltr"
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
             style={inputStyle}
             onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
@@ -159,12 +161,12 @@ export default function UploadPage() {
 
         {/* Expiration */}
         <div>
-          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>תאריך תוקף (אופציונלי)</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>תאריך תוקף (אופציונלי)</label>
           <input
             type="date"
             value={expiresAt}
             onChange={e => setExpiresAt(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
             style={inputStyle}
             dir="ltr"
             onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
@@ -174,14 +176,14 @@ export default function UploadPage() {
 
         {/* Password */}
         <div>
-          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>סיסמה לדף (אופציונלי)</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>סיסמה לדף (אופציונלי)</label>
           <input
             type="text"
             value={password}
             onChange={e => setPassword(e.target.value)}
             placeholder="השאר ריק ללא הגנה"
             dir="ltr"
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
             style={inputStyle}
             onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
@@ -193,14 +195,14 @@ export default function UploadPage() {
 
         {/* Short URL */}
         <div>
-          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>קישור קצר (אופציונלי)</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>קישור קצר (אופציונלי)</label>
           <input
             type="text"
             value={shortUrl}
             onChange={e => setShortUrl(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
             placeholder="cycle-q1"
             dir="ltr"
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
             style={inputStyle}
             onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
@@ -217,10 +219,10 @@ export default function UploadPage() {
         <button
           type="submit"
           disabled={uploading}
-          className="w-full py-3.5 rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-40"
+          className="w-full py-2.5 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-40"
           style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
-          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px var(--admin-accent-glow)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-          onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
+          onMouseEnter={e => { e.currentTarget.style.opacity = '0.9' }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
         >
           {uploading ? 'מעלה...' : 'העלאה'}
         </button>

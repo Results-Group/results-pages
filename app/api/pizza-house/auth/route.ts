@@ -6,7 +6,7 @@ const PH_COOKIE = 'ph_session'
 const MAX_AGE = 60 * 60 * 24 * 30 // 30 days
 
 export async function POST(req: NextRequest) {
-  const rl = rateLimit(req, { windowMs: 60_000, max: 10, prefix: 'ph-auth' })
+  const rl = await rateLimit(req, { windowMs: 60_000, max: 10, prefix: 'ph-auth' })
   if (rl) return rl
 
   const { password } = await req.json()

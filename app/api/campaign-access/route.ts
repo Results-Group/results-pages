@@ -7,7 +7,7 @@ import { rateLimit } from '@/lib/rate-limit'
 export const runtime = 'nodejs'
 
 export async function POST(request: NextRequest) {
-  const rl = rateLimit(request, { windowMs: 60_000, max: 10, prefix: 'cmp-access' })
+  const rl = await rateLimit(request, { windowMs: 60_000, max: 10, prefix: 'cmp-access' })
   if (rl) return rl
 
   try {

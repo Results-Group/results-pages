@@ -1,15 +1,37 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Users, UserPlus, Shield, Pencil, Trash2, X, Check, KeyRound } from 'lucide-react'
+import { useEffect, useState, useCallback } from 'react'
+import { Users, UserPlus, Shield, Pencil, Trash2, X, Check, Building, Star, ChevronDown, ChevronUp } from 'lucide-react'
+
+interface WorkspaceMembership {
+  workspace_id: string
+  role: string
+  permissions: Record<string, boolean>
+  workspaces: {
+    id: string
+    name: string
+    slug: string
+    color: string
+    icon: string
+  }
+}
 
 interface AdminUser {
   id: string
   email: string
   name: string
   role: 'admin' | 'editor' | 'viewer'
+  is_owner: boolean
   created_at: string
   last_login: string | null
+  workspace_memberships: WorkspaceMembership[]
+}
+
+interface Workspace {
+  id: string
+  name: string
+  slug: string
+  color: string
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -24,13 +46,32 @@ const ROLE_COLORS: Record<string, { color: string; bg: string }> = {
   viewer: { color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.1)' },
 }
 
+const PERMISSION_LABELS: Record<string, string> = {
+  can_upload: 'העלאה',
+  can_edit: 'עריכה',
+  can_delete: 'מחיקה',
+  can_manage_users: 'ניהול משתמשים',
+}
+
+async function fetchIsOwnerOrAdmin(): Promise<boolean> {
+  try {
+    const res = await fetch('/api/auth/me')
+    if (!res.ok) return false
+    const { user } = await res.json()
+    return !!user?.isOwner || user?.role === 'admin'
+  } catch {
+    return false
+  }
+}
+
 export default function UsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([])
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [currentIsOwnerOrAdmin, setCurrentIsOwnerOrAdmin] = useState(false)
 
-  // New user form
   const [showAddForm, setShowAddForm] = useState(false)
   const [newName, setNewName] = useState('')
   const [newEmail, setNewEmail] = useState('')
@@ -38,29 +79,36 @@ export default function UsersPage() {
   const [newRole, setNewRole] = useState<string>('editor')
   const [adding, setAdding] = useState(false)
 
-  // Edit state
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editRole, setEditRole] = useState('')
   const [editPassword, setEditPassword] = useState('')
   const [saving, setSaving] = useState(false)
 
+  const [expandedUser, setExpandedUser] = useState<string | null>(null)
+
   useEffect(() => {
+    fetchIsOwnerOrAdmin().then(v => setCurrentIsOwnerOrAdmin(v))
     fetchUsers()
+    fetchWorkspaces()
   }, [])
 
-  async function fetchUsers() {
+  const fetchUsers = useCallback(async () => {
     setLoading(true)
     const res = await fetch('/api/users')
     if (res.ok) {
-      const data = await res.json()
-      setUsers(data)
+      setUsers(await res.json())
     } else if (res.status === 403) {
       setError('אין הרשאה לצפות במשתמשים')
     } else {
       setError('שגיאה בטעינת משתמשים')
     }
     setLoading(false)
+  }, [])
+
+  async function fetchWorkspaces() {
+    const res = await fetch('/api/workspaces')
+    if (res.ok) setWorkspaces(await res.json())
   }
 
   function showSuccess(msg: string) {
@@ -81,10 +129,7 @@ export default function UsersPage() {
 
     if (res.ok) {
       setShowAddForm(false)
-      setNewName('')
-      setNewEmail('')
-      setNewPassword('')
-      setNewRole('editor')
+      setNewName(''); setNewEmail(''); setNewPassword(''); setNewRole('editor')
       showSuccess('משתמש נוצר בהצלחה!')
       fetchUsers()
     } else {
@@ -106,7 +151,7 @@ export default function UsersPage() {
     setSaving(true)
     setError('')
 
-    const body: Record<string, string> = { id: editingId }
+    const body: Record<string, unknown> = { id: editingId }
     if (editName) body.name = editName
     if (editRole) body.role = editRole
     if (editPassword) body.password = editPassword
@@ -131,19 +176,60 @@ export default function UsersPage() {
   async function handleDelete(id: string, name: string) {
     if (!confirm(`למחוק את המשתמש "${name}"?`)) return
     setError('')
-
     const res = await fetch('/api/users', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
     })
-
     if (res.ok) {
       showSuccess('משתמש נמחק בהצלחה!')
       fetchUsers()
     } else {
       const data = await res.json()
       setError(data.error || 'שגיאה במחיקת משתמש')
+    }
+  }
+
+  async function assignWorkspace(userId: string, workspaceId: string, role: string) {
+    const res = await fetch(`/api/workspaces/${workspaceId}/members`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, role }),
+    })
+    if (res.ok) {
+      showSuccess('משתמש שויך לסביבת עבודה')
+      fetchUsers()
+    }
+  }
+
+  async function updateMemberRole(userId: string, workspaceId: string, role: string) {
+    const res = await fetch(`/api/workspaces/${workspaceId}/members`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, role }),
+    })
+    if (res.ok) fetchUsers()
+  }
+
+  async function updateMemberPermission(userId: string, workspaceId: string, currentPerms: Record<string, boolean>, key: string, value: boolean) {
+    const permissions = { ...currentPerms, [key]: value }
+    const res = await fetch(`/api/workspaces/${workspaceId}/members`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, permissions }),
+    })
+    if (res.ok) fetchUsers()
+  }
+
+  async function removeMember(userId: string, workspaceId: string) {
+    const res = await fetch(`/api/workspaces/${workspaceId}/members`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId }),
+    })
+    if (res.ok) {
+      showSuccess('משתמש הוסר מסביבת העבודה')
+      fetchUsers()
     }
   }
 
@@ -155,17 +241,15 @@ export default function UsersPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Shield className="w-6 h-6" style={{ color: 'var(--admin-accent)' }} />
-          <h2 className="text-2xl font-black" style={{ color: 'var(--admin-text-primary)' }}>משתמשים</h2>
+          <h2 className="text-xl font-semibold" style={{ color: 'var(--admin-text-primary)' }}>משתמשים</h2>
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-200"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200"
           style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
-          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px var(--admin-accent-glow)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-          onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
         >
           {showAddForm ? <X className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
           {showAddForm ? 'ביטול' : 'הוספת משתמש'}
@@ -174,7 +258,7 @@ export default function UsersPage() {
 
       {successMsg && (
         <div
-          className="mb-6 p-4 rounded-xl flex items-center gap-2.5 text-sm font-bold"
+          className="mb-6 p-4 rounded-xl flex items-center gap-2.5 text-sm font-medium"
           style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.25)', color: '#22c55e' }}
         >
           <Check className="w-4 h-4 flex-shrink-0" />
@@ -184,239 +268,247 @@ export default function UsersPage() {
 
       {error && (
         <div
-          className="mb-6 p-4 rounded-xl text-sm font-bold"
+          className="mb-6 p-4 rounded-lg text-sm font-medium"
           style={{ background: 'var(--admin-danger-bg)', border: '1px solid var(--admin-danger-border)', color: 'var(--admin-danger)' }}
         >
           {error}
         </div>
       )}
 
-      {/* Add User Form */}
       {showAddForm && (
         <form
           onSubmit={handleAdd}
-          className="mb-8 p-6 rounded-2xl space-y-4"
+          className="mb-6 p-6 rounded-xl space-y-4"
           style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}
         >
-          <h3 className="text-base font-black mb-4" style={{ color: 'var(--admin-text-primary)' }}>
+          <h3 className="text-base font-semibold mb-4" style={{ color: 'var(--admin-text-primary)' }}>
             <UserPlus className="w-4.5 h-4.5 inline-block ml-2" style={{ verticalAlign: '-2px' }} />
             משתמש חדש
           </h3>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>שם</label>
-              <input
-                type="text"
-                value={newName}
-                onChange={e => setNewName(e.target.value)}
-                required
-                placeholder="ישראל ישראלי"
-                className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
-                style={inputStyle}
-                onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
-                onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
-              />
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>שם</label>
+              <input type="text" value={newName} onChange={e => setNewName(e.target.value)} required placeholder="ישראל ישראלי" className="w-full px-4 py-2.5 rounded-lg text-sm outline-none" style={inputStyle} />
             </div>
             <div>
-              <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>אימייל</label>
-              <input
-                type="email"
-                value={newEmail}
-                onChange={e => setNewEmail(e.target.value)}
-                required
-                placeholder="user@results.co.il"
-                dir="ltr"
-                className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
-                style={inputStyle}
-                onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
-                onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
-              />
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>אימייל</label>
+              <input type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)} required placeholder="user@results.co.il" dir="ltr" className="w-full px-4 py-2.5 rounded-lg text-sm outline-none" style={inputStyle} />
             </div>
             <div>
-              <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>סיסמה</label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={e => setNewPassword(e.target.value)}
-                required
-                minLength={6}
-                placeholder="לפחות 6 תווים"
-                dir="ltr"
-                className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
-                style={inputStyle}
-                onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
-                onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
-              />
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>סיסמה</label>
+              <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} required minLength={6} placeholder="לפחות 6 תווים" dir="ltr" className="w-full px-4 py-2.5 rounded-lg text-sm outline-none" style={inputStyle} />
             </div>
             <div>
-              <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>תפקיד</label>
-              <select
-                value={newRole}
-                onChange={e => setNewRole(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
-                style={inputStyle}
-              >
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>תפקיד</label>
+              <select value={newRole} onChange={e => setNewRole(e.target.value)} className="w-full px-4 py-2.5 rounded-lg text-sm outline-none" style={inputStyle}>
                 <option value="editor">עורך</option>
                 <option value="viewer">צופה</option>
                 <option value="admin">אדמין</option>
               </select>
             </div>
           </div>
-
-          <button
-            type="submit"
-            disabled={adding}
-            className="px-6 py-3 rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-40"
-            style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
-            onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px var(--admin-accent-glow)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-            onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
-          >
+          <button type="submit" disabled={adding} className="px-6 py-3 rounded-lg text-sm font-medium disabled:opacity-40" style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}>
             {adding ? 'יוצר...' : 'יצירת משתמש'}
           </button>
         </form>
       )}
 
-      {/* Users Table */}
       {loading ? (
         <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>טוען...</p>
       ) : users.length === 0 ? (
         <div className="text-center py-20" style={{ color: 'var(--admin-text-muted)' }}>
           <Users className="w-12 h-12 mx-auto mb-3 opacity-40" />
-          <p className="text-lg font-bold mb-1">אין משתמשים</p>
-          <p className="text-sm">יש להריץ את נקודת הקצה /api/setup ליצירת אדמין ראשון</p>
+          <p className="text-lg font-medium mb-1">אין משתמשים</p>
         </div>
       ) : (
-        <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
-          <table className="w-full text-sm">
-            <thead>
-              <tr style={{ background: 'var(--admin-bg-elevated)', borderBottom: '1px solid var(--admin-border)' }}>
-                <th className="text-start px-5 py-3.5 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--admin-text-muted)' }}>שם</th>
-                <th className="text-start px-5 py-3.5 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--admin-text-muted)' }}>אימייל</th>
-                <th className="text-start px-5 py-3.5 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--admin-text-muted)' }}>תפקיד</th>
-                <th className="text-start px-5 py-3.5 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--admin-text-muted)' }}>כניסה אחרונה</th>
-                <th className="text-start px-5 py-3.5 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--admin-text-muted)' }}>פעולות</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map(user => {
-                const roleStyle = ROLE_COLORS[user.role] || ROLE_COLORS.viewer
-                const isEditing = editingId === user.id
+        <div className="space-y-3">
+          {users.map(user => {
+            const roleStyle = ROLE_COLORS[user.role] || ROLE_COLORS.viewer
+            const isEditing = editingId === user.id
+            const isExpanded = expandedUser === user.id
+            const userWorkspaceIds = new Set(user.workspace_memberships?.map(m => m.workspace_id) || [])
+            const unassignedWorkspaces = workspaces.filter(ws => !userWorkspaceIds.has(ws.id))
 
-                return (
-                  <tr
-                    key={user.id}
-                    className="transition-colors duration-150"
-                    style={{ borderBottom: '1px solid var(--admin-border)' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                  >
-                    <td className="px-5 py-4">
+            return (
+              <div
+                key={user.id}
+                className="rounded-xl overflow-hidden"
+                style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}
+              >
+                {/* User row */}
+                <div className="flex items-center gap-4 px-4 py-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
                       {isEditing ? (
-                        <input
-                          type="text"
-                          value={editName}
-                          onChange={e => setEditName(e.target.value)}
-                          className="px-3 py-1.5 rounded-lg text-sm outline-none w-full max-w-[180px]"
-                          style={inputStyle}
-                          onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
-                          onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
-                        />
+                        <input type="text" value={editName} onChange={e => setEditName(e.target.value)} className="px-3 py-1.5 rounded-lg text-sm outline-none max-w-[180px]" style={inputStyle} />
                       ) : (
-                        <span className="font-bold" style={{ color: 'var(--admin-text-primary)' }}>{user.name}</span>
+                        <span className="font-medium text-sm" style={{ color: 'var(--admin-text-primary)' }}>{user.name}</span>
                       )}
-                    </td>
-                    <td className="px-5 py-4" dir="ltr" style={{ color: 'var(--admin-text-secondary)' }}>{user.email}</td>
-                    <td className="px-5 py-4">
+                      {user.is_owner && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-md font-medium flex items-center gap-1" style={{ color: '#f59e0b', background: 'rgba(245,158,11,0.15)' }}>
+                          <Star className="w-3 h-3" /> בעלים
+                        </span>
+                      )}
                       {isEditing ? (
-                        <select
-                          value={editRole}
-                          onChange={e => setEditRole(e.target.value)}
-                          className="px-3 py-1.5 rounded-lg text-sm outline-none"
-                          style={inputStyle}
-                        >
+                        <select value={editRole} onChange={e => setEditRole(e.target.value)} className="px-3 py-1.5 rounded-lg text-xs outline-none" style={inputStyle}>
                           <option value="admin">אדמין</option>
                           <option value="editor">עורך</option>
                           <option value="viewer">צופה</option>
                         </select>
                       ) : (
-                        <span
-                          className="text-xs px-3 py-1 rounded-full font-bold"
-                          style={{ color: roleStyle.color, background: roleStyle.bg }}
-                        >
+                        <span className="text-xs px-2.5 py-0.5 rounded-md font-medium" style={{ color: roleStyle.color, background: roleStyle.bg }}>
                           {ROLE_LABELS[user.role]}
                         </span>
                       )}
-                    </td>
-                    <td className="px-5 py-4" style={{ color: 'var(--admin-text-muted)' }}>
-                      {user.last_login
-                        ? new Date(user.last_login).toLocaleString('he-IL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
-                        : 'לא התחבר'}
-                    </td>
-                    <td className="px-5 py-4">
-                      {isEditing ? (
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="password"
-                            value={editPassword}
-                            onChange={e => setEditPassword(e.target.value)}
-                            placeholder="סיסמה חדשה (אופציונלי)"
-                            dir="ltr"
-                            className="px-3 py-1.5 rounded-lg text-xs outline-none w-[160px]"
-                            style={inputStyle}
-                          />
-                          <button
-                            onClick={handleSaveEdit}
-                            disabled={saving}
-                            className="p-1.5 rounded-lg transition-colors"
-                            style={{ color: 'var(--admin-success)' }}
-                            title="שמירה"
-                            onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-success-bg)'}
-                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                          >
-                            <Check className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => setEditingId(null)}
-                            className="p-1.5 rounded-lg transition-colors"
-                            style={{ color: 'var(--admin-text-muted)' }}
-                            title="ביטול"
-                            onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
-                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => startEdit(user)}
-                            className="p-1.5 rounded-lg transition-colors"
-                            style={{ color: 'var(--admin-link)' }}
-                            title="עריכה"
-                            onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
-                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(user.id, user.name)}
-                            className="p-1.5 rounded-lg transition-colors"
-                            style={{ color: 'var(--admin-danger)' }}
-                            title="מחיקה"
-                            onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-danger-bg)'}
-                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                    </div>
+                    <p className="text-xs mt-1" dir="ltr" style={{ color: 'var(--admin-text-muted)' }}>
+                      {user.email}
+                      {user.last_login && (
+                        <span className="mr-3">
+                          · כניסה אחרונה {new Date(user.last_login).toLocaleString('he-IL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                        </span>
                       )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+                    </p>
+                    {user.workspace_memberships?.length > 0 && !isExpanded && (
+                      <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                        {user.workspace_memberships.map(m => (
+                          <span key={m.workspace_id} className="text-[10px] px-2 py-0.5 rounded-md font-medium" style={{ background: (m.workspaces?.color || '#888') + '22', color: m.workspaces?.color || '#888' }}>
+                            {m.workspaces?.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {isEditing ? (
+                      <>
+                        <input type="password" value={editPassword} onChange={e => setEditPassword(e.target.value)} placeholder="סיסמה חדשה" dir="ltr" className="px-3 py-1.5 rounded-lg text-xs outline-none w-[130px]" style={inputStyle} />
+                        <button onClick={handleSaveEdit} disabled={saving} className="p-1.5 rounded-lg" style={{ color: 'var(--admin-success)' }} title="שמירה"><Check className="w-4 h-4" /></button>
+                        <button onClick={() => setEditingId(null)} className="p-1.5 rounded-lg" style={{ color: 'var(--admin-text-muted)' }} title="ביטול"><X className="w-4 h-4" /></button>
+                      </>
+                    ) : (
+                      <>
+                        <button onClick={() => setExpandedUser(isExpanded ? null : user.id)} className="p-1.5 rounded-lg transition-colors" style={{ color: 'var(--admin-text-muted)' }} title="סביבות עבודה">
+                          {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        </button>
+                        <button onClick={() => startEdit(user)} className="p-1.5 rounded-lg transition-colors" style={{ color: 'var(--admin-link)' }} title="עריכה"><Pencil className="w-4 h-4" /></button>
+                        <button onClick={() => handleDelete(user.id, user.name)} className="p-1.5 rounded-lg transition-colors" style={{ color: 'var(--admin-danger)' }} title="מחיקה"><Trash2 className="w-4 h-4" /></button>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Expanded workspace panel */}
+                {isExpanded && (
+                  <div className="px-5 pb-5 pt-1" style={{ borderTop: '1px solid var(--admin-border)' }}>
+                    <p className="text-xs font-medium mb-3 mt-3" style={{ color: 'var(--admin-text-secondary)' }}>
+                      <Building className="w-3.5 h-3.5 inline-block ml-1" style={{ verticalAlign: '-2px' }} />
+                      סביבות עבודה והרשאות
+                    </p>
+
+                    {user.workspace_memberships?.length > 0 ? (
+                      <div className="space-y-3 mb-4">
+                        {user.workspace_memberships.map(m => (
+                          <div key={m.workspace_id} className="p-3 rounded-xl" style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}>
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-4 h-4 rounded-full" style={{ background: m.workspaces?.color || '#888' }} />
+                              <span className="text-sm font-medium" style={{ color: 'var(--admin-text-primary)' }}>{m.workspaces?.name}</span>
+                              <select
+                                value={m.role}
+                                onChange={e => updateMemberRole(user.id, m.workspace_id, e.target.value)}
+                                className="px-2 py-0.5 rounded-lg text-xs outline-none mr-auto"
+                                style={inputStyle}
+                              >
+                                <option value="admin">אדמין</option>
+                                <option value="editor">עורך</option>
+                                <option value="viewer">צופה</option>
+                              </select>
+                              <button
+                                onClick={() => removeMember(user.id, m.workspace_id)}
+                                className="p-1 rounded-lg text-xs"
+                                style={{ color: 'var(--admin-danger)' }}
+                                title="הסר מסביבה"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2">
+                              {Object.entries(PERMISSION_LABELS).map(([key, label]) => {
+                                const isOn = key in (m.permissions || {})
+                                  ? m.permissions[key]
+                                  : undefined
+                                return (
+                                  <button
+                                    key={key}
+                                    onClick={() => updateMemberPermission(user.id, m.workspace_id, m.permissions || {}, key, isOn === undefined ? true : !isOn)}
+                                    className="text-[11px] px-2.5 py-1 rounded-lg font-medium transition-colors"
+                                    style={{
+                                      background: isOn === true
+                                        ? 'rgba(34,197,94,0.15)'
+                                        : isOn === false
+                                          ? 'rgba(239,68,68,0.12)'
+                                          : 'var(--admin-bg-elevated)',
+                                      color: isOn === true
+                                        ? '#22c55e'
+                                        : isOn === false
+                                          ? '#ef4444'
+                                          : 'var(--admin-text-muted)',
+                                      border: '1px solid ' + (isOn === true
+                                        ? 'rgba(34,197,94,0.25)'
+                                        : isOn === false
+                                          ? 'rgba(239,68,68,0.25)'
+                                          : 'var(--admin-border)'),
+                                    }}
+                                    title={isOn === undefined ? 'ברירת מחדל (לפי תפקיד)' : isOn ? 'מופעל (לחץ לכיבוי)' : 'מכובה (לחץ להפעלה)'}
+                                  >
+                                    {label}
+                                    {isOn === undefined && ' ⊘'}
+                                    {isOn === true && ' ✓'}
+                                    {isOn === false && ' ✕'}
+                                  </button>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs mb-3" style={{ color: 'var(--admin-text-muted)' }}>משתמש זה לא משויך לסביבת עבודה</p>
+                    )}
+
+                    {/* Add to workspace */}
+                    {unassignedWorkspaces.length > 0 && currentIsOwnerOrAdmin && (
+                      <div className="flex items-center gap-2">
+                        <select
+                          id={`assign-ws-${user.id}`}
+                          className="px-3 py-1.5 rounded-lg text-xs outline-none flex-1"
+                          style={inputStyle}
+                          defaultValue=""
+                        >
+                          <option value="" disabled>הוסף לסביבת עבודה...</option>
+                          {unassignedWorkspaces.map(ws => (
+                            <option key={ws.id} value={ws.id}>{ws.name}</option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() => {
+                            const select = document.getElementById(`assign-ws-${user.id}`) as HTMLSelectElement
+                            if (select?.value) assignWorkspace(user.id, select.value, 'editor')
+                          }}
+                          className="px-3 py-1.5 rounded-lg text-xs font-medium"
+                          style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
+                        >
+                          הוסף
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
     </div>

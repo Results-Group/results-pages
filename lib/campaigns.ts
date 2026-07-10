@@ -24,6 +24,7 @@ export interface CampaignSection {
 export interface Campaign {
   id: string
   client: string
+  client_id: string | null
   campaign_name: string
   slug: string
   concept: string | null
@@ -31,18 +32,28 @@ export interface Campaign {
   logo_url?: string
   sections: CampaignSection[]
   status: 'draft' | 'published' | 'archived'
+  publish_at: string | null
   password: string | null
   created_by: string | null
+  workspace_id: string | null
+  deleted_at: string | null
   created_at: string
   updated_at: string
 }
 
 // ── Queries ──
 
-export async function getCampaigns(filters?: { search?: string; status?: string }) {
+export async function getCampaigns(filters?: { search?: string; status?: string; workspace_id?: string; deleted?: boolean }) {
   let query = supabase.from('campaigns')
-    .select('id,client,campaign_name,slug,concept,logo_path,status,password,created_by,created_at,updated_at')
+    .select('id,client,client_id,campaign_name,slug,concept,logo_path,status,publish_at,password,created_by,workspace_id,deleted_at,created_at,updated_at')
     .order('created_at', { ascending: false })
+
+  if (filters?.deleted) query = query.not('deleted_at', 'is', null)
+  else query = query.is('deleted_at', null)
+
+  if (filters?.workspace_id) {
+    query = query.eq('workspace_id', filters.workspace_id)
+  }
 
   if (filters?.search) {
     const s = filters.search.replace(/[%_\\]/g, c => `\\${c}`)
@@ -72,6 +83,7 @@ export async function getCampaignBySlug(slug: string): Promise<Campaign | null> 
     .from('campaigns')
     .select('*')
     .eq('slug', slug)
+    .is('deleted_at', null)
     .single()
   if (error || !data) return null
   return data as Campaign
@@ -85,8 +97,11 @@ export async function createCampaign(data: {
   logo_path?: string
   sections?: CampaignSection[]
   status?: string
+  publish_at?: string | null
   password?: string
   created_by?: string
+  workspace_id?: string
+  client_id?: string | null
 }): Promise<Campaign> {
   const hashedPw = data.password ? await bcrypt.hash(data.password, 12) : null
   const insertData: Record<string, unknown> = {
@@ -97,9 +112,12 @@ export async function createCampaign(data: {
     logo_path: data.logo_path || null,
     sections: data.sections || [],
     status: data.status || 'draft',
+    publish_at: data.publish_at || null,
     password: hashedPw,
   }
   if (data.created_by) insertData.created_by = data.created_by
+  if (data.workspace_id) insertData.workspace_id = data.workspace_id
+  if (data.client_id !== undefined) insertData.client_id = data.client_id
 
   const { data: campaign, error } = await supabase
     .from('campaigns')
@@ -117,15 +135,18 @@ export async function updateCampaign(
   const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() }
 
   if (data.client !== undefined) updateData.client = data.client
+  if (data.client_id !== undefined) updateData.client_id = data.client_id
   if (data.campaign_name !== undefined) updateData.campaign_name = data.campaign_name
   if (data.slug !== undefined) updateData.slug = data.slug
   if (data.concept !== undefined) updateData.concept = data.concept
   if (data.logo_path !== undefined) updateData.logo_path = data.logo_path
   if (data.sections !== undefined) updateData.sections = data.sections
   if (data.status !== undefined) updateData.status = data.status
+  if (data.publish_at !== undefined) updateData.publish_at = data.publish_at
   if (data.password !== undefined) {
     updateData.password = data.password ? await bcrypt.hash(data.password, 12) : null
   }
+  if (data.workspace_id !== undefined) updateData.workspace_id = data.workspace_id
 
   const { data: campaign, error } = await supabase
     .from('campaigns')
@@ -137,8 +158,26 @@ export async function updateCampaign(
   return campaign as Campaign
 }
 
+/** Soft-delete: move a campaign to the recycle bin (reversible, keeps assets). */
 export async function deleteCampaign(id: string) {
-  // Remove the entire campaign storage folder (logo + all assets)
+  const { error } = await supabase
+    .from('campaigns')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', id)
+  if (error) throw error
+}
+
+/** Restore a campaign from the recycle bin. */
+export async function restoreCampaign(id: string) {
+  const { error } = await supabase
+    .from('campaigns')
+    .update({ deleted_at: null })
+    .eq('id', id)
+  if (error) throw error
+}
+
+/** Permanently delete a campaign and remove its entire storage folder. */
+export async function purgeCampaign(id: string) {
   await deleteCampaignAssets(id)
   const { error } = await supabase.from('campaigns').delete().eq('id', id)
   if (error) throw error
@@ -201,11 +240,35 @@ export async function deleteAsset(filePath: string) {
   await supabase.storage.from(ASSETS_BUCKET).remove([filePath])
 }
 
+/**
+ * Copy a stored asset (and its .jpeg sibling variant, if any) to a new path.
+ * Returns the new primary path. Best-effort on the sibling variant.
+ */
+export async function copyAsset(fromPath: string, toPath: string): Promise<string> {
+  const { error } = await supabase.storage.from(ASSETS_BUCKET).copy(fromPath, toPath)
+  if (error) throw error
+  if (fromPath.endsWith('.webp') && toPath.endsWith('.webp')) {
+    const fromJpeg = fromPath.replace(/\.webp$/, '.jpeg')
+    const toJpeg = toPath.replace(/\.webp$/, '.jpeg')
+    await supabase.storage.from(ASSETS_BUCKET).copy(fromJpeg, toJpeg).catch(() => {})
+  }
+  return toPath
+}
+
 export async function deleteCampaignAssets(campaignId: string) {
   const prefix = `campaigns/${campaignId}`
-  const { data } = await supabase.storage.from(ASSETS_BUCKET).list(prefix)
-  if (data && data.length > 0) {
-    const paths = data.map(f => `${prefix}/${f.name}`)
+  // list() caps at 100 objects per call — paginate until the prefix is exhausted
+  const pageSize = 100
+  const paths: string[] = []
+  let offset = 0
+  for (;;) {
+    const { data } = await supabase.storage.from(ASSETS_BUCKET).list(prefix, { limit: pageSize, offset })
+    if (!data || data.length === 0) break
+    paths.push(...data.map(f => `${prefix}/${f.name}`))
+    if (data.length < pageSize) break
+    offset += pageSize
+  }
+  if (paths.length > 0) {
     await supabase.storage.from(ASSETS_BUCKET).remove(paths)
   }
 }

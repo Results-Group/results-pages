@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPageById, updatePage, deletePage, moveFile, deleteFile, getPageByShortUrl } from '@/lib/db'
-import { requireAuth, requireRole, getSessionFromRequest } from '@/lib/auth'
+import { getPageById, updatePage, deletePage, purgePage, moveFile, getPageByShortUrl } from '@/lib/db'
+import { requireAuth, getSessionFromRequest, requireWorkspacePermission } from '@/lib/auth'
+import { findOrCreateClient } from '@/lib/clients'
+import { logAudit } from '@/lib/audit'
 
 interface Ctx { params: Promise<{ id: string }> }
 
@@ -15,21 +17,33 @@ export async function GET(req: NextRequest, { params }: Ctx) {
 }
 
 export async function PUT(req: NextRequest, { params }: Ctx) {
-  const roleErr = await requireRole(req, 'editor')
-  if (roleErr) return roleErr
-
   const session = await getSessionFromRequest(req)
-  const { id } = await params
-  const body = await req.json()
-  const { title, client, slug, active, expiresAt, password, shortUrl } = body
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const { id } = await params
   const existing = await getPageById(id)
   if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
+  if (existing.workspace_id) {
+    const permErr = await requireWorkspacePermission(req, existing.workspace_id, 'edit')
+    if (permErr) return permErr
+  }
+
+  const body = await req.json()
+  const { title, client, slug, active, expiresAt, publishAt, password, shortUrl, workspace_id } = body
+  let clientId: string | null | undefined = body.client_id
+  if (clientId === undefined && client && client !== existing.client) {
+    try {
+      const c = await findOrCreateClient(client, workspace_id ?? existing.workspace_id)
+      clientId = c.id
+    } catch { /* non-fatal */ }
+  }
+
   if (shortUrl !== undefined && shortUrl) {
-    const conflict = await getPageByShortUrl(shortUrl)
+    // Include soft-deleted rows — the unique constraint covers them too
+    const conflict = await getPageByShortUrl(shortUrl, { includeDeleted: true })
     if (conflict && conflict.id !== id) {
-      return NextResponse.json({ error: 'קישור קצר זה כבר בשימוש' }, { status: 409 })
+      return NextResponse.json({ error: 'קישור קצר זה כבר בשימוש (ייתכן בסל המיחזור)' }, { status: 409 })
     }
   }
 
@@ -57,33 +71,39 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
     ...(slug !== undefined && { slug }),
     ...(active !== undefined && { active }),
     ...(expiresAt !== undefined && { expires_at: expiresAt ? new Date(expiresAt).toISOString() : null }),
+    ...(publishAt !== undefined && { publish_at: publishAt ? new Date(publishAt).toISOString() : null }),
     ...(password !== undefined && { password: password || null }),
     ...(shortUrl !== undefined && { short_url: shortUrl || null }),
+    ...(workspace_id !== undefined && { workspace_id }),
+    ...(clientId !== undefined && { client_id: clientId }),
     file_path: newFilePath,
-    updated_by: session?.userId !== 'legacy' ? session?.userId : undefined,
+    updated_by: session.userId,
   })
 
+  await logAudit({ actor: session, action: 'update', entity_type: 'page', entity_id: id, entity_label: page.title, workspace_id: page.workspace_id })
   return NextResponse.json(page)
 }
 
 export async function DELETE(req: NextRequest, { params }: Ctx) {
-  const roleErr = await requireRole(req, 'admin')
-  if (roleErr) return roleErr
+  const session = await getSessionFromRequest(req)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
   const page = await getPageById(id)
   if (!page) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  try {
-    const sourcePath = page.file_path.replace(/\.html$/, '.source.html')
-    await Promise.all([
-      deleteFile(page.file_path),
-      deleteFile(sourcePath),
-    ])
-  } catch {
-    // Files may already be deleted
+  if (page.workspace_id) {
+    const permErr = await requireWorkspacePermission(req, page.workspace_id, 'delete')
+    if (permErr) return permErr
   }
 
-  await deletePage(id)
-  return NextResponse.json({ ok: true })
+  // ?purge=1 permanently deletes (files + row); default is a reversible soft-delete.
+  const purge = new URL(req.url).searchParams.get('purge') === '1'
+  if (purge) {
+    await purgePage(id)
+  } else {
+    await deletePage(id)
+  }
+  await logAudit({ actor: session, action: purge ? 'purge' : 'delete', entity_type: 'page', entity_id: id, entity_label: page.title, workspace_id: page.workspace_id })
+  return NextResponse.json({ ok: true, purged: purge })
 }

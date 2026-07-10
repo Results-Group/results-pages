@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
-import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, MessageCircle } from 'lucide-react'
+import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, MessageCircle, Files } from 'lucide-react'
+import { whatsappShareUrl } from '@/lib/share'
 
 interface Campaign {
   id: string
@@ -12,15 +13,22 @@ interface Campaign {
   status: 'draft' | 'published' | 'archived'
   sections: { assets: unknown[] }[]
   created_at: string
+  workspace_id: string | null
 }
 
-function getUserRole(): string {
+interface Workspace {
+  id: string
+  name: string
+  color: string
+}
+
+async function fetchUserRole(): Promise<string> {
   try {
-    const cookie = document.cookie.split('; ').find(c => c.startsWith('rp_session='))
-    if (!cookie) return 'admin'
-    const json = atob(decodeURIComponent(cookie.split('=')[1]))
-    return JSON.parse(json).role || 'admin'
-  } catch { return 'admin' }
+    const res = await fetch('/api/auth/me')
+    if (!res.ok) return 'viewer'
+    const { user } = await res.json()
+    return user?.role || 'viewer'
+  } catch { return 'viewer' }
 }
 
 const STATUS_LABELS: Record<string, string> = { draft: 'טיוטה', published: 'פורסם', archived: 'ארכיון' }
@@ -35,9 +43,14 @@ export default function CampaignsListPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [copied, setCopied] = useState<string | null>(null)
+  const [duplicating, setDuplicating] = useState<string | null>(null)
   const [userRole, setUserRole] = useState('admin')
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([])
 
-  useEffect(() => { setUserRole(getUserRole()) }, [])
+  useEffect(() => {
+    fetchUserRole().then(r => setUserRole(r))
+    fetch('/api/workspaces').then(r => r.ok ? r.json() : []).then(setWorkspaces).catch(() => {})
+  }, [])
 
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -76,8 +89,24 @@ export default function CampaignsListPage() {
 
   function handleWhatsApp(campaign: Campaign) {
     const url = getCampaignUrl(campaign.slug)
-    const text = `${campaign.campaign_name} - ${campaign.client}\n${url}`
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
+    window.open(whatsappShareUrl({ title: campaign.campaign_name, client: campaign.client, url }), '_blank')
+  }
+
+  async function handleDuplicate(campaign: Campaign) {
+    if (!confirm(`לשכפל את "${campaign.campaign_name}"?`)) return
+    setDuplicating(campaign.id)
+    try {
+      const res = await fetch(`/api/campaigns/${campaign.id}/duplicate`, { method: 'POST' })
+      if (res.ok) {
+        const created = await res.json()
+        setCampaigns(prev => [created, ...prev])
+      } else {
+        const err = await res.json().catch(() => ({}))
+        alert(`שגיאה בשכפול: ${err.error || 'Unknown error'}`)
+      }
+    } finally {
+      setDuplicating(null)
+    }
   }
 
   async function handleDelete(id: string, name: string) {
@@ -106,17 +135,17 @@ export default function CampaignsListPage() {
 
   return (
     <div className="max-w-6xl">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-black" style={{ color: 'var(--admin-text-primary)' }}>קמפיינים</h2>
+          <h2 className="text-xl font-semibold" style={{ color: 'var(--admin-text-primary)' }}>קמפיינים</h2>
           <p className="text-sm mt-1" style={{ color: 'var(--admin-text-muted)' }}>ניהול קמפיינים קריאייטיביים ושליחה ללקוחות</p>
         </div>
         <Link
           href="/admin/campaigns/new"
-          className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-200"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200"
           style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
-          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px var(--admin-accent-glow)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-          onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
+          onMouseEnter={e => { e.currentTarget.style.opacity = '0.9' }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
         >
           <Plus className="w-4 h-4" />
           קמפיין חדש
@@ -131,7 +160,7 @@ export default function CampaignsListPage() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="חיפוש לפי שם קמפיין או לקוח..."
-          className="w-full pr-10 pl-4 py-3 rounded-xl text-sm outline-none transition-colors"
+          className="w-full pr-10 pl-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
           style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)' }}
           onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
           onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
@@ -144,11 +173,11 @@ export default function CampaignsListPage() {
         </div>
       ) : campaigns.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-lg font-bold mb-2" style={{ color: 'var(--admin-text-muted)' }}>
+          <p className="text-lg font-medium mb-2" style={{ color: 'var(--admin-text-muted)' }}>
             {search ? 'לא נמצאו תוצאות' : 'אין קמפיינים עדיין'}
           </p>
           {!search && (
-            <Link href="/admin/campaigns/new" className="text-sm font-bold" style={{ color: 'var(--admin-accent)' }}>
+            <Link href="/admin/campaigns/new" className="text-sm font-medium" style={{ color: 'var(--admin-accent)' }}>
               צרו את הקמפיין הראשון
             </Link>
           )}
@@ -158,9 +187,9 @@ export default function CampaignsListPage() {
           {groupedByClient.map(([clientName, clientCampaigns]) => (
             <div key={clientName}>
               <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-sm font-black" style={{ color: 'var(--admin-accent)' }}>{clientName}</h3>
+                <h3 className="text-sm font-semibold" style={{ color: 'var(--admin-accent)' }}>{clientName}</h3>
                 <span
-                  className="text-[10px] px-2 py-0.5 rounded-full font-bold"
+                  className="text-[10px] px-2 py-0.5 rounded-md font-medium"
                   style={{ color: 'var(--admin-text-muted)', background: 'var(--admin-bg-elevated)' }}
                 >
                   {clientCampaigns.length} {clientCampaigns.length === 1 ? 'קמפיין' : 'קמפיינים'}
@@ -173,14 +202,14 @@ export default function CampaignsListPage() {
                   return (
                     <div
                       key={c.id}
-                      className="flex items-center gap-4 p-5 rounded-2xl transition-all duration-200"
+                      className="flex items-center gap-3 p-3.5 rounded-xl transition-colors"
                       style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}
                     >
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2.5 mb-1">
-                          <h3 className="text-base font-black truncate" style={{ color: 'var(--admin-text-primary)' }}>{c.campaign_name}</h3>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <h3 className="text-sm font-semibold truncate" style={{ color: 'var(--admin-text-primary)' }}>{c.campaign_name}</h3>
                           <span
-                            className="text-[10px] px-2 py-0.5 rounded-full font-bold flex-shrink-0"
+                            className="text-[10px] px-2 py-0.5 rounded-md font-medium flex-shrink-0"
                             style={{ color: ss.color, background: ss.bg }}
                           >
                             {STATUS_LABELS[c.status]}
@@ -189,6 +218,14 @@ export default function CampaignsListPage() {
                         <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--admin-text-muted)' }}>
                           <span>{totalAssets(c)} תוצרים</span>
                           <span>{new Date(c.created_at).toLocaleDateString('he-IL')}</span>
+                          {(() => {
+                            const ws = workspaces.find(w => w.id === c.workspace_id)
+                            return ws ? (
+                              <span className="px-2 py-0.5 rounded-md font-medium" style={{ background: `${ws.color}20`, color: ws.color, fontSize: '10px' }}>
+                                {ws.name}
+                              </span>
+                            ) : null
+                          })()}
                         </div>
                       </div>
 
@@ -228,6 +265,19 @@ export default function CampaignsListPage() {
                               <MessageCircle className="w-4 h-4" />
                             </button>
                           </>
+                        )}
+                        {userRole !== 'viewer' && (
+                          <button
+                            onClick={() => handleDuplicate(c)}
+                            disabled={duplicating === c.id}
+                            className="p-2.5 rounded-lg transition-colors disabled:opacity-40"
+                            style={{ color: 'var(--admin-text-muted)' }}
+                            onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-bg)'; e.currentTarget.style.color = 'var(--admin-accent)' }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
+                            title="שכפול"
+                          >
+                            <Files className="w-4 h-4" />
+                          </button>
                         )}
                         <Link
                           href={`/admin/campaigns/${c.id}`}

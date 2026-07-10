@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, requireRole } from '@/lib/auth'
-import { getCampaignById, updateCampaign, deleteCampaign, enrichCampaignUrls } from '@/lib/campaigns'
+import { requireAuth, getSessionFromRequest, requireWorkspacePermission } from '@/lib/auth'
+import { getCampaignById, updateCampaign, deleteCampaign, purgeCampaign, enrichCampaignUrls } from '@/lib/campaigns'
+import { findOrCreateClient } from '@/lib/clients'
+import { logAudit } from '@/lib/audit'
+import { captureException } from '@/lib/logger'
 
 export async function GET(
   request: NextRequest,
@@ -18,11 +21,8 @@ export async function GET(
     }
     const enriched = enrichCampaignUrls(campaign)
     return NextResponse.json({ ...enriched, has_password: !!enriched.password, password: undefined })
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'שגיאה בטעינת קמפיין' },
-      { status: 500 }
-    )
+  } catch {
+    return NextResponse.json({ error: 'שגיאה בטעינת קמפיין' }, { status: 500 })
   }
 }
 
@@ -30,8 +30,8 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const roleErr = await requireRole(request, 'editor')
-  if (roleErr) return roleErr
+  const session = await getSessionFromRequest(request)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
 
@@ -41,14 +41,35 @@ export async function PUT(
       return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
     }
 
+    if (existing.workspace_id) {
+      const permErr = await requireWorkspacePermission(request, existing.workspace_id, 'edit')
+      if (permErr) return permErr
+    }
+
     const body = await request.json()
+
+    // Moving the campaign to another workspace requires permission there too
+    if (body.workspace_id && body.workspace_id !== existing.workspace_id) {
+      const permErr = await requireWorkspacePermission(request, body.workspace_id, 'edit')
+      if (permErr) return permErr
+    }
+
+    // Keep client_id in sync when the client name changes (the editor may send
+    // client_id: null after free typing — re-resolve from the name in that case)
+    const targetWorkspaceId = body.workspace_id !== undefined ? body.workspace_id : existing.workspace_id
+    if (typeof body.client === 'string' && body.client.trim() && (body.client_id === undefined || body.client_id === null)) {
+      try {
+        const c = await findOrCreateClient(body.client, targetWorkspaceId)
+        body.client_id = c.id
+      } catch { /* non-fatal */ }
+    }
+
     const campaign = await updateCampaign(id, body)
+    const action = body.status === 'published' && existing.status !== 'published' ? 'publish' : 'update'
+    await logAudit({ actor: session, action, entity_type: 'campaign', entity_id: id, entity_label: campaign.campaign_name, workspace_id: existing.workspace_id })
     return NextResponse.json(campaign)
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'שגיאה בעדכון קמפיין' },
-      { status: 500 }
-    )
+  } catch {
+    return NextResponse.json({ error: 'שגיאה בעדכון קמפיין' }, { status: 500 })
   }
 }
 
@@ -56,8 +77,8 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const roleErr = await requireRole(request, 'admin')
-  if (roleErr) return roleErr
+  const session = await getSessionFromRequest(request)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
 
@@ -67,12 +88,18 @@ export async function DELETE(
       return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
     }
 
-    await deleteCampaign(id)
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'שגיאה במחיקת קמפיין' },
-      { status: 500 }
-    )
+    if (existing.workspace_id) {
+      const permErr = await requireWorkspacePermission(request, existing.workspace_id, 'delete')
+      if (permErr) return permErr
+    }
+
+    const purge = new URL(request.url).searchParams.get('purge') === '1'
+    if (purge) await purgeCampaign(id)
+    else await deleteCampaign(id)
+    await logAudit({ actor: session, action: purge ? 'purge' : 'delete', entity_type: 'campaign', entity_id: id, entity_label: existing.campaign_name, workspace_id: existing.workspace_id })
+    return NextResponse.json({ success: true, purged: purge })
+  } catch (err) {
+    captureException(err, { route: 'DELETE /api/campaigns/[id]', id })
+    return NextResponse.json({ error: 'שגיאה במחיקת קמפיין' }, { status: 500 })
   }
 }

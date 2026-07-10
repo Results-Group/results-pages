@@ -11,6 +11,7 @@ export interface SessionUser {
   email: string
   role: UserRole
   name: string
+  isOwner?: boolean
 }
 
 // ── HMAC signing (Web Crypto — works in Edge + Node) ──
@@ -137,4 +138,33 @@ export async function hasAdminUsers(): Promise<boolean> {
 // Verify a signed session token (for middleware — Edge compatible)
 export async function verifySessionToken(token: string): Promise<SessionUser | null> {
   return decodeSession(token)
+}
+
+// ── Workspace-aware permission check ──
+
+export async function requireWorkspacePermission(
+  request: NextRequest,
+  workspaceId: string,
+  action: import('./workspaces').WorkspaceAction,
+): Promise<NextResponse | null> {
+  const session = await getSessionFromRequest(request)
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  // Owners and global admins have full access to every workspace
+  if (session.isOwner || session.role === 'admin') return null
+
+  const { getWorkspaceMembership, resolvePermission } = await import('./workspaces')
+  const membership = await getWorkspaceMembership(session.userId, workspaceId)
+  if (!membership) {
+    return NextResponse.json({ error: 'אין הרשאה לסביבת עבודה זו' }, { status: 403 })
+  }
+  if (!resolvePermission(membership.role, membership.permissions, action)) {
+    return NextResponse.json({ error: 'אין הרשאה לפעולה זו' }, { status: 403 })
+  }
+  return null
+}
+
+export async function getActiveWorkspaceId(request: NextRequest): Promise<string | null> {
+  return request.cookies.get('rp_workspace')?.value || null
 }

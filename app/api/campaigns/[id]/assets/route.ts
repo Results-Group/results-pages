@@ -8,6 +8,7 @@ import {
   getAssetPublicUrl,
   deleteAsset,
 } from '@/lib/campaigns'
+import { captureException } from '@/lib/logger'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -51,6 +52,7 @@ export async function POST(
       public_url: getAssetPublicUrl(filePath),
     }, { status: 201 })
   } catch (error) {
+    captureException(error, { route: 'POST /api/campaigns/[id]/assets', id })
     return NextResponse.json(
       { error: 'שגיאה בהעלאת קבצים' },
       { status: 500 }
@@ -94,6 +96,7 @@ export async function DELETE(
     await deleteAsset(file_path)
     return NextResponse.json({ success: true })
   } catch (error) {
+    captureException(error, { route: 'DELETE /api/campaigns/[id]/assets', id })
     return NextResponse.json(
       { error: 'שגיאה במחיקת קובץ' },
       { status: 500 }

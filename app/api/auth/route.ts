@@ -5,7 +5,7 @@ import { destroySession, createSessionCookie, type SessionUser } from '@/lib/aut
 import { rateLimit } from '@/lib/rate-limit'
 
 export async function POST(req: NextRequest) {
-  const rl = rateLimit(req, { windowMs: 60_000, max: 10, prefix: 'auth' })
+  const rl = await rateLimit(req, { windowMs: 60_000, max: 10, prefix: 'auth' })
   if (rl) return rl
 
   const body = await req.json()
@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
     email: user.email,
     role: user.role,
     name: user.name,
+    isOwner: user.is_owner || false,
   }
 
   const cookie = await createSessionCookie(sessionUser)

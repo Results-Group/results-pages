@@ -5,12 +5,14 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "migrate": "node scripts/run-migrations.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@sentry/nextjs": "^10.64.0",
     "@supabase/supabase-js": "^2.108.2",
     "@tailwindcss/postcss": "^4.3.1",
     "bcryptjs": "^3.0.3",
@@ -22,6 +24,7 @@
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "recharts": "^3.9.2",
+    "resend": "^6.17.2",
     "sharp": "^0.35.2",
     "tailwindcss": "^4.3.1",
     "zod": "^4.4.3"
@@ -30,6 +33,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "latest",
     "@types/react": "latest",
+    "pg": "^8.22.0",
     "typescript": "6.0.3"
   }
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
@@ -14,6 +14,13 @@ import {
   Users,
   Shield,
   Megaphone,
+  Building,
+  ChevronDown,
+  Check,
+  Contact,
+  BarChart3,
+  Trash2,
+  ScrollText,
 } from 'lucide-react'
 
 interface SessionUser {
@@ -21,6 +28,15 @@ interface SessionUser {
   email: string
   role: 'admin' | 'editor' | 'viewer'
   name: string
+  isOwner?: boolean
+}
+
+interface Workspace {
+  id: string
+  name: string
+  slug: string
+  color: string
+  icon: string
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -35,15 +51,26 @@ const ROLE_COLORS: Record<string, { color: string; bg: string }> = {
   viewer: { color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.12)' },
 }
 
-function getSessionFromCookie(): SessionUser | null {
+async function fetchCurrentUser(): Promise<SessionUser | null> {
   try {
-    const cookie = document.cookie.split('; ').find(c => c.startsWith('rp_session='))
-    if (!cookie) return null
-    const value = cookie.split('=')[1]
-    const json = atob(decodeURIComponent(value))
-    const parsed = JSON.parse(json)
-    if (parsed.userId && parsed.role) return parsed as SessionUser
+    const res = await fetch('/api/auth/me')
+    if (!res.ok) return null
+    const { user } = await res.json()
+    return user || null
+  } catch {
     return null
+  }
+}
+
+function setWorkspaceCookie(workspaceId: string) {
+  document.cookie = `rp_workspace=${encodeURIComponent(workspaceId)};path=/;max-age=${60 * 60 * 24 * 365};SameSite=Lax`
+}
+
+function getActiveWorkspaceFromCookie(): string | null {
+  try {
+    const cookie = document.cookie.split('; ').find(c => c.startsWith('rp_workspace='))
+    if (!cookie) return null
+    return decodeURIComponent(cookie.substring('rp_workspace='.length))
   } catch {
     return null
   }
@@ -55,22 +82,51 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [mobileOpen, setMobileOpen] = useState(false)
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
   const [currentUser, setCurrentUser] = useState<SessionUser | null>(null)
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([])
+  const [activeWorkspace, setActiveWorkspace] = useState<string | null>(null)
+  const [wsDropdownOpen, setWsDropdownOpen] = useState(false)
+  const wsDropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const saved = localStorage.getItem('theme') as 'dark' | 'light' | null
     if (saved === 'light' || saved === 'dark') {
       setTheme(saved)
     }
-    setCurrentUser(getSessionFromCookie())
+    setActiveWorkspace(getActiveWorkspaceFromCookie())
+    fetchCurrentUser().then(u => setCurrentUser(u))
   }, [])
 
+  const fetchWorkspaces = useCallback(async () => {
+    try {
+      const res = await fetch('/api/workspaces')
+      if (res.ok) {
+        const data = await res.json()
+        setWorkspaces(data)
+        if (!getActiveWorkspaceFromCookie() && data.length > 0) {
+          setActiveWorkspace(data[0].id)
+          setWorkspaceCookie(data[0].id)
+        }
+      }
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    if (currentUser) fetchWorkspaces()
+  }, [currentUser, fetchWorkspaces])
+
   const isAdmin = currentUser?.role === 'admin'
+  const isOwner = currentUser?.isOwner
 
   const navItems = [
     { href: '/admin', label: 'כל הדפים', icon: FileText, show: true },
     { href: '/admin/upload', label: 'העלאת דף', icon: Upload, show: currentUser?.role !== 'viewer' },
     { href: '/admin/campaigns', label: 'קמפיינים', icon: Megaphone, show: currentUser?.role !== 'viewer' },
-    { href: '/admin/users', label: 'משתמשים', icon: Users, show: isAdmin },
+    { href: '/admin/clients', label: 'לקוחות', icon: Contact, show: currentUser?.role !== 'viewer' },
+    { href: '/admin/analytics', label: 'אנליטיקס', icon: BarChart3, show: currentUser?.role !== 'viewer' },
+    { href: '/admin/users', label: 'משתמשים', icon: Users, show: isAdmin || isOwner },
+    { href: '/admin/workspaces', label: 'סביבות עבודה', icon: Building, show: isAdmin || isOwner },
+    { href: '/admin/audit', label: 'יומן פעילות', icon: ScrollText, show: isAdmin || isOwner },
+    { href: '/admin/trash', label: 'סל מיחזור', icon: Trash2, show: currentUser?.role !== 'viewer' },
   ]
 
   function toggleTheme() {
@@ -90,6 +146,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     setMobileOpen(false)
   }, [pathname])
 
+  useEffect(() => {
+    if (!wsDropdownOpen) return
+    function handleClickOutside(e: MouseEvent) {
+      if (wsDropdownRef.current && !wsDropdownRef.current.contains(e.target as Node)) {
+        setWsDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [wsDropdownOpen])
+
   function isActive(href: string) {
     if (href === '/admin') return pathname === '/admin'
     return pathname.startsWith(href)
@@ -100,58 +167,108 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push('/admin/login')
   }
 
+  function switchWorkspace(wsId: string) {
+    if (wsId === activeWorkspace) {
+      setWsDropdownOpen(false)
+      return
+    }
+    setActiveWorkspace(wsId)
+    setWorkspaceCookie(wsId)
+    setWsDropdownOpen(false)
+    window.location.href = pathname || '/admin'
+  }
+
+  const activeWs = workspaces.find(w => w.id === activeWorkspace)
   const roleStyle = currentUser ? (ROLE_COLORS[currentUser.role] || ROLE_COLORS.viewer) : null
 
   const sidebarContent = (
     <>
-      <div className="p-6 pb-5">
-        <div className="flex items-center gap-3 mb-3">
+      <div className="px-4 pt-5 pb-4">
+        <div className="flex items-center gap-2.5 mb-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Results" className="h-10 w-auto" />
-          <div className="flex-1">
-            <h1 className="text-lg font-black tracking-tight" style={{ color: 'var(--sidebar-text)' }}>Results Pages</h1>
-            <p className="text-xs" style={{ color: 'var(--sidebar-text-muted)' }}>ניהול דפים</p>
+          <img src="/logo.png" alt="Results" className="h-7 w-auto" />
+          <div className="flex-1 min-w-0">
+            <h1 className="text-sm font-semibold tracking-tight" style={{ color: 'var(--sidebar-text)' }}>Results Pages</h1>
+            <p className="text-[11px]" style={{ color: 'var(--sidebar-text-muted)' }}>ניהול דפים</p>
           </div>
           <button
             onClick={() => setMobileOpen(false)}
-            className="lg:hidden p-2 rounded-lg"
+            className="lg:hidden p-1.5 rounded-md"
             style={{ color: 'var(--sidebar-text-muted)' }}
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Current user info */}
         {currentUser && currentUser.userId !== 'legacy' && (
-          <div
-            className="mt-4 px-4 py-3 rounded-xl"
-            style={{ background: 'var(--sidebar-active-bg)', border: '1px solid var(--sidebar-border)' }}
-          >
+          <div className="mb-3 px-2.5 py-2 rounded-lg" style={{ background: 'var(--sidebar-hover-bg)' }}>
             <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4 flex-shrink-0" style={{ color: roleStyle?.color }} />
+              <Shield className="w-3.5 h-3.5 flex-shrink-0" style={{ color: roleStyle?.color }} />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold truncate" style={{ color: 'var(--sidebar-text)' }}>
+                <p className="text-xs font-medium truncate" style={{ color: 'var(--sidebar-text)' }}>
                   {currentUser.name}
                 </p>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span
-                    className="text-[10px] px-2 py-0.5 rounded-full font-bold"
-                    style={{ color: roleStyle?.color, background: roleStyle?.bg }}
-                  >
-                    {ROLE_LABELS[currentUser.role]}
-                  </span>
-                </div>
+                <span className="text-[10px]" style={{ color: 'var(--sidebar-text-muted)' }}>
+                  {isOwner ? 'בעלים' : ROLE_LABELS[currentUser.role]}
+                </span>
               </div>
             </div>
           </div>
         )}
+
+        {/* Workspace switcher */}
+        {workspaces.length > 0 && (
+          <div className="relative" ref={wsDropdownRef}>
+            <button
+              type="button"
+              onClick={() => setWsDropdownOpen(open => !open)}
+              className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium transition-colors"
+              style={{
+                background: 'var(--sidebar-hover-bg)',
+                color: 'var(--sidebar-text)',
+              }}
+            >
+              <div
+                className="w-2 h-2 rounded-full flex-shrink-0"
+                style={{ background: activeWs?.color || '#40e1d3' }}
+              />
+              <span className="flex-1 text-right truncate">{activeWs?.name || 'בחר סביבת עבודה'}</span>
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${wsDropdownOpen ? 'rotate-180' : ''}`} style={{ color: 'var(--sidebar-text-muted)' }} />
+            </button>
+
+            {wsDropdownOpen && (
+              <div
+                className="absolute top-full left-0 right-0 mt-1 rounded-lg py-1 z-[60] shadow-lg"
+                style={{
+                  background: 'var(--admin-bg-elevated)',
+                  border: '1px solid var(--sidebar-border)',
+                }}
+              >
+                {workspaces.map(ws => (
+                  <button
+                    key={ws.id}
+                    type="button"
+                    onClick={() => switchWorkspace(ws.id)}
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs transition-colors"
+                    style={{
+                      color: ws.id === activeWorkspace ? 'var(--sidebar-accent)' : 'var(--sidebar-text-secondary)',
+                      background: ws.id === activeWorkspace ? 'var(--sidebar-active-bg)' : 'transparent',
+                    }}
+                  >
+                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: ws.color }} />
+                    <span className="flex-1 text-right truncate">{ws.name}</span>
+                    {ws.id === activeWorkspace && <Check className="w-3.5 h-3.5 flex-shrink-0" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="px-5 mb-4">
-        <div className="h-px" style={{ background: 'linear-gradient(to left, transparent, var(--sidebar-border), transparent)' }} />
-      </div>
+      <div className="mx-4 mb-2 h-px" style={{ background: 'var(--sidebar-border)' }} />
 
-      <nav className="flex-1 px-4 py-3 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-2.5 py-2 space-y-0.5 overflow-y-auto">
         {navItems.filter(item => item.show).map((item) => {
           const Icon = item.icon
           const active = isActive(item.href)
@@ -159,9 +276,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 ${active ? 'border-r-3' : ''}`}
+              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors"
               style={active
-                ? { color: 'var(--sidebar-accent)', background: 'var(--sidebar-active-bg)', borderColor: 'var(--sidebar-accent-border)' }
+                ? { color: 'var(--sidebar-accent)', background: 'var(--sidebar-active-bg)' }
                 : { color: 'var(--sidebar-text-secondary)' }
               }
               onMouseEnter={(e) => {
@@ -177,17 +294,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 }
               }}
             >
-              <Icon className="w-5 h-5" />
+              <Icon className="w-4 h-4" />
               {item.label}
             </Link>
           )
         })}
       </nav>
 
-      <div className="p-4 space-y-1" style={{ borderTop: '1px solid var(--sidebar-border)' }}>
+      <div className="p-2.5 space-y-0.5" style={{ borderTop: '1px solid var(--sidebar-border)' }}>
         <button
           onClick={toggleTheme}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 w-full"
+          className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors w-full"
           style={{ color: 'var(--sidebar-text-secondary)' }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = 'var(--sidebar-hover-bg)'
@@ -199,12 +316,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           }}
           title={theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'}
         >
-          {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           {theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'}
         </button>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 w-full"
+          className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors w-full"
           style={{ color: 'var(--sidebar-text-muted)' }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = 'var(--admin-danger-bg)'
@@ -215,7 +332,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             e.currentTarget.style.color = 'var(--sidebar-text-muted)'
           }}
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className="w-4 h-4" />
           התנתקות
         </button>
       </div>
@@ -244,14 +361,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Sidebar */}
       <aside
-        className={`w-72 flex flex-col flex-shrink-0 transition-all duration-300 max-lg:fixed max-lg:inset-y-0 max-lg:right-0 max-lg:z-50 max-lg:shadow-2xl ${mobileOpen ? 'max-lg:translate-x-0' : 'max-lg:translate-x-full'} lg:relative lg:translate-x-0`}
+        className={`w-56 flex flex-col flex-shrink-0 transition-all duration-300 max-lg:fixed max-lg:inset-y-0 max-lg:right-0 max-lg:z-50 max-lg:shadow-2xl ${mobileOpen ? 'max-lg:translate-x-0' : 'max-lg:translate-x-full'} lg:relative lg:translate-x-0`}
         style={{ background: 'var(--sidebar-bg)', borderLeft: '1px solid var(--sidebar-border)' }}
       >
         {sidebarContent}
       </aside>
 
       {/* Content */}
-      <main className="flex-1 p-4 pt-16 sm:p-6 sm:pt-16 lg:p-10 lg:pt-10 overflow-auto admin-content min-w-0">
+      <main className="flex-1 p-4 pt-14 sm:p-5 sm:pt-14 lg:p-7 lg:pt-7 overflow-auto admin-content min-w-0">
         {children}
       </main>
     </div>

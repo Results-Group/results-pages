@@ -14,13 +14,14 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> }
 ) {
-  const rl = rateLimit(request, { windowMs: 60_000, max: 200, prefix: 'asset' })
+  const rl = await rateLimit(request, { windowMs: 60_000, max: 200, prefix: 'asset' })
   if (rl) return rl
 
   const { path } = await params
   const filePath = (path || []).map(decodeURIComponent).join('/')
 
-  if (!filePath || !filePath.startsWith('campaigns/') || filePath.includes('..')) {
+  const hasAllowedPrefix = filePath.startsWith('campaigns/') || filePath.startsWith('clients/')
+  if (!filePath || !hasAllowedPrefix || filePath.includes('..')) {
     return new NextResponse('Not found', { status: 404 })
   }
 

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, requireRole, getSessionFromRequest } from '@/lib/auth'
-import { getCampaigns, getCampaignBySlug, createCampaign } from '@/lib/campaigns'
+import { requireAuth, getSessionFromRequest, getActiveWorkspaceId, requireWorkspacePermission } from '@/lib/auth'
+import { getCampaigns, createCampaign } from '@/lib/campaigns'
+import { findOrCreateClient, getClientById } from '@/lib/clients'
+import { supabase } from '@/lib/supabase'
+import { logAudit } from '@/lib/audit'
+import { captureException } from '@/lib/logger'
 
 export async function GET(request: NextRequest) {
   const authErr = await requireAuth(request)
@@ -9,34 +13,36 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const search = searchParams.get('search') || undefined
   const status = searchParams.get('status') || undefined
+  const deleted = searchParams.get('deleted') === '1'
+  const workspaceId = searchParams.get('workspace_id') || await getActiveWorkspaceId(request) || undefined
 
   try {
-    const campaigns = await getCampaigns({ search, status })
+    const campaigns = await getCampaigns({ search, status, workspace_id: workspaceId, deleted })
     const safe = campaigns.map(c => ({ ...c, has_password: !!c.password, password: undefined }))
     return NextResponse.json(safe)
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'שגיאה בטעינת קמפיינים' },
-      { status: 500 }
-    )
+  } catch (err) {
+    captureException(err, { route: 'GET /api/campaigns', workspaceId })
+    return NextResponse.json({ error: 'שגיאה בטעינת קמפיינים' }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
-  const roleErr = await requireRole(request, 'editor')
-  if (roleErr) return roleErr
-
   const session = await getSessionFromRequest(request)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
     const body = await request.json()
-    const { client, campaign_name, concept, status, password, sections, logo_path } = body
+    const { client, campaign_name, concept, status, password, sections, logo_path, publish_at } = body
+
+    // Honor an explicit workspace from the body, falling back to the active-workspace cookie
+    const workspaceId: string | null = body.workspace_id ?? await getActiveWorkspaceId(request)
+    if (workspaceId) {
+      const permErr = await requireWorkspacePermission(request, workspaceId, 'create')
+      if (permErr) return permErr
+    }
 
     if (!client || !campaign_name) {
-      return NextResponse.json(
-        { error: 'שם לקוח ושם קמפיין הם שדות חובה' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'שם לקוח ושם קמפיין הם שדות חובה' }, { status: 400 })
     }
 
     const baseSlug = (body.slug || campaign_name)
@@ -48,12 +54,32 @@ export async function POST(request: NextRequest) {
     const suffix = crypto.randomUUID().slice(0, 6)
     const slug = baseSlug ? `${baseSlug}-${suffix}` : suffix
 
-    const existing = await getCampaignBySlug(slug)
-    if (existing) {
-      return NextResponse.json(
-        { error: `קמפיין עם הסלאג "${slug}" כבר קיים` },
-        { status: 409 }
-      )
+    // Check slug uniqueness directly against the table — the DB UNIQUE constraint
+    // also covers soft-deleted rows, which getCampaignBySlug filters out
+    const { data: slugTaken } = await supabase
+      .from('campaigns')
+      .select('id')
+      .eq('slug', slug)
+      .maybeSingle()
+    if (slugTaken) {
+      return NextResponse.json({ error: `קמפיין עם הסלאג "${slug}" כבר קיים` }, { status: 409 })
+    }
+
+    // Resolve (or create) the client entity so campaigns link to a real client
+    let clientId: string | null = body.client_id || null
+    if (clientId) {
+      const clientRow = await getClientById(clientId)
+      if (!clientRow) {
+        return NextResponse.json({ error: 'הלקוח שנבחר לא נמצא' }, { status: 400 })
+      }
+      if (clientRow.workspace_id && clientRow.workspace_id !== workspaceId) {
+        return NextResponse.json({ error: 'הלקוח שנבחר אינו שייך לסביבת העבודה שנבחרה' }, { status: 400 })
+      }
+    } else if (client) {
+      try {
+        const c = await findOrCreateClient(client, workspaceId)
+        clientId = c.id
+      } catch { /* non-fatal — campaign still stores client name */ }
     }
 
     const campaign = await createCampaign({
@@ -64,15 +90,17 @@ export async function POST(request: NextRequest) {
       logo_path: logo_path || undefined,
       sections: sections || undefined,
       status: status || 'draft',
+      publish_at: publish_at || null,
       password: password || undefined,
-      created_by: session?.userId !== 'legacy' ? session?.userId : undefined,
+      created_by: session.userId,
+      workspace_id: workspaceId || undefined,
+      client_id: clientId,
     })
 
+    await logAudit({ actor: session, action: 'create', entity_type: 'campaign', entity_id: campaign.id, entity_label: campaign.campaign_name, workspace_id: workspaceId })
     return NextResponse.json(campaign, { status: 201 })
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'שגיאה ביצירת קמפיין' },
-      { status: 500 }
-    )
+  } catch (err) {
+    captureException(err, { route: 'POST /api/campaigns' })
+    return NextResponse.json({ error: 'שגיאה ביצירת קמפיין' }, { status: 500 })
   }
 }

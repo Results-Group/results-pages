@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { Plus, Search, Eye, ExternalLink, Pencil, ToggleLeft, ToggleRight, Trash2, Monitor, Smartphone, X, Copy, MessageCircle, Lock } from 'lucide-react'
+import { Plus, Search, Eye, ExternalLink, Pencil, ToggleLeft, ToggleRight, Trash2, Monitor, Smartphone, X, Copy, MessageCircle, Lock, Building, CheckSquare, Square } from 'lucide-react'
+import { whatsappShareUrl } from '@/lib/share'
 
 interface PageItem {
   id: string
@@ -14,23 +15,27 @@ interface PageItem {
   has_password: boolean
   short_url: string | null
   created_at: string
+  workspace_id: string | null
   _count: { views: number }
 }
 
 type UserRole = 'admin' | 'editor' | 'viewer'
 
-function getUserRole(): UserRole {
+async function fetchUserRole(): Promise<UserRole> {
   try {
-    const cookie = document.cookie.split('; ').find(c => c.startsWith('rp_session='))
-    if (!cookie) return 'admin'
-    const value = cookie.split('=')[1]
-    const json = atob(decodeURIComponent(value))
-    const parsed = JSON.parse(json)
-    if (parsed.role) return parsed.role as UserRole
-    return 'admin'
+    const res = await fetch('/api/auth/me')
+    if (!res.ok) return 'viewer'
+    const { user } = await res.json()
+    return (user?.role as UserRole) || 'viewer'
   } catch {
-    return 'admin'
+    return 'viewer'
   }
+}
+
+interface Workspace {
+  id: string
+  name: string
+  color: string
 }
 
 export default function AdminDashboard() {
@@ -42,8 +47,14 @@ export default function AdminDashboard() {
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop')
   const [userRole, setUserRole] = useState<UserRole>('admin')
 
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([])
+  const [moveTarget, setMoveTarget] = useState('')
+  const [moving, setMoving] = useState(false)
+
   useEffect(() => {
-    setUserRole(getUserRole())
+    fetchUserRole().then(r => setUserRole(r))
+    fetch('/api/workspaces').then(r => r.ok ? r.json() : []).then(setWorkspaces).catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -78,11 +89,11 @@ export default function AdminDashboard() {
   }
 
   function handleWhatsApp(page: PageItem) {
+    const base = typeof window !== 'undefined' ? window.location.origin : ''
     const url = page.short_url
-      ? `https://results-pages.vercel.app/r/${page.short_url}`
-      : `https://results-pages.vercel.app/pages/${page.client}/${page.slug}`
-    const message = `${page.title}\n${url}`
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank')
+      ? `${base}/r/${page.short_url}`
+      : `${base}/pages/${page.client}/${page.slug}`
+    window.open(whatsappShareUrl({ title: page.title, client: page.client, url }), '_blank')
   }
 
   async function handleToggle(id: string, currentActive: boolean) {
@@ -91,6 +102,39 @@ export default function AdminDashboard() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ active: !currentActive }),
     })
+    fetchPages()
+  }
+
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }, [])
+
+  const toggleAll = useCallback(() => {
+    setSelectedIds(prev => {
+      if (prev.size === filtered.length) return new Set()
+      return new Set(filtered.map(p => p.id))
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pages, search])
+
+  async function handleBulkMove() {
+    if (!moveTarget || selectedIds.size === 0) return
+    setMoving(true)
+    const promises = [...selectedIds].map(id =>
+      fetch(`/api/pages/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workspace_id: moveTarget }),
+      })
+    )
+    await Promise.all(promises)
+    setSelectedIds(new Set())
+    setMoveTarget('')
+    setMoving(false)
     fetchPages()
   }
 
@@ -107,15 +151,15 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-black" style={{ color: 'var(--admin-text-primary)' }}>דפים</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold" style={{ color: 'var(--admin-text-primary)' }}>דפים</h2>
         {userRole !== 'viewer' && (
           <Link
             href="/admin/upload"
-            className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-200"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200"
             style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
-            onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px var(--admin-accent-glow)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-            onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
+            onMouseEnter={e => { e.currentTarget.style.opacity = '0.9' }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
           >
             <Plus className="w-4 h-4" />
             העלאת דף
@@ -132,7 +176,7 @@ export default function AdminDashboard() {
             placeholder="חיפוש..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pr-10 pl-4 py-2.5 rounded-xl text-sm outline-none transition-colors"
+            className="w-full pr-10 pl-3.5 py-2 rounded-lg text-sm outline-none transition-colors"
             style={{
               background: 'var(--admin-bg-elevated)',
               border: '1px solid var(--admin-border)',
@@ -145,7 +189,7 @@ export default function AdminDashboard() {
         <select
           value={filter}
           onChange={e => setFilter(e.target.value)}
-          className="px-4 py-2.5 rounded-xl text-sm outline-none"
+          className="px-3.5 py-2 rounded-lg text-sm outline-none"
           style={{
             background: 'var(--admin-bg-elevated)',
             border: '1px solid var(--admin-border)',
@@ -157,24 +201,80 @@ export default function AdminDashboard() {
         </select>
       </div>
 
+      {/* Bulk actions */}
+      {selectedIds.size > 0 && workspaces.length > 1 && (
+        <div
+          className="mb-4 flex items-center gap-3 p-3 rounded-xl"
+          style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}
+        >
+          <Building className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--admin-accent)' }} />
+          <span className="text-sm font-medium" style={{ color: 'var(--admin-text-primary)' }}>
+            {selectedIds.size} דפים נבחרו
+          </span>
+          <select
+            value={moveTarget}
+            onChange={e => setMoveTarget(e.target.value)}
+            className="px-3 py-1.5 rounded-lg text-sm outline-none"
+            style={{
+              background: 'var(--admin-bg)',
+              border: '1px solid var(--admin-border)',
+              color: 'var(--admin-text-primary)',
+            }}
+          >
+            <option value="">העבר לסביבה...</option>
+            {workspaces.map(ws => (
+              <option key={ws.id} value={ws.id}>{ws.name}</option>
+            ))}
+          </select>
+          <button
+            onClick={handleBulkMove}
+            disabled={!moveTarget || moving}
+            className="px-4 py-1.5 rounded-lg text-sm font-medium disabled:opacity-40"
+            style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
+          >
+            {moving ? 'מעביר...' : 'העבר'}
+          </button>
+          <button
+            onClick={() => setSelectedIds(new Set())}
+            className="p-1.5 rounded-lg mr-auto"
+            style={{ color: 'var(--admin-text-muted)' }}
+            title="בטל בחירה"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {loading ? (
         <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>טוען...</p>
       ) : filtered.length === 0 ? (
         <div className="text-center py-20" style={{ color: 'var(--admin-text-muted)' }}>
-          <p className="text-lg font-bold mb-1">אין דפים</p>
+          <p className="text-lg font-medium mb-1">אין דפים</p>
           <p className="text-sm">לחץ &quot;העלאת דף&quot; להתחיל</p>
         </div>
       ) : (
-        <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
+        <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: 'var(--admin-bg-elevated)', borderBottom: '1px solid var(--admin-border)' }}>
-                <th className="text-start px-5 py-3.5 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--admin-text-muted)' }}>לקוח</th>
-                <th className="text-start px-5 py-3.5 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--admin-text-muted)' }}>כותרת</th>
-                <th className="text-start px-5 py-3.5 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--admin-text-muted)' }}>URL</th>
-                <th className="text-start px-5 py-3.5 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--admin-text-muted)' }}>סטטוס</th>
-                <th className="text-start px-5 py-3.5 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--admin-text-muted)' }}>צפיות</th>
-                <th className="text-start px-5 py-3.5 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--admin-text-muted)' }}>פעולות</th>
+                {workspaces.length > 1 && (
+                  <th className="px-3 py-2.5 w-10">
+                    <button type="button" onClick={toggleAll} style={{ color: 'var(--admin-text-muted)' }}>
+                      {selectedIds.size === filtered.length && filtered.length > 0
+                        ? <CheckSquare className="w-4 h-4" />
+                        : <Square className="w-4 h-4" />}
+                    </button>
+                  </th>
+                )}
+                <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>לקוח</th>
+                <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>כותרת</th>
+                {workspaces.length > 0 && (
+                  <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>סביבה</th>
+                )}
+                <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>URL</th>
+                <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>סטטוס</th>
+                <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>צפיות</th>
+                <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>פעולות</th>
               </tr>
             </thead>
             <tbody>
@@ -188,14 +288,37 @@ export default function AdminDashboard() {
                     onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   >
-                    <td className="px-5 py-4 font-bold" style={{ color: 'var(--admin-text-primary)' }}>{page.client}</td>
-                    <td className="px-5 py-4" style={{ color: 'var(--admin-text-secondary)' }}>
+                    {workspaces.length > 1 && (
+                      <td className="px-3 py-4 w-10">
+                        <button type="button" onClick={() => toggleSelect(page.id)} style={{ color: 'var(--admin-text-muted)' }}>
+                          {selectedIds.has(page.id)
+                            ? <CheckSquare className="w-4 h-4" style={{ color: 'var(--admin-accent)' }} />
+                            : <Square className="w-4 h-4" />}
+                        </button>
+                      </td>
+                    )}
+                    <td className="px-4 py-3 font-medium" style={{ color: 'var(--admin-text-primary)' }}>{page.client}</td>
+                    <td className="px-4 py-3" style={{ color: 'var(--admin-text-secondary)' }}>
                       <span className="flex items-center gap-1.5">
                         {page.title}
                         {page.has_password && <span title="מוגן בסיסמה"><Lock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--admin-accent)' }} /></span>}
                       </span>
                     </td>
-                    <td className="px-5 py-4">
+                    {workspaces.length > 0 && (
+                      <td className="px-4 py-3">
+                        {(() => {
+                          const ws = workspaces.find(w => w.id === page.workspace_id)
+                          return ws ? (
+                            <span className="text-xs px-2.5 py-1 rounded-md font-medium" style={{ background: `${ws.color}20`, color: ws.color }}>
+                              {ws.name}
+                            </span>
+                          ) : (
+                            <span className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>—</span>
+                          )
+                        })()}
+                      </td>
+                    )}
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <a
                           href={`/pages/${page.client}/${page.slug}`}
@@ -212,7 +335,7 @@ export default function AdminDashboard() {
                             href={`/r/${page.short_url}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-[10px] px-2 py-0.5 rounded-md hover:underline font-bold"
+                            className="text-[10px] px-2 py-0.5 rounded-md hover:underline font-medium"
                             dir="ltr"
                             style={{ background: 'rgba(167, 139, 250, 0.12)', color: '#a78bfa' }}
                           >
@@ -221,21 +344,21 @@ export default function AdminDashboard() {
                         )}
                       </div>
                     </td>
-                    <td className="px-5 py-4">
+                    <td className="px-4 py-3">
                       <span
-                        className="text-xs px-3 py-1 rounded-full font-bold"
+                        className="text-xs px-2.5 py-0.5 rounded-md font-medium"
                         style={{ color: status.colorVar, background: status.bgVar }}
                       >
                         {status.label}
                       </span>
                     </td>
-                    <td className="px-5 py-4" style={{ color: 'var(--admin-text-muted)' }}>
+                    <td className="px-4 py-3" style={{ color: 'var(--admin-text-muted)' }}>
                       <span className="flex items-center gap-1.5">
                         <Eye className="w-3.5 h-3.5" />
                         {page._count.views}
                       </span>
                     </td>
-                    <td className="px-5 py-4">
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <a
                           href={`/pages/${page.client}/${page.slug}`}
@@ -335,7 +458,7 @@ export default function AdminDashboard() {
           onClick={() => setPreviewPage(null)}
         >
           <div
-            className="relative w-[95vw] h-[92vh] rounded-2xl overflow-hidden flex flex-col"
+            className="relative w-[95vw] h-[92vh] rounded-xl overflow-hidden flex flex-col"
             style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
             onClick={e => e.stopPropagation()}
           >
@@ -345,7 +468,7 @@ export default function AdminDashboard() {
               style={{ borderBottom: '1px solid var(--admin-border)', background: 'var(--admin-bg-elevated)' }}
             >
               <div className="flex items-center gap-4">
-                <h3 className="text-sm font-bold" style={{ color: 'var(--admin-text-primary)' }}>
+                <h3 className="text-sm font-medium" style={{ color: 'var(--admin-text-primary)' }}>
                   תצוגה מקדימה: {previewPage.title}
                 </h3>
                 <span className="text-xs px-2.5 py-1 rounded-lg" dir="ltr" style={{ background: 'var(--admin-bg)', color: 'var(--admin-link)' }}>
@@ -357,7 +480,7 @@ export default function AdminDashboard() {
                 <div className="flex items-center rounded-xl overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
                   <button
                     onClick={() => setPreviewMode('desktop')}
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold transition-all duration-200"
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-medium transition-all duration-200"
                     style={{
                       background: previewMode === 'desktop' ? 'var(--admin-link)' : 'transparent',
                       color: previewMode === 'desktop' ? 'var(--admin-accent-text)' : 'var(--admin-text-muted)',
@@ -368,7 +491,7 @@ export default function AdminDashboard() {
                   </button>
                   <button
                     onClick={() => setPreviewMode('mobile')}
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold transition-all duration-200"
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-medium transition-all duration-200"
                     style={{
                       background: previewMode === 'mobile' ? 'var(--admin-link)' : 'transparent',
                       color: previewMode === 'mobile' ? 'var(--admin-accent-text)' : 'var(--admin-text-muted)',

@@ -185,7 +185,7 @@ const VisualEditor = forwardRef<VisualEditorRef, Props>(function VisualEditor(
       >
         <select
           onChange={e => { if (e.target.value) exec('formatBlock', e.target.value); e.target.value = '' }}
-          className="h-8 px-2 rounded-md text-xs font-bold outline-none cursor-pointer"
+          className="h-8 px-2 rounded-md text-xs font-medium outline-none cursor-pointer"
           style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-secondary)' }}
           defaultValue=""
         >
@@ -223,7 +223,7 @@ const VisualEditor = forwardRef<VisualEditorRef, Props>(function VisualEditor(
           onChange={e => { restoreSelection(); exec('foreColor', e.target.value) }}
         />
         <TB title="צבע טקסט" onClick={() => { saveSelection(); textColorRef.current?.click() }}>
-          <span className="text-sm font-bold" style={{ borderBottom: '3px solid #ef4444' }}>A</span>
+          <span className="text-sm font-medium" style={{ borderBottom: '3px solid #ef4444' }}>A</span>
         </TB>
 
         <input
@@ -245,7 +245,7 @@ const VisualEditor = forwardRef<VisualEditorRef, Props>(function VisualEditor(
         <div className="flex-1" />
 
         {dirty && (
-          <span className="text-xs font-bold px-2 animate-pulse" style={{ color: 'var(--admin-accent)' }}>
+          <span className="text-xs font-medium px-2 animate-pulse" style={{ color: 'var(--admin-accent)' }}>
             שינויים לא שמורים
           </span>
         )}
@@ -287,11 +287,11 @@ const VisualEditor = forwardRef<VisualEditorRef, Props>(function VisualEditor(
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-40"
+          className="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 disabled:opacity-40"
           style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
           onMouseEnter={e => {
-            e.currentTarget.style.boxShadow = '0 0 25px var(--admin-accent-glow)'
-            e.currentTarget.style.transform = 'translateY(-1px)'
+            e.currentTarget.style.boxShadow = 'none'
+            e.currentTarget.style.opacity = '0.9'
           }}
           onMouseLeave={e => {
             e.currentTarget.style.boxShadow = 'none'

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Lock, Mail } from 'lucide-react'
 
@@ -37,18 +38,18 @@ export default function LoginPage() {
       <div className="w-full max-w-sm px-4">
         <form
           onSubmit={handleSubmit}
-          className="rounded-2xl p-10"
+          className="rounded-xl p-7"
           style={{ background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)' }}
         >
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Results" className="h-12 w-auto" />
+            <img src="/logo.png" alt="Results" className="h-9 w-auto" />
           </div>
 
-          <h1 className="text-xl font-black text-center mb-1" style={{ color: 'var(--admin-text-primary)' }}>
+          <h1 className="text-lg font-semibold text-center mb-1" style={{ color: 'var(--admin-text-primary)' }}>
             Results Pages
           </h1>
-          <p className="text-center text-sm mb-8" style={{ color: 'var(--admin-text-muted)' }}>
+          <p className="text-center text-xs mb-6" style={{ color: 'var(--admin-text-muted)' }}>
             ניהול דפים
           </p>
 
@@ -60,7 +61,7 @@ export default function LoginPage() {
               onChange={e => setEmail(e.target.value)}
               placeholder="אימייל"
               dir="ltr"
-              className="w-full pr-10 pl-4 py-3 rounded-xl text-sm outline-none transition-colors"
+              className="w-full pr-10 pl-3.5 py-2.5 rounded-lg text-sm outline-none transition-colors"
               style={{
                 background: 'var(--admin-bg-elevated)',
                 border: '1px solid var(--admin-border-input)',
@@ -79,7 +80,7 @@ export default function LoginPage() {
               onChange={e => setPassword(e.target.value)}
               placeholder="סיסמה"
               autoFocus
-              className="w-full pr-10 pl-4 py-3 rounded-xl text-sm outline-none transition-colors"
+              className="w-full pr-10 pl-3.5 py-2.5 rounded-lg text-sm outline-none transition-colors"
               style={{
                 background: 'var(--admin-bg-elevated)',
                 border: '1px solid var(--admin-border-input)',
@@ -97,16 +98,22 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading || !password}
-            className="w-full py-3.5 rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-40"
+            className="w-full py-2.5 rounded-lg text-sm font-medium transition-opacity disabled:opacity-40"
             style={{
               background: 'var(--admin-accent)',
               color: 'var(--admin-accent-text)',
             }}
-            onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px var(--admin-accent-glow)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-            onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
+            onMouseEnter={e => { e.currentTarget.style.opacity = '0.9' }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
           >
             {loading ? '...' : 'כניסה'}
           </button>
+
+          <div className="text-center mt-4">
+            <Link href="/admin/forgot-password" className="text-xs transition-colors" style={{ color: 'var(--admin-text-muted)' }}>
+              שכחת סיסמה?
+            </Link>
+          </div>
         </form>
       </div>
     </div>

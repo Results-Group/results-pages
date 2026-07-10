@@ -1,27 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
-import { requireRole, getSessionFromRequest } from '@/lib/auth'
+import { getSessionFromRequest } from '@/lib/auth'
 import { hashPassword } from '@/lib/hash'
+import { addAdminToAllWorkspaces } from '@/lib/workspaces'
 
 export async function GET(req: NextRequest) {
-  const roleErr = await requireRole(req, 'admin')
-  if (roleErr) return roleErr
+  const session = await getSessionFromRequest(req)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (session.role !== 'admin' && !session.isOwner) {
+    return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
+  }
 
   const { data: users, error } = await supabase
     .from('admin_users')
-    .select('id, email, name, role, created_at, last_login')
+    .select('id, email, name, role, is_owner, created_at, last_login')
     .order('created_at', { ascending: true })
 
   if (error) {
     return NextResponse.json({ error: 'שגיאה בטעינת משתמשים' }, { status: 500 })
   }
 
-  return NextResponse.json(users)
+  const { data: memberships } = await supabase
+    .from('workspace_members')
+    .select('user_id, workspace_id, role, permissions, workspaces(id, name, slug, color, icon)')
+
+  const membershipsByUser: Record<string, unknown[]> = {}
+  for (const m of memberships || []) {
+    if (!membershipsByUser[m.user_id]) membershipsByUser[m.user_id] = []
+    membershipsByUser[m.user_id].push(m)
+  }
+
+  const enriched = (users || []).map(u => ({
+    ...u,
+    workspace_memberships: membershipsByUser[u.id] || [],
+  }))
+
+  return NextResponse.json(enriched)
 }
 
 export async function POST(req: NextRequest) {
-  const roleErr = await requireRole(req, 'admin')
-  if (roleErr) return roleErr
+  const session = await getSessionFromRequest(req)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (session.role !== 'admin' && !session.isOwner) {
+    return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
+  }
 
   const { email, password, name, role } = await req.json()
 
@@ -47,7 +69,7 @@ export async function POST(req: NextRequest) {
       name: name.trim(),
       role: role || 'editor',
     })
-    .select('id, email, name, role, created_at, last_login')
+    .select('id, email, name, role, is_owner, created_at, last_login')
     .single()
 
   if (error) {
@@ -57,14 +79,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'שגיאה ביצירת משתמש' }, { status: 500 })
   }
 
+  if (user.role === 'admin' || user.is_owner) {
+    await addAdminToAllWorkspaces(user.id).catch(() => {})
+  }
+
   return NextResponse.json(user, { status: 201 })
 }
 
 export async function PUT(req: NextRequest) {
-  const roleErr = await requireRole(req, 'admin')
-  if (roleErr) return roleErr
+  const session = await getSessionFromRequest(req)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (session.role !== 'admin' && !session.isOwner) {
+    return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
+  }
 
-  const { id, name, role, password } = await req.json()
+  const { id, name, role, password, is_owner } = await req.json()
 
   if (!id) {
     return NextResponse.json({ error: 'חסר מזהה משתמש' }, { status: 400 })
@@ -77,6 +106,7 @@ export async function PUT(req: NextRequest) {
   const updateData: Record<string, unknown> = {}
   if (name) updateData.name = name.trim()
   if (role) updateData.role = role
+  if (is_owner !== undefined && session.isOwner) updateData.is_owner = is_owner
   if (password) {
     if (password.length < 6) {
       return NextResponse.json({ error: 'סיסמה חייבת להכיל לפחות 6 תווים' }, { status: 400 })
@@ -92,27 +122,33 @@ export async function PUT(req: NextRequest) {
     .from('admin_users')
     .update(updateData)
     .eq('id', id)
-    .select('id, email, name, role, created_at, last_login')
+    .select('id, email, name, role, is_owner, created_at, last_login')
     .single()
 
   if (error) {
     return NextResponse.json({ error: 'שגיאה בעדכון משתמש' }, { status: 500 })
   }
 
+  if (user.role === 'admin' || user.is_owner) {
+    await addAdminToAllWorkspaces(user.id).catch(() => {})
+  }
+
   return NextResponse.json(user)
 }
 
 export async function DELETE(req: NextRequest) {
-  const roleErr = await requireRole(req, 'admin')
-  if (roleErr) return roleErr
+  const session = await getSessionFromRequest(req)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (session.role !== 'admin' && !session.isOwner) {
+    return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
+  }
 
   const { id } = await req.json()
   if (!id) {
     return NextResponse.json({ error: 'חסר מזהה משתמש' }, { status: 400 })
   }
 
-  const session = await getSessionFromRequest(req)
-  if (session?.userId === id) {
+  if (session.userId === id) {
     return NextResponse.json({ error: 'לא ניתן למחוק את עצמך' }, { status: 400 })
   }
 

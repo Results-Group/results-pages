@@ -5,21 +5,27 @@ import { useParams, useRouter } from 'next/navigation'
 import { Eye, Trash2, ArrowRight, Code2, Upload, ChevronDown, ChevronUp, Check, FileCode2, RotateCcw, History, Paintbrush } from 'lucide-react'
 import Link from 'next/link'
 import VisualEditor, { type VisualEditorRef } from './visual-editor'
+import ClientAutocomplete from '../../_components/client-autocomplete'
+import WorkspaceSelector from '../../_components/workspace-selector'
 
 type UserRole = 'admin' | 'editor' | 'viewer'
 
-function getUserRole(): UserRole {
+async function fetchUserRole(): Promise<UserRole> {
   try {
-    const cookie = document.cookie.split('; ').find(c => c.startsWith('rp_session='))
-    if (!cookie) return 'admin'
-    const value = cookie.split('=')[1]
-    const json = atob(decodeURIComponent(value))
-    const parsed = JSON.parse(json)
-    if (parsed.role) return parsed.role as UserRole
-    return 'admin'
+    const res = await fetch('/api/auth/me')
+    if (!res.ok) return 'viewer'
+    const { user } = await res.json()
+    return (user?.role as UserRole) || 'viewer'
   } catch {
-    return 'admin'
+    return 'viewer'
   }
+}
+
+/** Format a UTC ISO string as local wall time for a datetime-local input ('YYYY-MM-DDTHH:mm'). */
+function toLocalDatetimeInput(iso: string): string {
+  const d = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 interface PageData {
@@ -29,9 +35,11 @@ interface PageData {
   title: string
   active: boolean
   expiresAt: string | null
+  publish_at: string | null
   password: string | null
   filePath: string
   createdAt: string
+  workspace_id: string | null
   _count: { views: number }
 }
 
@@ -52,8 +60,10 @@ export default function EditPage() {
   const [slug, setSlug] = useState('')
   const [active, setActive] = useState(true)
   const [expiresAt, setExpiresAt] = useState('')
+  const [publishAt, setPublishAt] = useState('')
   const [password, setPassword] = useState('')
   const [shortUrl, setShortUrl] = useState('')
+  const [workspaceId, setWorkspaceId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
@@ -85,7 +95,7 @@ export default function EditPage() {
   const [restoringVersion, setRestoringVersion] = useState<string | null>(null)
 
   useEffect(() => {
-    setUserRole(getUserRole())
+    fetchUserRole().then(r => setUserRole(r))
   }, [])
 
   useEffect(() => {
@@ -98,8 +108,10 @@ export default function EditPage() {
         setSlug(data.slug)
         setActive(data.active)
         setExpiresAt(data.expiresAt ? data.expiresAt.split('T')[0] : '')
+        setPublishAt(data.publish_at ? toLocalDatetimeInput(data.publish_at) : '')
         setPassword(data.password || '')
         setShortUrl(data.short_url || '')
+        setWorkspaceId(data.workspace_id || null)
         setViewCount(data._count?.views || 0)
       })
     loadHtml()
@@ -216,7 +228,9 @@ export default function EditPage() {
     const res = await fetch(`/api/pages/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, client, slug, active, expiresAt: expiresAt || null, password: password || null, shortUrl: shortUrl || null }),
+      // datetime-local values are local wall time — convert to UTC ISO client-side,
+      // since the server (UTC on Vercel) would otherwise parse them 3h off
+      body: JSON.stringify({ title, client, slug, active, expiresAt: expiresAt || null, publishAt: publishAt ? new Date(publishAt).toISOString() : null, password: password || null, shortUrl: shortUrl || null, workspace_id: workspaceId }),
     })
 
     if (!res.ok) {
@@ -318,7 +332,7 @@ export default function EditPage() {
     <div className="max-w-5xl">
       <Link
         href="/admin"
-        className="inline-flex items-center gap-1.5 text-sm font-bold mb-6 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm font-medium mb-6 transition-colors"
         style={{ color: 'var(--admin-text-muted)' }}
         onMouseEnter={e => e.currentTarget.style.color = 'var(--admin-text-primary)'}
         onMouseLeave={e => e.currentTarget.style.color = 'var(--admin-text-muted)'}
@@ -327,8 +341,8 @@ export default function EditPage() {
         חזרה לדפים
       </Link>
 
-      <h2 className="text-2xl font-black mb-2" style={{ color: 'var(--admin-text-primary)' }}>עריכת דף</h2>
-      <div className="flex items-center gap-3 mb-8">
+      <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--admin-text-primary)' }}>עריכת דף</h2>
+      <div className="flex items-center gap-3 mb-6">
         <span className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--admin-text-muted)' }}>
           <Eye className="w-3.5 h-3.5" />
           {viewCount} צפיות
@@ -337,7 +351,7 @@ export default function EditPage() {
           type="button"
           onClick={handleResetStats}
           disabled={resettingStats || viewCount === 0}
-          className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
           style={{
             color: 'var(--admin-danger)',
             border: '1px solid var(--admin-danger-border)',
@@ -355,16 +369,16 @@ export default function EditPage() {
       </div>
 
       <div
-        className="mb-8 p-5 rounded-2xl"
+        className="mb-6 p-4 rounded-xl"
         style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}
       >
-        <p className="text-xs font-bold mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>URL</p>
+        <p className="text-xs font-medium mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>URL</p>
         <code className="text-sm" dir="ltr" style={{ color: 'var(--admin-link)' }}>/pages/{client}/{slug}</code>
       </div>
 
       {successMsg && (
         <div
-          className="mb-6 p-4 rounded-xl flex items-center gap-2.5 text-sm font-bold"
+          className="mb-6 p-4 rounded-xl flex items-center gap-2.5 text-sm font-medium"
           style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.25)', color: '#22c55e' }}
         >
           <Check className="w-4 h-4 flex-shrink-0" />
@@ -374,11 +388,11 @@ export default function EditPage() {
 
       {/* ─── HTML Content Management ─── */}
       <div
-        className="mb-8 rounded-2xl overflow-hidden"
+        className="mb-6 rounded-xl overflow-hidden"
         style={{ border: '1px solid var(--admin-border)' }}
       >
         <div className="p-5" style={{ background: 'var(--admin-bg-elevated)' }}>
-          <h3 className="text-base font-black mb-1" style={{ color: 'var(--admin-text-primary)' }}>
+          <h3 className="text-base font-semibold mb-1" style={{ color: 'var(--admin-text-primary)' }}>
             <FileCode2 className="w-4.5 h-4.5 inline-block ml-2" style={{ verticalAlign: '-2px' }} />
             ניהול תוכן
           </h3>
@@ -397,7 +411,7 @@ export default function EditPage() {
                 key={key}
                 type="button"
                 onClick={() => handleTabChange(key)}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all duration-200"
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-200"
                 style={{
                   background: activeTab === key ? 'var(--admin-bg-elevated)' : 'transparent',
                   color: activeTab === key ? 'var(--admin-accent)' : 'var(--admin-text-muted)',
@@ -466,10 +480,10 @@ export default function EditPage() {
                   type="button"
                   onClick={handleSaveHtml}
                   disabled={savingHtml}
-                  className="mt-3 px-6 py-3 rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-40"
+                  className="mt-3 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-40"
                   style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
-                  onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px var(--admin-accent-glow)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-                  onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = '0.9' }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
                 >
                   {savingHtml ? 'שומר HTML...' : 'שמירת קוד HTML'}
                 </button>
@@ -497,7 +511,7 @@ export default function EditPage() {
                   onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--admin-border)'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
                 >
                   <Upload className="w-6 h-6 mx-auto mb-2 opacity-60" />
-                  <span className="font-bold block">לחצו לבחירת קובץ HTML</span>
+                  <span className="font-medium block">לחצו לבחירת קובץ HTML</span>
                   <span className="text-xs opacity-60 mt-1 block">או גררו קובץ לכאן</span>
                 </button>
               ) : (
@@ -505,13 +519,13 @@ export default function EditPage() {
                   <div className="flex items-center gap-3 mb-4">
                     <FileCode2 className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--admin-accent)' }} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold truncate" style={{ color: 'var(--admin-text-primary)' }} dir="ltr">{replaceFile.name}</p>
+                      <p className="text-sm font-medium truncate" style={{ color: 'var(--admin-text-primary)' }} dir="ltr">{replaceFile.name}</p>
                       <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>{(replaceFile.size / 1024).toFixed(1)} KB</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => { setReplaceFile(null); if (fileInputRef.current) fileInputRef.current.value = '' }}
-                      className="text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+                      className="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
                       style={{ color: 'var(--admin-danger)', background: 'var(--admin-danger-bg)' }}
                     >
                       ביטול
@@ -522,10 +536,10 @@ export default function EditPage() {
                     type="button"
                     onClick={handleUploadReplace}
                     disabled={uploadingFile}
-                    className="w-full py-3 rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-40"
+                    className="w-full py-3 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-40"
                     style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
-                    onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px var(--admin-accent-glow)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-                    onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
+                    onMouseEnter={e => { e.currentTarget.style.opacity = '0.9' }}
+                    onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
                   >
                     {uploadingFile ? 'מעלה קובץ...' : 'אישור והחלפת הקובץ'}
                   </button>
@@ -538,7 +552,7 @@ export default function EditPage() {
 
       {/* ─── Version History ─── */}
       <div
-        className="mb-8 rounded-2xl overflow-hidden"
+        className="mb-6 rounded-xl overflow-hidden"
         style={{ border: '1px solid var(--admin-border)' }}
       >
         <button
@@ -548,7 +562,7 @@ export default function EditPage() {
           style={{ background: 'var(--admin-bg-elevated)' }}
         >
           <span>
-            <h3 className="text-base font-black mb-0.5" style={{ color: 'var(--admin-text-primary)' }}>
+            <h3 className="text-base font-semibold mb-0.5" style={{ color: 'var(--admin-text-primary)' }}>
               <History className="w-4.5 h-4.5 inline-block ml-2" style={{ verticalAlign: '-2px' }} />
               היסטוריית גרסאות
             </h3>
@@ -572,11 +586,11 @@ export default function EditPage() {
                 {versions.map(v => (
                   <div
                     key={v.id}
-                    className="flex items-center justify-between px-4 py-3 rounded-xl"
+                    className="flex items-center justify-between px-4 py-2.5 rounded-lg"
                     style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
                   >
                     <div>
-                      <p className="text-sm font-bold" style={{ color: 'var(--admin-text-primary)' }}>
+                      <p className="text-sm font-medium" style={{ color: 'var(--admin-text-primary)' }}>
                         {new Date(v.created_at).toLocaleString('he-IL', {
                           day: 'numeric', month: 'short', year: 'numeric',
                           hour: '2-digit', minute: '2-digit',
@@ -590,7 +604,7 @@ export default function EditPage() {
                       type="button"
                       onClick={() => handleRestore(v.id)}
                       disabled={restoringVersion === v.id}
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 disabled:opacity-40"
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 disabled:opacity-40"
                       style={{
                         background: 'rgba(243, 213, 109, 0.1)',
                         border: '1px solid rgba(243, 213, 109, 0.25)',
@@ -613,12 +627,12 @@ export default function EditPage() {
       {/* ─── Page Settings Form ─── */}
       <form onSubmit={handleSave} className="space-y-6">
         <div>
-          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>כותרת</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>כותרת</label>
           <input
             type="text"
             value={title}
             onChange={e => setTitle(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
             style={inputStyle}
             onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
@@ -626,27 +640,20 @@ export default function EditPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>לקוח</label>
-          <input
-            type="text"
-            value={client}
-            onChange={e => setClient(e.target.value)}
-            dir="ltr"
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
-            style={inputStyle}
-            onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
-            onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
-          />
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>לקוח</label>
+          <ClientAutocomplete value={client} onChange={setClient} workspaceId={workspaceId} placeholder="בחר לקוח או הקלד שם חדש" dir="ltr" />
         </div>
 
+        <WorkspaceSelector value={workspaceId} onChange={setWorkspaceId} />
+
         <div>
-          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>Slug</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>Slug</label>
           <input
             type="text"
             value={slug}
             onChange={e => setSlug(e.target.value)}
             dir="ltr"
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
             style={inputStyle}
             onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
@@ -654,13 +661,28 @@ export default function EditPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>תאריך תוקף</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>תאריך פרסום (אופציונלי)</label>
+          <input
+            type="datetime-local"
+            value={publishAt}
+            onChange={e => setPublishAt(e.target.value)}
+            dir="ltr"
+            className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
+            style={inputStyle}
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
+            onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
+          />
+          <p className="text-xs mt-1" style={{ color: 'var(--admin-text-muted)' }}>הדף לא יהיה זמין לצפייה עד למועד זה</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>תאריך תוקף</label>
           <input
             type="date"
             value={expiresAt}
             onChange={e => setExpiresAt(e.target.value)}
             dir="ltr"
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
             style={inputStyle}
             onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
@@ -668,14 +690,14 @@ export default function EditPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>סיסמה לדף (אופציונלי)</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>סיסמה לדף (אופציונלי)</label>
           <input
             type="text"
             value={password}
             onChange={e => setPassword(e.target.value)}
             placeholder="השאר ריק ללא הגנה"
             dir="ltr"
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
             style={inputStyle}
             onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
@@ -686,14 +708,14 @@ export default function EditPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--admin-text-secondary)' }}>קישור קצר (אופציונלי)</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>קישור קצר (אופציונלי)</label>
           <input
             type="text"
             value={shortUrl}
             onChange={e => setShortUrl(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
             placeholder="cycle-q1"
             dir="ltr"
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+            className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
             style={inputStyle}
             onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
@@ -717,7 +739,7 @@ export default function EditPage() {
               style={{ transform: active ? 'translateX(-2px)' : 'translateX(-22px)' }}
             />
           </button>
-          <span className="text-sm font-bold" style={{ color: 'var(--admin-text-secondary)' }}>
+          <span className="text-sm font-medium" style={{ color: 'var(--admin-text-secondary)' }}>
             {active ? 'פעיל' : 'מושבת'}
           </span>
         </div>
@@ -728,10 +750,10 @@ export default function EditPage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-40"
+            className="flex-1 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-40"
             style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
-            onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 25px var(--admin-accent-glow)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-            onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}
+            onMouseEnter={e => { e.currentTarget.style.opacity = '0.9' }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
           >
             {saving ? 'שומר...' : 'שמירה'}
           </button>
@@ -739,7 +761,7 @@ export default function EditPage() {
             <button
               type="button"
               onClick={handleDelete}
-              className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold transition-all duration-200"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
               style={{ color: 'var(--admin-danger)', border: '1px solid var(--admin-danger-border)' }}
               onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-danger-bg)'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}

@@ -17,7 +17,13 @@ interface Props {
   slides: SlideData[]
   clientName: string
   campaignName: string
+  brandColor?: string | null
+  campaignId?: string
+  feedbackEnabled?: boolean
 }
+
+type FeedbackStatus = 'approved' | 'rejected' | 'pending'
+interface SlideFeedback { slide_key: string; status: FeedbackStatus; comment: string | null; author: string | null }
 
 const slideVariants = {
   enter: { opacity: 0, y: 30, scale: 0.98 },
@@ -25,16 +31,81 @@ const slideVariants = {
   exit: { opacity: 0, y: -20, scale: 0.98 },
 }
 
+/** Convert a #RRGGBB (or #RGB) hex to an rgba() string. Falls back to the raw value. */
+function hexToRgba(hex: string, alpha: number): string {
+  let h = hex.trim().replace('#', '')
+  if (h.length === 3) h = h.split('').map(c => c + c).join('')
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return hex
+  const r = parseInt(h.slice(0, 2), 16)
+  const g = parseInt(h.slice(2, 4), 16)
+  const b = parseInt(h.slice(4, 6), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
+/** Convert a #RRGGBB (or #RGB) hex to an 'R, G, B' triplet for rgba(var(--brand-rgb), a). */
+function hexToRgbTriplet(hex: string): string | null {
+  let h = hex.trim().replace('#', '')
+  if (h.length === 3) h = h.split('').map(c => c + c).join('')
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return null
+  const r = parseInt(h.slice(0, 2), 16)
+  const g = parseInt(h.slice(2, 4), 16)
+  const b = parseInt(h.slice(4, 6), 16)
+  return `${r}, ${g}, ${b}`
+}
+
 const staggerChild = {
   hidden: { opacity: 0, y: 24 },
   visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } }),
 }
 
-export default function CampaignPresentation({ slides, clientName, campaignName }: Props) {
+export default function CampaignPresentation({ slides, clientName, campaignName, brandColor, campaignId, feedbackEnabled }: Props) {
   const [activeSlide, setActiveSlide] = useState(0)
   const [exporting, setExporting] = useState(false)
   const [lightboxAsset, setLightboxAsset] = useState<{ url: string; caption?: string } | null>(null)
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 })
+  const [feedback, setFeedback] = useState<Record<string, SlideFeedback>>({})
+  const [feedbackError, setFeedbackError] = useState<Record<string, boolean>>({})
+
+  const showFeedback = Boolean(feedbackEnabled && campaignId)
+
+  useEffect(() => {
+    if (!showFeedback || !campaignId) return
+    fetch(`/api/campaigns/${campaignId}/feedback`)
+      .then(r => r.ok ? r.json() : [])
+      .then((rows: SlideFeedback[]) => {
+        const map: Record<string, SlideFeedback> = {}
+        for (const r of rows) map[r.slide_key] = r
+        setFeedback(map)
+      })
+      .catch(() => {})
+  }, [showFeedback, campaignId])
+
+  const submitFeedback = useCallback(async (slideKey: string, status: FeedbackStatus, comment: string, author: string) => {
+    if (!campaignId) return
+    let prevEntry: SlideFeedback | undefined
+    setFeedback(prev => {
+      prevEntry = prev[slideKey]
+      return { ...prev, [slideKey]: { slide_key: slideKey, status, comment, author } }
+    })
+    setFeedbackError(prev => ({ ...prev, [slideKey]: false }))
+    try {
+      const res = await fetch(`/api/campaigns/${campaignId}/feedback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slide_key: slideKey, status, comment, author }),
+      })
+      if (!res.ok) throw new Error(`feedback save failed: ${res.status}`)
+    } catch {
+      // Revert the optimistic entry and surface an error indicator
+      setFeedback(prev => {
+        const next = { ...prev }
+        if (prevEntry) next[slideKey] = prevEntry
+        else delete next[slideKey]
+        return next
+      })
+      setFeedbackError(prev => ({ ...prev, [slideKey]: true }))
+    }
+  }, [campaignId])
 
   const goSlide = useCallback((n: number) => {
     setActiveSlide(n)
@@ -101,7 +172,15 @@ export default function CampaignPresentation({ slides, clientName, campaignName 
 
   return (
     <>
-      <div className="campaign-pres">
+      <div
+        className="campaign-pres"
+        style={brandColor ? ({
+          '--brand-cyan': brandColor,
+          '--brand-green': brandColor,
+          '--border-color': `${hexToRgba(brandColor, 0.14)}`,
+          ...(hexToRgbTriplet(brandColor) ? { '--brand-rgb': hexToRgbTriplet(brandColor) } : {}),
+        } as React.CSSProperties) : undefined}
+      >
         {/* Parallax background layers */}
         <div className="bg-noise" />
         <div className="bg-grid" style={{ transform: `translate(${parallaxX * 0.3}px, ${parallaxY * 0.3}px)` }} />
@@ -169,6 +248,16 @@ export default function CampaignPresentation({ slides, clientName, campaignName 
               {slides[activeSlide].type === 'closing' && <ClosingSlide slide={slides[activeSlide]} />}
             </motion.section>
           </AnimatePresence>
+
+          {showFeedback && slides[activeSlide].key && (
+            <ApprovalBar
+              key={slides[activeSlide].key}
+              slideKey={slides[activeSlide].key as string}
+              current={feedback[slides[activeSlide].key as string]}
+              error={!!feedbackError[slides[activeSlide].key as string]}
+              onSubmit={submitFeedback}
+            />
+          )}
         </main>
 
         {/* Bottom nav arrows */}
@@ -217,6 +306,86 @@ export default function CampaignPresentation({ slides, clientName, campaignName 
         </AnimatePresence>
       </div>
     </>
+  )
+}
+
+function ApprovalBar({ slideKey, current, error, onSubmit }: {
+  slideKey: string
+  current?: SlideFeedback
+  error?: boolean
+  onSubmit: (slideKey: string, status: FeedbackStatus, comment: string, author: string) => void
+}) {
+  const [comment, setComment] = useState(current?.comment || '')
+  const [author, setAuthor] = useState(current?.author || '')
+  const [touched, setTouched] = useState(false)
+  const [showComment, setShowComment] = useState(false)
+  const status = current?.status || 'pending'
+
+  // Hydrate inputs once the async feedback fetch lands — unless the user already typed
+  useEffect(() => {
+    if (touched || !current) return
+    setComment(current.comment || '')
+    setAuthor(current.author || '')
+  }, [current, touched])
+
+  // Never wipe an existing comment with an empty string on save
+  const effectiveComment = comment.trim() ? comment : (current?.comment || '')
+
+  return (
+    <div className="approval-bar">
+      <div className="approval-actions">
+        <button
+          className={`approval-btn approve ${status === 'approved' ? 'active' : ''}`}
+          onClick={() => onSubmit(slideKey, 'approved', effectiveComment, author)}
+        >
+          ✓ מאושר
+        </button>
+        <button
+          className={`approval-btn reject ${status === 'rejected' ? 'active' : ''}`}
+          onClick={() => { setShowComment(true); onSubmit(slideKey, 'rejected', effectiveComment, author) }}
+        >
+          ✕ דורש שינוי
+        </button>
+        <button className="approval-btn comment-toggle" onClick={() => setShowComment(s => !s)}>
+          💬 הערה
+        </button>
+      </div>
+
+      {(showComment || comment) && (
+        <div className="approval-comment">
+          <input
+            className="approval-input"
+            placeholder="השם שלך"
+            value={author}
+            onChange={e => { setTouched(true); setAuthor(e.target.value) }}
+          />
+          <textarea
+            className="approval-textarea"
+            placeholder="הוסף הערה או בקשת שינוי..."
+            value={comment}
+            onChange={e => { setTouched(true); setComment(e.target.value) }}
+            rows={2}
+          />
+          <button
+            className="approval-save"
+            onClick={() => onSubmit(slideKey, status === 'pending' ? 'rejected' : status, effectiveComment, author)}
+          >
+            שמירת הערה
+          </button>
+        </div>
+      )}
+
+      {error && (
+        <div className="approval-error">שגיאה בשמירה, נסו שוב</div>
+      )}
+
+      {current && (
+        <div className={`approval-status-badge ${status}`}>
+          {status === 'approved' ? 'אושר על ידי הלקוח' : status === 'rejected' ? 'נדרש שינוי' : 'ממתין לאישור'}
+          {current.author ? ` · ${current.author}` : ''}
+        </div>
+      )}
+    </div>
   )
 }
 

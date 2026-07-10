@@ -14,6 +14,7 @@ import {
   fetchFreshness,
   type DateRange,
 } from '@/lib/pizza-house-queries'
+import { captureException } from '@/lib/logger'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -112,7 +113,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(data)
   } catch (err) {
-    console.error('pizza-house dashboard error:', err)
+    captureException(err, { route: 'GET /api/pizza-house/dashboard' })
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Database error' },
       { status: 500 }

@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { Metadata } from 'next'
-import { getCampaignBySlug, enrichCampaignUrls } from '@/lib/campaigns'
+import { getCampaignBySlug, enrichCampaignUrls, getAssetPublicUrl } from '@/lib/campaigns'
 import type { CampaignSection } from '@/lib/campaigns'
+import { getClientById } from '@/lib/clients'
 import { getSession } from '@/lib/auth'
 import { verifyAccessToken } from '@/lib/content-access'
 import { assetProxyUrl } from '@/lib/asset-url'
@@ -21,17 +22,35 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!campaign) return { title: 'Campaign Not Found' }
 
-  if (campaign.status === 'draft' || campaign.password) {
+  const isScheduled = campaign.publish_at && new Date(campaign.publish_at) > new Date()
+  if (campaign.status === 'draft' || campaign.password || isScheduled) {
     return { title: 'Results Digital', robots: { index: false, follow: false } }
   }
 
+  const title = `${campaign.client} – ${campaign.campaign_name}`
+  const description = campaign.concept || `מצגת קריאייטיב עבור ${campaign.client}`
+  let logoPath = campaign.logo_path
+  if (!logoPath && campaign.client_id) {
+    const client = await getClientById(campaign.client_id)
+    logoPath = client?.logo_path || null
+  }
+  const image = logoPath ? getAssetPublicUrl(logoPath) : undefined
+
   return {
-    title: `${campaign.client} – ${campaign.campaign_name} | Results Digital`,
-    description: campaign.concept || `Creative presentation for ${campaign.client}`,
+    title: `${title} | Results Digital`,
+    description,
     openGraph: {
-      title: `${campaign.client} – ${campaign.campaign_name}`,
-      description: campaign.concept || `Creative presentation for ${campaign.client}`,
+      title,
+      description,
       type: 'website',
+      siteName: 'Results Digital',
+      ...(image ? { images: [{ url: image }] } : {}),
+    },
+    twitter: {
+      card: image ? 'summary_large_image' : 'summary',
+      title,
+      description,
+      ...(image ? { images: [image] } : {}),
     },
   }
 }
@@ -53,6 +72,11 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     notFound()
   }
 
+  // Scheduled publish: not yet available to the public (staff preview bypasses)
+  if (rawCampaign.publish_at && new Date(rawCampaign.publish_at) > new Date() && !isPreview) {
+    notFound()
+  }
+
   if (rawCampaign.password && !isEditorOrAdmin) {
     const cookieStore = await cookies()
     const accessToken = cookieStore.get(`cmp_${rawCampaign.id}`)?.value
@@ -63,7 +87,18 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
   }
 
   const campaign = enrichCampaignUrls(rawCampaign)
-  const clientLogoUrl = campaign.logo_path ? assetProxyUrl(campaign.logo_path) : null
+
+  // Effective branding: campaign logo overrides, else inherit the client's logo/color
+  let effectiveLogoPath = campaign.logo_path
+  let brandColor: string | null = null
+  if (campaign.client_id) {
+    const client = await getClientById(campaign.client_id)
+    if (client) {
+      brandColor = client.brand_color
+      if (!effectiveLogoPath) effectiveLogoPath = client.logo_path
+    }
+  }
+  const clientLogoUrl = effectiveLogoPath ? assetProxyUrl(effectiveLogoPath) : null
   const formattedDate = new Date(campaign.created_at).toLocaleDateString('he-IL', {
     year: 'numeric', month: 'long', day: 'numeric',
   })
@@ -82,6 +117,9 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
       slides={slides}
       clientName={campaign.client}
       campaignName={campaign.campaign_name}
+      brandColor={brandColor}
+      campaignId={campaign.id}
+      feedbackEnabled
     />
   )
 }

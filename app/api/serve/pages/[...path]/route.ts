@@ -32,6 +32,13 @@ export async function GET(req: NextRequest, { params }: Ctx) {
     })
   }
 
+  if (page.publish_at && new Date(page.publish_at) > new Date()) {
+    return new NextResponse(expiredPage('הדף עדיין לא זמין'), {
+      status: 403,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    })
+  }
+
   if (page.expires_at && new Date(page.expires_at) < new Date()) {
     return new NextResponse(expiredPage('תוקף הדף פג'), {
       status: 410,
@@ -67,31 +74,39 @@ export async function GET(req: NextRequest, { params }: Ctx) {
   const pageUrl = `${baseUrl}/pages/${client}/${slug}`
   const ogImageUrl = `${baseUrl}/og-image.png`
 
+  const ogDescription = escapeHtml(page.client || 'Results Group')
   const ogTags = `
     <meta property="og:title" content="${escapeHtml(page.title)}" />
-    <meta property="og:description" content="Results Group" />
-    <meta property="og:image" content="${ogImageUrl}" />
-    <meta property="og:url" content="${pageUrl}" />
+    <meta property="og:description" content="${ogDescription}" />
+    <meta property="og:image" content="${escapeHtml(ogImageUrl)}" />
+    <meta property="og:url" content="${escapeHtml(pageUrl)}" />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Results Digital" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${escapeHtml(page.title)}" />
-    <meta name="twitter:description" content="Results Group" />
-    <meta name="twitter:image" content="${ogImageUrl}" />
+    <meta name="twitter:description" content="${ogDescription}" />
+    <meta name="twitter:image" content="${escapeHtml(ogImageUrl)}" />
   `
 
   const enrichedHtml = injectOgTags(html, ogTags, page.title)
 
+  // Password-protected pages must never be cached by the CDN — the cached
+  // copy would be served to visitors who never passed the password gate.
+  const cacheControl = page.password
+    ? 'private, no-store'
+    : 'public, s-maxage=60, stale-while-revalidate=60'
+
   return new NextResponse(enrichedHtml, {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=3600',
+      'Cache-Control': cacheControl,
       'x-vercel-cache-tag': `page-${page.id}`,
     },
   })
 }
 
 export async function POST(req: NextRequest, { params }: Ctx) {
-  const rl = rateLimit(req, { windowMs: 60_000, max: 10, prefix: 'page-pw' })
+  const rl = await rateLimit(req, { windowMs: 60_000, max: 10, prefix: 'page-pw' })
   if (rl) return new NextResponse(null, { status: 429 })
 
   const { path } = await params
