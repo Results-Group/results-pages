@@ -3,7 +3,7 @@ import { captureException } from './logger'
 import type { SessionUser } from './auth'
 
 export type AuditAction = 'create' | 'update' | 'delete' | 'restore' | 'publish' | 'purge'
-export type AuditEntity = 'campaign' | 'page' | 'client' | 'user' | 'workspace'
+export type AuditEntity = 'campaign' | 'page' | 'client' | 'user' | 'workspace' | 'report'
 
 export interface AuditEntry {
   id: string

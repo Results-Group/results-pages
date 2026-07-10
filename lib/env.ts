@@ -22,6 +22,9 @@ const envSchema = z.object({
   MONDAY_API_TOKEN: z.string().optional(),
   MONDAY_BOARD_ID: z.string().optional(),
   MONDAY_SYNC_WORKSPACE_ID: z.string().uuid().optional(),
+  // Google Gemini AI (translation + Excel parsing)
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().optional(),
 })
 
 export type Env = z.infer<typeof envSchema>

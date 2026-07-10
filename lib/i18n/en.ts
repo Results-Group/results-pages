@@ -1,0 +1,88 @@
+import type { TranslationKey } from './he'
+
+const en: Record<TranslationKey, string> = {
+  // Navigation
+  'nav.pages': 'All Pages',
+  'nav.upload': 'Upload Page',
+  'nav.campaigns': 'Campaigns',
+  'nav.reports': 'Performance Reports',
+  'nav.clients': 'Clients',
+  'nav.users': 'Users',
+  'nav.workspaces': 'Workspaces',
+  'nav.audit': 'Activity Log',
+  'nav.trash': 'Trash',
+
+  // Common
+  'common.save': 'Save',
+  'common.cancel': 'Cancel',
+  'common.delete': 'Delete',
+  'common.edit': 'Edit',
+  'common.search': 'Search',
+  'common.loading': 'Loading...',
+  'common.status': 'Status',
+  'common.draft': 'Draft',
+  'common.published': 'Published',
+  'common.archived': 'Archived',
+  'common.noResults': 'No results found',
+  'common.client': 'Client',
+  'common.password': 'Password',
+  'common.language': 'Language',
+
+  // Reports
+  'reports.title': 'Performance Reports',
+  'reports.subtitle': 'Manage performance reports and share with clients',
+  'reports.new': 'New Report',
+  'reports.edit': 'Edit Report',
+  'reports.total': 'Total Reports',
+  'reports.published': 'Published',
+  'reports.clients': 'Clients',
+  'reports.search': 'Search by report name or client...',
+  'reports.empty': 'No reports yet',
+  'reports.createFirst': 'Create your first report',
+  'reports.loadTemplate': 'Template',
+  'reports.importExcel': 'Import Excel',
+  'reports.importing': 'Processing...',
+  'reports.saveDraft': 'Save Draft',
+  'reports.saving': 'Saving...',
+  'reports.publish': 'Publish',
+  'reports.reportName': 'Report Name',
+  'reports.period': 'Report Period',
+  'reports.addTab': 'Add Tab',
+  'reports.addBlock': 'Add Block',
+  'reports.deleteTab': 'Delete this tab?',
+  'reports.replaceConfirm': 'This will replace all existing tabs. Continue?',
+  'reports.importConfirm': 'Import will replace all existing tabs. Continue?',
+
+  // Campaigns
+  'campaigns.title': 'Campaigns',
+  'campaigns.subtitle': 'Manage creative campaigns and share with clients',
+  'campaigns.new': 'New Campaign',
+  'campaigns.total': 'Total Campaigns',
+  'campaigns.search': 'Search by campaign name or client...',
+  'campaigns.empty': 'No campaigns yet',
+  'campaigns.createFirst': 'Create your first campaign',
+  'campaigns.assets': 'Assets',
+  'campaigns.slides': 'Slides',
+  'campaigns.duplicate': 'Duplicate',
+  'campaigns.deleteConfirm': 'Delete campaign',
+  'campaigns.duplicateConfirm': 'Duplicate',
+
+  // Clients
+  'clients.title': 'Clients',
+  'clients.search': 'Search clients...',
+
+  // Block types
+  'block.kpi_grid': 'KPI Cards',
+  'block.strategic_note': 'Strategic Note',
+  'block.funnel': 'Marketing Funnel',
+  'block.data_rows': 'Data Rows',
+  'block.source_grid': 'Platform Breakdown',
+  'block.table': 'Data Table',
+  'block.chart': 'Chart',
+  'block.insight_box': 'Insight',
+  'block.action_list': 'Recommendations',
+  'block.idea_cards': 'Idea Cards',
+  'block.text': 'Free Text',
+}
+
+export default en

@@ -1,0 +1,87 @@
+const he = {
+  // Navigation
+  'nav.pages': 'כל הדפים',
+  'nav.upload': 'העלאת דף',
+  'nav.campaigns': 'קמפיינים',
+  'nav.reports': 'דוחות ביצועים',
+  'nav.clients': 'לקוחות',
+  'nav.users': 'משתמשים',
+  'nav.workspaces': 'סביבות עבודה',
+  'nav.audit': 'יומן פעילות',
+  'nav.trash': 'סל מיחזור',
+
+  // Common
+  'common.save': 'שמור',
+  'common.cancel': 'ביטול',
+  'common.delete': 'מחיקה',
+  'common.edit': 'עריכה',
+  'common.search': 'חיפוש',
+  'common.loading': 'טוען...',
+  'common.status': 'סטטוס',
+  'common.draft': 'טיוטה',
+  'common.published': 'פורסם',
+  'common.archived': 'ארכיון',
+  'common.noResults': 'לא נמצאו תוצאות',
+  'common.client': 'לקוח',
+  'common.password': 'סיסמה',
+  'common.language': 'שפה',
+
+  // Reports
+  'reports.title': 'דוחות ביצועים',
+  'reports.subtitle': 'ניהול דוחות פרפורמנס ושליחה ללקוחות',
+  'reports.new': 'דוח חדש',
+  'reports.edit': 'עריכת דוח',
+  'reports.total': 'סה״כ דוחות',
+  'reports.published': 'פורסמו',
+  'reports.clients': 'לקוחות',
+  'reports.search': 'חיפוש לפי שם דוח או לקוח...',
+  'reports.empty': 'אין דוחות עדיין',
+  'reports.createFirst': 'צרו את הדוח הראשון',
+  'reports.loadTemplate': 'תבנית',
+  'reports.importExcel': 'ייבוא Excel',
+  'reports.importing': 'מעבד...',
+  'reports.saveDraft': 'שמור טיוטה',
+  'reports.saving': 'שומר...',
+  'reports.publish': 'פרסם',
+  'reports.reportName': 'שם הדוח',
+  'reports.period': 'תקופת דוח',
+  'reports.addTab': 'הוסף טאב',
+  'reports.addBlock': 'הוסף בלוק',
+  'reports.deleteTab': 'למחוק את הטאב?',
+  'reports.replaceConfirm': 'הפעולה תחליף את כל הטאבים הקיימים. להמשיך?',
+  'reports.importConfirm': 'ייבוא יחליף את כל הטאבים הקיימים. להמשיך?',
+
+  // Campaigns
+  'campaigns.title': 'קמפיינים',
+  'campaigns.subtitle': 'ניהול קמפיינים קריאייטיביים ושליחה ללקוחות',
+  'campaigns.new': 'קמפיין חדש',
+  'campaigns.total': 'סה״כ קמפיינים',
+  'campaigns.search': 'חיפוש לפי שם קמפיין או לקוח...',
+  'campaigns.empty': 'אין קמפיינים עדיין',
+  'campaigns.createFirst': 'צרו את הקמפיין הראשון',
+  'campaigns.assets': 'תוצרים',
+  'campaigns.slides': 'שקפים',
+  'campaigns.duplicate': 'שכפול',
+  'campaigns.deleteConfirm': 'למחוק את הקמפיין',
+  'campaigns.duplicateConfirm': 'לשכפל את',
+
+  // Clients
+  'clients.title': 'לקוחות',
+  'clients.search': 'חיפוש לקוח...',
+
+  // Block types
+  'block.kpi_grid': 'כרטיסי מדדים (KPI)',
+  'block.strategic_note': 'פסקת סיכום',
+  'block.funnel': 'משפך שיווקי',
+  'block.data_rows': 'שורות נתונים',
+  'block.source_grid': 'פילוח פלטפורמות',
+  'block.table': 'טבלת נתונים',
+  'block.chart': 'גרף',
+  'block.insight_box': 'תובנה',
+  'block.action_list': 'המלצות',
+  'block.idea_cards': 'כרטיסי רעיונות',
+  'block.text': 'טקסט חופשי',
+} as const
+
+export default he
+export type TranslationKey = keyof typeof he

@@ -20,7 +20,10 @@ import {
   Contact,
   Trash2,
   ScrollText,
+  BarChart3,
+  Globe,
 } from 'lucide-react'
+import { I18nContext, getStoredLocale, setStoredLocale, type Locale } from '@/lib/i18n'
 
 interface SessionUser {
   userId: string
@@ -80,6 +83,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+  const [locale, setLocale] = useState<Locale>('he')
   const [currentUser, setCurrentUser] = useState<SessionUser | null>(null)
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [activeWorkspace, setActiveWorkspace] = useState<string | null>(null)
@@ -91,9 +95,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (saved === 'light' || saved === 'dark') {
       setTheme(saved)
     }
+    setLocale(getStoredLocale())
     setActiveWorkspace(getActiveWorkspaceFromCookie())
     fetchCurrentUser().then(u => setCurrentUser(u))
   }, [])
+
+  function toggleLocale() {
+    const next: Locale = locale === 'he' ? 'en' : 'he'
+    setLocale(next)
+    setStoredLocale(next)
+  }
 
   const fetchWorkspaces = useCallback(async () => {
     try {
@@ -120,6 +131,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin', label: 'כל הדפים', icon: FileText, show: true },
     { href: '/admin/upload', label: 'העלאת דף', icon: Upload, show: currentUser?.role !== 'viewer' },
     { href: '/admin/campaigns', label: 'קמפיינים', icon: Megaphone, show: currentUser?.role !== 'viewer' },
+    { href: '/admin/reports', label: 'דוחות ביצועים', icon: BarChart3, show: currentUser?.role !== 'viewer' },
     { href: '/admin/clients', label: 'לקוחות', icon: Contact, show: currentUser?.role !== 'viewer' },
     { href: '/admin/users', label: 'משתמשים', icon: Users, show: isAdmin || isOwner },
     { href: '/admin/workspaces', label: 'סביבות עבודה', icon: Building, show: isAdmin || isOwner },
@@ -318,6 +330,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'}
         </button>
         <button
+          onClick={toggleLocale}
+          className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors w-full"
+          style={{ color: 'var(--sidebar-text-secondary)' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'var(--sidebar-hover-bg)'
+            e.currentTarget.style.color = 'var(--sidebar-text)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent'
+            e.currentTarget.style.color = 'var(--sidebar-text-secondary)'
+          }}
+          title={locale === 'he' ? 'Switch to English' : 'עבור לעברית'}
+        >
+          <Globe className="w-4 h-4" />
+          {locale === 'he' ? 'English' : 'עברית'}
+        </button>
+        <button
           onClick={handleLogout}
           className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors w-full"
           style={{ color: 'var(--sidebar-text-muted)' }}
@@ -338,6 +367,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   )
 
   return (
+    <I18nContext.Provider value={locale}>
     <div className="flex min-h-screen">
       {/* Mobile hamburger */}
       <button
@@ -373,6 +403,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <AdminFooter />
       </main>
     </div>
+    </I18nContext.Provider>
   )
 }
 
