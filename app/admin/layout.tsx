@@ -18,7 +18,6 @@ import {
   ChevronDown,
   Check,
   Contact,
-  BarChart3,
   Trash2,
   ScrollText,
 } from 'lucide-react'
@@ -122,7 +121,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/upload', label: 'העלאת דף', icon: Upload, show: currentUser?.role !== 'viewer' },
     { href: '/admin/campaigns', label: 'קמפיינים', icon: Megaphone, show: currentUser?.role !== 'viewer' },
     { href: '/admin/clients', label: 'לקוחות', icon: Contact, show: currentUser?.role !== 'viewer' },
-    { href: '/admin/analytics', label: 'אנליטיקס', icon: BarChart3, show: currentUser?.role !== 'viewer' },
     { href: '/admin/users', label: 'משתמשים', icon: Users, show: isAdmin || isOwner },
     { href: '/admin/workspaces', label: 'סביבות עבודה', icon: Building, show: isAdmin || isOwner },
     { href: '/admin/audit', label: 'יומן פעילות', icon: ScrollText, show: isAdmin || isOwner },

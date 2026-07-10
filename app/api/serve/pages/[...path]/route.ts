@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
-import { getPageByClientSlug, createPageView, downloadFile } from '@/lib/db'
+import { getPageByClientSlug, downloadFile } from '@/lib/db'
 import { signAccessToken, verifyAccessToken, CONTENT_ACCESS_MAX_AGE } from '@/lib/content-access'
 import { rateLimit } from '@/lib/rate-limit'
 
@@ -65,10 +65,6 @@ export async function GET(req: NextRequest, { params }: Ctx) {
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     })
   }
-
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
-  const userAgent = req.headers.get('user-agent') || ''
-  createPageView({ page_id: page.id, ip, user_agent: userAgent }).catch(() => {})
 
   const baseUrl = `${req.nextUrl.protocol}//${req.nextUrl.host}`
   const pageUrl = `${baseUrl}/pages/${client}/${slug}`
