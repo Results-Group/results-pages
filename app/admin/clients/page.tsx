@@ -183,32 +183,55 @@ export default function ClientsPage() {
           <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>אין לקוחות עדיין</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {filtered.map(c => (
-            <div key={c.id} className="rounded-xl p-4 group relative flex items-center gap-3 min-h-[68px]" style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}>
-              <Link href={`/admin/clients/${c.id}`} className="flex items-center gap-3 flex-1 min-w-0">
-                {c.logo_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={c.logo_url} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" style={{ background: 'var(--admin-bg)' }} />
-                ) : (
-                  <span className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-sm font-bold" style={{ background: c.brand_color || 'var(--admin-bg)', color: '#fff' }}>
-                    {c.name.charAt(0).toUpperCase()}
-                  </span>
-                )}
-                <p className="text-sm font-medium leading-snug" style={{ color: 'var(--admin-text-primary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {c.name}
-                </p>
-              </Link>
-              <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                <Link href={`/admin/clients/${c.id}`} className="p-1.5 rounded-lg" style={{ background: 'var(--admin-bg)', color: 'var(--admin-text-secondary)' }}>
-                  <Edit3 className="w-3.5 h-3.5" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          {filtered.map(c => {
+            const accent = c.brand_color || '#40e1d3'
+            return (
+              <div
+                key={c.id}
+                className="group relative rounded-xl overflow-hidden flex items-center transition-colors"
+                style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}
+              >
+                {/* Color accent bar on the right (RTL = visual left) */}
+                <div className="w-1 self-stretch flex-shrink-0" style={{ background: accent }} />
+
+                <Link href={`/admin/clients/${c.id}`} className="flex items-center gap-3 flex-1 min-w-0 px-4 py-3.5">
+                  {c.logo_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={c.logo_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" style={{ outline: `2px solid ${accent}55` }} />
+                  ) : (
+                    <span
+                      className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
+                      style={{ background: accent + '22', color: accent, border: `1.5px solid ${accent}55` }}
+                    >
+                      {c.name.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  <p
+                    className="text-sm font-medium leading-snug"
+                    style={{
+                      color: 'var(--admin-text-primary)',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {c.name}
+                  </p>
                 </Link>
-                <button onClick={() => handleDelete(c.id)} className="p-1.5 rounded-lg" style={{ background: 'var(--admin-danger-bg)', color: 'var(--admin-danger)' }}>
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+
+                <div className="flex items-center gap-1 pl-3 pr-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                  <Link href={`/admin/clients/${c.id}`} className="p-1.5 rounded-lg" style={{ color: 'var(--admin-text-muted)' }}>
+                    <Edit3 className="w-3.5 h-3.5" />
+                  </Link>
+                  <button onClick={() => handleDelete(c.id)} className="p-1.5 rounded-lg" style={{ color: 'var(--admin-danger)' }}>
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
@@ -218,14 +241,17 @@ export default function ClientsPage() {
   )
 }
 
-function ClientAvatar({ client, size = 9 }: { client: Client; size?: number }) {
-  const sz = `w-${size} h-${size}`
+function ClientAvatar({ client }: { client: Client }) {
+  const accent = client.brand_color || '#40e1d3'
   if (client.logo_url) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={client.logo_url} alt="" className={`${sz} rounded-lg object-cover flex-shrink-0`} style={{ background: 'var(--admin-bg)' }} />
+    return <img src={client.logo_url} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
   }
   return (
-    <span className={`${sz} rounded-lg flex items-center justify-center flex-shrink-0 text-sm font-bold`} style={{ background: client.brand_color || '#40e1d3', color: '#fff' }}>
+    <span
+      className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
+      style={{ background: accent + '22', color: accent, border: `1.5px solid ${accent}55` }}
+    >
       {client.name.charAt(0).toUpperCase()}
     </span>
   )
@@ -321,7 +347,7 @@ function MergeModal({ clients, onClose, onMerged }: { clients: Client[]; onClose
                         outline: keepId === p.a.id ? '2px solid var(--admin-accent)' : 'none',
                       }}
                     >
-                      <ClientAvatar client={p.a} size={8} />
+                      <ClientAvatar client={p.a} />
                       <span className="text-sm font-medium leading-snug text-right flex-1" style={{ color: 'var(--admin-text-primary)' }}>{p.a.name}</span>
                       {keepId === p.a.id && <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--admin-accent)' }} />}
                     </button>
@@ -337,7 +363,7 @@ function MergeModal({ clients, onClose, onMerged }: { clients: Client[]; onClose
                         outline: keepId === p.b.id ? '2px solid var(--admin-accent)' : 'none',
                       }}
                     >
-                      <ClientAvatar client={p.b} size={8} />
+                      <ClientAvatar client={p.b} />
                       <span className="text-sm font-medium leading-snug text-right flex-1" style={{ color: 'var(--admin-text-primary)' }}>{p.b.name}</span>
                       {keepId === p.b.id && <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--admin-accent)' }} />}
                     </button>
