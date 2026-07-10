@@ -17,6 +17,7 @@ export interface Client {
   brand_color: string | null
   contacts: ClientContact[]
   notes: string | null
+  monday_item_id: string | null
   created_at: string
   updated_at: string
 }
@@ -53,6 +54,16 @@ export async function getClientByName(name: string, workspaceId?: string | null)
   return enrich(data[0] as Client)
 }
 
+export async function getClientByMondayItemId(mondayItemId: string): Promise<Client | null> {
+  const { data, error } = await supabase
+    .from('clients')
+    .select('*')
+    .eq('monday_item_id', mondayItemId)
+    .limit(1)
+  if (error || !data || data.length === 0) return null
+  return enrich(data[0] as Client)
+}
+
 export async function createClient(data: {
   name: string
   workspace_id?: string | null
@@ -60,6 +71,7 @@ export async function createClient(data: {
   brand_color?: string | null
   contacts?: ClientContact[]
   notes?: string | null
+  monday_item_id?: string | null
 }): Promise<Client> {
   const insertData: Record<string, unknown> = {
     name: data.name,
@@ -68,6 +80,7 @@ export async function createClient(data: {
     brand_color: data.brand_color || '#40e1d3',
     contacts: data.contacts || [],
     notes: data.notes || null,
+    monday_item_id: data.monday_item_id || null,
   }
   const { data: row, error } = await supabase.from('clients').insert(insertData).select().single()
   if (error) throw error
@@ -95,7 +108,7 @@ export async function findOrCreateClient(name: string, workspaceId?: string | nu
 
 export async function updateClient(
   id: string,
-  data: Partial<Pick<Client, 'name' | 'logo_path' | 'brand_color' | 'contacts' | 'notes' | 'workspace_id'>>,
+  data: Partial<Pick<Client, 'name' | 'logo_path' | 'brand_color' | 'contacts' | 'notes' | 'workspace_id' | 'monday_item_id'>>,
 ): Promise<Client> {
   const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() }
   if (data.name !== undefined) updateData.name = data.name
@@ -104,6 +117,7 @@ export async function updateClient(
   if (data.contacts !== undefined) updateData.contacts = data.contacts
   if (data.notes !== undefined) updateData.notes = data.notes
   if (data.workspace_id !== undefined) updateData.workspace_id = data.workspace_id
+  if (data.monday_item_id !== undefined) updateData.monday_item_id = data.monday_item_id
 
   const { data: row, error } = await supabase.from('clients').update(updateData).eq('id', id).select().single()
   if (error) throw error

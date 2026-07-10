@@ -29,6 +29,7 @@ const MIGRATIONS = [
   'migration-approval.sql',
   'migration-ops.sql',
   'migration-scheduling.sql',
+  'migration-monday-sync.sql',
 ]
 
 // ── Helpers ─────────────────────────────────────────────────────────────────

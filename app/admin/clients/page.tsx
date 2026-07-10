@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { Plus, Search, Contact, Trash2, Edit3, X } from 'lucide-react'
+import { Plus, Search, Contact, Trash2, Edit3, X, RefreshCw } from 'lucide-react'
 
 interface Client {
   id: string
@@ -17,18 +17,50 @@ export default function ClientsPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [showCreate, setShowCreate] = useState(false)
+  const [mondayAvailable, setMondayAvailable] = useState(false)
+  const [syncing, setSyncing] = useState(false)
+  const [syncMessage, setSyncMessage] = useState<{ text: string; ok: boolean } | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/clients')
-      setClients(res.ok ? await res.json() : [])
+      const [clientsRes, syncRes] = await Promise.all([
+        fetch('/api/clients'),
+        fetch('/api/clients/sync'),
+      ])
+      setClients(clientsRes.ok ? await clientsRes.json() : [])
+      if (syncRes.ok) {
+        const syncData = await syncRes.json() as { available: boolean }
+        setMondayAvailable(syncData.available ?? false)
+      }
     } catch {
       setClients([])
     } finally {
       setLoading(false)
     }
   }, [])
+
+  async function handleMondaySync() {
+    setSyncing(true)
+    setSyncMessage(null)
+    try {
+      const res = await fetch('/api/clients/sync', { method: 'POST' })
+      const data = await res.json() as { created?: number; skipped?: number; total?: number; error?: string }
+      if (res.ok && data.created !== undefined) {
+        setSyncMessage({
+          text: `${data.created} לקוחות חדשים נוספו, ${data.skipped} כבר קיימים (סה"כ ${data.total} ב-Monday)`,
+          ok: true,
+        })
+        await load()
+      } else {
+        setSyncMessage({ text: data.error ?? 'שגיאה בסנכרון', ok: false })
+      }
+    } catch {
+      setSyncMessage({ text: 'שגיאה בסנכרון מ-Monday.com', ok: false })
+    } finally {
+      setSyncing(false)
+    }
+  }
 
   useEffect(() => { load().catch(() => {}) }, [load])
 
@@ -59,14 +91,42 @@ export default function ClientsPage() {
             ניהול לקוחות, לוגו, צבע מותג ואנשי קשר
           </p>
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-opacity"
-          style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
-        >
-          <Plus className="w-4 h-4" /> לקוח חדש
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {mondayAvailable && (
+            <button
+              onClick={handleMondaySync}
+              disabled={syncing}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50"
+              style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)' }}
+              title="סנכרן לקוחות מ-Monday.com"
+            >
+              <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+              {syncing ? 'מסנכרן...' : 'סנכרן מ-Monday'}
+            </button>
+          )}
+          <button
+            onClick={() => setShowCreate(true)}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-opacity"
+            style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
+          >
+            <Plus className="w-4 h-4" /> לקוח חדש
+          </button>
+        </div>
       </div>
+
+      {syncMessage && (
+        <div
+          className="mb-4 px-4 py-3 rounded-lg text-sm flex items-center justify-between gap-3"
+          style={{
+            background: syncMessage.ok ? 'var(--admin-success-bg, #d1fae5)' : 'var(--admin-danger-bg)',
+            color: syncMessage.ok ? 'var(--admin-success, #065f46)' : 'var(--admin-danger)',
+            border: `1px solid ${syncMessage.ok ? 'var(--admin-success, #6ee7b7)' : 'var(--admin-danger)'}`,
+          }}
+        >
+          <span>{syncMessage.text}</span>
+          <button onClick={() => setSyncMessage(null)} style={{ opacity: 0.6 }}><X className="w-3.5 h-3.5" /></button>
+        </div>
+      )}
 
       <div className="relative mb-5">
         <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--admin-text-muted)' }} />
