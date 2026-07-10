@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, MessageCircle, Files, Image as ImageIcon, Calendar } from 'lucide-react'
 import { whatsappShareUrl } from '@/lib/share'
+import { useT, useLocale } from '@/lib/i18n'
 
 interface Campaign {
   id: string
@@ -31,7 +32,6 @@ async function fetchUserRole(): Promise<string> {
   } catch { return 'viewer' }
 }
 
-const STATUS_LABELS: Record<string, string> = { draft: 'טיוטה', published: 'פורסם', archived: 'ארכיון' }
 const STATUS_DOT: Record<string, string> = {
   draft: '#f59e0b',
   published: '#40e1d3',
@@ -39,6 +39,8 @@ const STATUS_DOT: Record<string, string> = {
 }
 
 export default function CampaignsListPage() {
+  const t = useT()
+  const locale = useLocale()
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -46,6 +48,8 @@ export default function CampaignsListPage() {
   const [duplicating, setDuplicating] = useState<string | null>(null)
   const [userRole, setUserRole] = useState('admin')
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
+
+  const STATUS_LABELS: Record<string, string> = { draft: t('common.draft'), published: t('common.published'), archived: t('common.archived') }
 
   useEffect(() => {
     fetchUserRole().then(r => setUserRole(r))
@@ -127,7 +131,7 @@ export default function CampaignsListPage() {
   const groupedByClient = (() => {
     const groups = new Map<string, Campaign[]>()
     for (const c of campaigns) {
-      const key = c.client?.trim() || 'ללא לקוח'
+      const key = c.client?.trim() || (locale === 'en' ? 'No client' : 'ללא לקוח')
       if (!groups.has(key)) groups.set(key, [])
       groups.get(key)!.push(c)
     }
@@ -144,8 +148,8 @@ export default function CampaignsListPage() {
         <div className="flex items-center gap-4">
           <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: '#40e1d3', boxShadow: '0 0 12px rgba(64,225,211,0.6)' }} />
           <div>
-            <h2 className="text-2xl font-black tracking-tight" style={{ color: 'var(--admin-text-primary)' }}>קמפיינים</h2>
-            <p className="text-sm mt-0.5" style={{ color: 'var(--admin-text-muted)' }}>ניהול קמפיינים קריאייטיביים ושליחה ללקוחות</p>
+            <h2 className="text-2xl font-black tracking-tight" style={{ color: 'var(--admin-text-primary)' }}>{t('campaigns.title')}</h2>
+            <p className="text-sm mt-0.5" style={{ color: 'var(--admin-text-muted)' }}>{t('campaigns.subtitle')}</p>
           </div>
         </div>
         <Link
@@ -158,7 +162,7 @@ export default function CampaignsListPage() {
           }}
         >
           <Plus className="w-4 h-4" />
-          קמפיין חדש
+          {t('campaigns.new')}
         </Link>
       </div>
 
@@ -166,9 +170,9 @@ export default function CampaignsListPage() {
       {!loading && campaigns.length > 0 && (
         <div className="grid grid-cols-3 gap-3 mb-8">
           {[
-            { label: 'סה״כ קמפיינים', value: totalCampaigns },
-            { label: 'פורסמו', value: publishedCount },
-            { label: 'לקוחות', value: groupedByClient.length },
+            { label: t('campaigns.total'), value: totalCampaigns },
+            { label: t('common.published'), value: publishedCount },
+            { label: t('nav.clients'), value: groupedByClient.length },
           ].map(kpi => (
             <div
               key={kpi.label}
@@ -187,13 +191,13 @@ export default function CampaignsListPage() {
 
       {/* Search */}
       <div className="relative mb-8">
-        <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'rgba(255,255,255,0.3)' }} />
+        <Search className="absolute start-4 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'rgba(255,255,255,0.3)' }} />
         <input
           type="text"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="חיפוש לפי שם קמפיין או לקוח..."
-          className="w-full pr-11 pl-4 py-3 rounded-xl text-sm outline-none transition-all duration-200"
+          placeholder={t('campaigns.search')}
+          className="w-full ps-11 pe-4 py-3 rounded-xl text-sm outline-none transition-all duration-200"
           style={{
             background: 'rgba(10,10,10,0.8)',
             border: '1px solid rgba(255,255,255,0.08)',
@@ -207,14 +211,14 @@ export default function CampaignsListPage() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24" style={{ color: 'var(--admin-text-muted)' }}>
           <div className="w-8 h-8 border-2 rounded-full animate-spin mb-4" style={{ borderColor: 'rgba(64,225,211,0.3)', borderTopColor: '#40e1d3' }} />
-          <span className="text-sm">טוען קמפיינים...</span>
+          <span className="text-sm">{t('common.loading')}</span>
         </div>
       ) : campaigns.length === 0 ? (
         <div className="relative text-center py-24 px-8 rounded-2xl" style={{ background: 'rgba(10,10,10,0.6)', border: '1px solid rgba(255,255,255,0.06)' }}>
           <div className="absolute top-0 right-0 w-16 h-16" style={{ borderTop: '2px solid rgba(64,225,211,0.3)', borderRight: '2px solid rgba(64,225,211,0.3)' }} />
           <div className="absolute bottom-0 left-0 w-16 h-16" style={{ borderBottom: '2px solid rgba(64,225,211,0.15)', borderLeft: '2px solid rgba(64,225,211,0.15)' }} />
           <p className="text-lg font-bold mb-3" style={{ color: 'var(--admin-text-secondary)' }}>
-            {search ? 'לא נמצאו תוצאות' : 'אין קמפיינים עדיין'}
+            {search ? t('common.noResults') : t('campaigns.empty')}
           </p>
           {!search && (
             <Link
@@ -222,7 +226,7 @@ export default function CampaignsListPage() {
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200"
               style={{ background: 'rgba(64,225,211,0.12)', border: '1px solid rgba(64,225,211,0.3)', color: '#40e1d3' }}
             >
-              <Plus className="w-4 h-4" /> צרו את הקמפיין הראשון
+              <Plus className="w-4 h-4" /> {t('campaigns.createFirst')}
             </Link>
           )}
         </div>
@@ -282,12 +286,12 @@ export default function CampaignsListPage() {
                           <div className="flex items-center gap-4 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
                             <span className="flex items-center gap-1.5">
                               <ImageIcon className="w-3 h-3" />
-                              <span className="font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>{assets}</span> תוצרים
+                              <span className="font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>{assets}</span> {t('campaigns.assets')}
                             </span>
-                            <span className="font-medium">{sections} שקפים</span>
+                            <span className="font-medium">{sections} {t('campaigns.slides')}</span>
                             <span className="flex items-center gap-1.5">
                               <Calendar className="w-3 h-3" />
-                              {new Date(c.created_at).toLocaleDateString('he-IL')}
+                              {new Date(c.created_at).toLocaleDateString(locale === 'en' ? 'en-US' : 'he-IL')}
                             </span>
                             {(() => {
                               const ws = workspaces.find(w => w.id === c.workspace_id)

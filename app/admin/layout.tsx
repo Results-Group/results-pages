@@ -24,6 +24,8 @@ import {
   Globe,
 } from 'lucide-react'
 import { I18nContext, getStoredLocale, setStoredLocale, type Locale } from '@/lib/i18n'
+import heDict from '@/lib/i18n/he'
+import enDict from '@/lib/i18n/en'
 
 interface SessionUser {
   userId: string
@@ -127,16 +129,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isAdmin = currentUser?.role === 'admin'
   const isOwner = currentUser?.isOwner
 
+  const dict = locale === 'en' ? enDict : heDict
+  const t = (key: keyof typeof heDict) => dict[key] ?? heDict[key] ?? key
+
   const navItems = [
-    { href: '/admin', label: 'כל הדפים', icon: FileText, show: true },
-    { href: '/admin/upload', label: 'העלאת דף', icon: Upload, show: currentUser?.role !== 'viewer' },
-    { href: '/admin/campaigns', label: 'קמפיינים', icon: Megaphone, show: currentUser?.role !== 'viewer' },
-    { href: '/admin/reports', label: 'דוחות ביצועים', icon: BarChart3, show: currentUser?.role !== 'viewer' },
-    { href: '/admin/clients', label: 'לקוחות', icon: Contact, show: currentUser?.role !== 'viewer' },
-    { href: '/admin/users', label: 'משתמשים', icon: Users, show: isAdmin || isOwner },
-    { href: '/admin/workspaces', label: 'סביבות עבודה', icon: Building, show: isAdmin || isOwner },
-    { href: '/admin/audit', label: 'יומן פעילות', icon: ScrollText, show: isAdmin || isOwner },
-    { href: '/admin/trash', label: 'סל מיחזור', icon: Trash2, show: currentUser?.role !== 'viewer' },
+    { href: '/admin', label: t('nav.pages'), icon: FileText, show: true },
+    { href: '/admin/upload', label: t('nav.upload'), icon: Upload, show: currentUser?.role !== 'viewer' },
+    { href: '/admin/campaigns', label: t('nav.campaigns'), icon: Megaphone, show: currentUser?.role !== 'viewer' },
+    { href: '/admin/reports', label: t('nav.reports'), icon: BarChart3, show: currentUser?.role !== 'viewer' },
+    { href: '/admin/clients', label: t('nav.clients'), icon: Contact, show: currentUser?.role !== 'viewer' },
+    { href: '/admin/users', label: t('nav.users'), icon: Users, show: isAdmin || isOwner },
+    { href: '/admin/workspaces', label: t('nav.workspaces'), icon: Building, show: isAdmin || isOwner },
+    { href: '/admin/audit', label: t('nav.audit'), icon: ScrollText, show: isAdmin || isOwner },
+    { href: '/admin/trash', label: t('nav.trash'), icon: Trash2, show: currentUser?.role !== 'viewer' },
   ]
 
   function toggleTheme() {
@@ -324,10 +329,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             e.currentTarget.style.background = 'transparent'
             e.currentTarget.style.color = 'var(--sidebar-text-secondary)'
           }}
-          title={theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'}
+          title={theme === 'dark' ? (locale === 'en' ? 'Light mode' : 'מצב בהיר') : (locale === 'en' ? 'Dark mode' : 'מצב כהה')}
         >
           {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          {theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'}
+          {theme === 'dark' ? (locale === 'en' ? 'Light Mode' : 'מצב בהיר') : (locale === 'en' ? 'Dark Mode' : 'מצב כהה')}
         </button>
         <button
           onClick={toggleLocale}
@@ -360,7 +365,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           }}
         >
           <LogOut className="w-4 h-4" />
-          התנתקות
+          {locale === 'en' ? 'Logout' : 'התנתקות'}
         </button>
       </div>
     </>
@@ -368,7 +373,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <I18nContext.Provider value={locale}>
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen" dir={locale === 'en' ? 'ltr' : 'rtl'}>
       {/* Mobile hamburger */}
       <button
         onClick={() => setMobileOpen(true)}

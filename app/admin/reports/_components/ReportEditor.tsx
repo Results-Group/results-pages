@@ -6,6 +6,7 @@ import { Plus, Save, Eye, Send, Trash2, ChevronDown, ChevronUp, GripVertical, Fi
 import type { ReportTab, ReportBlock, ReportBlockType, PerformanceReport } from '@/lib/performance-reports'
 import { createStandardTemplate } from '@/lib/performance-reports'
 import BlockEditor from './BlockEditor'
+import { useT, useLocale } from '@/lib/i18n'
 
 interface Client {
   id: string
@@ -24,22 +25,24 @@ interface Props {
   reportId?: string
 }
 
-const BLOCK_TYPE_LABELS: Record<ReportBlockType, string> = {
-  kpi_grid: 'כרטיסי מדדים (KPI)',
-  strategic_note: 'פסקת סיכום',
-  funnel: 'משפך שיווקי',
-  data_rows: 'שורות נתונים',
-  source_grid: 'פילוח פלטפורמות',
-  table: 'טבלת נתונים',
-  chart: 'גרף',
-  insight_box: 'תובנה',
-  action_list: 'המלצות',
-  idea_cards: 'כרטיסי רעיונות',
-  text: 'טקסט חופשי',
+const BLOCK_TYPE_KEYS: Record<ReportBlockType, string> = {
+  kpi_grid: 'block.kpi_grid',
+  strategic_note: 'block.strategic_note',
+  funnel: 'block.funnel',
+  data_rows: 'block.data_rows',
+  source_grid: 'block.source_grid',
+  table: 'block.table',
+  chart: 'block.chart',
+  insight_box: 'block.insight_box',
+  action_list: 'block.action_list',
+  idea_cards: 'block.idea_cards',
+  text: 'block.text',
 }
 
 export default function ReportEditor({ mode, initial, reportId }: Props) {
   const router = useRouter()
+  const t = useT()
+  const locale = useLocale()
   const [saving, setSaving] = useState(false)
   const [status, setStatus] = useState(initial.status)
   const [clients, setClients] = useState<Client[]>([])
@@ -260,7 +263,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
       {/* Top bar */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-black" style={{ color: 'var(--admin-text-primary)' }}>
-          {mode === 'new' ? 'דוח חדש' : 'עריכת דוח'}
+          {mode === 'new' ? t('reports.new') : t('reports.edit')}
         </h2>
         <div className="flex items-center gap-2">
           {mode === 'edit' && (
@@ -285,26 +288,26 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
             style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)'; e.currentTarget.style.color = '#40e1d3' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}>
-            <FileText className="w-3.5 h-3.5" /> תבנית
+            <FileText className="w-3.5 h-3.5" /> {t('reports.loadTemplate')}
           </button>
           <button onClick={() => excelInputRef.current?.click()} disabled={importing}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all"
             style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)'; e.currentTarget.style.color = '#40e1d3' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}>
-            <Upload className="w-3.5 h-3.5" /> {importing ? 'מעבד...' : 'ייבוא Excel'}
+            <Upload className="w-3.5 h-3.5" /> {importing ? t('reports.importing') : t('reports.importExcel')}
           </button>
           <input ref={excelInputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden"
             onChange={e => { const f = e.target.files?.[0]; if (f) importExcel(f) }} />
           <button onClick={() => save()} disabled={saving}
             className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all"
             style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff' }}>
-            <Save className="w-4 h-4" /> {saving ? 'שומר...' : 'שמור טיוטה'}
+            <Save className="w-4 h-4" /> {saving ? t('reports.saving') : t('reports.saveDraft')}
           </button>
           <button onClick={() => save('published')} disabled={saving}
             className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all"
             style={{ background: 'rgba(64,225,211,0.15)', border: '1px solid rgba(64,225,211,0.4)', color: '#40e1d3' }}>
-            <Send className="w-4 h-4" /> פרסם
+            <Send className="w-4 h-4" /> {t('reports.publish')}
           </button>
         </div>
       </div>
@@ -313,7 +316,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
       <div className="rounded-xl p-5 mb-6 space-y-4" style={{ background: 'rgba(10,10,10,0.8)', border: '1px solid rgba(255,255,255,0.08)' }}>
         <div className="grid grid-cols-2 gap-4">
           <div ref={clientDropdownRef} className="relative">
-            <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>לקוח</label>
+            <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('common.client')}</label>
             <input value={client}
               onChange={e => { setClient(e.target.value); setClientId(null); setClientSearch(e.target.value); setShowClientDropdown(true) }}
               onFocus={() => setShowClientDropdown(true)}
@@ -331,19 +334,19 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
             )}
           </div>
           <div>
-            <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>שם הדוח</label>
+            <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('reports.reportName')}</label>
             <input value={reportName} onChange={e => setReportName(e.target.value)}
               placeholder="למשל: סקירה שנתית Q1 2026" className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>תקופת דוח</label>
+            <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('reports.period')}</label>
             <input value={periodLabel} onChange={e => setPeriodLabel(e.target.value)}
               placeholder="למשל: מאי 2025 – מאי 2026" className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle} />
           </div>
           <div>
-            <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>סיסמה (לא חובה)</label>
+            <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('common.password')} ({locale === 'en' ? 'optional' : 'לא חובה'})</label>
             <input type="password" value={password} onChange={e => setPassword(e.target.value)}
               placeholder="להגנת הדוח..." className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle} />
           </div>
@@ -372,7 +375,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
           style={{ color: 'rgba(64,225,211,0.6)', border: '1px dashed rgba(64,225,211,0.2)' }}
           onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.06)' }}
           onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
-          <Plus className="w-3.5 h-3.5 inline" /> הוסף טאב
+          <Plus className="w-3.5 h-3.5 inline" /> {t('reports.addTab')}
         </button>
       </div>
 
@@ -407,7 +410,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
               <div key={block.id} className="rounded-lg relative" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <div className="flex items-center gap-2 px-4 py-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                   <GripVertical className="w-3.5 h-3.5" style={{ color: 'rgba(255,255,255,0.2)' }} />
-                  <span className="text-[10px] font-bold uppercase" style={{ color: 'rgba(64,225,211,0.5)' }}>{BLOCK_TYPE_LABELS[block.type]}</span>
+                  <span className="text-[10px] font-bold uppercase" style={{ color: 'rgba(64,225,211,0.5)' }}>{t(BLOCK_TYPE_KEYS[block.type] as any)}</span>
                   <div className="flex-1" />
                   <button onClick={() => moveBlock(block.id, -1)} disabled={bIdx === 0}
                     className="p-1 rounded disabled:opacity-20" style={{ color: 'rgba(255,255,255,0.3)' }}><ChevronUp className="w-3.5 h-3.5" /></button>
@@ -434,16 +437,16 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
               style={{ color: '#40e1d3', border: '1px dashed rgba(64,225,211,0.2)', background: 'rgba(64,225,211,0.03)' }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.08)' }}
               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.03)' }}>
-              <Plus className="w-4 h-4" /> הוסף בלוק
+              <Plus className="w-4 h-4" /> {t('reports.addBlock')}
             </button>
             {showBlockPicker && (
               <div className="absolute z-20 bottom-full mb-1 w-full rounded-lg shadow-xl p-2 grid grid-cols-3 gap-1"
                 style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)' }}>
-                {(Object.keys(BLOCK_TYPE_LABELS) as ReportBlockType[]).map(type => (
+                {(Object.keys(BLOCK_TYPE_KEYS) as ReportBlockType[]).map(type => (
                   <button key={type} onClick={() => { addBlock(type); setShowBlockPicker(false) }}
                     className="text-right px-3 py-2 rounded text-xs font-semibold transition-colors hover:bg-white/5"
                     style={{ color: 'rgba(255,255,255,0.7)' }}>
-                    {BLOCK_TYPE_LABELS[type]}
+                    {t(BLOCK_TYPE_KEYS[type] as any)}
                   </button>
                 ))}
               </div>

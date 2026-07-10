@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, Calendar, BarChart3 } from 'lucide-react'
+import { useT, useLocale } from '@/lib/i18n'
 
 interface Report {
   id: string
@@ -24,15 +25,18 @@ async function fetchUserRole(): Promise<string> {
   } catch { return 'viewer' }
 }
 
-const STATUS_LABELS: Record<string, string> = { draft: 'טיוטה', published: 'פורסם', archived: 'ארכיון' }
 const STATUS_DOT: Record<string, string> = { draft: '#f59e0b', published: '#40e1d3', archived: '#64748b' }
 
 export default function ReportsListPage() {
+  const t = useT()
+  const locale = useLocale()
   const [reports, setReports] = useState<Report[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [copied, setCopied] = useState<string | null>(null)
   const [userRole, setUserRole] = useState('admin')
+
+  const STATUS_LABELS: Record<string, string> = { draft: t('common.draft'), published: t('common.published'), archived: t('common.archived') }
 
   useEffect(() => { fetchUserRole().then(r => setUserRole(r)) }, [])
 
@@ -71,7 +75,7 @@ export default function ReportsListPage() {
   const groupedByClient = (() => {
     const groups = new Map<string, Report[]>()
     for (const r of reports) {
-      const key = r.client?.trim() || 'ללא לקוח'
+      const key = r.client?.trim() || (locale === 'en' ? 'No client' : 'ללא לקוח')
       if (!groups.has(key)) groups.set(key, [])
       groups.get(key)!.push(r)
     }
@@ -84,8 +88,8 @@ export default function ReportsListPage() {
         <div className="flex items-center gap-4">
           <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: '#40e1d3', boxShadow: '0 0 12px rgba(64,225,211,0.6)' }} />
           <div>
-            <h2 className="text-2xl font-black tracking-tight" style={{ color: 'var(--admin-text-primary)' }}>דוחות ביצועים</h2>
-            <p className="text-sm mt-0.5" style={{ color: 'var(--admin-text-muted)' }}>ניהול דוחות פרפורמנס ושליחה ללקוחות</p>
+            <h2 className="text-2xl font-black tracking-tight" style={{ color: 'var(--admin-text-primary)' }}>{t('reports.title')}</h2>
+            <p className="text-sm mt-0.5" style={{ color: 'var(--admin-text-muted)' }}>{t('reports.subtitle')}</p>
           </div>
         </div>
         <Link
@@ -94,16 +98,16 @@ export default function ReportsListPage() {
           style={{ background: 'rgba(64,225,211,0.12)', border: '1px solid rgba(64,225,211,0.4)', color: '#40e1d3' }}
         >
           <Plus className="w-4 h-4" />
-          דוח חדש
+          {t('reports.new')}
         </Link>
       </div>
 
       {!loading && reports.length > 0 && (
         <div className="grid grid-cols-3 gap-3 mb-8">
           {[
-            { label: 'סה״כ דוחות', value: reports.length },
-            { label: 'פורסמו', value: reports.filter(r => r.status === 'published').length },
-            { label: 'לקוחות', value: groupedByClient.length },
+            { label: t('reports.totalReports'), value: reports.length },
+            { label: t('common.published'), value: reports.filter(r => r.status === 'published').length },
+            { label: t('nav.clients'), value: groupedByClient.length },
           ].map(kpi => (
             <div key={kpi.label} className="rounded-xl p-4" style={{ background: 'rgba(10,10,10,0.8)', border: '1px solid rgba(255,255,255,0.08)' }}>
               <div className="text-xs font-semibold mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>{kpi.label}</div>
@@ -114,11 +118,11 @@ export default function ReportsListPage() {
       )}
 
       <div className="relative mb-8">
-        <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'rgba(255,255,255,0.3)' }} />
+        <Search className="absolute start-4 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'rgba(255,255,255,0.3)' }} />
         <input
           type="text" value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="חיפוש לפי שם דוח או לקוח..."
-          className="w-full pr-11 pl-4 py-3 rounded-xl text-sm outline-none transition-all duration-200"
+          placeholder={t('reports.searchPlaceholder')}
+          className="w-full ps-11 pe-4 py-3 rounded-xl text-sm outline-none transition-all duration-200"
           style={{ background: 'rgba(10,10,10,0.8)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--admin-text-primary)' }}
           onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.4)' }}
           onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
@@ -128,17 +132,17 @@ export default function ReportsListPage() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24" style={{ color: 'var(--admin-text-muted)' }}>
           <div className="w-8 h-8 border-2 rounded-full animate-spin mb-4" style={{ borderColor: 'rgba(64,225,211,0.3)', borderTopColor: '#40e1d3' }} />
-          <span className="text-sm">טוען דוחות...</span>
+          <span className="text-sm">{t('common.loading')}</span>
         </div>
       ) : reports.length === 0 ? (
         <div className="relative text-center py-24 px-8 rounded-2xl" style={{ background: 'rgba(10,10,10,0.6)', border: '1px solid rgba(255,255,255,0.06)' }}>
           <BarChart3 className="w-12 h-12 mx-auto mb-4" style={{ color: 'rgba(255,255,255,0.15)' }} />
           <p className="text-lg font-bold mb-3" style={{ color: 'var(--admin-text-secondary)' }}>
-            {search ? 'לא נמצאו תוצאות' : 'אין דוחות עדיין'}
+            {search ? t('common.noResults') : t('reports.empty')}
           </p>
           {!search && (
             <Link href="/admin/reports/new" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold" style={{ background: 'rgba(64,225,211,0.12)', border: '1px solid rgba(64,225,211,0.3)', color: '#40e1d3' }}>
-              <Plus className="w-4 h-4" /> צרו את הדוח הראשון
+              <Plus className="w-4 h-4" /> {t('reports.createFirst')}
             </Link>
           )}
         </div>
@@ -175,7 +179,7 @@ export default function ReportsListPage() {
                             {r.period_label && <span className="font-medium">{r.period_label}</span>}
                             <span className="flex items-center gap-1.5">
                               <Calendar className="w-3 h-3" />
-                              {new Date(r.created_at).toLocaleDateString('he-IL')}
+                              {new Date(r.created_at).toLocaleDateString(locale === 'en' ? 'en-US' : 'he-IL')}
                             </span>
                           </div>
                         </div>
