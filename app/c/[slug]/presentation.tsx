@@ -65,6 +65,10 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 })
   const [feedback, setFeedback] = useState<Record<string, SlideFeedback>>({})
   const [feedbackError, setFeedbackError] = useState<Record<string, boolean>>({})
+  // Global copy switcher — shared across all slides that have copies enabled
+  const [activeCopyIdx, setActiveCopyIdx] = useState(0)
+  // Collect all copies from any slide (they're all the same set from campaign meta)
+  const globalCopies = slides.find(s => s.copies?.length)?.copies || []
 
   const showFeedback = Boolean(feedbackEnabled && campaignId)
 
@@ -201,6 +205,21 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
         <header className="pres-header">
           <div className="brand">Results Digital</div>
           <div className="header-right">
+            {/* Global copy switcher — shown only when campaign has copies */}
+            {globalCopies.length > 1 && (
+              <div className="global-copy-switcher">
+                <span className="global-copy-label">קופי:</span>
+                {globalCopies.map((_, i) => (
+                  <button
+                    key={i}
+                    className={`global-copy-btn${activeCopyIdx === i ? ' active' : ''}`}
+                    onClick={() => setActiveCopyIdx(i)}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="campaign-badge">{clientName} — {campaignName}</div>
             <button className="pdf-btn" onClick={handleExportPdf} disabled={exporting}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -243,7 +262,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
               {slides[activeSlide].type === 'concept' && <ConceptSlide slide={slides[activeSlide]} />}
               {slides[activeSlide].type === 'divider' && <DividerSlide slide={slides[activeSlide]} index={activeSlide} />}
               {slides[activeSlide].type === 'creatives' && (
-                <CreativesSlide slide={slides[activeSlide]} onAssetClick={setLightboxAsset} />
+                <CreativesSlide slide={slides[activeSlide]} activeCopyIdx={activeCopyIdx} onAssetClick={setLightboxAsset} />
               )}
               {slides[activeSlide].type === 'closing' && <ClosingSlide slide={slides[activeSlide]} />}
             </motion.section>
@@ -517,12 +536,16 @@ function DividerSlide({ slide, index }: { slide: SlideData; index: number }) {
   )
 }
 
-function CreativesSlide({ slide, onAssetClick }: { slide: SlideData; onAssetClick: (a: { url: string; caption?: string }) => void }) {
+function CreativesSlide({ slide, activeCopyIdx, onAssetClick }: {
+  slide: SlideData
+  activeCopyIdx: number
+  onAssetClick: (a: { url: string; caption?: string }) => void
+}) {
   const assets = slide.assets || []
   const isStory = slide.mockupType === 'instagram_story'
   const copies = slide.copies || []
-  const [activeCopyIdx, setActiveCopyIdx] = useState(0)
-  const activeCopy = copies.length > 0 ? (copies[activeCopyIdx] || '') : undefined
+  // activeCopy is set only when this slide has copies enabled
+  const activeCopy = copies.length > 0 ? (copies[activeCopyIdx] ?? copies[0] ?? '') : undefined
 
   return (
     <div>
@@ -537,20 +560,11 @@ function CreativesSlide({ slide, onAssetClick }: { slide: SlideData; onAssetClic
         </motion.p>
       )}
 
-      {/* Copy switcher tabs — shown when multiple copies exist */}
-      {copies.length > 0 && (
+      {/* Copy preview box — shown on this slide when copies are enabled for it */}
+      {activeCopy !== undefined && activeCopy !== '' && (
         <motion.div className="copy-switcher" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.4 }}>
-          <span className="copy-switcher-label">ורסיית טקסט:</span>
-          <div className="copy-tabs">
-            {copies.map((_, i) => (
-              <button key={i} className={`copy-tab${activeCopyIdx === i ? ' active' : ''}`} onClick={() => setActiveCopyIdx(i)}>
-                {i + 1}
-              </button>
-            ))}
-          </div>
-          {activeCopy && (
-            <div className="copy-text-preview" dir="auto">{activeCopy}</div>
-          )}
+          <span className="copy-switcher-label">טקסט פעיל — ורסיה {activeCopyIdx + 1}</span>
+          <div className="copy-text-preview" dir="auto">{activeCopy}</div>
         </motion.div>
       )}
 

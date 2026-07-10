@@ -6,6 +6,7 @@ export interface SlideData {
   title: string
   subtitle?: string
   content?: string
+  /** Campaign-level copy variations to show on this slide (only when section.useCopies is true) */
   copies?: string[]
   logoUrl?: string | null
   date?: string
@@ -19,11 +20,12 @@ export function buildCampaignSlides(opts: {
   client: string
   campaignName: string
   concept: string | null
+  copies?: string[]
   clientLogoUrl: string | null
   date: string
   sections: CampaignSection[]
 }): SlideData[] {
-  const { client, campaignName, concept, clientLogoUrl, date, sections } = opts
+  const { client, campaignName, concept, copies, clientLogoUrl, date, sections } = opts
   const slides: SlideData[] = []
 
   slides.push({ type: 'cover', title: client, subtitle: campaignName, logoUrl: clientLogoUrl, date })
@@ -41,7 +43,8 @@ export function buildCampaignSlides(opts: {
         key: section.id,
         title: section.title,
         content: section.description,
-        copies: (section as { copies?: string[] }).copies || [],
+        // Only forward copies to slides where the editor enabled them
+        copies: section.useCopies && copies?.length ? copies : [],
         mockupType: section.mockup_type,
         assets: section.assets || [],
         clientLogoUrl,

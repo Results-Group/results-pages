@@ -20,7 +20,7 @@ export interface EditorSection {
   title: string
   mockup_type: MockupType
   description: string
-  copies: string[]
+  useCopies: boolean
   assets: EditorAsset[]
 }
 
@@ -29,6 +29,7 @@ export interface CampaignMeta {
   clientId: string | null
   campaignName: string
   concept: string
+  copies: string[]
   password: string
   /** Whether the campaign currently has a password stored server-side (hash never leaves the server). */
   hasPassword: boolean
@@ -58,7 +59,7 @@ export function newSection(): EditorSection {
     title: '',
     mockup_type: 'general',
     description: '',
-    copies: [],
+    useCopies: false,
     assets: [],
   }
 }

@@ -104,6 +104,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
     client_id: doc.meta.clientId,
     campaign_name: doc.meta.campaignName.trim(),
     concept: doc.meta.concept.trim(),
+    copies: doc.meta.copies,
     // Only send the password when the user actually edited it — omitting the
     // key means "untouched" server-side (null would clear the stored hash).
     ...(passwordDirty ? { password: doc.meta.password.trim() || null } : {}),
@@ -116,7 +117,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
       title: s.title,
       mockup_type: s.mockup_type,
       description: s.description,
-      copies: s.copies || [],
+      useCopies: s.useCopies ?? false,
       assets: s.assets.map(a => ({ id: a.id, type: a.type, file_path: a.file_path, url: a.url, caption: a.caption })),
     })),
   }), [doc, status, passwordDirty])
@@ -440,6 +441,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
     client: doc.meta.client || 'שם לקוח',
     campaignName: doc.meta.campaignName || 'שם קמפיין',
     concept: doc.meta.concept || null,
+    copies: doc.meta.copies,
     clientLogoUrl,
     date: new Date().toLocaleDateString('he-IL', { year: 'numeric', month: 'long', day: 'numeric' }),
     sections: doc.sections.map(s => ({

@@ -18,8 +18,12 @@ export interface CampaignSection {
   title: string
   mockup_type: 'instagram_feed' | 'instagram_story' | 'facebook_feed' | 'video' | 'general' | 'divider'
   description?: string
-  copies?: string[]
+  useCopies?: boolean
   assets: CampaignAsset[]
+}
+
+export interface CampaignCopies {
+  copies?: string[]
 }
 
 export interface Campaign {
@@ -29,6 +33,7 @@ export interface Campaign {
   campaign_name: string
   slug: string
   concept: string | null
+  copies?: string[]
   logo_path: string | null
   logo_url?: string
   sections: CampaignSection[]
@@ -148,6 +153,7 @@ export async function updateCampaign(
     updateData.password = data.password ? await bcrypt.hash(data.password, 12) : null
   }
   if (data.workspace_id !== undefined) updateData.workspace_id = data.workspace_id
+  if (data.copies !== undefined) updateData.copies = data.copies
 
   const { data: campaign, error } = await supabase
     .from('campaigns')

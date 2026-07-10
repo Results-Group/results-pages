@@ -22,6 +22,7 @@ export default function NewCampaignPage() {
         clientId: null,
         campaignName: '',
         concept: '',
+        copies: [],
         password: '',
         hasPassword: false,
         logoPath: null,

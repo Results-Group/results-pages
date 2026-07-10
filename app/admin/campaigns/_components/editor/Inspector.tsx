@@ -108,56 +108,41 @@ export default function Inspector({
                 />
               </div>
 
-              <SectionDivider label="קופי / ווריאציות טקסט" />
-              <div className="space-y-2.5">
-                <p className="text-[10px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                  הוסף ורסיות טקסט. הלקוח יוכל לעבור בין הוורסיות ולראות כיצד כל טקסט נראה על הגרפיקות.
-                </p>
-                {(section.copies || []).map((copy, idx) => (
-                  <div key={idx} className="relative">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <span className="text-[10px] font-bold" style={{ color: 'rgba(64,225,211,0.6)' }}>ורסיה {idx + 1}</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const next = section.copies.filter((_, i) => i !== idx)
-                          onUpdateSection({ copies: next })
-                        }}
-                        className="p-0.5 rounded transition-colors ml-auto"
-                        style={{ color: 'rgba(255,255,255,0.2)' }}
-                        onMouseEnter={e => { e.currentTarget.style.color = '#ef4444' }}
-                        onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.2)' }}
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
+              {meta.copies.length > 0 && (
+                <>
+                  <SectionDivider label="קופי" />
+                  <button
+                    type="button"
+                    onClick={() => onUpdateSection({ useCopies: !section.useCopies })}
+                    className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg transition-all duration-200"
+                    style={{
+                      background: section.useCopies ? 'rgba(64,225,211,0.08)' : 'rgba(255,255,255,0.03)',
+                      border: `1px solid ${section.useCopies ? 'rgba(64,225,211,0.3)' : 'rgba(255,255,255,0.07)'}`,
+                    }}
+                  >
+                    {/* Toggle pill */}
+                    <div className="relative w-8 h-4 rounded-full transition-all duration-200 shrink-0"
+                      style={{ background: section.useCopies ? '#40e1d3' : 'rgba(255,255,255,0.1)' }}>
+                      <div className="absolute top-0.5 rounded-full w-3 h-3 bg-white shadow transition-all duration-200"
+                        style={{ left: section.useCopies ? '18px' : '2px' }} />
                     </div>
-                    <textarea
-                      value={copy}
-                      onChange={e => {
-                        const next = section.copies.map((c, i) => i === idx ? e.target.value : c)
-                        onUpdateSection({ copies: next })
-                      }}
-                      rows={3}
-                      placeholder={`טקסט ורסיה ${idx + 1}...`}
-                      dir="auto"
-                      className="w-full px-3 py-2.5 rounded-lg text-sm outline-none resize-none transition-all duration-200"
-                      style={fieldStyle}
-                      onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
-                      onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
-                    />
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => onUpdateSection({ copies: [...(section.copies || []), ''] })}
-                  className="flex items-center gap-1.5 w-full px-3 py-2.5 rounded-lg text-xs font-bold transition-all duration-200"
-                  style={{ color: '#40e1d3', border: '1px dashed rgba(64,225,211,0.2)', background: 'rgba(64,225,211,0.03)' }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.08)' }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.03)' }}
-                >
-                  <Plus className="w-3.5 h-3.5" /> הוסף ורסיית קופי
-                </button>
-              </div>
+                    <div className="flex-1 text-right">
+                      <p className="text-xs font-bold" style={{ color: section.useCopies ? '#40e1d3' : 'rgba(255,255,255,0.55)' }}>
+                        {section.useCopies ? 'קופי מופעל על שקף זה' : 'הפעל קופי על שקף זה'}
+                      </p>
+                      <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                        {meta.copies.length} ורסיות מוגדרות בקמפיין
+                      </p>
+                    </div>
+                  </button>
+                </>
+              )}
+
+              {meta.copies.length === 0 && (
+                <p className="text-[10px] leading-relaxed px-1" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                  כדי להפעיל קופי על שקף זה, הוסף ורסיות טקסט בטאב "קמפיין"
+                </p>
+              )}
             </>
           ) : (
             <div className="flex items-center justify-center h-32">
@@ -197,6 +182,51 @@ export default function Inspector({
                 onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
                 onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
               />
+            </div>
+
+            <SectionDivider label="קופי / ווריאציות טקסט" />
+            <div className="space-y-2.5">
+              <p className="text-[10px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                הזן כאן את ורסיות הטקסט פעם אחת, ואז בחר בטאב ״שקף״ על אילו שקפים להציג אותן.
+              </p>
+              {meta.copies.map((copy, idx) => (
+                <div key={idx}>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="text-[10px] font-bold" style={{ color: 'rgba(64,225,211,0.6)' }}>ורסיה {idx + 1}</span>
+                    <button
+                      type="button"
+                      onClick={() => onUpdateMeta({ copies: meta.copies.filter((_, i) => i !== idx) })}
+                      className="p-0.5 rounded transition-colors ml-auto"
+                      style={{ color: 'rgba(255,255,255,0.2)' }}
+                      onMouseEnter={e => { e.currentTarget.style.color = '#ef4444' }}
+                      onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.2)' }}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <textarea
+                    value={copy}
+                    onChange={e => onUpdateMeta({ copies: meta.copies.map((c, i) => i === idx ? e.target.value : c) })}
+                    rows={3}
+                    placeholder={`טקסט ורסיה ${idx + 1}...`}
+                    dir="auto"
+                    className="w-full px-3 py-2.5 rounded-lg text-sm outline-none resize-none transition-all duration-200"
+                    style={fieldStyle}
+                    onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
+                    onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
+                  />
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => onUpdateMeta({ copies: [...meta.copies, ''] })}
+                className="flex items-center gap-1.5 w-full px-3 py-2.5 rounded-lg text-xs font-bold transition-all duration-200"
+                style={{ color: '#40e1d3', border: '1px dashed rgba(64,225,211,0.2)', background: 'rgba(64,225,211,0.03)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.08)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.03)' }}
+              >
+                <Plus className="w-3.5 h-3.5" /> הוסף ורסיית קופי
+              </button>
             </div>
 
             <SectionDivider label="ברנדינג" />

@@ -107,6 +107,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     client: campaign.client,
     campaignName: campaign.campaign_name,
     concept: campaign.concept,
+    copies: campaign.copies || [],
     clientLogoUrl,
     date: formattedDate,
     sections: (campaign.sections || []) as CampaignSection[],

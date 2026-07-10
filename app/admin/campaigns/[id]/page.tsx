@@ -36,7 +36,7 @@ export default function EditCampaignPage() {
           title: s.title || '',
           mockup_type: (s.mockup_type || 'general') as MockupType,
           description: s.description || '',
-          copies: (s as { copies?: string[] }).copies || [],
+          useCopies: !!(s as { useCopies?: boolean }).useCopies,
           assets: (s.assets || []).map((a: Partial<EditorAsset>) => ({
             id: a.id || crypto.randomUUID(),
             type: (a.type || 'image') as 'image' | 'video',
@@ -53,6 +53,7 @@ export default function EditCampaignPage() {
             clientId: data.client_id || null,
             campaignName: data.campaign_name || '',
             concept: data.concept || '',
+            copies: Array.isArray(data.copies) ? data.copies : [],
             password: '',
             hasPassword: !!data.has_password,
             logoPath: data.logo_path || null,

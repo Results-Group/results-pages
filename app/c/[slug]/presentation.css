@@ -173,6 +173,14 @@
 /* Legacy cover slide — keep for safety (old data may reference it) */
 .campaign-pres .cover-slide{text-align:center;padding:80px 20px 60px;position:relative;min-height:75vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
 
+/* ── Global copy switcher (in header) ── */
+.global-copy-switcher{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:4px 10px}
+.global-copy-label{font-size:11px;font-weight:600;color:rgba(255,255,255,0.5);letter-spacing:.03em}
+.global-copy-btn{width:22px;height:22px;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.55);font-size:11px;font-weight:700;cursor:pointer;transition:background .15s,color .15s,border-color .15s;display:grid;place-items:center}
+.global-copy-btn:hover{background:rgba(64,225,211,0.15);color:#40e1d3;border-color:rgba(64,225,211,0.4)}
+.global-copy-btn.active{background:#40e1d3;color:#000;border-color:#40e1d3}
+
+/* ── Per-slide copy preview ── */
 /* ── Copy Switcher ── */
 .campaign-pres .copy-switcher{
   display:flex;flex-direction:column;gap:10px;
@@ -181,14 +189,6 @@
   border:1px solid rgba(64,225,211,0.12);border-radius:14px;
 }
 .campaign-pres .copy-switcher-label{font-size:0.72rem;font-weight:700;color:rgba(64,225,211,0.7);text-transform:uppercase;letter-spacing:0.08em}
-.campaign-pres .copy-tabs{display:flex;gap:6px;flex-wrap:wrap}
-.campaign-pres .copy-tab{
-  padding:6px 18px;border-radius:20px;font-size:0.78rem;font-weight:700;cursor:pointer;
-  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
-  color:var(--text-secondary);transition:all 0.2s;
-}
-.campaign-pres .copy-tab:hover{background:rgba(64,225,211,0.08);color:var(--brand-cyan);border-color:rgba(64,225,211,0.2)}
-.campaign-pres .copy-tab.active{background:rgba(64,225,211,0.12);color:var(--brand-cyan);border-color:rgba(64,225,211,0.35)}
 .campaign-pres .copy-text-preview{
   font-size:0.95rem;color:var(--text-secondary);line-height:1.75;
   padding:10px 14px;background:rgba(255,255,255,0.03);border-radius:10px;
