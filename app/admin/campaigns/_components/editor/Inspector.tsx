@@ -7,9 +7,19 @@ import WorkspaceSelector from '../../../_components/workspace-selector'
 import { MOCKUP_TYPES, type CampaignMeta, type EditorSection, type MockupType } from './types'
 
 const fieldStyle: React.CSSProperties = {
-  background: 'var(--admin-bg-elevated)',
-  border: '1px solid var(--admin-border)',
-  color: 'var(--admin-text-primary)',
+  background: 'rgba(255,255,255,0.04)',
+  border: '1px solid rgba(255,255,255,0.08)',
+  color: '#fff',
+}
+
+function SectionDivider({ label }: { label?: string }) {
+  return (
+    <div className="flex items-center gap-2 pt-2">
+      <div className="w-1 h-1 rounded-full" style={{ background: '#40e1d3' }} />
+      {label && <span className="text-[10px] font-bold tracking-wide uppercase" style={{ color: 'rgba(64,225,211,0.6)' }}>{label}</span>}
+      <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, rgba(64,225,211,0.15), transparent)' }} />
+    </div>
+  )
 }
 
 export default function Inspector({
@@ -30,18 +40,24 @@ export default function Inspector({
   return (
     <div className="flex flex-col h-full">
       {/* Tabs */}
-      <div className="flex gap-1 p-1 rounded-lg mb-4" style={{ background: 'var(--admin-bg)' }}>
+      <div className="flex gap-0.5 p-0.5 rounded-lg mb-5" style={{ background: 'rgba(255,255,255,0.04)' }}>
         <button
           onClick={() => setTab('slide')}
-          className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-colors"
-          style={tab === 'slide' ? { background: 'var(--admin-bg-elevated)', color: 'var(--admin-text-primary)' } : { color: 'var(--admin-text-muted)' }}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-bold transition-all duration-200"
+          style={tab === 'slide'
+            ? { background: 'rgba(64,225,211,0.12)', color: '#40e1d3' }
+            : { color: 'rgba(255,255,255,0.35)' }
+          }
         >
           <Settings2 className="w-3.5 h-3.5" /> שקף
         </button>
         <button
           onClick={() => setTab('campaign')}
-          className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-colors"
-          style={tab === 'campaign' ? { background: 'var(--admin-bg-elevated)', color: 'var(--admin-text-primary)' } : { color: 'var(--admin-text-muted)' }}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-bold transition-all duration-200"
+          style={tab === 'campaign'
+            ? { background: 'rgba(64,225,211,0.12)', color: '#40e1d3' }
+            : { color: 'rgba(255,255,255,0.35)' }
+          }
         >
           <LayoutGrid className="w-3.5 h-3.5" /> קמפיין
         </button>
@@ -51,48 +67,57 @@ export default function Inspector({
         {tab === 'slide' ? (
           section ? (
             <>
+              <SectionDivider label="תצוגה" />
               <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>סוג התצוגה</label>
+                <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>סוג התצוגה</label>
                 <select
                   value={section.mockup_type}
                   onChange={e => onUpdateSection({ mockup_type: e.target.value as MockupType })}
-                  className="w-full px-3 py-2.5 rounded-lg text-sm outline-none cursor-pointer"
+                  className="w-full px-3 py-2.5 rounded-lg text-sm outline-none cursor-pointer transition-all duration-200"
                   style={fieldStyle}
                 >
                   {(Object.entries(MOCKUP_TYPES) as [MockupType, string][]).map(([val, label]) => (
                     <option key={val} value={val}>{label}</option>
                   ))}
                 </select>
-                <p className="text-[11px] mt-2 leading-relaxed" style={{ color: 'var(--admin-text-muted)' }}>
-                  התצוגה קובעת כיצד הקריאייטיבים מוצגים ללקוח (מוקאפ רשתות חברתיות, וידאו, או תצוגה כללית).
+                <p className="text-[10px] mt-2 leading-relaxed" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                  התצוגה קובעת כיצד הקריאייטיבים מוצגים ללקוח.
                 </p>
               </div>
 
+              <SectionDivider label="תוכן" />
               <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>כותרת השקף</label>
+                <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>כותרת השקף</label>
                 <input
                   type="text" value={section.title} onChange={e => onUpdateSection({ title: e.target.value })}
                   placeholder="כותרת" dir="auto"
-                  className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle}
+                  className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={fieldStyle}
+                  onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
+                  onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>טקסט / קופי</label>
+                <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>טקסט / קופי</label>
                 <textarea
                   value={section.description} onChange={e => onUpdateSection({ description: e.target.value })}
                   rows={4} placeholder="טקסט שיופיע מעל הקריאייטיבים" dir="auto"
-                  className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none resize-none" style={fieldStyle}
+                  className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none resize-none transition-all duration-200" style={fieldStyle}
+                  onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
+                  onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
                 />
               </div>
             </>
           ) : (
-            <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>לא נבחר שקף</p>
+            <div className="flex items-center justify-center h-32">
+              <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.25)' }}>לא נבחר שקף</p>
+            </div>
           )
         ) : (
           <>
+            <SectionDivider label="פרטי הקמפיין" />
             <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>לקוח</label>
+              <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>לקוח</label>
               <ClientAutocomplete
                 value={meta.client}
                 workspaceId={meta.workspaceId}
@@ -102,72 +127,86 @@ export default function Inspector({
             </div>
 
             <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>שם הקמפיין</label>
+              <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>שם הקמפיין</label>
               <input
                 type="text" value={meta.campaignName} onChange={e => onUpdateMeta({ campaignName: e.target.value })}
                 placeholder="שם הקמפיין" dir="auto"
-                className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle}
+                className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={fieldStyle}
+                onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>קונספט</label>
+              <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>קונספט</label>
               <textarea
                 value={meta.concept} onChange={e => onUpdateMeta({ concept: e.target.value })}
                 rows={3} placeholder="תיאור קצר של הקונספט (שקף נפרד במצגת)" dir="auto"
-                className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none resize-none" style={fieldStyle}
+                className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none resize-none transition-all duration-200" style={fieldStyle}
+                onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
               />
             </div>
 
+            <SectionDivider label="ברנדינג" />
             <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>לוגו הלקוח</label>
+              <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>לוגו הלקוח</label>
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center shrink-0" style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}>
+                <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center shrink-0"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
                   {meta.logoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={meta.logoUrl} alt="" className="w-full h-full object-contain" />
                   ) : (
-                    <Upload className="w-4 h-4" style={{ color: 'var(--admin-text-muted)' }} />
+                    <Upload className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.2)' }} />
                   )}
                 </div>
                 <button
                   onClick={() => logoRef.current?.click()}
                   disabled={uploadingLogo}
-                  className="flex-1 px-3 py-2 rounded-lg text-xs font-medium disabled:opacity-40"
-                  style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)' }}
+                  className="flex-1 px-3 py-2.5 rounded-lg text-xs font-bold disabled:opacity-30 transition-all duration-200"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}
                 >
                   {uploadingLogo ? 'מעלה...' : meta.logoUrl ? 'החלף לוגו' : 'העלה לוגו'}
                 </button>
                 {meta.logoUrl && (
-                  <button onClick={() => onUpdateMeta({ logoPath: null, logoUrl: null })} className="p-2 rounded-lg" style={{ color: 'var(--admin-text-muted)' }}>
+                  <button onClick={() => onUpdateMeta({ logoPath: null, logoUrl: null })} className="p-2 rounded-lg transition-colors"
+                    style={{ color: 'rgba(255,255,255,0.3)' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#ef4444' }}
+                    onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)' }}>
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 )}
                 <input ref={logoRef} type="file" accept="image/*" className="hidden" onChange={e => { if (e.target.files?.[0]) onUploadLogo(e.target.files[0]) }} />
               </div>
-              <p className="text-[11px] mt-2" style={{ color: 'var(--admin-text-muted)' }}>
+              <p className="text-[10px] mt-2" style={{ color: 'rgba(255,255,255,0.2)' }}>
                 אם לא יוגדר לוגו, ישתמש בלוגו של הלקוח (אם קיים).
               </p>
             </div>
 
+            <SectionDivider label="אבטחה" />
             <div>
-              <label className="block text-xs font-medium mb-1.5 flex items-center gap-1.5" style={{ color: 'var(--admin-text-secondary)' }}>
-                <Lock className="w-3.5 h-3.5" /> סיסמה (הגנה על המצגת)
+              <label className="block text-[11px] font-bold mb-1.5 flex items-center gap-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                <Lock className="w-3.5 h-3.5" /> סיסמה
               </label>
               <input
                 type="password" value={meta.password}
                 onChange={e => { onPasswordDirty(true); onUpdateMeta({ password: e.target.value }) }}
                 placeholder={meta.hasPassword && !passwordDirty ? '••••••••' : 'ריק = ללא סיסמה'} dir="ltr"
-                className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle}
+                className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={fieldStyle}
+                onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
               />
               {meta.hasPassword && !passwordDirty && (
-                <div className="flex items-center justify-between mt-1.5">
-                  <span className="text-[11px]" style={{ color: 'var(--admin-accent)' }}>סיסמה מוגדרת</span>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-[10px] font-bold" style={{ color: '#40e1d3' }}>סיסמה מוגדרת</span>
                   <button
                     type="button"
                     onClick={() => { onPasswordDirty(true); onUpdateMeta({ password: '', hasPassword: false }) }}
-                    className="text-[11px] font-medium"
-                    style={{ color: 'var(--admin-danger)' }}
+                    className="text-[10px] font-bold transition-colors"
+                    style={{ color: 'rgba(239,68,68,0.6)' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#ef4444' }}
+                    onMouseLeave={e => { e.currentTarget.style.color = 'rgba(239,68,68,0.6)' }}
                   >
                     הסרת סיסמה
                   </button>
@@ -175,22 +214,26 @@ export default function Inspector({
               )}
             </div>
 
+            <SectionDivider label="תזמון" />
             <div>
-              <label className="block text-xs font-medium mb-1.5 flex items-center gap-1.5" style={{ color: 'var(--admin-text-secondary)' }}>
-                <Clock className="w-3.5 h-3.5" /> תזמון פרסום (אופציונלי)
+              <label className="block text-[11px] font-bold mb-1.5 flex items-center gap-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                <Clock className="w-3.5 h-3.5" /> תזמון פרסום
               </label>
               <input
                 type="datetime-local"
                 value={meta.publishAt || ''}
                 onChange={e => onUpdateMeta({ publishAt: e.target.value || null })}
                 dir="ltr"
-                className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle}
+                className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={fieldStyle}
+                onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
               />
-              <p className="text-[11px] mt-2" style={{ color: 'var(--admin-text-muted)' }}>
-                המצגת לא תהיה זמינה ללקוח עד למועד זה (תצוגה מקדימה לצוות תמיד זמינה).
+              <p className="text-[10px] mt-2" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                המצגת לא תהיה זמינה ללקוח עד למועד זה.
               </p>
             </div>
 
+            <SectionDivider label="סביבת עבודה" />
             <WorkspaceSelector value={meta.workspaceId} onChange={val => onUpdateMeta({ workspaceId: val })} />
           </>
         )}

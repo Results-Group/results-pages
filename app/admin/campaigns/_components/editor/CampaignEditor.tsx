@@ -370,39 +370,58 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
   return (
     <div className="flex flex-col h-[calc(100vh-1rem)] -m-4 sm:-m-5 lg:-m-7">
       {/* Toolbar */}
-      <div className="flex items-center gap-2 px-4 py-2.5 flex-wrap shrink-0" style={{ borderBottom: '1px solid var(--admin-border)', background: 'var(--admin-bg-elevated)' }}>
-        <Link href="/admin/campaigns" className="inline-flex items-center gap-1.5 text-sm font-medium" style={{ color: 'var(--admin-text-muted)' }}>
+      <div
+        className="flex items-center gap-2 px-4 py-2.5 flex-wrap shrink-0"
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'rgba(5,5,5,0.92)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
+      >
+        <Link href="/admin/campaigns" className="inline-flex items-center gap-1.5 text-sm font-bold transition-colors duration-200" style={{ color: 'rgba(255,255,255,0.4)' }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#40e1d3' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+        >
           <ArrowRight className="w-4 h-4" /> חזרה
         </Link>
 
-        <div className="h-5 w-px mx-1" style={{ background: 'var(--admin-border)' }} />
+        <div className="h-5 w-px mx-1" style={{ background: 'rgba(255,255,255,0.07)' }} />
 
-        <button onClick={undo} disabled={!canUndo} className="p-2 rounded-lg disabled:opacity-30" style={{ color: 'var(--admin-text-secondary)' }} title="בטל (Cmd+Z)">
+        <button onClick={undo} disabled={!canUndo} className="p-2 rounded-lg disabled:opacity-20 transition-colors duration-200" style={{ color: 'rgba(255,255,255,0.5)' }}
+          onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.color = '#40e1d3' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)' }}
+          title="בטל (Cmd+Z)">
           <Undo2 className="w-4 h-4" />
         </button>
-        <button onClick={redo} disabled={!canRedo} className="p-2 rounded-lg disabled:opacity-30" style={{ color: 'var(--admin-text-secondary)' }} title="בצע שוב (Cmd+Shift+Z)">
+        <button onClick={redo} disabled={!canRedo} className="p-2 rounded-lg disabled:opacity-20 transition-colors duration-200" style={{ color: 'rgba(255,255,255,0.5)' }}
+          onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.color = '#40e1d3' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)' }}
+          title="בצע שוב (Cmd+Shift+Z)">
           <Redo2 className="w-4 h-4" />
         </button>
 
-        <div className="h-5 w-px mx-1" style={{ background: 'var(--admin-border)' }} />
+        <div className="h-5 w-px mx-1" style={{ background: 'rgba(255,255,255,0.07)' }} />
 
         {/* Device toggle */}
-        <div className="flex gap-0.5 p-0.5 rounded-lg" style={{ background: 'var(--admin-bg)' }}>
-          <button onClick={() => setDevice('desktop')} className="p-1.5 rounded-md" style={device === 'desktop' ? { background: 'var(--admin-bg-elevated)', color: 'var(--admin-accent)' } : { color: 'var(--admin-text-muted)' }} title="דסקטופ">
+        <div className="flex gap-0.5 p-0.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.04)' }}>
+          <button onClick={() => setDevice('desktop')} className="p-1.5 rounded-md transition-all duration-200"
+            style={device === 'desktop' ? { background: 'rgba(64,225,211,0.12)', color: '#40e1d3' } : { color: 'rgba(255,255,255,0.35)' }} title="דסקטופ">
             <Monitor className="w-4 h-4" />
           </button>
-          <button onClick={() => setDevice('mobile')} className="p-1.5 rounded-md" style={device === 'mobile' ? { background: 'var(--admin-bg-elevated)', color: 'var(--admin-accent)' } : { color: 'var(--admin-text-muted)' }} title="מובייל">
+          <button onClick={() => setDevice('mobile')} className="p-1.5 rounded-md transition-all duration-200"
+            style={device === 'mobile' ? { background: 'rgba(64,225,211,0.12)', color: '#40e1d3' } : { color: 'rgba(255,255,255,0.35)' }} title="מובייל">
             <Smartphone className="w-4 h-4" />
           </button>
         </div>
 
-        <button onClick={() => setShowFullPreview(p => !p)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ color: showFullPreview ? 'var(--admin-accent)' : 'var(--admin-text-secondary)', border: '1px solid var(--admin-border)' }}>
+        <button onClick={() => setShowFullPreview(p => !p)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
+          style={showFullPreview
+            ? { color: '#40e1d3', background: 'rgba(64,225,211,0.1)', border: '1px solid rgba(64,225,211,0.3)' }
+            : { color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.08)' }
+          }>
           {showFullPreview ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
           תצוגת מצגת מלאה
         </button>
 
         {feedbackCount > 0 && (
-          <button onClick={() => setShowApprovals(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-secondary)' }}>
+          <button onClick={() => setShowApprovals(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
+            style={{ background: 'rgba(64,225,211,0.08)', border: '1px solid rgba(64,225,211,0.2)', color: '#40e1d3' }}>
             <MessageSquare className="w-3.5 h-3.5" /> אישורים {approvedCount}/{feedbackCount}
           </button>
         )}
@@ -410,35 +429,41 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
         <div className="flex-1" />
 
         {/* Save state */}
-        <span className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--admin-text-muted)' }}>
-          {saveState === 'saving' && <><Loader2 className="w-3.5 h-3.5 animate-spin" /> שומר...</>}
-          {saveState === 'saved' && <><CheckCircle2 className="w-3.5 h-3.5" style={{ color: 'var(--admin-accent)' }} /> נשמר</>}
-          {saveState === 'error' && <span style={{ color: 'var(--admin-danger)' }}>שגיאת שמירה</span>}
+        <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>
+          {saveState === 'saving' && <><Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: '#40e1d3' }} /> שומר...</>}
+          {saveState === 'saved' && <><CheckCircle2 className="w-3.5 h-3.5" style={{ color: '#40e1d3' }} /> נשמר</>}
+          {saveState === 'error' && <span style={{ color: '#ef4444' }}>שגיאת שמירה</span>}
         </span>
 
         {slug && (
-          <button onClick={copyLink} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)', color: copied ? 'var(--admin-accent)' : 'var(--admin-text-secondary)' }}>
+          <button onClick={copyLink} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
+            style={{ background: copied ? 'rgba(64,225,211,0.1)' : 'rgba(255,255,255,0.04)', border: `1px solid ${copied ? 'rgba(64,225,211,0.3)' : 'rgba(255,255,255,0.08)'}`, color: copied ? '#40e1d3' : 'rgba(255,255,255,0.5)' }}>
             {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
             {copied ? 'הועתק' : 'העתק לינק'}
           </button>
         )}
         {slug && (
-          <a href={`/c/${slug}?preview=1`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg" style={{ color: 'var(--admin-text-secondary)' }} title="פתח בטאב חדש">
+          <a href={`/c/${slug}?preview=1`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg transition-colors duration-200" style={{ color: 'rgba(255,255,255,0.4)' }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#40e1d3' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+            title="פתח בטאב חדש">
             <ExternalLink className="w-4 h-4" />
           </a>
         )}
 
-        <button onClick={() => save('draft')} disabled={saveState === 'saving'} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium disabled:opacity-40" style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)' }}>
+        <button onClick={() => save('draft')} disabled={saveState === 'saving'} className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold disabled:opacity-30 transition-all duration-200"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}>
           <Save className="w-3.5 h-3.5" /> טיוטה
         </button>
-        <button onClick={() => save('published', { redirect: true })} disabled={saveState === 'saving'} className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium disabled:opacity-40" style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}>
+        <button onClick={() => save('published', { redirect: true })} disabled={saveState === 'saving'} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold disabled:opacity-30 transition-all duration-200"
+          style={{ background: 'rgba(64,225,211,0.15)', border: '1px solid rgba(64,225,211,0.4)', color: '#40e1d3' }}>
           <Send className="w-3.5 h-3.5" /> {status === 'published' ? 'עדכן ופרסם' : 'פרסום'}
         </button>
       </div>
 
       {/* Body: filmstrip | canvas | inspector */}
       <div className="flex flex-1 min-h-0">
-        <aside className="w-56 shrink-0 overflow-y-auto p-3 hidden md:block" style={{ borderLeft: '1px solid var(--admin-border)', background: 'var(--admin-bg)' }}>
+        <aside className="w-56 shrink-0 overflow-y-auto p-3 hidden md:block" style={{ borderLeft: '1px solid rgba(255,255,255,0.06)', background: '#050505' }}>
           <SlideFilmstrip
             sections={doc.sections}
             activeId={activeId}
@@ -474,7 +499,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
           )}
         </main>
 
-        <aside className="w-72 shrink-0 overflow-y-auto p-4 hidden lg:block" style={{ borderRight: '1px solid var(--admin-border)', background: 'var(--admin-bg-elevated)' }}>
+        <aside className="w-72 shrink-0 overflow-y-auto p-4 hidden lg:block" style={{ borderRight: '1px solid rgba(255,255,255,0.06)', background: 'rgba(10,10,10,0.95)' }}>
           <Inspector
             section={activeSection}
             meta={doc.meta}
@@ -490,26 +515,33 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
 
       {/* Approvals panel */}
       {showApprovals && (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={() => setShowApprovals(false)}>
-          <div className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-xl p-5" style={{ background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)' }} onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold" style={{ color: 'var(--admin-text-primary)' }}>אישורי לקוח ({approvedCount}/{feedbackCount})</h3>
-              <button onClick={() => setShowApprovals(false)} style={{ color: 'var(--admin-text-muted)' }}><X className="w-4 h-4" /></button>
+        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }} onClick={() => setShowApprovals(false)}>
+          <div className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-2xl p-6" style={{ background: 'rgba(10,10,10,0.95)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full" style={{ background: '#40e1d3', boxShadow: '0 0 8px rgba(64,225,211,0.5)' }} />
+                <h3 className="text-base font-bold" style={{ color: '#fff' }}>אישורי לקוח ({approvedCount}/{feedbackCount})</h3>
+              </div>
+              <button onClick={() => setShowApprovals(false)} className="p-1.5 rounded-lg transition-colors" style={{ color: 'rgba(255,255,255,0.3)' }}
+                onMouseEnter={e => { e.currentTarget.style.color = '#fff' }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)' }}>
+                <X className="w-4 h-4" />
+              </button>
             </div>
             <div className="space-y-2">
               {doc.sections.filter(s => feedback[s.id]).map(s => {
                 const fb = feedback[s.id]
-                const color = fb.status === 'approved' ? '#2EC4B6' : fb.status === 'rejected' ? '#ef4444' : '#94a3b8'
+                const color = fb.status === 'approved' ? '#40e1d3' : fb.status === 'rejected' ? '#ef4444' : '#64748b'
                 const label = fb.status === 'approved' ? 'אושר' : fb.status === 'rejected' ? 'נדרש שינוי' : 'ממתין'
                 return (
-                  <div key={s.id} className="rounded-lg p-3" style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="w-2 h-2 rounded-full" style={{ background: color }} />
-                      <span className="text-sm font-medium flex-1 truncate" style={{ color: 'var(--admin-text-primary)' }}>{s.title || 'שקף ללא כותרת'}</span>
-                      <span className="text-xs font-medium" style={{ color }}>{label}</span>
+                  <div key={s.id} className="rounded-xl p-3.5 transition-all duration-200" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div className="flex items-center gap-2.5 mb-1">
+                      <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color, boxShadow: `0 0 6px ${color}50` }} />
+                      <span className="text-sm font-bold flex-1 truncate" style={{ color: '#fff' }}>{s.title || 'שקף ללא כותרת'}</span>
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded" style={{ color, background: `${color}15` }}>{label}</span>
                     </div>
-                    {fb.comment && <p className="text-xs mt-1" style={{ color: 'var(--admin-text-secondary)' }}>{fb.comment}</p>}
-                    {fb.author && <p className="text-[11px] mt-1" style={{ color: 'var(--admin-text-muted)' }}>— {fb.author}</p>}
+                    {fb.comment && <p className="text-xs mt-1.5" style={{ color: 'rgba(255,255,255,0.6)' }}>{fb.comment}</p>}
+                    {fb.author && <p className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>— {fb.author}</p>}
                   </div>
                 )
               })}
@@ -521,11 +553,12 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
       {/* Toasts */}
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 items-center">
         {toasts.map(t => (
-          <div key={t.id} className="px-4 py-2 rounded-lg text-sm font-medium shadow-lg"
+          <div key={t.id} className="px-5 py-2.5 rounded-xl text-sm font-bold shadow-2xl"
             style={{
-              background: t.kind === 'error' ? 'var(--admin-danger)' : t.kind === 'success' ? 'var(--admin-accent)' : 'var(--admin-bg-elevated)',
-              color: t.kind === 'info' ? 'var(--admin-text-primary)' : '#fff',
-              border: t.kind === 'info' ? '1px solid var(--admin-border)' : 'none',
+              background: t.kind === 'error' ? 'rgba(239,68,68,0.9)' : t.kind === 'success' ? 'rgba(64,225,211,0.15)' : 'rgba(10,10,10,0.95)',
+              color: t.kind === 'error' ? '#fff' : t.kind === 'success' ? '#40e1d3' : '#fff',
+              border: `1px solid ${t.kind === 'error' ? 'rgba(239,68,68,0.5)' : t.kind === 'success' ? 'rgba(64,225,211,0.3)' : 'rgba(255,255,255,0.1)'}`,
+              backdropFilter: 'blur(12px)',
             }}>
             {t.message}
           </div>

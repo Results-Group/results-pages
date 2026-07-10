@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
-import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, MessageCircle, Files } from 'lucide-react'
+import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, MessageCircle, Files, Image as ImageIcon, Calendar } from 'lucide-react'
 import { whatsappShareUrl } from '@/lib/share'
 
 interface Campaign {
@@ -32,10 +32,10 @@ async function fetchUserRole(): Promise<string> {
 }
 
 const STATUS_LABELS: Record<string, string> = { draft: 'טיוטה', published: 'פורסם', archived: 'ארכיון' }
-const STATUS_STYLES: Record<string, { color: string; bg: string }> = {
-  draft: { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
-  published: { color: '#22c55e', bg: 'rgba(34,197,94,0.12)' },
-  archived: { color: '#94a3b8', bg: 'rgba(148,163,184,0.12)' },
+const STATUS_DOT: Record<string, string> = {
+  draft: '#f59e0b',
+  published: '#40e1d3',
+  archived: '#64748b',
 }
 
 export default function CampaignsListPage() {
@@ -110,7 +110,7 @@ export default function CampaignsListPage() {
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`למחוק את הקמפיין "${name}"? פעולה זו בלתי הפיכה.`)) return
+    if (!confirm(`למחוק את הקמפיין "${name}"?`)) return
     await fetch(`/api/campaigns/${id}`, { method: 'DELETE' })
     setCampaigns(prev => prev.filter(c => c.id !== id))
   }
@@ -122,6 +122,7 @@ export default function CampaignsListPage() {
   }
 
   const totalAssets = (c: Campaign) => parseSections(c.sections).reduce((sum, s) => sum + (s.assets?.length || 0), 0)
+  const totalSections = (c: Campaign) => parseSections(c.sections).length
 
   const groupedByClient = (() => {
     const groups = new Map<string, Campaign[]>()
@@ -133,174 +134,246 @@ export default function CampaignsListPage() {
     return Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0], 'he'))
   })()
 
+  const totalCampaigns = campaigns.length
+  const publishedCount = campaigns.filter(c => c.status === 'published').length
+
   return (
     <div className="max-w-6xl">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-xl font-semibold" style={{ color: 'var(--admin-text-primary)' }}>קמפיינים</h2>
-          <p className="text-sm mt-1" style={{ color: 'var(--admin-text-muted)' }}>ניהול קמפיינים קריאייטיביים ושליחה ללקוחות</p>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: '#40e1d3', boxShadow: '0 0 12px rgba(64,225,211,0.6)' }} />
+          <div>
+            <h2 className="text-2xl font-black tracking-tight" style={{ color: 'var(--admin-text-primary)' }}>קמפיינים</h2>
+            <p className="text-sm mt-0.5" style={{ color: 'var(--admin-text-muted)' }}>ניהול קמפיינים קריאייטיביים ושליחה ללקוחות</p>
+          </div>
         </div>
         <Link
           href="/admin/campaigns/new"
-          className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-          style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
-          onMouseEnter={e => { e.currentTarget.style.opacity = '0.9' }}
-          onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
+          className="campaign-btn-primary flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200"
+          style={{
+            background: 'rgba(64,225,211,0.12)',
+            border: '1px solid rgba(64,225,211,0.4)',
+            color: '#40e1d3',
+          }}
         >
           <Plus className="w-4 h-4" />
           קמפיין חדש
         </Link>
       </div>
 
+      {/* KPI Summary */}
+      {!loading && campaigns.length > 0 && (
+        <div className="grid grid-cols-3 gap-3 mb-8">
+          {[
+            { label: 'סה״כ קמפיינים', value: totalCampaigns },
+            { label: 'פורסמו', value: publishedCount },
+            { label: 'לקוחות', value: groupedByClient.length },
+          ].map(kpi => (
+            <div
+              key={kpi.label}
+              className="rounded-xl p-4 transition-all duration-300"
+              style={{
+                background: 'rgba(10,10,10,0.8)',
+                border: '1px solid rgba(255,255,255,0.08)',
+              }}
+            >
+              <div className="text-xs font-semibold mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>{kpi.label}</div>
+              <div className="text-2xl font-black" style={{ color: '#40e1d3' }}>{kpi.value}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Search */}
-      <div className="relative mb-6">
-        <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--admin-text-muted)' }} />
+      <div className="relative mb-8">
+        <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'rgba(255,255,255,0.3)' }} />
         <input
           type="text"
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="חיפוש לפי שם קמפיין או לקוח..."
-          className="w-full pr-10 pl-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
-          style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)' }}
-          onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
-          onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
+          className="w-full pr-11 pl-4 py-3 rounded-xl text-sm outline-none transition-all duration-200"
+          style={{
+            background: 'rgba(10,10,10,0.8)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: 'var(--admin-text-primary)',
+          }}
+          onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.4)'; e.currentTarget.style.boxShadow = '0 0 0 1px rgba(64,225,211,0.15)' }}
+          onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.boxShadow = 'none' }}
         />
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20" style={{ color: 'var(--admin-text-muted)' }}>
+        <div className="flex flex-col items-center justify-center py-24" style={{ color: 'var(--admin-text-muted)' }}>
+          <div className="w-8 h-8 border-2 rounded-full animate-spin mb-4" style={{ borderColor: 'rgba(64,225,211,0.3)', borderTopColor: '#40e1d3' }} />
           <span className="text-sm">טוען קמפיינים...</span>
         </div>
       ) : campaigns.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="text-lg font-medium mb-2" style={{ color: 'var(--admin-text-muted)' }}>
+        <div className="relative text-center py-24 px-8 rounded-2xl" style={{ background: 'rgba(10,10,10,0.6)', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="absolute top-0 right-0 w-16 h-16" style={{ borderTop: '2px solid rgba(64,225,211,0.3)', borderRight: '2px solid rgba(64,225,211,0.3)' }} />
+          <div className="absolute bottom-0 left-0 w-16 h-16" style={{ borderBottom: '2px solid rgba(64,225,211,0.15)', borderLeft: '2px solid rgba(64,225,211,0.15)' }} />
+          <p className="text-lg font-bold mb-3" style={{ color: 'var(--admin-text-secondary)' }}>
             {search ? 'לא נמצאו תוצאות' : 'אין קמפיינים עדיין'}
           </p>
           {!search && (
-            <Link href="/admin/campaigns/new" className="text-sm font-medium" style={{ color: 'var(--admin-accent)' }}>
-              צרו את הקמפיין הראשון
+            <Link
+              href="/admin/campaigns/new"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200"
+              style={{ background: 'rgba(64,225,211,0.12)', border: '1px solid rgba(64,225,211,0.3)', color: '#40e1d3' }}
+            >
+              <Plus className="w-4 h-4" /> צרו את הקמפיין הראשון
             </Link>
           )}
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-10">
           {groupedByClient.map(([clientName, clientCampaigns]) => (
             <div key={clientName}>
-              <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-sm font-semibold" style={{ color: 'var(--admin-accent)' }}>{clientName}</h3>
-                <span
-                  className="text-[10px] px-2 py-0.5 rounded-md font-medium"
-                  style={{ color: 'var(--admin-text-muted)', background: 'var(--admin-bg-elevated)' }}
-                >
-                  {clientCampaigns.length} {clientCampaigns.length === 1 ? 'קמפיין' : 'קמפיינים'}
+              {/* Client group header */}
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#40e1d3', boxShadow: '0 0 8px rgba(64,225,211,0.5)' }} />
+                <h3 className="text-sm font-bold tracking-wide" style={{ color: '#40e1d3' }}>{clientName}</h3>
+                <span className="text-[10px] px-2.5 py-0.5 rounded font-semibold" style={{ color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.04)' }}>
+                  {clientCampaigns.length}
                 </span>
-                <div className="flex-1 h-px" style={{ background: 'var(--admin-border)' }} />
+                <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, rgba(64,225,211,0.15), transparent)' }} />
               </div>
+
               <div className="space-y-3">
                 {clientCampaigns.map(c => {
-                  const ss = STATUS_STYLES[c.status] || STATUS_STYLES.draft
+                  const dotColor = STATUS_DOT[c.status] || STATUS_DOT.draft
+                  const assets = totalAssets(c)
+                  const sections = totalSections(c)
+
                   return (
                     <div
                       key={c.id}
-                      className="flex items-center gap-3 p-3.5 rounded-xl transition-colors"
-                      style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}
+                      className="campaign-card group relative rounded-xl p-4 transition-all duration-300"
+                      style={{
+                        background: 'rgba(10,10,10,0.8)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.borderColor = 'rgba(64,225,211,0.25)'
+                        e.currentTarget.style.transform = 'translateY(-2px)'
+                        e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(64,225,211,0.15)'
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+                        e.currentTarget.style.transform = 'translateY(0)'
+                        e.currentTarget.style.boxShadow = 'none'
+                      }}
                     >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <h3 className="text-sm font-semibold truncate" style={{ color: 'var(--admin-text-primary)' }}>{c.campaign_name}</h3>
-                          <span
-                            className="text-[10px] px-2 py-0.5 rounded-md font-medium flex-shrink-0"
-                            style={{ color: ss.color, background: ss.bg }}
-                          >
-                            {STATUS_LABELS[c.status]}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--admin-text-muted)' }}>
-                          <span>{totalAssets(c)} תוצרים</span>
-                          <span>{new Date(c.created_at).toLocaleDateString('he-IL')}</span>
-                          {(() => {
-                            const ws = workspaces.find(w => w.id === c.workspace_id)
-                            return ws ? (
-                              <span className="px-2 py-0.5 rounded-md font-medium" style={{ background: `${ws.color}20`, color: ws.color, fontSize: '10px' }}>
-                                {ws.name}
-                              </span>
-                            ) : null
-                          })()}
-                        </div>
-                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2.5 mb-2">
+                            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: dotColor, boxShadow: `0 0 8px ${dotColor}60` }} />
+                            <h3 className="text-sm font-bold truncate" style={{ color: '#fff' }}>{c.campaign_name}</h3>
+                            <span
+                              className="text-[10px] px-2 py-0.5 rounded font-semibold shrink-0"
+                              style={{ color: dotColor, background: `${dotColor}18` }}
+                            >
+                              {STATUS_LABELS[c.status]}
+                            </span>
+                          </div>
 
-                      <div className="flex items-center gap-1.5">
-                        {c.status === 'published' && (
-                          <>
-                            <a
-                              href={getCampaignUrl(c.slug)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-2.5 rounded-lg transition-colors"
-                              style={{ color: 'var(--admin-text-muted)' }}
-                              onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-bg)'; e.currentTarget.style.color = 'var(--admin-text-primary)' }}
-                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
-                              title="פתיחה"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                            </a>
+                          {/* Metrics row */}
+                          <div className="flex items-center gap-4 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                            <span className="flex items-center gap-1.5">
+                              <ImageIcon className="w-3 h-3" />
+                              <span className="font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>{assets}</span> תוצרים
+                            </span>
+                            <span className="font-medium">{sections} שקפים</span>
+                            <span className="flex items-center gap-1.5">
+                              <Calendar className="w-3 h-3" />
+                              {new Date(c.created_at).toLocaleDateString('he-IL')}
+                            </span>
+                            {(() => {
+                              const ws = workspaces.find(w => w.id === c.workspace_id)
+                              return ws ? (
+                                <span className="px-2 py-0.5 rounded font-semibold" style={{ background: `${ws.color}15`, color: ws.color, fontSize: '10px' }}>
+                                  {ws.name}
+                                </span>
+                              ) : null
+                            })()}
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                          {c.status === 'published' && (
+                            <>
+                              <a
+                                href={getCampaignUrl(c.slug)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 rounded-lg transition-all duration-200"
+                                style={{ color: 'rgba(255,255,255,0.4)' }}
+                                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.1)'; e.currentTarget.style.color = '#40e1d3' }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+                                title="פתיחה"
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                              </a>
+                              <button
+                                onClick={() => handleCopy(c.slug)}
+                                className="p-2 rounded-lg transition-all duration-200"
+                                style={{ color: copied === c.slug ? '#40e1d3' : 'rgba(255,255,255,0.4)' }}
+                                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.1)' }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+                                title="העתקת לינק"
+                              >
+                                {copied === c.slug ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                              </button>
+                              <button
+                                onClick={() => handleWhatsApp(c)}
+                                className="p-2 rounded-lg transition-all duration-200"
+                                style={{ color: 'rgba(255,255,255,0.4)' }}
+                                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(37,211,102,0.1)'; e.currentTarget.style.color = '#25d366' }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+                                title="שליחה בוואטסאפ"
+                              >
+                                <MessageCircle className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                          {userRole !== 'viewer' && (
                             <button
-                              onClick={() => handleCopy(c.slug)}
-                              className="p-2.5 rounded-lg transition-colors"
-                              style={{ color: copied === c.slug ? 'var(--admin-success)' : 'var(--admin-text-muted)' }}
-                              onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-bg)' }}
-                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-                              title="העתקת לינק"
+                              onClick={() => handleDuplicate(c)}
+                              disabled={duplicating === c.id}
+                              className="p-2 rounded-lg transition-all duration-200 disabled:opacity-30"
+                              style={{ color: 'rgba(255,255,255,0.4)' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.1)'; e.currentTarget.style.color = '#40e1d3' }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+                              title="שכפול"
                             >
-                              {copied === c.slug ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                              <Files className="w-4 h-4" />
                             </button>
+                          )}
+                          <Link
+                            href={`/admin/campaigns/${c.id}`}
+                            className="p-2 rounded-lg transition-all duration-200"
+                            style={{ color: 'rgba(255,255,255,0.4)' }}
+                            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.1)'; e.currentTarget.style.color = '#40e1d3' }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+                            title="עריכה"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </Link>
+                          {userRole === 'admin' && (
                             <button
-                              onClick={() => handleWhatsApp(c)}
-                              className="p-2.5 rounded-lg transition-colors"
-                              style={{ color: 'var(--admin-text-muted)' }}
-                              onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-bg)'; e.currentTarget.style.color = '#25d366' }}
-                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
-                              title="שליחה בוואטסאפ"
+                              onClick={() => handleDelete(c.id, c.campaign_name)}
+                              className="p-2 rounded-lg transition-all duration-200"
+                              style={{ color: 'rgba(255,255,255,0.4)' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; e.currentTarget.style.color = '#ef4444' }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+                              title="מחיקה"
                             >
-                              <MessageCircle className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
-                          </>
-                        )}
-                        {userRole !== 'viewer' && (
-                          <button
-                            onClick={() => handleDuplicate(c)}
-                            disabled={duplicating === c.id}
-                            className="p-2.5 rounded-lg transition-colors disabled:opacity-40"
-                            style={{ color: 'var(--admin-text-muted)' }}
-                            onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-bg)'; e.currentTarget.style.color = 'var(--admin-accent)' }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
-                            title="שכפול"
-                          >
-                            <Files className="w-4 h-4" />
-                          </button>
-                        )}
-                        <Link
-                          href={`/admin/campaigns/${c.id}`}
-                          className="p-2.5 rounded-lg transition-colors"
-                          style={{ color: 'var(--admin-text-muted)' }}
-                          onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-bg)'; e.currentTarget.style.color = 'var(--admin-accent)' }}
-                          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
-                          title="עריכה"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </Link>
-                        {userRole === 'admin' && (
-                          <button
-                            onClick={() => handleDelete(c.id, c.campaign_name)}
-                            className="p-2.5 rounded-lg transition-colors"
-                            style={{ color: 'var(--admin-text-muted)' }}
-                            onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-danger-bg)'; e.currentTarget.style.color = 'var(--admin-danger)' }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
-                            title="מחיקה"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
+                          )}
+                        </div>
                       </div>
                     </div>
                   )
