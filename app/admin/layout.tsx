@@ -366,9 +366,57 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Content */}
-      <main className="flex-1 p-4 pt-14 sm:p-5 sm:pt-14 lg:p-7 lg:pt-7 overflow-auto admin-content min-w-0">
-        {children}
+      <main className="flex-1 flex flex-col overflow-auto admin-content min-w-0">
+        <div className="flex-1 p-4 pt-14 sm:p-5 sm:pt-14 lg:p-7 lg:pt-7">
+          {children}
+        </div>
+        <AdminFooter />
       </main>
     </div>
+  )
+}
+
+function AdminFooter() {
+  return (
+    <footer
+      className="mt-auto px-6 py-4 flex items-center justify-between gap-4 flex-wrap"
+      style={{ borderTop: '1px solid var(--admin-border)' }}
+    >
+      <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>
+        © {new Date().getFullYear()} Results Group
+      </p>
+
+      <div className="flex items-center gap-3">
+        <a
+          href="https://www.instagram.com/results_group/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="p-1.5 rounded-lg transition-opacity hover:opacity-70"
+          style={{ color: 'var(--admin-text-muted)' }}
+          title="Instagram"
+        >
+          {/* Instagram icon */}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+          </svg>
+        </a>
+
+        <a
+          href="https://www.tiktok.com/@resultsgroup?_r=1&_t=ZS-92QnmolMOoC"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="p-1.5 rounded-lg transition-opacity hover:opacity-70"
+          style={{ color: 'var(--admin-text-muted)' }}
+          title="TikTok"
+        >
+          {/* TikTok icon */}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/>
+          </svg>
+        </a>
+      </div>
+    </footer>
   )
 }
