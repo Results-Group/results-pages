@@ -115,6 +115,8 @@ const en: Record<TranslationKey, string> = {
   'clients.syncing': 'Syncing...',
   'clients.newClient': 'New Client',
   'clients.noClients': 'No clients yet',
+  'clients.noResults': 'No matching clients found',
+  'clients.noClientsHint': 'Click "New Client" to get started',
   'clients.deleteConfirm': 'Delete client? Linked pages and campaigns will lose their association.',
   'clients.deleteError': 'Error deleting client',
   'clients.createTitle': 'New Client',

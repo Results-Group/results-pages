@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest, getActiveWorkspaceId, requireWorkspacePermission } from '@/lib/auth'
 import { getClients, createClient, getClientByName } from '@/lib/clients'
+import { supabase } from '@/lib/supabase'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
 
@@ -22,6 +23,18 @@ export async function GET(req: NextRequest) {
 
   try {
     const clients = await getClients(workspaceId)
+    const clientIds = clients.map(c => c.id)
+
+    const [{ data: campCounts }, { data: pageCounts }] = await Promise.all([
+      supabase.from('campaigns').select('client_id').is('deleted_at', null).in('client_id', clientIds),
+      supabase.from('pages').select('client_id').is('deleted_at', null).in('client_id', clientIds),
+    ])
+
+    const campMap: Record<string, number> = {}
+    const pageMap: Record<string, number> = {}
+    for (const c of campCounts || []) campMap[c.client_id] = (campMap[c.client_id] || 0) + 1
+    for (const p of pageCounts || []) pageMap[p.client_id] = (pageMap[p.client_id] || 0) + 1
+
     return NextResponse.json(
       clients.map(c => ({
         id: c.id,
@@ -29,6 +42,9 @@ export async function GET(req: NextRequest) {
         logo_url: c.logo_url || null,
         brand_color: c.brand_color,
         workspace_id: c.workspace_id,
+        campaign_count: campMap[c.id] || 0,
+        page_count: pageMap[c.id] || 0,
+        contacts_count: (c.contacts || []).length,
       })),
     )
   } catch (err) {

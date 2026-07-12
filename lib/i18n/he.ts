@@ -113,6 +113,8 @@ const he = {
   'clients.syncing': 'מסנכרן...',
   'clients.newClient': 'לקוח חדש',
   'clients.noClients': 'אין לקוחות עדיין',
+  'clients.noResults': 'לא נמצאו לקוחות תואמים',
+  'clients.noClientsHint': 'לחץ "לקוח חדש" כדי להתחיל',
   'clients.deleteConfirm': 'למחוק את הלקוח? דפים וקמפיינים משויכים לא יימחקו אך יאבדו את השיוך.',
   'clients.deleteError': 'שגיאה במחיקת הלקוח',
   'clients.createTitle': 'לקוח חדש',
