@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     })
 
     await logAudit({ actor: session, action: 'create', entity_type: 'report', entity_id: report.id, entity_label: report.report_name, workspace_id: workspaceId })
-    return NextResponse.json(report, { status: 201 })
+    return NextResponse.json({ ...report, has_password: !!report.password, password: undefined }, { status: 201 })
   } catch (err) {
     captureException(err, { route: 'POST /api/reports' })
     return NextResponse.json({ error: 'שגיאה ביצירת דוח' }, { status: 500 })

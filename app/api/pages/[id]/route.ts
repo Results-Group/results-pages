@@ -3,6 +3,7 @@ import { getPageById, updatePage, deletePage, purgePage, moveFile, getPageByShor
 import { getSessionFromRequest, requireResourcePermission } from '@/lib/auth'
 import { findOrCreateClient } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
+import { captureException } from '@/lib/logger'
 
 interface Ctx { params: Promise<{ id: string }> }
 
@@ -56,16 +57,22 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
   if (needsMove) {
     const newClient = client || existing.client
     const newSlug = slug || existing.slug
-    newFilePath = `${newClient}/${newSlug}.html`
+    const candidatePath = `${newClient}/${newSlug}.html`
 
     const oldSourcePath = existing.file_path.replace(/\.html$/, '.source.html')
-    const newSourcePath = newFilePath.replace(/\.html$/, '.source.html')
+    const newSourcePath = candidatePath.replace(/\.html$/, '.source.html')
 
-    const moves = [
-      moveFile(existing.file_path, newFilePath).catch(() => {}),
-      moveFile(oldSourcePath, newSourcePath).catch(() => {}),
-    ]
-    await Promise.all(moves)
+    // The primary file move must succeed — otherwise updating file_path would
+    // point the page at a file that doesn't exist (serving a 404).
+    try {
+      await moveFile(existing.file_path, candidatePath)
+    } catch (err) {
+      captureException(err, { route: 'PUT /api/pages/[id] moveFile', id })
+      return NextResponse.json({ error: 'שגיאה בהעברת קובץ הדף — לא בוצע שינוי' }, { status: 500 })
+    }
+    // The source file is best-effort (older pages may not have one)
+    await moveFile(oldSourcePath, newSourcePath).catch(() => {})
+    newFilePath = candidatePath
   }
 
   const page = await updatePage(id, {
@@ -84,7 +91,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
   })
 
   await logAudit({ actor: session, action: 'update', entity_type: 'page', entity_id: id, entity_label: page.title, workspace_id: page.workspace_id })
-  return NextResponse.json(page)
+  return NextResponse.json({ ...page, has_password: !!page.password, password: undefined })
 }
 
 export async function DELETE(req: NextRequest, { params }: Ctx) {

@@ -3,6 +3,7 @@ import { getPages, createPage } from '@/lib/db'
 import { getSessionFromRequest, getActiveWorkspaceId, requireWorkspacePermission } from '@/lib/auth'
 import { findOrCreateClient } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
+import { captureException } from '@/lib/logger'
 
 export async function GET(req: NextRequest) {
   const session = await getSessionFromRequest(req)
@@ -41,6 +42,10 @@ export async function POST(req: NextRequest) {
   const body = await req.json()
   const { client, slug, title, filePath, expiresAt, publishAt } = body
 
+  if (!client || !slug || !title || !filePath) {
+    return NextResponse.json({ error: 'חסרים שדות חובה' }, { status: 400 })
+  }
+
   let clientId: string | null = body.client_id || null
   if (!clientId && client) {
     try {
@@ -49,18 +54,26 @@ export async function POST(req: NextRequest) {
     } catch { /* non-fatal */ }
   }
 
-  const page = await createPage({
-    client,
-    slug,
-    title,
-    file_path: filePath,
-    expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
-    publish_at: publishAt ? new Date(publishAt).toISOString() : null,
-    created_by: session.userId,
-    workspace_id: workspaceId || undefined,
-    client_id: clientId,
-  })
+  try {
+    const page = await createPage({
+      client,
+      slug,
+      title,
+      file_path: filePath,
+      expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
+      publish_at: publishAt ? new Date(publishAt).toISOString() : null,
+      created_by: session.userId,
+      workspace_id: workspaceId || undefined,
+      client_id: clientId,
+    })
 
-  await logAudit({ actor: session, action: 'create', entity_type: 'page', entity_id: page.id, entity_label: page.title, workspace_id: workspaceId })
-  return NextResponse.json(page, { status: 201 })
+    await logAudit({ actor: session, action: 'create', entity_type: 'page', entity_id: page.id, entity_label: page.title, workspace_id: workspaceId })
+    return NextResponse.json({ ...page, has_password: !!page.password, password: undefined }, { status: 201 })
+  } catch (err) {
+    if ((err as { code?: string })?.code === '23505') {
+      return NextResponse.json({ error: 'קיים דף עם כתובת זהה (ייתכן בסל המיחזור)' }, { status: 409 })
+    }
+    captureException(err, { route: 'POST /api/pages' })
+    return NextResponse.json({ error: 'שגיאה ביצירת הדף' }, { status: 500 })
+  }
 }

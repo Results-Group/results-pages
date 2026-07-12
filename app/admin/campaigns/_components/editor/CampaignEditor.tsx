@@ -25,6 +25,7 @@ export interface EditorInitial {
   doc: CampaignDocument
   slug?: string | null
   status?: 'draft' | 'published' | 'archived'
+  updatedAt?: string | null
 }
 
 type Toast = { id: number; message: string; kind: 'success' | 'error' | 'info' }
@@ -49,6 +50,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
   const [passwordDirty, setPasswordDirty] = useState(false)
   const [activeCopyIdx, setActiveCopyIdx] = useState(0)
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [conflict, setConflict] = useState(false)
   const [copied, setCopied] = useState(false)
   const [toasts, setToasts] = useState<Toast[]>([])
   const [feedback, setFeedback] = useState<Record<string, { status: 'approved' | 'rejected' | 'pending'; comment: string | null; author: string | null }>>({})
@@ -100,6 +102,10 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
   const docRef = useRef(doc)
   useEffect(() => { docRef.current = doc })
 
+  // Last server-known updated_at, for optimistic-concurrency conflict detection
+  const updatedAtRef = useRef<string | null>(initial.updatedAt ?? null)
+  const conflictRef = useRef(false)
+
   const buildBody = useCallback((newStatus?: 'draft' | 'published' | 'archived') => ({
     client: doc.meta.client.trim(),
     client_id: doc.meta.clientId,
@@ -113,6 +119,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
     publish_at: doc.meta.publishAt ? new Date(doc.meta.publishAt).toISOString() : null,
     status: newStatus ?? status,
     workspace_id: doc.meta.workspaceId,
+    base_updated_at: updatedAtRef.current ?? undefined,
     sections: doc.sections.map(s => ({
       id: s.id,
       title: s.title,
@@ -177,6 +184,11 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
   const saveQueue = useRef<Promise<unknown>>(Promise.resolve())
 
   const save = useCallback(async (newStatus?: 'draft' | 'published', opts: { redirect?: boolean; silent?: boolean } = {}) => {
+    // Stop writing once a conflict is detected — the user must reload first
+    if (conflictRef.current) {
+      if (!opts.silent) toast('הקמפיין עודכן במקום אחר. רעננו את הדף לפני שמירה.', 'error')
+      return null
+    }
     // A manual save/publish supersedes any pending autosave
     if (autosaveTimer.current) { clearTimeout(autosaveTimer.current); autosaveTimer.current = null }
     if (!doc.meta.client.trim() || !doc.meta.campaignName.trim()) {
@@ -197,8 +209,18 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
           body: JSON.stringify(buildBody(newStatus)),
         })
         const data = await res.json()
+        if (res.status === 409) {
+          // Another tab/editor saved since we loaded — stop autosaving so we
+          // don't clobber their changes, and tell the user to reload.
+          conflictRef.current = true
+          setConflict(true)
+          setSaveState('error')
+          toast(data.error || 'הקמפיין עודכן במקום אחר. רעננו את הדף.', 'error')
+          return null
+        }
         if (!res.ok) throw new Error(data.error || 'שגיאה בשמירה')
         if (data.id) setCampaignId(data.id)
+        if (data.updated_at) updatedAtRef.current = data.updated_at
         syncFromServer(data)
         if (newStatus) setStatus(newStatus)
         setSaveState('saved')
@@ -225,6 +247,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
   useEffect(() => {
     if (firstRender.current) { firstRender.current = false; return }
     if (!campaignId) return
+    if (conflictRef.current) return
     autosaveTimer.current = setTimeout(() => {
       autosaveTimer.current = null
       saveRef.current(undefined, { silent: true })
@@ -513,11 +536,19 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
 
         <div className="flex-1" />
 
+        {/* Conflict banner — shown when another editor saved over us */}
+        {conflict && (
+          <button onClick={() => window.location.reload()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
+            style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.4)', color: '#ef4444' }}>
+            עודכן במקום אחר — רענן
+          </button>
+        )}
+
         {/* Save state */}
         <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>
           {saveState === 'saving' && <><Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: '#40e1d3' }} /> שומר...</>}
           {saveState === 'saved' && <><CheckCircle2 className="w-3.5 h-3.5" style={{ color: '#40e1d3' }} /> נשמר</>}
-          {saveState === 'error' && <span style={{ color: '#ef4444' }}>שגיאת שמירה</span>}
+          {saveState === 'error' && !conflict && <span style={{ color: '#ef4444' }}>שגיאת שמירה</span>}
         </span>
 
         {slug && (

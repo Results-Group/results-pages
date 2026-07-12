@@ -134,9 +134,16 @@ export async function createCampaign(data: {
   return campaign as Campaign
 }
 
+/** Thrown by updateCampaign when an optimistic-concurrency check fails. */
+export class CampaignConflictError extends Error {
+  code = 'CONFLICT' as const
+  constructor() { super('Campaign was modified by someone else') }
+}
+
 export async function updateCampaign(
   id: string,
-  data: Partial<Omit<Campaign, 'id' | 'created_at'>>
+  data: Partial<Omit<Campaign, 'id' | 'created_at'>>,
+  opts?: { baseUpdatedAt?: string }
 ): Promise<Campaign> {
   const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() }
 
@@ -155,13 +162,18 @@ export async function updateCampaign(
   if (data.workspace_id !== undefined) updateData.workspace_id = data.workspace_id
   if (data.copies !== undefined) updateData.copies = data.copies
 
-  const { data: campaign, error } = await supabase
-    .from('campaigns')
-    .update(updateData)
-    .eq('id', id)
-    .select()
-    .single()
+  // Optimistic concurrency: when the caller passes the updated_at it loaded,
+  // only write if the row hasn't changed since — otherwise a second editor's
+  // save would silently clobber the first.
+  let query = supabase.from('campaigns').update(updateData).eq('id', id)
+  if (opts?.baseUpdatedAt) query = query.eq('updated_at', opts.baseUpdatedAt)
+
+  const { data: campaign, error } = await query.select().maybeSingle()
   if (error) throw error
+  if (!campaign) {
+    if (opts?.baseUpdatedAt) throw new CampaignConflictError()
+    throw new Error('Campaign not found')
+  }
   return campaign as Campaign
 }
 

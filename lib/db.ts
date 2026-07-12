@@ -309,5 +309,8 @@ export async function deleteFile(filePath: string) {
 }
 
 export async function moveFile(oldPath: string, newPath: string) {
-  await supabase.storage.from(BUCKET).move(oldPath, newPath)
+  // Supabase returns an error object rather than throwing — surface it so
+  // callers don't treat a failed move as success.
+  const { error } = await supabase.storage.from(BUCKET).move(oldPath, newPath)
+  if (error) throw error
 }

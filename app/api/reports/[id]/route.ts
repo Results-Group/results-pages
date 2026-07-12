@@ -60,7 +60,7 @@ export async function PUT(
     const report = await updateReport(id, body)
     const action = body.status === 'published' && existing.status !== 'published' ? 'publish' : 'update'
     await logAudit({ actor: session, action, entity_type: 'report', entity_id: id, entity_label: report.report_name, workspace_id: existing.workspace_id })
-    return NextResponse.json(report)
+    return NextResponse.json({ ...report, has_password: !!report.password, password: undefined })
   } catch {
     return NextResponse.json({ error: 'שגיאה בעדכון דוח' }, { status: 500 })
   }

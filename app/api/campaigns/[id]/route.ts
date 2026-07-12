@@ -61,11 +61,14 @@ export async function PUT(
       } catch { /* non-fatal */ }
     }
 
-    const campaign = await updateCampaign(id, body)
+    const campaign = await updateCampaign(id, body, { baseUpdatedAt: body.base_updated_at })
     const action = body.status === 'published' && existing.status !== 'published' ? 'publish' : 'update'
     await logAudit({ actor: session, action, entity_type: 'campaign', entity_id: id, entity_label: campaign.campaign_name, workspace_id: existing.workspace_id })
-    return NextResponse.json(campaign)
-  } catch {
+    return NextResponse.json({ ...campaign, has_password: !!campaign.password, password: undefined })
+  } catch (err) {
+    if ((err as { code?: string })?.code === 'CONFLICT') {
+      return NextResponse.json({ error: 'הקמפיין עודכן במקום אחר. רעננו את הדף כדי לא לדרוס שינויים.' }, { status: 409 })
+    }
     return NextResponse.json({ error: 'שגיאה בעדכון קמפיין' }, { status: 500 })
   }
 }

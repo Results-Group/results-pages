@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
     })
 
     await logAudit({ actor: session, action: 'create', entity_type: 'campaign', entity_id: campaign.id, entity_label: campaign.campaign_name, workspace_id: workspaceId })
-    return NextResponse.json(campaign, { status: 201 })
+    return NextResponse.json({ ...campaign, has_password: !!campaign.password, password: undefined }, { status: 201 })
   } catch (err) {
     captureException(err, { route: 'POST /api/campaigns' })
     return NextResponse.json({ error: 'שגיאה ביצירת קמפיין' }, { status: 500 })
