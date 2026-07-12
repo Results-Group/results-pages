@@ -70,12 +70,26 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 })
   const [feedback, setFeedback] = useState<Record<string, SlideFeedback>>({})
   const [feedbackError, setFeedbackError] = useState<Record<string, boolean>>({})
+  // Reviewer name — remembered across slides and visits (per campaign)
+  const [reviewerName, setReviewerName] = useState('')
+  const [doneDismissed, setDoneDismissed] = useState(false)
   // Global copy switcher — shared across all slides that have copies enabled
   const [activeCopyIdx, setActiveCopyIdx] = useState(0)
   // Collect all copies from any slide (they're all the same set from campaign meta)
   const globalCopies = slides.find(s => s.copies?.length)?.copies || []
 
   const showFeedback = Boolean(feedbackEnabled && campaignId)
+
+  // Remember the reviewer's name locally so they type it once, ever
+  const reviewerKey = campaignId ? `rp_reviewer_${campaignId}` : ''
+  useEffect(() => {
+    if (!reviewerKey) return
+    try { const v = localStorage.getItem(reviewerKey); if (v) setReviewerName(v) } catch { /* ignore */ }
+  }, [reviewerKey])
+  const updateReviewerName = useCallback((name: string) => {
+    setReviewerName(name)
+    try { if (reviewerKey) localStorage.setItem(reviewerKey, name) } catch { /* ignore */ }
+  }, [reviewerKey])
 
   useEffect(() => {
     if (!showFeedback || !campaignId) return
@@ -120,6 +134,18 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
     setActiveSlide(n)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [])
+
+  // Approval progress across all feedback-enabled (creative) slides
+  const feedbackSlides = showFeedback ? slides.filter(s => s.key) : []
+  const approvedCount = feedbackSlides.filter(s => feedback[s.key as string]?.status === 'approved').length
+  const allApproved = feedbackSlides.length > 0 && approvedCount === feedbackSlides.length
+
+  function approveAllRemaining() {
+    feedbackSlides.forEach(s => {
+      const k = s.key as string
+      if (feedback[k]?.status !== 'approved') submitFeedback(k, 'approved', feedback[k]?.comment || '', reviewerName)
+    })
+  }
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -225,6 +251,19 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
                 ))}
               </div>
             )}
+            {showFeedback && feedbackSlides.length > 0 && (
+              <div className={`approval-progress${allApproved ? ' complete' : ''}`}>
+                <span className="approval-progress-count">
+                  {allApproved ? `✓ ${t('public.allApprovedShort')}` : `${t('public.approvedLabel')} ${approvedCount}/${feedbackSlides.length}`}
+                </span>
+                <div className="approval-progress-track">
+                  <div className="approval-progress-fill" style={{ width: `${feedbackSlides.length ? (approvedCount / feedbackSlides.length) * 100 : 0}%` }} />
+                </div>
+                {!allApproved && (
+                  <button className="approve-all-btn" onClick={approveAllRemaining}>{t('public.approveAll')}</button>
+                )}
+              </div>
+            )}
             <div className="campaign-badge">{clientName} — {campaignName}</div>
             <button className="pdf-btn" onClick={handleExportPdf} disabled={exporting}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -280,10 +319,29 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
               current={feedback[slides[activeSlide].key as string]}
               error={!!feedbackError[slides[activeSlide].key as string]}
               onSubmit={submitFeedback}
+              reviewerName={reviewerName}
+              onReviewerNameChange={updateReviewerName}
               lang={lang}
             />
           )}
         </main>
+
+        {/* All-approved confirmation */}
+        <AnimatePresence>
+          {showFeedback && allApproved && !doneDismissed && (
+            <motion.div
+              className="approval-done-banner"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 24 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <span className="approval-done-check">✓</span>
+              <span>{t('public.allApproved')}</span>
+              <button className="approval-done-close" onClick={() => setDoneDismissed(true)} aria-label="✕">✕</button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Bottom nav arrows */}
         <div className="slide-footer-nav">
@@ -334,26 +392,29 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   )
 }
 
-function ApprovalBar({ slideKey, current, error, onSubmit, lang = 'he' }: {
+function ApprovalBar({ slideKey, current, error, onSubmit, reviewerName, onReviewerNameChange, lang = 'he' }: {
   slideKey: string
   current?: SlideFeedback
   error?: boolean
   onSubmit: (slideKey: string, status: FeedbackStatus, comment: string, author: string) => void
+  reviewerName: string
+  onReviewerNameChange: (name: string) => void
   lang?: 'he' | 'en'
 }) {
   const dict = lang === 'en' ? en : he
   const t = (key: keyof typeof he) => dict[key] ?? he[key] ?? key
   const [comment, setComment] = useState(current?.comment || '')
-  const [author, setAuthor] = useState(current?.author || '')
   const [touched, setTouched] = useState(false)
   const [showComment, setShowComment] = useState(false)
+  // Intent set by "needs change" so the rejection is only submitted when the client saves —
+  // clicking it no longer fires an immediate reject.
+  const [intent, setIntent] = useState<FeedbackStatus | null>(null)
   const status = current?.status || 'pending'
 
-  // Hydrate inputs once the async feedback fetch lands — unless the user already typed
+  // Hydrate the comment once the async feedback fetch lands — unless the user already typed
   useEffect(() => {
     if (touched || !current) return
     setComment(current.comment || '')
-    setAuthor(current.author || '')
   }, [current, touched])
 
   // Never wipe an existing comment with an empty string on save
@@ -364,13 +425,13 @@ function ApprovalBar({ slideKey, current, error, onSubmit, lang = 'he' }: {
       <div className="approval-actions">
         <button
           className={`approval-btn approve ${status === 'approved' ? 'active' : ''}`}
-          onClick={() => onSubmit(slideKey, 'approved', effectiveComment, author)}
+          onClick={() => { setIntent(null); onSubmit(slideKey, 'approved', effectiveComment, reviewerName) }}
         >
           {'✓ ' + t('public.approved')}
         </button>
         <button
-          className={`approval-btn reject ${status === 'rejected' ? 'active' : ''}`}
-          onClick={() => { setShowComment(true); onSubmit(slideKey, 'rejected', effectiveComment, author) }}
+          className={`approval-btn reject ${status === 'rejected' || intent === 'rejected' ? 'active' : ''}`}
+          onClick={() => { setIntent('rejected'); setShowComment(true) }}
         >
           {'✕ ' + t('public.needsChange')}
         </button>
@@ -384,8 +445,8 @@ function ApprovalBar({ slideKey, current, error, onSubmit, lang = 'he' }: {
           <input
             className="approval-input"
             placeholder={t('public.yourName')}
-            value={author}
-            onChange={e => { setTouched(true); setAuthor(e.target.value) }}
+            value={reviewerName}
+            onChange={e => onReviewerNameChange(e.target.value)}
           />
           <textarea
             className="approval-textarea"
@@ -396,9 +457,9 @@ function ApprovalBar({ slideKey, current, error, onSubmit, lang = 'he' }: {
           />
           <button
             className="approval-save"
-            onClick={() => onSubmit(slideKey, status === 'pending' ? 'rejected' : status, effectiveComment, author)}
+            onClick={() => { onSubmit(slideKey, intent ?? status, effectiveComment, reviewerName); setIntent(null) }}
           >
-            {t('public.saveComment')}
+            {intent === 'rejected' ? t('public.sendChangeRequest') : t('public.saveComment')}
           </button>
         </div>
       )}
