@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { LayoutGrid, Settings2, Upload, Lock, Trash2, Clock, Plus, X } from 'lucide-react'
+import { LayoutGrid, Settings2, Upload, Lock, Trash2, Clock, Plus, X, Sparkles, Loader2, Check } from 'lucide-react'
 import ClientAutocomplete from '../../../_components/client-autocomplete'
 import WorkspaceSelector from '../../../_components/workspace-selector'
 import { MOCKUP_TYPES, type CampaignMeta, type EditorSection, type MockupType } from './types'
@@ -24,7 +24,7 @@ function SectionDivider({ label }: { label?: string }) {
 }
 
 export default function Inspector({
-  section, meta, onUpdateSection, onUpdateMeta, onUploadLogo, uploadingLogo, passwordDirty, onPasswordDirty,
+  section, meta, onUpdateSection, onUpdateMeta, onUploadLogo, uploadingLogo, passwordDirty, onPasswordDirty, onGenerateCopy,
 }: {
   section: EditorSection | null
   meta: CampaignMeta
@@ -34,11 +34,22 @@ export default function Inspector({
   uploadingLogo: boolean
   passwordDirty: boolean
   onPasswordDirty: (dirty: boolean) => void
+  onGenerateCopy?: (section: EditorSection) => Promise<{ captions: string[]; titles: string[]; grounded: boolean } | null>
 }) {
   const [tab, setTab] = useState<'slide' | 'campaign'>('slide')
   const logoRef = useRef<HTMLInputElement>(null)
+  const [copyLoading, setCopyLoading] = useState(false)
+  const [suggestions, setSuggestions] = useState<{ captions: string[]; titles: string[] } | null>(null)
   const t = useT()
   const dir = useDir()
+
+  async function handleGenerateCopy() {
+    if (!section || !onGenerateCopy) return
+    setCopyLoading(true)
+    const res = await onGenerateCopy(section)
+    if (res) setSuggestions({ captions: res.captions, titles: res.titles })
+    setCopyLoading(false)
+  }
 
   const mockupLabels: Record<MockupType, string> = {
     instagram_feed: t('campaigns.mockup.instagram_feed'),
@@ -119,6 +130,73 @@ export default function Inspector({
                   onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
                 />
               </div>
+
+              {/* AI copy generation */}
+              {onGenerateCopy && (
+                <div>
+                  <button
+                    type="button"
+                    onClick={handleGenerateCopy}
+                    disabled={copyLoading}
+                    className="flex items-center justify-center gap-1.5 w-full px-3 py-2.5 rounded-lg text-xs font-bold transition-all duration-200 disabled:opacity-50"
+                    style={{ color: '#04211d', background: '#40e1d3' }}
+                  >
+                    {copyLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                    {copyLoading ? t('campaigns.generatingCopy') : t('campaigns.generateCopy')}
+                  </button>
+
+                  {suggestions && (suggestions.titles.length > 0 || suggestions.captions.length > 0) && (
+                    <div className="mt-3 rounded-lg p-3 space-y-3" style={{ background: 'rgba(64,225,211,0.04)', border: '1px solid rgba(64,225,211,0.15)' }}>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'rgba(64,225,211,0.7)' }}>{t('campaigns.aiSuggestions')}</span>
+                        <button type="button" onClick={() => setSuggestions(null)} className="p-0.5 rounded" style={{ color: 'rgba(255,255,255,0.3)' }} aria-label={t('campaigns.dismissSuggestions')}>
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+
+                      {suggestions.titles.length > 0 && (
+                        <div className="space-y-1.5">
+                          <span className="text-[10px] font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('campaigns.suggestedTitles')}</span>
+                          {suggestions.titles.map((s, i) => (
+                            <button
+                              key={i} type="button" dir="auto"
+                              onClick={() => onUpdateSection({ title: s })}
+                              title={t('campaigns.applyTitle')}
+                              className="flex items-center gap-2 w-full text-right px-2.5 py-1.5 rounded-md text-xs transition-colors"
+                              style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.8)' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.1)' }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
+                            >
+                              <Check className="w-3 h-3 shrink-0" style={{ color: '#40e1d3' }} />
+                              <span className="flex-1 min-w-0">{s}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {suggestions.captions.length > 0 && (
+                        <div className="space-y-1.5">
+                          <span className="text-[10px] font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('campaigns.suggestedCaptions')}</span>
+                          {suggestions.captions.map((s, i) => (
+                            <button
+                              key={i} type="button" dir="auto"
+                              onClick={() => onUpdateMeta({ copies: [...meta.copies, s] })}
+                              title={t('campaigns.addAsCopy')}
+                              className="flex items-start gap-2 w-full text-right px-2.5 py-1.5 rounded-md text-xs leading-relaxed transition-colors"
+                              style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.8)' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.1)' }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
+                            >
+                              <Plus className="w-3 h-3 shrink-0 mt-0.5" style={{ color: '#40e1d3' }} />
+                              <span className="flex-1 min-w-0">{s}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {meta.copies.length > 0 && (
                 <>

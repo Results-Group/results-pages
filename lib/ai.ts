@@ -18,12 +18,26 @@ interface GeminiResponse {
   candidates?: { content?: { parts?: { text?: string }[] } }[]
 }
 
-export async function geminiGenerate(prompt: string, opts?: { json?: boolean }): Promise<string> {
+/** A binary file (e.g. PDF) to send alongside the prompt as inline data. */
+export interface GeminiFile {
+  /** Base64-encoded file bytes (no data: prefix). */
+  data: string
+  /** MIME type, e.g. 'application/pdf'. */
+  mimeType: string
+}
+
+export async function geminiGenerate(prompt: string, opts?: { json?: boolean; file?: GeminiFile; model?: string }): Promise<string> {
   const apiKey = getApiKey()
-  const model = getModel()
+  const model = opts?.model || getModel()
+
+  const parts: Record<string, unknown>[] = []
+  if (opts?.file) {
+    parts.push({ inline_data: { mime_type: opts.file.mimeType, data: opts.file.data } })
+  }
+  parts.push({ text: prompt })
 
   const body: Record<string, unknown> = {
-    contents: [{ parts: [{ text: prompt }] }],
+    contents: [{ parts }],
   }
   if (opts?.json) {
     body.generationConfig = { responseMimeType: 'application/json' }
@@ -49,8 +63,8 @@ export async function geminiGenerate(prompt: string, opts?: { json?: boolean }):
   return text
 }
 
-export async function geminiGenerateJson<T = unknown>(prompt: string): Promise<T> {
-  const raw = await geminiGenerate(prompt, { json: true })
+export async function geminiGenerateJson<T = unknown>(prompt: string, opts?: { file?: GeminiFile; model?: string }): Promise<T> {
+  const raw = await geminiGenerate(prompt, { json: true, file: opts?.file, model: opts?.model })
   try {
     return JSON.parse(raw) as T
   } catch {

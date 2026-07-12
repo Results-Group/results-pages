@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, use } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Upload, Plus, Trash2, Megaphone, FileText, Save } from 'lucide-react'
+import { ArrowRight, Upload, Plus, Trash2, Megaphone, FileText, Save, Sparkles, Loader2, FileCheck2 } from 'lucide-react'
 import { useUnsavedChanges } from '@/lib/use-unsaved-changes'
 import { useToast } from '../../_components/toast'
 
@@ -16,6 +16,8 @@ interface Client {
   contacts: Contact[]
   notes: string | null
   workspace_id: string | null
+  positioning: string | null
+  positioning_pdf_path: string | null
 }
 
 interface LinkedCampaign { id: string; campaign_name: string; slug: string; client_id: string | null; status: string }
@@ -31,6 +33,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
   const [campaigns, setCampaigns] = useState<LinkedCampaign[]>([])
   const [pages, setPages] = useState<LinkedPage[]>([])
   const [dirty, setDirty] = useState(false)
+  const [distilling, setDistilling] = useState(false)
   const { showToast } = useToast()
 
   useUnsavedChanges(dirty)
@@ -86,6 +89,28 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
     updateField('contacts', (client?.contacts || []).filter((_, idx) => idx !== i))
   }
 
+  async function handlePositioningUpload(file: File) {
+    if (file.type && file.type !== 'application/pdf') { showToast('נא להעלות קובץ PDF'); return }
+    setDistilling(true)
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      const res = await fetch(`/api/clients/${id}/positioning`, { method: 'POST', body: form })
+      if (res.ok) {
+        const data = await res.json()
+        setClient(prev => prev ? { ...prev, positioning: data.positioning, positioning_pdf_path: data.positioning_pdf_path } : prev)
+        showToast('מסמך המיצוב נותח בהצלחה', 'success')
+      } else {
+        const data = await res.json().catch(() => null)
+        showToast(data?.error || 'שגיאה בניתוח המסמך')
+      }
+    } catch {
+      showToast('שגיאה בניתוח המסמך')
+    } finally {
+      setDistilling(false)
+    }
+  }
+
   async function handleSave() {
     if (!client) return
     setSaving(true)
@@ -94,6 +119,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
       form.append('name', client.name)
       form.append('brand_color', client.brand_color || '#40e1d3')
       form.append('notes', client.notes || '')
+      form.append('positioning', client.positioning || '')
       form.append('contacts', JSON.stringify(client.contacts || []))
       if (logoFile) form.append('logo', logoFile)
       const res = await fetch(`/api/clients/${id}`, { method: 'PUT', body: form })
@@ -186,6 +212,39 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
             ))}
           </div>
         )}
+      </div>
+
+      {/* Positioning document */}
+      <div className="rounded-xl p-5 mb-5" style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}>
+        <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
+          <h3 className="text-sm font-semibold flex items-center gap-1.5" style={{ color: 'var(--admin-text-primary)' }}>
+            <Sparkles className="w-4 h-4" style={{ color: 'var(--admin-accent)' }} /> מסמך מיצוב
+          </h3>
+          <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-opacity hover:opacity-90"
+            style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)', opacity: distilling ? 0.5 : 1, pointerEvents: distilling ? 'none' : 'auto' }}>
+            {distilling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+            {distilling ? 'מנתח...' : client.positioning_pdf_path ? 'החלף PDF' : 'העלה PDF'}
+            <input type="file" accept="application/pdf" className="hidden" disabled={distilling}
+              onChange={e => { if (e.target.files?.[0]) handlePositioningUpload(e.target.files[0]); e.target.value = '' }} />
+          </label>
+        </div>
+        <p className="text-xs mb-3" style={{ color: 'var(--admin-text-muted)' }}>
+          העלה את מסמך המיצוב (PDF) — ה-AI ינתח ויזקק את עיקרי המותג. הטקסט המזוקק משמש ליצירת קופי אוטומטי בקמפיינים.
+        </p>
+        {client.positioning_pdf_path && !distilling && (
+          <div className="inline-flex items-center gap-1.5 text-xs mb-3 px-2.5 py-1 rounded-md" style={{ background: 'var(--admin-bg)', color: 'var(--admin-text-secondary)', border: '1px solid var(--admin-border)' }}>
+            <FileCheck2 className="w-3.5 h-3.5" style={{ color: 'var(--admin-accent)' }} /> מסמך מקור הועלה
+          </div>
+        )}
+        <textarea
+          value={client.positioning || ''}
+          onChange={e => updateField('positioning', e.target.value)}
+          rows={distilling ? 4 : 10}
+          disabled={distilling}
+          placeholder={distilling ? 'מנתח את המסמך...' : 'המיצוב המזוקק יופיע כאן לאחר העלאת PDF — ניתן גם לערוך ידנית.'}
+          className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none leading-relaxed resize-y"
+          style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)', direction: 'rtl' }}
+        />
       </div>
 
       <button onClick={handleSave} disabled={saving}

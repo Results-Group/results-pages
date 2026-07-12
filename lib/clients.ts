@@ -18,6 +18,10 @@ export interface Client {
   contacts: ClientContact[]
   notes: string | null
   monday_item_id: string | null
+  /** Storage path of the uploaded positioning source PDF. */
+  positioning_pdf_path: string | null
+  /** AI-distilled positioning text, injected into campaign copy generation. */
+  positioning: string | null
   created_at: string
   updated_at: string
 }
@@ -108,7 +112,7 @@ export async function findOrCreateClient(name: string, workspaceId?: string | nu
 
 export async function updateClient(
   id: string,
-  data: Partial<Pick<Client, 'name' | 'logo_path' | 'brand_color' | 'contacts' | 'notes' | 'workspace_id' | 'monday_item_id'>>,
+  data: Partial<Pick<Client, 'name' | 'logo_path' | 'brand_color' | 'contacts' | 'notes' | 'workspace_id' | 'monday_item_id' | 'positioning_pdf_path' | 'positioning'>>,
 ): Promise<Client> {
   const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() }
   if (data.name !== undefined) updateData.name = data.name
@@ -118,6 +122,8 @@ export async function updateClient(
   if (data.notes !== undefined) updateData.notes = data.notes
   if (data.workspace_id !== undefined) updateData.workspace_id = data.workspace_id
   if (data.monday_item_id !== undefined) updateData.monday_item_id = data.monday_item_id
+  if (data.positioning_pdf_path !== undefined) updateData.positioning_pdf_path = data.positioning_pdf_path
+  if (data.positioning !== undefined) updateData.positioning = data.positioning
 
   const { data: row, error } = await supabase.from('clients').update(updateData).eq('id', id).select().single()
   if (error) throw error
@@ -147,4 +153,14 @@ export async function deleteClient(id: string): Promise<void> {
 export async function uploadClientLogo(file: File | Blob, clientId: string): Promise<string> {
   const storagePath = `clients/${clientId}/logo.webp`
   return compressAndUploadImage(file, storagePath)
+}
+
+/** Upload the raw positioning source PDF to storage (overwrites any previous one). */
+export async function uploadClientPositioningPdf(file: File | Blob, clientId: string): Promise<string> {
+  const storagePath = `clients/${clientId}/positioning.pdf`
+  const { error } = await supabase.storage
+    .from('campaign-assets')
+    .upload(storagePath, file, { contentType: 'application/pdf', upsert: true })
+  if (error) throw error
+  return storagePath
 }

@@ -16,7 +16,8 @@ import { useCampaignDocument } from './useCampaignDocument'
 import SlideFilmstrip from './SlideFilmstrip'
 import SlideCanvas from './SlideCanvas'
 import Inspector from './Inspector'
-import type { CampaignDocument, EditorAsset } from './types'
+import SmartUploadModal from './SmartUploadModal'
+import type { CampaignDocument, EditorAsset, EditorSection, MockupType } from './types'
 
 const CampaignPresentation = dynamic(() => import('@/app/c/[slug]/presentation'), { ssr: false })
 
@@ -32,7 +33,7 @@ type Toast = { id: number; message: string; kind: 'success' | 'error' | 'info' }
 
 export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'; initial: EditorInitial }) {
   const router = useRouter()
-  const { doc, canUndo, canRedo, setMeta, addSection, duplicateSection, removeSection, updateSection, moveSection, addAsset, updateAsset, removeAsset, moveAsset, undo, redo } = useCampaignDocument(initial.doc)
+  const { doc, canUndo, canRedo, setMeta, addSection, addSections, duplicateSection, removeSection, updateSection, moveSection, addAsset, updateAsset, removeAsset, moveAsset, undo, redo } = useCampaignDocument(initial.doc)
 
   const [campaignId, setCampaignId] = useState<string | null>(initial.campaignId ?? null)
   const [slug, setSlug] = useState<string | null>(initial.slug ?? null)
@@ -55,6 +56,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
   const [toasts, setToasts] = useState<Toast[]>([])
   const [feedback, setFeedback] = useState<Record<string, { status: 'approved' | 'rejected' | 'pending'; comment: string | null; author: string | null }>>({})
   const [showApprovals, setShowApprovals] = useState(false)
+  const [smartOpen, setSmartOpen] = useState(false)
 
   const toast = useCallback((message: string, kind: Toast['kind'] = 'info') => {
     const id = Date.now() + Math.random()
@@ -368,6 +370,63 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
     )
   }, [activeSection, ensureCampaignExists, addAsset, initProgress, tickProgress, uploadOneFile, toast])
 
+  /** Smart bulk upload: drop N files → auto-split into slides of 4, all with the chosen mockup type. */
+  const smartUpload = useCallback(async (files: File[], mockupType: MockupType) => {
+    const valid = files.filter(f => isImageFile(f) && f.size <= MAX_FILE_BYTES)
+    if (!valid.length) { toast('לא נבחרו קבצים תקינים', 'error'); return }
+
+    const id = await ensureCampaignExists()
+    if (!id) { toast('יש למלא שם לקוח ושם קמפיין לפני העלאת קבצים', 'error'); return }
+
+    // Split into groups of MAX_ASSETS_PER_SLIDE and create one section per group
+    const groups: File[][] = []
+    for (let i = 0; i < valid.length; i += MAX_ASSETS_PER_SLIDE) groups.push(valid.slice(i, i + MAX_ASSETS_PER_SLIDE))
+    const sections: EditorSection[] = groups.map(() => ({
+      id: crypto.randomUUID(), title: '', mockup_type: mockupType, description: '', useCopies: false, assets: [],
+    }))
+    addSections(sections)
+    setActiveId(sections[0].id)
+
+    // Upload each group's files into its section (parallel across all files)
+    await Promise.all(groups.map(async (group, gi) => {
+      const sectionId = sections[gi].id
+      initProgress(sectionId, group.length)
+      await Promise.allSettled(group.map(async file => {
+        try {
+          const data = await uploadOneFile(file, id)
+          if (!data) throw new Error('empty response')
+          addAsset(sectionId, { id: crypto.randomUUID(), type: 'image', file_path: data.file_path, public_url: data.public_url || '', url: '', caption: '' })
+          tickProgress(sectionId, 'done')
+        } catch (err) {
+          tickProgress(sectionId, 'failed')
+          const msg = err instanceof Error ? err.message : ''
+          toast(`שגיאה בהעלאת ${file.name}${msg ? ` — ${msg}` : ''}`, 'error')
+        }
+      }))
+    }))
+    toast(`נוצרו ${sections.length} שקפים מ-${valid.length} קבצים`, 'success')
+  }, [ensureCampaignExists, addSections, initProgress, tickProgress, uploadOneFile, addAsset, toast])
+
+  /** Generate AI copy suggestions for a slide, grounded in the client's positioning. */
+  const generateCopy = useCallback(async (section: EditorSection): Promise<{ captions: string[]; titles: string[]; grounded: boolean } | null> => {
+    const id = await ensureCampaignExists()
+    if (!id) { toast('יש למלא שם לקוח ושם קמפיין לפני יצירת קופי', 'error'); return null }
+    try {
+      const res = await fetch(`/api/campaigns/${id}/generate-copy`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slideTitle: section.title, slideDescription: section.description, mockupType: section.mockup_type }),
+      })
+      if (!res.ok) { const b = await res.json().catch(() => ({})); throw new Error(b?.error || `HTTP ${res.status}`) }
+      const data = await res.json()
+      if (!data.grounded) toast('ללקוח אין מסמך מיצוב — הקופי נוצר ללא ביסוס. הוסף PDF מיצוב בעמוד הלקוח.', 'info')
+      return { captions: Array.isArray(data.captions) ? data.captions : [], titles: Array.isArray(data.titles) ? data.titles : [], grounded: !!data.grounded }
+    } catch (err) {
+      toast(`שגיאה ביצירת קופי${err instanceof Error && err.message ? ` — ${err.message}` : ''}`, 'error')
+      return null
+    }
+  }, [ensureCampaignExists, toast])
+
   const replaceAsset = useCallback(async (assetId: string, file: File) => {
     if (!activeSection) return
     const sectionId = activeSection.id
@@ -587,6 +646,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
             meta={doc.meta}
             onSelect={setActiveId}
             onAdd={() => { addSection(); }}
+            onSmartUpload={() => setSmartOpen(true)}
             onDuplicate={duplicateSection}
             onRemove={removeSection}
             onMove={moveSection}
@@ -630,6 +690,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
             uploadingLogo={uploadingLogo}
             passwordDirty={passwordDirty}
             onPasswordDirty={setPasswordDirty}
+            onGenerateCopy={generateCopy}
           />
         </aside>
       </div>
@@ -671,6 +732,9 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
           </div>
         </div>
       )}
+
+      {/* Smart bulk upload */}
+      <SmartUploadModal open={smartOpen} onClose={() => setSmartOpen(false)} onConfirm={smartUpload} />
 
       {/* Toasts */}
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 items-center">

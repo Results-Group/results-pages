@@ -11,7 +11,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import {
   GripVertical, Plus, Copy, Trash2, Image as ImageIcon, Film, LayoutTemplate,
-  Star, BookOpen, CheckCircle2,
+  Star, BookOpen, CheckCircle2, Sparkles,
 } from 'lucide-react'
 import { assetProxyUrl } from '@/lib/asset-url'
 import type { EditorSection, MockupType, CampaignMeta } from './types'
@@ -140,13 +140,14 @@ function SortableItem({ section, index, active, status, onSelect, onDuplicate, o
   )
 }
 
-export default function SlideFilmstrip({ sections, activeId, feedback, meta, onSelect, onAdd, onDuplicate, onRemove, onMove }: {
+export default function SlideFilmstrip({ sections, activeId, feedback, meta, onSelect, onAdd, onSmartUpload, onDuplicate, onRemove, onMove }: {
   sections: EditorSection[]
   activeId: string | null
   feedback?: Record<string, 'approved' | 'rejected' | 'pending'>
   meta: Pick<CampaignMeta, 'concept'>
   onSelect: (id: string) => void
   onAdd: () => void
+  onSmartUpload?: () => void
   onDuplicate: (id: string) => void
   onRemove: (id: string) => void
   onMove: (from: number, to: number) => void
@@ -218,6 +219,18 @@ export default function SlideFilmstrip({ sections, activeId, feedback, meta, onS
       >
         <Plus className="w-3.5 h-3.5" /> הוסף שקף
       </button>
+
+      {onSmartUpload && (
+        <button
+          onClick={onSmartUpload}
+          className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200"
+          style={{ color: '#04211d', background: 'rgba(64,225,211,0.9)' }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#40e1d3' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.9)' }}
+        >
+          <Sparkles className="w-3.5 h-3.5" /> העלאה חכמה
+        </button>
+      )}
 
       {/* Thin divider */}
       <div className="mx-2 mt-0.5" style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />

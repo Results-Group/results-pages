@@ -68,6 +68,8 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
       }
       const notes = form.get('notes')
       if (typeof notes === 'string') updates.notes = notes
+      const positioning = form.get('positioning')
+      if (typeof positioning === 'string') updates.positioning = positioning
       const contacts = form.get('contacts')
       if (typeof contacts === 'string') {
         try { updates.contacts = JSON.parse(contacts) as ClientContact[] } catch { /* ignore */ }
@@ -95,6 +97,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
       ...(body.notes !== undefined && { notes: body.notes }),
       ...(body.logo_path !== undefined && { logo_path: body.logo_path }),
       ...(body.workspace_id !== undefined && { workspace_id: body.workspace_id }),
+      ...(body.positioning !== undefined && { positioning: body.positioning }),
     })
     await logAudit({ actor: session, action: 'update', entity_type: 'client', entity_id: id, entity_label: client.name, workspace_id: client.workspace_id })
     return NextResponse.json(client)

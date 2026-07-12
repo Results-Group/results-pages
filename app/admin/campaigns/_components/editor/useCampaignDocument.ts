@@ -7,6 +7,7 @@ import { newSection } from './types'
 type Action =
   | { type: 'SET_META'; patch: Partial<CampaignMeta> }
   | { type: 'ADD_SECTION' }
+  | { type: 'ADD_SECTIONS'; sections: EditorSection[] }
   | { type: 'DUPLICATE_SECTION'; id: string }
   | { type: 'REMOVE_SECTION'; id: string }
   | { type: 'UPDATE_SECTION'; id: string; patch: Partial<EditorSection> }
@@ -33,6 +34,9 @@ function docReducer(state: CampaignDocument, action: Action): CampaignDocument {
       return { ...state, meta: { ...state.meta, ...action.patch } }
     case 'ADD_SECTION':
       return { ...state, sections: [...state.sections, newSection()] }
+    case 'ADD_SECTIONS':
+      if (!action.sections.length) return state
+      return { ...state, sections: [...state.sections, ...action.sections] }
     case 'DUPLICATE_SECTION': {
       const idx = state.sections.findIndex(s => s.id === action.id)
       if (idx < 0) return state
@@ -145,6 +149,7 @@ export function useCampaignDocument(initial: CampaignDocument) {
   const actions = {
     setMeta: useCallback((patch: Partial<CampaignMeta>) => dispatch({ type: 'SET_META', patch }), []),
     addSection: useCallback(() => dispatch({ type: 'ADD_SECTION' }), []),
+    addSections: useCallback((sections: EditorSection[]) => dispatch({ type: 'ADD_SECTIONS', sections }), []),
     duplicateSection: useCallback((id: string) => dispatch({ type: 'DUPLICATE_SECTION', id }), []),
     removeSection: useCallback((id: string) => dispatch({ type: 'REMOVE_SECTION', id }), []),
     updateSection: useCallback((id: string, patch: Partial<EditorSection>) => dispatch({ type: 'UPDATE_SECTION', id, patch }), []),

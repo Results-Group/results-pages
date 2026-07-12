@@ -26,6 +26,7 @@ const MIGRATIONS = [
   'migration-foundations.sql',
   'migration-workspaces.sql',
   'migration-clients.sql',
+  'migration-positioning.sql',
   'migration-approval.sql',
   'migration-ops.sql',
   'migration-scheduling.sql',
