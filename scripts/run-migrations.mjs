@@ -28,6 +28,7 @@ const MIGRATIONS = [
   'migration-clients.sql',
   'migration-positioning.sql',
   'migration-approval.sql',
+  'migration-slide-pins.sql',
   'migration-ops.sql',
   'migration-scheduling.sql',
   'migration-monday-sync.sql',

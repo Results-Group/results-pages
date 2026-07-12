@@ -1,7 +1,7 @@
 'use client'
 
 import './presentation.css'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { SlideData } from '@/lib/slides'
 import type { CampaignAsset } from '@/lib/campaigns'
@@ -27,6 +27,7 @@ interface Props {
 
 type FeedbackStatus = 'approved' | 'rejected' | 'pending'
 interface SlideFeedback { slide_key: string; status: FeedbackStatus; comment: string | null; author: string | null }
+interface SlidePin { id: string; slide_key: string; asset_id: string | null; x: number; y: number; comment: string | null; author: string | null; resolved: boolean }
 
 const slideVariants = {
   enter: { opacity: 0, y: 30, scale: 0.98 },
@@ -66,10 +67,11 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   const t = (key: keyof typeof he) => dict[key] ?? he[key] ?? key
   const [activeSlide, setActiveSlide] = useState(0)
   const [exporting, setExporting] = useState(false)
-  const [lightboxAsset, setLightboxAsset] = useState<{ url: string; caption?: string } | null>(null)
+  const [lightboxAsset, setLightboxAsset] = useState<{ url: string; caption?: string; slideKey?: string; assetId?: string } | null>(null)
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 })
   const [feedback, setFeedback] = useState<Record<string, SlideFeedback>>({})
   const [feedbackError, setFeedbackError] = useState<Record<string, boolean>>({})
+  const [pins, setPins] = useState<SlidePin[]>([])
   // Reviewer name — remembered across slides and visits (per campaign)
   const [reviewerName, setReviewerName] = useState('')
   const [doneDismissed, setDoneDismissed] = useState(false)
@@ -101,7 +103,35 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
         setFeedback(map)
       })
       .catch(() => {})
+    fetch(`/api/campaigns/${campaignId}/pins`)
+      .then(r => r.ok ? r.json() : [])
+      .then((rows: SlidePin[]) => Array.isArray(rows) && setPins(rows))
+      .catch(() => {})
   }, [showFeedback, campaignId])
+
+  const addPin = useCallback(async (pin: { slideKey: string; assetId?: string; x: number; y: number; comment: string; author: string }) => {
+    if (!campaignId) return
+    try {
+      const res = await fetch(`/api/campaigns/${campaignId}/pins`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slide_key: pin.slideKey, asset_id: pin.assetId, x: pin.x, y: pin.y, comment: pin.comment, author: pin.author }),
+      })
+      if (res.ok) { const saved: SlidePin = await res.json(); setPins(prev => [...prev, saved]) }
+    } catch { /* ignore */ }
+  }, [campaignId])
+
+  const removePin = useCallback(async (pinId: string) => {
+    if (!campaignId) return
+    setPins(prev => prev.filter(p => p.id !== pinId))
+    try {
+      await fetch(`/api/campaigns/${campaignId}/pins`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: pinId }),
+      })
+    } catch { /* ignore */ }
+  }, [campaignId])
 
   const submitFeedback = useCallback(async (slideKey: string, status: FeedbackStatus, comment: string, author: string) => {
     if (!campaignId) return
@@ -361,7 +391,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
           <p>By Results Group</p>
         </footer>
 
-        {/* Lightbox */}
+        {/* Lightbox with pin annotations */}
         <AnimatePresence>
           {lightboxAsset && (
             <motion.div
@@ -380,7 +410,16 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 onClick={e => e.stopPropagation()}
               >
-                <img src={lightboxAsset.url} alt={lightboxAsset.caption || ''} className="lightbox-img" />
+                <PinnableImage
+                  asset={lightboxAsset}
+                  pins={pins.filter(p => p.slide_key === lightboxAsset.slideKey && (!lightboxAsset.assetId || p.asset_id === lightboxAsset.assetId))}
+                  canPin={showFeedback}
+                  reviewerName={reviewerName}
+                  onReviewerNameChange={updateReviewerName}
+                  onAddPin={addPin}
+                  onRemovePin={removePin}
+                  lang={lang}
+                />
                 {lightboxAsset.caption && <p className="lightbox-caption">{lightboxAsset.caption}</p>}
                 <button className="lightbox-close" onClick={() => setLightboxAsset(null)}>✕</button>
               </motion.div>
@@ -473,6 +512,122 @@ function ApprovalBar({ slideKey, current, error, onSubmit, reviewerName, onRevie
           {status === 'approved' ? t('public.approvedByClient') : status === 'rejected' ? t('public.changeRequired') : t('public.pendingApproval')}
           {current.author ? ` · ${current.author}` : ''}
         </div>
+      )}
+    </div>
+  )
+}
+
+/** Lightbox image with Figma-style pin comments overlaid on the creative. */
+function PinnableImage({ asset, pins, canPin, reviewerName, onReviewerNameChange, onAddPin, onRemovePin, lang = 'he' }: {
+  asset: { url: string; caption?: string; slideKey?: string; assetId?: string }
+  pins: SlidePin[]
+  canPin: boolean
+  reviewerName: string
+  onReviewerNameChange: (name: string) => void
+  onAddPin: (pin: { slideKey: string; assetId?: string; x: number; y: number; comment: string; author: string }) => void
+  onRemovePin: (id: string) => void
+  lang?: 'he' | 'en'
+}) {
+  const dict = lang === 'en' ? en : he
+  const t = (key: keyof typeof he) => dict[key] ?? he[key] ?? key
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const [pinMode, setPinMode] = useState(false)
+  const [draft, setDraft] = useState<{ x: number; y: number; comment: string } | null>(null)
+  const [openPin, setOpenPin] = useState<string | null>(null)
+
+  const canAnnotate = canPin && !!asset.slideKey
+
+  function handleImageClick(e: React.MouseEvent) {
+    if (!pinMode || !wrapRef.current) return
+    const rect = wrapRef.current.getBoundingClientRect()
+    const x = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width))
+    const y = Math.min(1, Math.max(0, (e.clientY - rect.top) / rect.height))
+    setDraft({ x, y, comment: '' })
+    setOpenPin(null)
+  }
+
+  function saveDraft() {
+    if (!draft || !asset.slideKey) return
+    const text = draft.comment.trim()
+    if (!text) { setDraft(null); return }
+    onAddPin({ slideKey: asset.slideKey, assetId: asset.assetId, x: draft.x, y: draft.y, comment: text, author: reviewerName })
+    setDraft(null)
+    setPinMode(false)
+  }
+
+  return (
+    <div className="pin-stage">
+      {canAnnotate && (
+        <div className="pin-toolbar">
+          <button
+            className={`pin-mode-btn${pinMode ? ' active' : ''}`}
+            onClick={() => { setPinMode(m => !m); setDraft(null) }}
+          >
+            {pinMode ? `✕ ${t('public.pinModeExit')}` : `📍 ${t('public.pinAdd')}`}
+          </button>
+          {pins.length > 0 && <span className="pin-count">{pins.length} {t('public.pinCount')}</span>}
+        </div>
+      )}
+
+      <div
+        ref={wrapRef}
+        className={`pin-image-wrap${pinMode ? ' pinning' : ''}`}
+        onClick={handleImageClick}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={asset.url} alt={asset.caption || ''} className="lightbox-img" draggable={false} />
+
+        {/* Existing pins */}
+        {pins.map((p, i) => (
+          <div key={p.id} className="pin-marker-wrap" style={{ left: `${p.x * 100}%`, top: `${p.y * 100}%` }}>
+            <button
+              className={`pin-marker${p.resolved ? ' resolved' : ''}`}
+              onClick={e => { e.stopPropagation(); setOpenPin(openPin === p.id ? null : p.id); setDraft(null) }}
+            >
+              {i + 1}
+            </button>
+            {openPin === p.id && (
+              <div className="pin-popover" onClick={e => e.stopPropagation()}>
+                <p className="pin-popover-comment" dir="auto">{p.comment}</p>
+                <div className="pin-popover-foot">
+                  {p.author && <span className="pin-popover-author">{p.author}</span>}
+                  <button className="pin-popover-del" onClick={() => { onRemovePin(p.id); setOpenPin(null) }}>{t('public.pinDelete')}</button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+
+        {/* Draft pin being composed */}
+        {draft && (
+          <div className="pin-marker-wrap" style={{ left: `${draft.x * 100}%`, top: `${draft.y * 100}%` }}>
+            <div className="pin-marker draft">•</div>
+            <div className="pin-popover" onClick={e => e.stopPropagation()}>
+              <input
+                className="pin-input"
+                placeholder={t('public.yourName')}
+                value={reviewerName}
+                onChange={e => onReviewerNameChange(e.target.value)}
+              />
+              <textarea
+                className="pin-textarea"
+                placeholder={t('public.pinPlaceholder')}
+                value={draft.comment}
+                onChange={e => setDraft(d => d ? { ...d, comment: e.target.value } : d)}
+                rows={2}
+                autoFocus
+              />
+              <div className="pin-popover-foot">
+                <button className="pin-cancel" onClick={() => setDraft(null)}>{t('public.pinCancel')}</button>
+                <button className="pin-save" onClick={saveDraft}>{t('public.pinSave')}</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {canAnnotate && pinMode && !draft && (
+        <p className="pin-hint">{t('public.pinHint')}</p>
       )}
     </div>
   )
@@ -609,7 +764,7 @@ function DividerSlide({ slide, index }: { slide: SlideData; index: number }) {
 function CreativesSlide({ slide, activeCopyIdx, onAssetClick, lang = 'he' }: {
   slide: SlideData
   activeCopyIdx: number
-  onAssetClick: (a: { url: string; caption?: string }) => void
+  onAssetClick: (a: { url: string; caption?: string; slideKey?: string; assetId?: string }) => void
   lang?: 'he' | 'en'
 }) {
   const dict = lang === 'en' ? en : he
@@ -653,7 +808,7 @@ function CreativesSlide({ slide, activeCopyIdx, onAssetClick, lang = 'he' }: {
               variants={staggerChild}
               onClick={() => {
                 const url = asset.file_path ? assetProxyUrl(asset.file_path) : (asset.public_url || '')
-                if (url && asset.type !== 'video') onAssetClick({ url, caption: activeCopy || asset.caption })
+                if (url && asset.type !== 'video') onAssetClick({ url, caption: activeCopy || asset.caption, slideKey: slide.key, assetId: asset.id })
               }}
               style={{ cursor: asset.type !== 'video' ? 'pointer' : 'default' }}
             >
