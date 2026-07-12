@@ -10,22 +10,26 @@ import { captureException } from '@/lib/logger'
 
 const STATUS_HE: Record<FeedbackStatus, string> = { approved: 'אישר', rejected: 'ביקש שינוי ב', pending: 'סימן כממתין' }
 
-/** Notify the team on the client's Monday card. Best-effort — never blocks the response. */
-async function notifyMonday(campaign: Campaign, section: CampaignSection | undefined, status: FeedbackStatus, comment: string | null, author: string | null) {
+/** Post free text onto the client's Monday card. Best-effort — never blocks the response. */
+async function mondayNotify(campaign: Campaign, text: string) {
   try {
     if (!isMondayWriteConfigured() || !campaign.client_id) return
     const client = await getClientById(campaign.client_id)
     if (!client?.monday_item_id) return
-    const who = author?.trim() ? author.trim() : 'הלקוח'
-    const slideLabel = section?.title?.trim() ? `"${section.title.trim()}"` : 'שקף'
-    const lines = [
-      `🎨 ${who} ${STATUS_HE[status]} ${slideLabel} בקמפיין "${campaign.campaign_name}".`,
-      comment?.trim() ? `💬 ${comment.trim()}` : '',
-    ].filter(Boolean)
-    await postMondayUpdate(client.monday_item_id, lines.join('\n'))
+    await postMondayUpdate(client.monday_item_id, text)
   } catch (err) {
     captureException(err, { route: 'feedback→monday', campaign: campaign.id })
   }
+}
+
+/** One-slide notification text. */
+function singleText(campaign: Campaign, section: CampaignSection | undefined, status: FeedbackStatus, comment: string | null, author: string | null): string {
+  const who = author?.trim() ? author.trim() : 'הלקוח'
+  const slideLabel = section?.title?.trim() ? `"${section.title.trim()}"` : 'שקף'
+  return [
+    `🎨 ${who} ${STATUS_HE[status]} ${slideLabel} בקמפיין "${campaign.campaign_name}".`,
+    comment?.trim() ? `💬 ${comment.trim()}` : '',
+  ].filter(Boolean).join('\n')
 }
 
 interface Ctx { params: Promise<{ id: string }> }
@@ -103,6 +107,33 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     }
 
     const body = await req.json()
+    const sections = parseSections(campaign)
+    const sectionIds = new Set(sections.map(s => s.id))
+
+    // ── Bulk path (e.g. "approve all") → one Monday summary instead of many ──
+    if (Array.isArray(body.bulk)) {
+      const items = (body.bulk as Array<{ slide_key?: string; status?: FeedbackStatus; comment?: string; author?: string }>)
+        .filter(it => it.slide_key && VALID.includes(it.status as FeedbackStatus) && sectionIds.has(String(it.slide_key)))
+      const saved = []
+      for (const it of items) {
+        saved.push(await upsertFeedback({
+          campaign_id: id,
+          slide_key: String(it.slide_key),
+          status: it.status as FeedbackStatus,
+          comment: typeof it.comment === 'string' ? it.comment.slice(0, 2000) : null,
+          author: typeof it.author === 'string' ? it.author.slice(0, 120) : null,
+        }))
+      }
+      if (!isStaff && items.length) {
+        const who = items.find(i => i.author?.trim())?.author?.trim() || 'הלקוח'
+        const approved = items.filter(i => i.status === 'approved').length
+        const rejected = items.filter(i => i.status === 'rejected').length
+        const parts = [approved ? `אישר ${approved} שקפים` : '', rejected ? `ביקש שינוי ב-${rejected}` : ''].filter(Boolean).join(', ')
+        await mondayNotify(campaign, `🎨 ${who} ${parts || 'עדכן שקפים'} בקמפיין "${campaign.campaign_name}".`)
+      }
+      return NextResponse.json(saved)
+    }
+
     const slideKey = String(body.slide_key || '').trim()
     const statusVal = body.status as FeedbackStatus
     if (!slideKey || !VALID.includes(statusVal)) {
@@ -110,7 +141,6 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     }
 
     // Only accept slide keys that map to real sections of this campaign
-    const sectionIds = new Set(parseSections(campaign).map(s => s.id))
     if (!sectionIds.has(slideKey)) {
       return NextResponse.json({ error: 'שקופית לא קיימת' }, { status: 400 })
     }
@@ -125,8 +155,8 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 
     // When the client (not staff) responds, drop an update on their Monday card.
     if (!isStaff) {
-      const section = parseSections(campaign).find(s => s.id === slideKey)
-      await notifyMonday(campaign, section, statusVal, feedback.comment, feedback.author)
+      const section = sections.find(s => s.id === slideKey)
+      await mondayNotify(campaign, singleText(campaign, section, statusVal, feedback.comment, feedback.author))
     }
 
     return NextResponse.json(feedback)

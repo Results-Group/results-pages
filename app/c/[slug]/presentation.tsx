@@ -171,10 +171,25 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   const allApproved = feedbackSlides.length > 0 && approvedCount === feedbackSlides.length
 
   function approveAllRemaining() {
-    feedbackSlides.forEach(s => {
-      const k = s.key as string
-      if (feedback[k]?.status !== 'approved') submitFeedback(k, 'approved', feedback[k]?.comment || '', reviewerName)
+    const toApprove = feedbackSlides.filter(s => feedback[s.key as string]?.status !== 'approved')
+    if (!toApprove.length || !campaignId) return
+    // Optimistic: mark them all approved locally
+    setFeedback(prev => {
+      const next = { ...prev }
+      for (const s of toApprove) {
+        const k = s.key as string
+        next[k] = { slide_key: k, status: 'approved', comment: prev[k]?.comment ?? null, author: reviewerName }
+      }
+      return next
     })
+    // One bulk request → the server posts a single Monday summary, not one per slide
+    fetch(`/api/campaigns/${campaignId}/feedback`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        bulk: toApprove.map(s => ({ slide_key: s.key, status: 'approved', comment: feedback[s.key as string]?.comment || '', author: reviewerName })),
+      }),
+    }).catch(() => {})
   }
 
   useEffect(() => {
