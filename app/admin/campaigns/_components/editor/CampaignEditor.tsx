@@ -47,6 +47,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
     Object.entries(uploadProgress).map(([k, v]) => [k, Math.max(0, v.total - v.done - v.failed)])
   )
   const [passwordDirty, setPasswordDirty] = useState(false)
+  const [activeCopyIdx, setActiveCopyIdx] = useState(0)
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [copied, setCopied] = useState(false)
   const [toasts, setToasts] = useState<Toast[]>([])
@@ -574,6 +575,9 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
               device={device}
               uploading={activeSection ? (uploadCounts[activeSection.id] ?? 0) : 0}
               uploadProgress={activeSection ? uploadProgress[activeSection.id] : undefined}
+              copies={doc.meta.copies}
+              activeCopyIdx={activeCopyIdx}
+              onActiveCopyChange={setActiveCopyIdx}
               onUpdateSection={patch => activeSection && updateSection(activeSection.id, patch)}
               onUpdateAsset={(assetId, patch) => activeSection && updateAsset(activeSection.id, assetId, patch)}
               onRemoveAsset={handleRemoveAsset}

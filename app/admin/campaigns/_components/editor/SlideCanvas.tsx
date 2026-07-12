@@ -27,6 +27,9 @@ interface CanvasProps {
   device: 'desktop' | 'mobile'
   uploading: number
   uploadProgress?: UploadProgress
+  copies: string[]
+  activeCopyIdx: number
+  onActiveCopyChange: (idx: number) => void
   onUpdateSection: (patch: Partial<EditorSection>) => void
   onUpdateAsset: (assetId: string, patch: Partial<EditorAsset>) => void
   onRemoveAsset: (assetId: string) => void
@@ -36,11 +39,12 @@ interface CanvasProps {
   onAddVideo: () => void
 }
 
-function SortableAssetCard({ asset, section, clientName, clientLogoUrl, onUpdateAsset, onRemoveAsset, onReplaceAsset }: {
+function SortableAssetCard({ asset, section, clientName, clientLogoUrl, captionOverride, onUpdateAsset, onRemoveAsset, onReplaceAsset }: {
   asset: EditorAsset
   section: EditorSection
   clientName: string
   clientLogoUrl: string | null
+  captionOverride?: string
   onUpdateAsset: (assetId: string, patch: Partial<EditorAsset>) => void
   onRemoveAsset: (assetId: string) => void
   onReplaceAsset: (assetId: string, file: File) => void
@@ -79,7 +83,7 @@ function SortableAssetCard({ asset, section, clientName, clientLogoUrl, onUpdate
 
       {/* Asset card wrapper */}
       <div className="rounded-xl overflow-hidden transition-all duration-300" style={{ border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>
-        <CanvasAsset asset={asset} mockupType={section.mockup_type} clientName={clientName} clientLogoUrl={clientLogoUrl} />
+        <CanvasAsset asset={asset} mockupType={section.mockup_type} clientName={clientName} clientLogoUrl={clientLogoUrl} captionOverride={captionOverride} />
       </div>
 
       {section.mockup_type !== 'instagram_story' && (
@@ -101,6 +105,7 @@ function SortableAssetCard({ asset, section, clientName, clientLogoUrl, onUpdate
 
 export default function SlideCanvas({
   section, clientName, clientLogoUrl, device, uploading, uploadProgress,
+  copies, activeCopyIdx, onActiveCopyChange,
   onUpdateSection, onUpdateAsset, onRemoveAsset, onMoveAsset, onUploadFiles, onReplaceAsset, onAddVideo,
 }: CanvasProps) {
   const sensors = useSensors(
@@ -126,6 +131,8 @@ export default function SlideCanvas({
   const isVideo = section.mockup_type === 'video'
   const isStory = section.mockup_type === 'instagram_story'
   const maxWidth = device === 'mobile' ? 420 : 960
+  const hasCopies = section.useCopies && copies.length > 0
+  const activeCopy = hasCopies ? (copies[activeCopyIdx] ?? copies[0] ?? '') : undefined
 
   function handleDragEnd(e: DragEndEvent) {
     const { active, over } = e
@@ -184,6 +191,31 @@ export default function SlideCanvas({
           style={{ color: 'rgba(255,255,255,0.5)' }}
         />
 
+        {/* Copy version switcher + preview */}
+        {hasCopies && activeCopy !== undefined && (
+          <div className="rounded-xl px-4 py-3 mb-6" style={{ background: 'rgba(64,225,211,0.04)', border: '1px solid rgba(64,225,211,0.12)' }}>
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'rgba(64,225,211,0.6)' }}>קופי פעיל</span>
+              <div className="flex gap-1">
+                {copies.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => onActiveCopyChange(i)}
+                    className="w-6 h-6 rounded-md text-[11px] font-bold transition-all duration-200"
+                    style={activeCopyIdx === i
+                      ? { background: '#40e1d3', color: '#050505' }
+                      : { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.08)' }
+                    }
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <p className="text-sm leading-relaxed" dir="auto" style={{ color: 'rgba(255,255,255,0.7)' }}>{activeCopy}</p>
+          </div>
+        )}
+
         {isDivider ? (
           <div className="relative rounded-2xl py-20 text-center" style={{ border: '1px dashed rgba(64,225,211,0.2)', background: 'rgba(64,225,211,0.02)' }}>
             <div className="absolute top-0 right-0 w-12 h-12" style={{ borderTop: '2px solid rgba(64,225,211,0.2)', borderRight: '2px solid rgba(64,225,211,0.2)' }} />
@@ -219,7 +251,7 @@ export default function SlideCanvas({
                 </div>
                 {asset.url && (
                   <div className="mt-4 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
-                    <CanvasAsset asset={asset} mockupType="video" clientName={clientName} clientLogoUrl={clientLogoUrl} />
+                    <CanvasAsset asset={asset} mockupType="video" clientName={clientName} clientLogoUrl={clientLogoUrl} captionOverride={activeCopy} />
                   </div>
                 )}
               </div>
@@ -244,6 +276,7 @@ export default function SlideCanvas({
                         section={section}
                         clientName={clientName}
                         clientLogoUrl={clientLogoUrl}
+                        captionOverride={activeCopy}
                         onUpdateAsset={onUpdateAsset}
                         onRemoveAsset={onRemoveAsset}
                         onReplaceAsset={onReplaceAsset}
