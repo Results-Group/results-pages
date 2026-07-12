@@ -300,7 +300,7 @@ export default function UsersPage() {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>{t('users.passwordLabel')}</label>
-              <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} required minLength={6} placeholder={t('users.passwordPlaceholder')} dir="ltr" className="w-full px-4 py-2.5 rounded-lg text-sm outline-none" style={inputStyle} />
+              <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} required minLength={6} autoComplete="new-password" placeholder={t('users.passwordPlaceholder')} dir="ltr" className="w-full px-4 py-2.5 rounded-lg text-sm outline-none" style={inputStyle} />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>{t('users.roleLabel')}</label>
@@ -387,7 +387,7 @@ export default function UsersPage() {
                   <div className="flex items-center gap-1.5 flex-shrink-0">
                     {isEditing ? (
                       <>
-                        <input type="password" value={editPassword} onChange={e => setEditPassword(e.target.value)} placeholder={t('users.newPassword')} dir="ltr" className="px-3 py-1.5 rounded-lg text-xs outline-none w-[130px]" style={inputStyle} />
+                        <input type="password" value={editPassword} onChange={e => setEditPassword(e.target.value)} autoComplete="new-password" placeholder={t('users.newPassword')} dir="ltr" className="px-3 py-1.5 rounded-lg text-xs outline-none w-[130px]" style={inputStyle} />
                         <button onClick={handleSaveEdit} disabled={saving} className="p-1.5 rounded-lg" style={{ color: 'var(--admin-success)' }} title={t('common.save')}><Check className="w-4 h-4" /></button>
                         <button onClick={() => setEditingId(null)} className="p-1.5 rounded-lg" style={{ color: 'var(--admin-text-muted)' }} title={t('common.cancel')}><X className="w-4 h-4" /></button>
                       </>

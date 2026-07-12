@@ -347,7 +347,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
           </div>
           <div>
             <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('common.password')} ({locale === 'en' ? 'optional' : 'לא חובה'})</label>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} autoComplete="off"
               placeholder={locale === 'en' ? 'Protect report...' : 'להגנת הדוח...'} className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle} />
           </div>
         </div>

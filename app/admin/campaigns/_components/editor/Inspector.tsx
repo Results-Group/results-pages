@@ -271,7 +271,7 @@ export default function Inspector({
                 <Lock className="w-3.5 h-3.5" /> סיסמה
               </label>
               <input
-                type="password" value={meta.password}
+                type="password" value={meta.password} autoComplete="off"
                 onChange={e => { onPasswordDirty(true); onUpdateMeta({ password: e.target.value }) }}
                 placeholder={meta.hasPassword && !passwordDirty ? '••••••••' : 'ריק = ללא סיסמה'} dir="ltr"
                 className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={fieldStyle}
