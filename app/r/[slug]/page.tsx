@@ -47,7 +47,7 @@ export default async function ReportPage({ params, searchParams }: PageProps) {
   if (report.password && !isEditorOrAdmin) {
     const cookieStore = await cookies()
     const accessToken = cookieStore.get(`rpt_${report.id}`)?.value
-    const tokenValid = accessToken ? await verifyAccessToken(accessToken, report.id) : false
+    const tokenValid = accessToken ? await verifyAccessToken(accessToken, report.id, report.password) : false
     if (!tokenValid) {
       return <PasswordGate slug={slug} clientName={report.client} />
     }

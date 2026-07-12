@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'סיסמה שגויה' }, { status: 401 })
     }
 
-    const token = await signAccessToken(campaign.id)
+    const token = await signAccessToken(campaign.id, campaign.password)
     const response = NextResponse.json({ ok: true })
     response.cookies.set(`cmp_${campaign.id}`, token, {
       httpOnly: true,

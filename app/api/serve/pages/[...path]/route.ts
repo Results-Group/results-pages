@@ -49,7 +49,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
   if (page.password) {
     const cookieName = `page_access_${page.id}`
     const accessCookie = req.cookies.get(cookieName)?.value
-    const tokenValid = accessCookie ? await verifyAccessToken(accessCookie, page.id) : false
+    const tokenValid = accessCookie ? await verifyAccessToken(accessCookie, page.id, page.password) : false
     if (!tokenValid) {
       return new NextResponse(passwordPage(client, slug, false), {
         status: 200,
@@ -139,7 +139,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 
   if (passwordMatch) {
     const cookieName = `page_access_${page.id}`
-    const token = await signAccessToken(page.id)
+    const token = await signAccessToken(page.id, page.password)
     const baseUrl = `${req.nextUrl.protocol}//${req.nextUrl.host}`
     const redirectUrl = `${baseUrl}/pages/${client}/${slug}`
     const response = NextResponse.redirect(redirectUrl, 303)

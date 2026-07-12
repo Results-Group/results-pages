@@ -52,6 +52,13 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       .eq('client_id', id)
     if (pageErr) throw pageErr
 
+    // Reassign performance reports
+    const { error: reportErr } = await supabase
+      .from('performance_reports')
+      .update({ client_id: mergeIntoId, client: target.name })
+      .eq('client_id', id)
+    if (reportErr) throw reportErr
+
     // Delete the duplicate
     await deleteClient(id)
 

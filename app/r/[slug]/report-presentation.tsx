@@ -100,9 +100,19 @@ export default function ReportPresentation({ report, brandColor }: Props) {
   )
 }
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 function formatTitle(title: string): string {
-  // Wrap text after " — " or after ":" in accent color
-  return title
+  // Escape first so an editor-supplied title can't inject markup, then wrap
+  // text after " — " or after ":" in accent color.
+  return escapeHtml(title)
     .replace(/—\s*(.+)$/, '— <span>$1</span>')
     .replace(/:\s*(.+)$/, ': <span>$1</span>')
 }

@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth'
 import { geminiGenerateJson, isAiConfigured } from '@/lib/ai'
 import type { ReportTab } from '@/lib/performance-reports'
 import { captureException } from '@/lib/logger'
+import { rateLimit } from '@/lib/rate-limit'
 import * as XLSX from 'xlsx'
 
 export const runtime = 'nodejs'
@@ -10,6 +11,10 @@ export const runtime = 'nodejs'
 export async function POST(request: NextRequest) {
   const authErr = await requireAuth(request)
   if (authErr) return authErr
+
+  // Guards the paid AI call against abuse/cost runaway
+  const rl = await rateLimit(request, { windowMs: 60_000, max: 5, prefix: 'ai-import' })
+  if (rl) return rl
 
   if (!isAiConfigured()) {
     return NextResponse.json({ error: 'AI לא מוגדר — חסר GEMINI_API_KEY' }, { status: 503 })

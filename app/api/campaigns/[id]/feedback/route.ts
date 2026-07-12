@@ -40,7 +40,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
       const isStaff = !!session && (session.role === 'admin' || session.role === 'editor')
       if (!isStaff) {
         const token = req.cookies.get(`cmp_${campaign.id}`)?.value
-        const ok = token ? await verifyAccessToken(token, campaign.id) : false
+        const ok = token ? await verifyAccessToken(token, campaign.id, campaign.password) : false
         if (!ok) return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
       }
     }
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     }
     if (!isStaff && campaign.password) {
       const token = req.cookies.get(`cmp_${campaign.id}`)?.value
-      const ok = token ? await verifyAccessToken(token, campaign.id) : false
+      const ok = token ? await verifyAccessToken(token, campaign.id, campaign.password) : false
       if (!ok) return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
     }
 

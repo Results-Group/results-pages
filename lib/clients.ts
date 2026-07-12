@@ -123,12 +123,13 @@ export async function updateClient(
   if (error) throw error
   const client = enrich(row as Client)
 
-  // Keep the denormalized `client` text on linked pages/campaigns in sync (best-effort)
+  // Keep the denormalized `client` text on linked pages/campaigns/reports in sync (best-effort)
   if (data.name !== undefined && data.name) {
     try {
       await Promise.all([
         supabase.from('landing_pages').update({ client: data.name }).eq('client_id', id),
         supabase.from('campaigns').update({ client: data.name }).eq('client_id', id),
+        supabase.from('performance_reports').update({ client: data.name }).eq('client_id', id),
       ])
     } catch {
       // best-effort — a stale display name must not fail the update

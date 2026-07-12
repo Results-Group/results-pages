@@ -204,6 +204,7 @@ const he = {
   'trash.empty': 'סל המיחזור ריק',
   'trash.campaigns': 'קמפיינים',
   'trash.pages': 'דפים',
+  'trash.reports': 'דוחות',
   'trash.deleted': 'נמחק',
   'trash.restore': 'שחזר',
   'trash.purge': 'מחק לצמיתות',

@@ -80,7 +80,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
   if (rawCampaign.password && !isEditorOrAdmin) {
     const cookieStore = await cookies()
     const accessToken = cookieStore.get(`cmp_${rawCampaign.id}`)?.value
-    const tokenValid = accessToken ? await verifyAccessToken(accessToken, rawCampaign.id) : false
+    const tokenValid = accessToken ? await verifyAccessToken(accessToken, rawCampaign.id, rawCampaign.password) : false
     if (!tokenValid) {
       return <PasswordGate slug={slug} clientName={rawCampaign.client} />
     }

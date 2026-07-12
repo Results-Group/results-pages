@@ -103,6 +103,18 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: 'תפקיד לא חוקי' }, { status: 400 })
   }
 
+  // Only the owner may change the role or reset the password of another
+  // admin/owner — otherwise any admin could take over another admin's account.
+  const { data: target } = await supabase
+    .from('admin_users')
+    .select('role, is_owner')
+    .eq('id', id)
+    .single()
+  const targetIsPrivileged = !!target && (target.is_owner || target.role === 'admin')
+  if (targetIsPrivileged && !session.isOwner && session.userId !== id && (role !== undefined || password !== undefined)) {
+    return NextResponse.json({ error: 'רק הבעלים יכול לשנות תפקיד או סיסמה של מנהל אחר' }, { status: 403 })
+  }
+
   const updateData: Record<string, unknown> = {}
   if (name) updateData.name = name.trim()
   if (role) updateData.role = role
@@ -150,6 +162,16 @@ export async function DELETE(req: NextRequest) {
 
   if (session.userId === id) {
     return NextResponse.json({ error: 'לא ניתן למחוק את עצמך' }, { status: 400 })
+  }
+
+  // Only the owner may delete another admin/owner
+  const { data: target } = await supabase
+    .from('admin_users')
+    .select('role, is_owner')
+    .eq('id', id)
+    .single()
+  if (target && (target.is_owner || target.role === 'admin') && !session.isOwner) {
+    return NextResponse.json({ error: 'רק הבעלים יכול למחוק מנהל אחר' }, { status: 403 })
   }
 
   const { error } = await supabase

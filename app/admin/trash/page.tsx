@@ -18,6 +18,13 @@ interface TrashedCampaign {
   deleted_at: string | null
 }
 
+interface TrashedReport {
+  id: string
+  report_name: string
+  client: string
+  deleted_at: string | null
+}
+
 export default function TrashPage() {
   const t = useT()
   const locale = useLocale()
@@ -29,18 +36,21 @@ export default function TrashPage() {
 
   const [pages, setPages] = useState<TrashedPage[]>([])
   const [campaigns, setCampaigns] = useState<TrashedCampaign[]>([])
+  const [reports, setReports] = useState<TrashedReport[]>([])
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const [pRes, cRes] = await Promise.all([
+      const [pRes, cRes, rRes] = await Promise.all([
         fetch('/api/pages?deleted=1'),
         fetch('/api/campaigns?deleted=1'),
+        fetch('/api/reports?deleted=1'),
       ])
       setPages(pRes.ok ? await pRes.json() : [])
       setCampaigns(cRes.ok ? await cRes.json() : [])
+      setReports(rRes.ok ? await rRes.json() : [])
     } finally {
       setLoading(false)
     }
@@ -48,7 +58,7 @@ export default function TrashPage() {
 
   useEffect(() => { load() }, [load])
 
-  async function restore(kind: 'pages' | 'campaigns', id: string) {
+  async function restore(kind: 'pages' | 'campaigns' | 'reports', id: string) {
     setBusy(id)
     try {
       const res = await fetch(`/api/${kind}/${id}/restore`, { method: 'POST' })
@@ -58,7 +68,7 @@ export default function TrashPage() {
     }
   }
 
-  async function purge(kind: 'pages' | 'campaigns', id: string) {
+  async function purge(kind: 'pages' | 'campaigns' | 'reports', id: string) {
     if (!confirm(t('trash.purgeConfirm'))) return
     setBusy(id)
     try {
@@ -69,7 +79,7 @@ export default function TrashPage() {
     }
   }
 
-  const isEmpty = pages.length === 0 && campaigns.length === 0
+  const isEmpty = pages.length === 0 && campaigns.length === 0 && reports.length === 0
 
   return (
     <div className="max-w-4xl">
@@ -106,6 +116,27 @@ export default function TrashPage() {
                     busy={busy === c.id}
                     onRestore={() => restore('campaigns', c.id)}
                     onPurge={() => purge('campaigns', c.id)}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {reports.length > 0 && (
+            <section>
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-1.5" style={{ color: 'var(--admin-text-secondary)' }}>
+                <FileText className="w-4 h-4" /> {t('trash.reports')} ({reports.length})
+              </h3>
+              <div className="space-y-2">
+                {reports.map(r => (
+                  <TrashRow
+                    key={r.id}
+                    title={r.report_name}
+                    subtitle={r.client}
+                    deletedAt={r.deleted_at}
+                    busy={busy === r.id}
+                    onRestore={() => restore('reports', r.id)}
+                    onPurge={() => purge('reports', r.id)}
                   />
                 ))}
               </div>

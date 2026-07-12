@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionFromRequest, requireWorkspacePermission } from '@/lib/auth'
+import { getSessionFromRequest, requireResourcePermission } from '@/lib/auth'
 import { getReportById, updateReport } from '@/lib/performance-reports'
 import type { ReportTab } from '@/lib/performance-reports'
 import { geminiGenerateJson, isAiConfigured } from '@/lib/ai'
 import { captureException } from '@/lib/logger'
+import { rateLimit } from '@/lib/rate-limit'
 
 export async function POST(
   request: NextRequest,
@@ -11,6 +12,9 @@ export async function POST(
 ) {
   const session = await getSessionFromRequest(request)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const rl = await rateLimit(request, { windowMs: 60_000, max: 5, prefix: 'ai-translate' })
+  if (rl) return rl
 
   const { id } = await params
 
@@ -22,10 +26,8 @@ export async function POST(
     const report = await getReportById(id)
     if (!report) return NextResponse.json({ error: 'דוח לא נמצא' }, { status: 404 })
 
-    if (report.workspace_id) {
-      const permErr = await requireWorkspacePermission(request, report.workspace_id, 'edit')
-      if (permErr) return permErr
-    }
+    const permErr = await requireResourcePermission(request, report.workspace_id, 'edit')
+    if (permErr) return permErr
 
     const body = await request.json()
     const direction: 'he-to-en' | 'en-to-he' = body.direction || 'he-to-en'

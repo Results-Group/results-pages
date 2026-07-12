@@ -206,6 +206,7 @@ const en: Record<TranslationKey, string> = {
   'trash.empty': 'Trash is empty',
   'trash.campaigns': 'Campaigns',
   'trash.pages': 'Pages',
+  'trash.reports': 'Reports',
   'trash.deleted': 'Deleted',
   'trash.restore': 'Restore',
   'trash.purge': 'Delete Permanently',
