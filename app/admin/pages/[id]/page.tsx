@@ -100,8 +100,13 @@ export default function EditPage() {
 
   useEffect(() => {
     fetch(`/api/pages/${id}`)
-      .then(r => r.json())
+      .then(r => {
+        if (r.status === 401) { window.location.href = '/admin/login'; return null }
+        if (!r.ok) throw new Error('load failed')
+        return r.json()
+      })
       .then(data => {
+        if (!data) return
         setPage(data)
         setTitle(data.title)
         setClient(data.client)
@@ -114,6 +119,7 @@ export default function EditPage() {
         setWorkspaceId(data.workspace_id || null)
         setViewCount(data._count?.views || 0)
       })
+      .catch(() => setError('שגיאה בטעינת הדף'))
     loadHtml()
   }, [id])
 

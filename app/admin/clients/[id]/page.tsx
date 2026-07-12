@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, use } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Upload, Plus, Trash2, Megaphone, FileText, Save } from 'lucide-react'
+import { useUnsavedChanges } from '@/lib/use-unsaved-changes'
 
 interface Contact { name?: string; role?: string; email?: string; phone?: string }
 interface Client {
@@ -28,6 +29,9 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const [campaigns, setCampaigns] = useState<LinkedCampaign[]>([])
   const [pages, setPages] = useState<LinkedPage[]>([])
+  const [dirty, setDirty] = useState(false)
+
+  useUnsavedChanges(dirty)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -58,10 +62,12 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
   useEffect(() => { load().catch(() => {}) }, [load])
 
   function updateField<K extends keyof Client>(key: K, val: Client[K]) {
+    setDirty(true)
     setClient(prev => prev ? { ...prev, [key]: val } : prev)
   }
 
   function handleLogoSelect(file: File) {
+    setDirty(true)
     setLogoFile(file)
     setLogoPreview(URL.createObjectURL(file))
   }
@@ -92,6 +98,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
       if (res.ok) {
         setLogoFile(null)
         setLogoPreview(null)
+        setDirty(false)
         await load()
       } else {
         const data = await res.json().catch(() => null)

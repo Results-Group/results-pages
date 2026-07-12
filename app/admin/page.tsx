@@ -48,7 +48,7 @@ export default function AdminDashboard() {
   const [search, setSearch] = useState('')
   const [previewPage, setPreviewPage] = useState<PageItem | null>(null)
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop')
-  const [userRole, setUserRole] = useState<UserRole>('admin')
+  const [userRole, setUserRole] = useState<UserRole>('viewer')
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
@@ -66,17 +66,28 @@ export default function AdminDashboard() {
 
   async function fetchPages() {
     setLoading(true)
-    const params = new URLSearchParams()
-    if (filter) params.set('client', filter)
-    const res = await fetch(`/api/pages?${params}`)
-    const data = await res.json()
-    setPages(data)
-    setLoading(false)
+    try {
+      const params = new URLSearchParams()
+      if (filter) params.set('client', filter)
+      const res = await fetch(`/api/pages?${params}`)
+      if (res.status === 401) { window.location.href = '/admin/login'; return }
+      if (!res.ok) throw new Error('load failed')
+      const data = await res.json()
+      setPages(Array.isArray(data) ? data : [])
+    } catch {
+      setPages([])
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function handleDelete(id: string, title: string) {
     if (!confirm(locale === 'en' ? `Delete "${title}"?` : `למחוק את "${title}"?`)) return
-    await fetch(`/api/pages/${id}`, { method: 'DELETE' })
+    const res = await fetch(`/api/pages/${id}`, { method: 'DELETE' })
+    if (!res.ok) {
+      alert(locale === 'en' ? 'Delete failed' : 'שגיאה במחיקה')
+      return
+    }
     fetchPages()
   }
 
@@ -100,11 +111,15 @@ export default function AdminDashboard() {
   }
 
   async function handleToggle(id: string, currentActive: boolean) {
-    await fetch(`/api/pages/${id}`, {
+    const res = await fetch(`/api/pages/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ active: !currentActive }),
     })
+    if (!res.ok) {
+      alert(locale === 'en' ? 'Update failed' : 'שגיאה בעדכון')
+      return
+    }
     fetchPages()
   }
 
@@ -127,14 +142,17 @@ export default function AdminDashboard() {
   async function handleBulkMove() {
     if (!moveTarget || selectedIds.size === 0) return
     setMoving(true)
-    const promises = [...selectedIds].map(id =>
+    const results = await Promise.all([...selectedIds].map(id =>
       fetch(`/api/pages/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ workspace_id: moveTarget }),
-      })
-    )
-    await Promise.all(promises)
+      }).then(r => r.ok).catch(() => false)
+    ))
+    const failed = results.filter(ok => !ok).length
+    if (failed > 0) {
+      alert(locale === 'en' ? `${failed} item(s) failed to move` : `${failed} פריטים נכשלו בהעברה`)
+    }
     setSelectedIds(new Set())
     setMoveTarget('')
     setMoving(false)
@@ -256,8 +274,8 @@ export default function AdminDashboard() {
           <p className="text-sm">{t('pages.noPagesHint')}</p>
         </div>
       ) : (
-        <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
-          <table className="w-full text-sm">
+        <div className="rounded-xl overflow-x-auto" style={{ border: '1px solid var(--admin-border)' }}>
+          <table className="w-full text-sm min-w-[720px]">
             <thead>
               <tr style={{ background: 'var(--admin-bg-elevated)', borderBottom: '1px solid var(--admin-border)' }}>
                 {workspaces.length > 1 && (
@@ -390,7 +408,8 @@ export default function AdminDashboard() {
                             href={`/admin/pages/${page.id}`}
                             className="p-1.5 rounded-lg transition-colors"
                             style={{ color: 'var(--admin-link)' }}
-                            title="עריכה"
+                            title={t('common.edit')}
+                            aria-label={t('common.edit')}
                             onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
                             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                           >
