@@ -1,10 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCampaignById, type Campaign, type CampaignSection } from '@/lib/campaigns'
 import { getFeedback, upsertFeedback, type FeedbackStatus } from '@/lib/feedback'
+import { getClientById } from '@/lib/clients'
+import { postMondayUpdate, isMondayWriteConfigured } from '@/lib/monday'
 import { verifyAccessToken } from '@/lib/content-access'
 import { getSessionFromRequest } from '@/lib/auth'
 import { rateLimit } from '@/lib/rate-limit'
 import { captureException } from '@/lib/logger'
+
+const STATUS_HE: Record<FeedbackStatus, string> = { approved: 'אישר', rejected: 'ביקש שינוי ב', pending: 'סימן כממתין' }
+
+/** Notify the team on the client's Monday card. Best-effort — never blocks the response. */
+async function notifyMonday(campaign: Campaign, section: CampaignSection | undefined, status: FeedbackStatus, comment: string | null, author: string | null) {
+  try {
+    if (!isMondayWriteConfigured() || !campaign.client_id) return
+    const client = await getClientById(campaign.client_id)
+    if (!client?.monday_item_id) return
+    const who = author?.trim() ? author.trim() : 'הלקוח'
+    const slideLabel = section?.title?.trim() ? `"${section.title.trim()}"` : 'שקף'
+    const lines = [
+      `🎨 ${who} ${STATUS_HE[status]} ${slideLabel} בקמפיין "${campaign.campaign_name}".`,
+      comment?.trim() ? `💬 ${comment.trim()}` : '',
+    ].filter(Boolean)
+    await postMondayUpdate(client.monday_item_id, lines.join('\n'))
+  } catch (err) {
+    captureException(err, { route: 'feedback→monday', campaign: campaign.id })
+  }
+}
 
 interface Ctx { params: Promise<{ id: string }> }
 
@@ -100,6 +122,13 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       comment: typeof body.comment === 'string' ? body.comment.slice(0, 2000) : null,
       author: typeof body.author === 'string' ? body.author.slice(0, 120) : null,
     })
+
+    // When the client (not staff) responds, drop an update on their Monday card.
+    if (!isStaff) {
+      const section = parseSections(campaign).find(s => s.id === slideKey)
+      await notifyMonday(campaign, section, statusVal, feedback.comment, feedback.author)
+    }
+
     return NextResponse.json(feedback)
   } catch (err) {
     captureException(err, { route: 'POST /api/campaigns/[id]/feedback', id })

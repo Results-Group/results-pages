@@ -17,6 +17,8 @@ interface Campaign {
   sections: { assets: unknown[] }[]
   created_at: string
   workspace_id: string | null
+  created_by?: string | null
+  feedback_counts?: { approved: number; rejected: number; pending: number }
 }
 
 interface Workspace {
@@ -25,13 +27,13 @@ interface Workspace {
   color: string
 }
 
-async function fetchUserRole(): Promise<string> {
+async function fetchMe(): Promise<{ role: string; id: string | null }> {
   try {
     const res = await fetch('/api/auth/me')
-    if (!res.ok) return 'viewer'
+    if (!res.ok) return { role: 'viewer', id: null }
     const { user } = await res.json()
-    return user?.role || 'viewer'
-  } catch { return 'viewer' }
+    return { role: user?.role || 'viewer', id: user?.id || user?.userId || null }
+  } catch { return { role: 'viewer', id: null } }
 }
 
 const STATUS_DOT: Record<string, string> = {
@@ -50,6 +52,9 @@ export default function CampaignsListPage() {
   const [copied, setCopied] = useState<string | null>(null)
   const [duplicating, setDuplicating] = useState<string | null>(null)
   const [userRole, setUserRole] = useState('admin')
+  const [myId, setMyId] = useState<string | null>(null)
+  const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published' | 'archived'>('all')
+  const [mineOnly, setMineOnly] = useState(false)
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [templatesOpen, setTemplatesOpen] = useState(false)
   const [templates, setTemplates] = useState<Campaign[] | null>(null)
@@ -59,7 +64,7 @@ export default function CampaignsListPage() {
   const STATUS_LABELS: Record<string, string> = { draft: t('common.draft'), published: t('common.published'), archived: t('common.archived') }
 
   useEffect(() => {
-    fetchUserRole().then(r => setUserRole(r))
+    fetchMe().then(me => { setUserRole(me.role); setMyId(me.id) })
     fetch('/api/workspaces').then(r => r.ok ? r.json() : []).then(setWorkspaces).catch(() => {})
   }, [])
 
@@ -177,9 +182,14 @@ export default function CampaignsListPage() {
   const totalAssets = (c: Campaign) => parseSections(c.sections).reduce((sum, s) => sum + (s.assets?.length || 0), 0)
   const totalSections = (c: Campaign) => parseSections(c.sections).length
 
+  const filteredCampaigns = campaigns.filter(c =>
+    (statusFilter === 'all' || c.status === statusFilter) &&
+    (!mineOnly || (myId != null && c.created_by === myId))
+  )
+
   const groupedByClient = (() => {
     const groups = new Map<string, Campaign[]>()
-    for (const c of campaigns) {
+    for (const c of filteredCampaigns) {
       const key = c.client?.trim() || (locale === 'en' ? 'No client' : 'ללא לקוח')
       if (!groups.has(key)) groups.set(key, [])
       groups.get(key)!.push(c)
@@ -267,6 +277,31 @@ export default function CampaignsListPage() {
         />
       </div>
 
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-2 mb-6">
+        {(['all', 'draft', 'published', 'archived'] as const).map(s => (
+          <button
+            key={s}
+            onClick={() => setStatusFilter(s)}
+            className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+            style={statusFilter === s
+              ? { background: 'rgba(64,225,211,0.14)', border: '1px solid rgba(64,225,211,0.4)', color: '#40e1d3' }
+              : { background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-muted)' }}
+          >
+            {s === 'all' ? t('common.all') : STATUS_LABELS[s]}
+          </button>
+        ))}
+        <button
+          onClick={() => setMineOnly(m => !m)}
+          className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all ms-auto"
+          style={mineOnly
+            ? { background: 'rgba(64,225,211,0.14)', border: '1px solid rgba(64,225,211,0.4)', color: '#40e1d3' }
+            : { background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-muted)' }}
+        >
+          {t('campaigns.mineOnly')}
+        </button>
+      </div>
+
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24" style={{ color: 'var(--admin-text-muted)' }}>
           <div className="w-8 h-8 border-2 rounded-full animate-spin mb-4" style={{ borderColor: 'rgba(64,225,211,0.3)', borderTopColor: '#40e1d3' }} />
@@ -339,6 +374,13 @@ export default function CampaignsListPage() {
                             >
                               {STATUS_LABELS[c.status]}
                             </span>
+                            {c.feedback_counts && (c.feedback_counts.approved + c.feedback_counts.rejected + c.feedback_counts.pending) > 0 && (
+                              <span className="flex items-center gap-1.5 text-[10px] font-bold shrink-0" title="משוב לקוח">
+                                {c.feedback_counts.approved > 0 && <span style={{ color: '#40e1d3' }}>✓{c.feedback_counts.approved}</span>}
+                                {c.feedback_counts.rejected > 0 && <span style={{ color: '#ef4444' }}>✕{c.feedback_counts.rejected}</span>}
+                                {c.feedback_counts.pending > 0 && <span style={{ color: '#94a3b8' }}>⏳{c.feedback_counts.pending}</span>}
+                              </span>
+                            )}
                           </div>
 
                           {/* Metrics row */}

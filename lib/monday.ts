@@ -132,6 +132,25 @@ export async function syncClientsFromMonday(): Promise<MondaySyncResult> {
   return { created, skipped, total: mondayItems.length }
 }
 
+/**
+ * Post an update (comment) onto a Monday item's timeline. Used to notify the
+ * team on the client's Monday card when the client approves/rejects a slide.
+ * Requires only MONDAY_API_TOKEN (no board/workspace config).
+ */
+export async function postMondayUpdate(itemId: string, body: string): Promise<void> {
+  await mondayGraphQL(
+    `mutation ($itemId: ID!, $body: String!) {
+      create_update(item_id: $itemId, body: $body) { id }
+    }`,
+    { itemId, body },
+  )
+}
+
+/** Returns true when just the write token is present (enough for posting updates). */
+export function isMondayWriteConfigured(): boolean {
+  return !!process.env.MONDAY_API_TOKEN
+}
+
 /** Returns true when all required Monday env vars are present. */
 export function isMondayConfigured(): boolean {
   return !!(

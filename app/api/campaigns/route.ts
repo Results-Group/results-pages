@@ -28,7 +28,26 @@ export async function GET(request: NextRequest) {
 
   try {
     const campaigns = await getCampaigns({ search, status, workspace_id: workspaceId, deleted, templates })
-    const safe = campaigns.map(c => ({ ...c, has_password: !!c.password, password: undefined }))
+
+    // Aggregate per-campaign approval counts so the list can show a feedback badge
+    // without opening each editor (same idea as client counts in /api/clients).
+    const ids = campaigns.map(c => c.id)
+    const counts: Record<string, { approved: number; rejected: number; pending: number }> = {}
+    if (ids.length) {
+      const { data: fb } = await supabase.from('slide_feedback').select('campaign_id,status').in('campaign_id', ids)
+      for (const r of fb || []) {
+        const c = (counts[r.campaign_id] ||= { approved: 0, rejected: 0, pending: 0 })
+        const st = String(r.status)
+        if (st === 'approved' || st === 'rejected' || st === 'pending') c[st]++
+      }
+    }
+
+    const safe = campaigns.map(c => ({
+      ...c,
+      has_password: !!c.password,
+      password: undefined,
+      feedback_counts: counts[c.id] || { approved: 0, rejected: 0, pending: 0 },
+    }))
     return NextResponse.json(safe)
   } catch (err) {
     captureException(err, { route: 'GET /api/campaigns', workspaceId })
