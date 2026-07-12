@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { LayoutGrid, Settings2, Upload, Lock, Trash2, Clock, Plus, X, Sparkles, Loader2, Check } from 'lucide-react'
+import { LayoutGrid, Settings2, Upload, Lock, Trash2, Clock, Plus, X, Sparkles, Loader2, Check, Image as ImageIcon } from 'lucide-react'
 import ClientAutocomplete from '../../../_components/client-autocomplete'
 import WorkspaceSelector from '../../../_components/workspace-selector'
 import { MOCKUP_TYPES, type CampaignMeta, type EditorSection, type MockupType } from './types'
@@ -40,8 +40,24 @@ export default function Inspector({
   const logoRef = useRef<HTMLInputElement>(null)
   const [copyLoading, setCopyLoading] = useState(false)
   const [suggestions, setSuggestions] = useState<{ captions: string[]; titles: string[] } | null>(null)
+  const [applyingLogo, setApplyingLogo] = useState(false)
   const t = useT()
   const dir = useDir()
+
+  // Pull the client's saved logo into this campaign — no re-upload needed.
+  async function useClientLogo() {
+    if (!meta.clientId) return
+    setApplyingLogo(true)
+    try {
+      const res = await fetch(`/api/clients/${meta.clientId}`)
+      if (res.ok) {
+        const client = await res.json()
+        if (client?.logo_path) onUpdateMeta({ logoPath: client.logo_path, logoUrl: client.logo_url || null })
+      }
+    } catch { /* ignore */ } finally {
+      setApplyingLogo(false)
+    }
+  }
 
   async function handleGenerateCopy() {
     if (!section || !onGenerateCopy) return
@@ -352,6 +368,17 @@ export default function Inspector({
                 )}
                 <input ref={logoRef} type="file" accept="image/*" className="hidden" onChange={e => { if (e.target.files?.[0]) onUploadLogo(e.target.files[0]) }} />
               </div>
+              {meta.clientId && (
+                <button
+                  onClick={useClientLogo}
+                  disabled={applyingLogo}
+                  className="flex items-center justify-center gap-1.5 w-full mt-2 px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200 disabled:opacity-40"
+                  style={{ color: '#40e1d3', border: '1px dashed rgba(64,225,211,0.25)', background: 'rgba(64,225,211,0.03)' }}
+                >
+                  {applyingLogo ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImageIcon className="w-3.5 h-3.5" />}
+                  {t('campaigns.useClientLogo')}
+                </button>
+              )}
               <p className="text-[10px] mt-2" style={{ color: 'rgba(255,255,255,0.2)' }}>
                 {t('campaigns.logoFallbackHint')}
               </p>

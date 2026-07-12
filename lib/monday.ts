@@ -146,9 +146,25 @@ export async function postMondayUpdate(itemId: string, body: string): Promise<vo
   )
 }
 
+/** Create a new item (row) on a board and return its id. */
+export async function createMondayItem(boardId: string, itemName: string): Promise<string> {
+  const data = await mondayGraphQL<{ create_item: { id: string } }>(
+    `mutation ($boardId: ID!, $name: String!) {
+      create_item(board_id: $boardId, item_name: $name) { id }
+    }`,
+    { boardId, name: itemName },
+  )
+  return data.create_item.id
+}
+
 /** Returns true when just the write token is present (enough for posting updates). */
 export function isMondayWriteConfigured(): boolean {
   return !!process.env.MONDAY_API_TOKEN
+}
+
+/** Feedback goes to its own dedicated board (a row per campaign). */
+export function isMondayFeedbackConfigured(): boolean {
+  return !!(process.env.MONDAY_API_TOKEN && process.env.MONDAY_FEEDBACK_BOARD_ID)
 }
 
 /** Returns true when all required Monday env vars are present. */

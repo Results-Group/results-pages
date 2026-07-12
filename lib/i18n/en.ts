@@ -324,6 +324,7 @@ const en: Record<TranslationKey, string> = {
   'campaigns.replaceLogo': 'Replace Logo',
   'campaigns.uploadLogo': 'Upload Logo',
   'campaigns.deleteLogo': 'Delete Logo',
+  'campaigns.useClientLogo': "Use client's logo",
   'campaigns.logoFallbackHint': 'If no logo is set, the client logo will be used (if available).',
   'campaigns.securitySection': 'Security',
   'campaigns.passwordSet': 'Password set',

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCampaignById, type Campaign, type CampaignSection } from '@/lib/campaigns'
+import { getCampaignById, setCampaignMondayFeedbackItem, type Campaign, type CampaignSection } from '@/lib/campaigns'
 import { getFeedback, upsertFeedback, type FeedbackStatus } from '@/lib/feedback'
-import { getClientById } from '@/lib/clients'
-import { postMondayUpdate, isMondayWriteConfigured } from '@/lib/monday'
+import { postMondayUpdate, createMondayItem, isMondayFeedbackConfigured } from '@/lib/monday'
 import { verifyAccessToken } from '@/lib/content-access'
 import { getSessionFromRequest } from '@/lib/auth'
 import { rateLimit } from '@/lib/rate-limit'
@@ -10,13 +9,22 @@ import { captureException } from '@/lib/logger'
 
 const STATUS_HE: Record<FeedbackStatus, string> = { approved: 'אישר', rejected: 'ביקש שינוי ב', pending: 'סימן כממתין' }
 
-/** Post free text onto the client's Monday card. Best-effort — never blocks the response. */
+/**
+ * Post an update to the campaign's row on the dedicated Monday feedback board.
+ * Creates the row on first feedback, then appends every later update to it.
+ * Best-effort — never blocks the response.
+ */
 async function mondayNotify(campaign: Campaign, text: string) {
   try {
-    if (!isMondayWriteConfigured() || !campaign.client_id) return
-    const client = await getClientById(campaign.client_id)
-    if (!client?.monday_item_id) return
-    await postMondayUpdate(client.monday_item_id, text)
+    if (!isMondayFeedbackConfigured()) return
+    const boardId = process.env.MONDAY_FEEDBACK_BOARD_ID as string
+    let itemId = campaign.monday_feedback_item_id
+    if (!itemId) {
+      const rowName = `${campaign.client?.trim() || 'לקוח'} — ${campaign.campaign_name}`
+      itemId = await createMondayItem(boardId, rowName)
+      await setCampaignMondayFeedbackItem(campaign.id, itemId)
+    }
+    await postMondayUpdate(itemId, text)
   } catch (err) {
     captureException(err, { route: 'feedback→monday', campaign: campaign.id })
   }

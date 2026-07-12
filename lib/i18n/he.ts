@@ -322,6 +322,7 @@ const he = {
   'campaigns.replaceLogo': 'החלף לוגו',
   'campaigns.uploadLogo': 'העלה לוגו',
   'campaigns.deleteLogo': 'מחק לוגו',
+  'campaigns.useClientLogo': 'השתמש בלוגו הלקוח',
   'campaigns.logoFallbackHint': 'אם לא יוגדר לוגו, ישתמש בלוגו של הלקוח (אם קיים).',
   'campaigns.securitySection': 'אבטחה',
   'campaigns.passwordSet': 'סיסמה מוגדרת',

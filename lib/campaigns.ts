@@ -44,6 +44,7 @@ export interface Campaign {
   workspace_id: string | null
   deleted_at: string | null
   is_template?: boolean
+  monday_feedback_item_id?: string | null
   created_at: string
   updated_at: string
 }
@@ -183,6 +184,12 @@ export async function updateCampaign(
     throw new Error('Campaign not found')
   }
   return campaign as Campaign
+}
+
+/** Persist the campaign's Monday feedback-board item id. Does not touch updated_at
+ * (avoids spurious optimistic-concurrency conflicts for an editor with it open). */
+export async function setCampaignMondayFeedbackItem(id: string, itemId: string) {
+  await supabase.from('campaigns').update({ monday_feedback_item_id: itemId }).eq('id', id)
 }
 
 /** Soft-delete: move a campaign to the recycle bin (reversible, keeps assets). */
