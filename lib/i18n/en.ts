@@ -134,6 +134,10 @@ const en: Record<TranslationKey, string> = {
   'clients.merging': 'Merging...',
   'clients.merge': 'Merge',
   'clients.mergeError': 'Error merging clients',
+  'clients.thClient': 'Client',
+  'clients.thCampaigns': 'Campaigns',
+  'clients.thPages': 'Pages',
+  'clients.thContacts': 'Contacts',
 
   // Users
   'users.title': 'Users',

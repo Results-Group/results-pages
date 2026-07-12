@@ -132,6 +132,10 @@ const he = {
   'clients.merging': 'ממזג...',
   'clients.merge': 'מזג',
   'clients.mergeError': 'שגיאה במיזוג',
+  'clients.thClient': 'לקוח',
+  'clients.thCampaigns': 'קמפיינים',
+  'clients.thPages': 'דפים',
+  'clients.thContacts': 'אנשי קשר',
 
   // Users
   'users.title': 'משתמשים',
