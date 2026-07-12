@@ -439,7 +439,9 @@ export default function UsersPage() {
                             </div>
 
                             <div className="flex flex-wrap gap-2">
-                              {Object.entries(PERMISSION_LABELS).map(([key, label]) => {
+                              {Object.entries(PERMISSION_LABELS)
+                              .filter(([key]) => !(key === 'can_manage_users' && m.role !== 'admin'))
+                              .map(([key, label]) => {
                                 const isOn = key in (m.permissions || {})
                                   ? m.permissions[key]
                                   : undefined

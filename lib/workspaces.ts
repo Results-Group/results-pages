@@ -32,6 +32,7 @@ export function resolvePermission(
   overrides: Record<string, boolean>,
   action: WorkspaceAction,
 ): boolean {
+  if (action === 'manage_users' && role !== 'admin') return false
   if (action in overrides) return overrides[action]
   return ROLE_DEFAULT_PERMISSIONS[role]?.[action] ?? false
 }
