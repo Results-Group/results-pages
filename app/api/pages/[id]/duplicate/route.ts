@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireRole, getSessionFromRequest } from '@/lib/auth'
+import { getSessionFromRequest, requireResourcePermission } from '@/lib/auth'
 import { getPageById, createPage, downloadFile, uploadFile, getPageByClientSlug } from '@/lib/db'
 
 interface Ctx { params: Promise<{ id: string }> }
 
 export async function POST(req: NextRequest, { params }: Ctx) {
-  const roleErr = await requireRole(req, 'editor')
-  if (roleErr) return roleErr
-
   const session = await getSessionFromRequest(req)
 
   const { id } = await params
   const page = await getPageById(id)
   if (!page) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  const permErr = await requireResourcePermission(req, page.workspace_id, 'create')
+  if (permErr) return permErr
 
   const html = await downloadFile(page.file_path)
   if (!html) return NextResponse.json({ error: 'HTML file not found in storage' }, { status: 404 })

@@ -25,10 +25,17 @@ const cache = new Map<string, { data: unknown; at: number }>()
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
 async function isAuthorized(req: NextRequest): Promise<boolean> {
+  // The dedicated Pizza House session (from the shared dashboard password).
   const ph = req.cookies.get('ph_session')?.value
   if (ph && (await verifySessionToken(ph))) return true
+  // Platform users may view it too, but only global admins/owners — a viewer
+  // or editor from an unrelated workspace must not reach this client's
+  // financial + customer PII.
   const rp = req.cookies.get('rp_session')?.value
-  if (rp && (await verifySessionToken(rp))) return true
+  if (rp) {
+    const session = await verifySessionToken(rp)
+    if (session && (session.isOwner || session.role === 'admin')) return true
+  }
   return false
 }
 
@@ -114,9 +121,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(data)
   } catch (err) {
     captureException(err, { route: 'GET /api/pizza-house/dashboard' })
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Database error' },
-      { status: 500 }
-    )
+    // Don't leak raw DB error text (schema/host details) to the client
+    return NextResponse.json({ error: 'שגיאה בטעינת הנתונים' }, { status: 500 })
   }
 }

@@ -1,18 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPages, createPage } from '@/lib/db'
-import { requireAuth, getSessionFromRequest, getActiveWorkspaceId, requireWorkspacePermission } from '@/lib/auth'
+import { getSessionFromRequest, getActiveWorkspaceId, requireWorkspacePermission } from '@/lib/auth'
 import { findOrCreateClient } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
 
 export async function GET(req: NextRequest) {
-  const authError = await requireAuth(req)
-  if (authError) return authError
+  const session = await getSessionFromRequest(req)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = req.nextUrl
   const client = searchParams.get('client') || undefined
   const search = searchParams.get('search') || undefined
   const deleted = searchParams.get('deleted') === '1'
   const workspaceId = searchParams.get('workspace_id') || await getActiveWorkspaceId(req) || undefined
+
+  if (workspaceId) {
+    const permErr = await requireWorkspacePermission(req, workspaceId, 'view')
+    if (permErr) return permErr
+  } else if (!session.isOwner && session.role !== 'admin') {
+    return NextResponse.json([])
+  }
 
   const pages = await getPages({ client, search, workspace_id: workspaceId, deleted })
   const safe = pages.map(p => ({ ...p, has_password: !!p.password, password: undefined }))
@@ -27,6 +34,8 @@ export async function POST(req: NextRequest) {
   if (workspaceId) {
     const permErr = await requireWorkspacePermission(req, workspaceId, 'create')
     if (permErr) return permErr
+  } else if (!session.isOwner && session.role === 'viewer') {
+    return NextResponse.json({ error: 'אין הרשאה לפעולה זו' }, { status: 403 })
   }
 
   const body = await req.json()

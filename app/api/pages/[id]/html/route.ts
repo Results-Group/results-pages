@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPageById, downloadFile, uploadFile, createVersion } from '@/lib/db'
-import { requireAuth, requireRole } from '@/lib/auth'
+import { requireResourcePermission } from '@/lib/auth'
 import { minifyHtml } from '@/lib/minify'
 
 interface Ctx { params: Promise<{ id: string }> }
@@ -10,12 +10,12 @@ function sourcePath(filePath: string): string {
 }
 
 export async function GET(req: NextRequest, { params }: Ctx) {
-  const authError = await requireAuth(req)
-  if (authError) return authError
-
   const { id } = await params
   const page = await getPageById(id)
   if (!page) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  const permErr = await requireResourcePermission(req, page.workspace_id, 'view')
+  if (permErr) return permErr
 
   // Prefer the un-minified source; fall back to the served file for older pages
   let html = await downloadFile(sourcePath(page.file_path))
@@ -30,12 +30,12 @@ export async function GET(req: NextRequest, { params }: Ctx) {
 }
 
 export async function PUT(req: NextRequest, { params }: Ctx) {
-  const roleErr = await requireRole(req, 'editor')
-  if (roleErr) return roleErr
-
   const { id } = await params
   const page = await getPageById(id)
   if (!page) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  const permErr = await requireResourcePermission(req, page.workspace_id, 'edit')
+  if (permErr) return permErr
 
   const contentType = req.headers.get('content-type') || ''
 

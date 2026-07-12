@@ -16,6 +16,8 @@ export async function POST(req: NextRequest) {
   if (workspaceId) {
     const permErr = await requireWorkspacePermission(req, workspaceId, 'create')
     if (permErr) return permErr
+  } else if (!session.isOwner && session.role === 'viewer') {
+    return NextResponse.json({ error: 'אין הרשאה לפעולה זו' }, { status: 403 })
   }
 
   const formData = await req.formData()
@@ -36,6 +38,11 @@ export async function POST(req: NextRequest) {
 
   if (!file.name.endsWith('.html') && !file.type.includes('html')) {
     return NextResponse.json({ error: 'ניתן להעלות קבצי HTML בלבד' }, { status: 400 })
+  }
+
+  const MAX_HTML_BYTES = 10 * 1024 * 1024 // 10 MB — landing-page HTML is small
+  if (file.size > MAX_HTML_BYTES) {
+    return NextResponse.json({ error: 'הקובץ גדול מדי (מקסימום 10 MB)' }, { status: 413 })
   }
 
   // Check conflicts including soft-deleted rows — the DB unique constraints

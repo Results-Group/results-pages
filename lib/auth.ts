@@ -12,6 +12,8 @@ export interface SessionUser {
   role: UserRole
   name: string
   isOwner?: boolean
+  /** Unix seconds. Tokens without a valid, unexpired `exp` are rejected. */
+  exp?: number
 }
 
 // ── HMAC signing (Web Crypto — works in Edge + Node) ──
@@ -41,8 +43,9 @@ async function hmacVerify(payload: string, signature: string): Promise<boolean> 
   return mismatch === 0
 }
 
-async function encodeSession(user: SessionUser): Promise<string> {
-  const payload = btoa(JSON.stringify(user))
+async function encodeSession(user: SessionUser, maxAgeSeconds: number = SESSION_MAX_AGE): Promise<string> {
+  const exp = Math.floor(Date.now() / 1000) + maxAgeSeconds
+  const payload = btoa(JSON.stringify({ ...user, exp }))
   const sig = await hmacSign(payload)
   return `${payload}.${sig}`
 }
@@ -56,8 +59,12 @@ async function decodeSession(token: string): Promise<SessionUser | null> {
     if (!(await hmacVerify(payload, sig))) return null
     const json = atob(payload)
     const parsed = JSON.parse(json)
-    if (parsed.userId && parsed.email && parsed.role) return parsed as SessionUser
-    return null
+    if (!parsed.userId || !parsed.email || !parsed.role) return null
+    // Reject tokens with no embedded expiry (legacy) or a past expiry.
+    // A stolen token can no longer be replayed indefinitely, and legacy
+    // sessions are invalidated on first use after this deploy (one re-login).
+    if (typeof parsed.exp !== 'number' || parsed.exp * 1000 < Date.now()) return null
+    return parsed as SessionUser
   } catch {
     return null
   }
@@ -108,15 +115,18 @@ export async function requireRole(request: NextRequest, minimumRole: UserRole): 
   return null
 }
 
-export async function createSessionCookie(user: SessionUser): Promise<{ name: string; value: string; options: Record<string, unknown> }> {
+export async function createSessionCookie(
+  user: SessionUser,
+  maxAgeSeconds: number = SESSION_MAX_AGE,
+): Promise<{ name: string; value: string; options: Record<string, unknown> }> {
   return {
     name: SESSION_COOKIE,
-    value: await encodeSession(user),
+    value: await encodeSession(user, maxAgeSeconds),
     options: {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax' as const,
-      maxAge: SESSION_MAX_AGE,
+      maxAge: maxAgeSeconds,
       path: '/',
     },
   }
@@ -167,4 +177,27 @@ export async function requireWorkspacePermission(
 
 export async function getActiveWorkspaceId(request: NextRequest): Promise<string | null> {
   return request.cookies.get('rp_workspace')?.value || null
+}
+
+/**
+ * Guards a resource that may or may not belong to a workspace.
+ * - Workspace-scoped resources → full membership/permission check.
+ * - Orphan resources (null workspace) → global admin/owner only, so they can
+ *   never be read/edited/deleted by an unrelated viewer just because the
+ *   workspace check was skipped.
+ */
+export async function requireResourcePermission(
+  request: NextRequest,
+  workspaceId: string | null | undefined,
+  action: import('./workspaces').WorkspaceAction,
+): Promise<NextResponse | null> {
+  if (workspaceId) {
+    return requireWorkspacePermission(request, workspaceId, action)
+  }
+  const session = await getSessionFromRequest(request)
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  if (session.isOwner || session.role === 'admin') return null
+  return NextResponse.json({ error: 'אין הרשאה לפעולה זו' }, { status: 403 })
 }

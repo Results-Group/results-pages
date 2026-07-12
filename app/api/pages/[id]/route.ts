@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPageById, updatePage, deletePage, purgePage, moveFile, getPageByShortUrl } from '@/lib/db'
-import { requireAuth, getSessionFromRequest, requireWorkspacePermission } from '@/lib/auth'
+import { getSessionFromRequest, requireResourcePermission } from '@/lib/auth'
 import { findOrCreateClient } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
 
 interface Ctx { params: Promise<{ id: string }> }
 
 export async function GET(req: NextRequest, { params }: Ctx) {
-  const authError = await requireAuth(req)
-  if (authError) return authError
-
   const { id } = await params
   const page = await getPageById(id)
   if (!page) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  const permErr = await requireResourcePermission(req, page.workspace_id, 'view')
+  if (permErr) return permErr
   return NextResponse.json({ ...page, has_password: !!page.password, password: undefined })
 }
 
@@ -24,13 +23,17 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
   const existing = await getPageById(id)
   if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  if (existing.workspace_id) {
-    const permErr = await requireWorkspacePermission(req, existing.workspace_id, 'edit')
-    if (permErr) return permErr
-  }
+  const permErr = await requireResourcePermission(req, existing.workspace_id, 'edit')
+  if (permErr) return permErr
 
   const body = await req.json()
   const { title, client, slug, active, expiresAt, publishAt, password, shortUrl, workspace_id } = body
+
+  // Moving the page to another workspace requires permission there too
+  if (workspace_id !== undefined && workspace_id !== existing.workspace_id) {
+    const moveErr = await requireResourcePermission(req, workspace_id, 'edit')
+    if (moveErr) return moveErr
+  }
   let clientId: string | null | undefined = body.client_id
   if (clientId === undefined && client && client !== existing.client) {
     try {
@@ -92,10 +95,8 @@ export async function DELETE(req: NextRequest, { params }: Ctx) {
   const page = await getPageById(id)
   if (!page) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  if (page.workspace_id) {
-    const permErr = await requireWorkspacePermission(req, page.workspace_id, 'delete')
-    if (permErr) return permErr
-  }
+  const permErr = await requireResourcePermission(req, page.workspace_id, 'delete')
+  if (permErr) return permErr
 
   // ?purge=1 permanently deletes (files + row); default is a reversible soft-delete.
   const purge = new URL(req.url).searchParams.get('purge') === '1'

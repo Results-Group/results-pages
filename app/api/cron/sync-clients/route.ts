@@ -9,10 +9,16 @@ import { captureException, logger } from '@/lib/logger'
  * Vercel automatically injects an Authorization: Bearer <CRON_SECRET> header.
  */
 export async function GET(req: NextRequest) {
-  // Verify the request comes from Vercel Cron
+  // Verify the request comes from Vercel Cron. The secret is mandatory — if it
+  // is not configured we refuse rather than run unauthenticated (which would
+  // let anyone trigger a full Monday.com sync).
   const authHeader = req.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret) {
+    logger.error('CRON_SECRET is not configured — refusing cron request')
+    return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
+  }
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

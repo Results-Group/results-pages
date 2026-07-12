@@ -25,6 +25,8 @@ const envSchema = z.object({
   // Google Gemini AI (translation + Excel parsing)
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_MODEL: z.string().optional(),
+  // Secret shared with Vercel Cron — required for the cron endpoint to run
+  CRON_SECRET: z.string().optional(),
 })
 
 export type Env = z.infer<typeof envSchema>

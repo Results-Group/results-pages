@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireRole } from '@/lib/auth'
+import { requireResourcePermission } from '@/lib/auth'
 import {
   getCampaignById,
   updateCampaign,
@@ -25,9 +25,6 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const roleErr = await requireRole(request, 'editor')
-  if (roleErr) return roleErr
-
   const { id } = await params
 
   try {
@@ -35,6 +32,9 @@ export async function POST(
     if (!campaign) {
       return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
     }
+
+    const permErr = await requireResourcePermission(request, campaign.workspace_id, 'edit')
+    if (permErr) return permErr
 
     const formData = await request.formData()
     const file = formData.get('file') as File | null
@@ -84,9 +84,6 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const roleErr = await requireRole(request, 'editor')
-  if (roleErr) return roleErr
-
   const { id } = await params
 
   try {
@@ -94,6 +91,9 @@ export async function DELETE(
     if (!campaign) {
       return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
     }
+
+    const permErr = await requireResourcePermission(request, campaign.workspace_id, 'edit')
+    if (permErr) return permErr
 
     const body = await request.json()
     const { file_path } = body

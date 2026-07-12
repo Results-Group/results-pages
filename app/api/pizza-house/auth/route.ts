@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     name: 'Pizza House',
   }
 
-  const cookie = await createSessionCookie(phUser)
+  const cookie = await createSessionCookie(phUser, MAX_AGE)
   const response = NextResponse.json({ ok: true })
   response.cookies.set(PH_COOKIE, cookie.value, {
     httpOnly: true,

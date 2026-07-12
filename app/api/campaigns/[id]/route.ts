@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, getSessionFromRequest, requireWorkspacePermission } from '@/lib/auth'
+import { getSessionFromRequest, requireWorkspacePermission, requireResourcePermission } from '@/lib/auth'
 import { getCampaignById, updateCampaign, deleteCampaign, purgeCampaign, enrichCampaignUrls } from '@/lib/campaigns'
 import { findOrCreateClient } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
@@ -9,9 +9,6 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const authErr = await requireAuth(request)
-  if (authErr) return authErr
-
   const { id } = await params
 
   try {
@@ -19,6 +16,8 @@ export async function GET(
     if (!campaign) {
       return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
     }
+    const permErr = await requireResourcePermission(request, campaign.workspace_id, 'view')
+    if (permErr) return permErr
     const enriched = enrichCampaignUrls(campaign)
     return NextResponse.json({ ...enriched, has_password: !!enriched.password, password: undefined })
   } catch {
@@ -41,10 +40,8 @@ export async function PUT(
       return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
     }
 
-    if (existing.workspace_id) {
-      const permErr = await requireWorkspacePermission(request, existing.workspace_id, 'edit')
-      if (permErr) return permErr
-    }
+    const permErr = await requireResourcePermission(request, existing.workspace_id, 'edit')
+    if (permErr) return permErr
 
     const body = await request.json()
 
@@ -88,10 +85,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
     }
 
-    if (existing.workspace_id) {
-      const permErr = await requireWorkspacePermission(request, existing.workspace_id, 'delete')
-      if (permErr) return permErr
-    }
+    const permErr = await requireResourcePermission(request, existing.workspace_id, 'delete')
+    if (permErr) return permErr
 
     const purge = new URL(request.url).searchParams.get('purge') === '1'
     if (purge) await purgeCampaign(id)

@@ -1,28 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPageById, getVersions, getVersion, downloadFile, uploadFile, createVersion, deleteVersion } from '@/lib/db'
-import { requireAuth, requireRole } from '@/lib/auth'
+import { requireResourcePermission } from '@/lib/auth'
 
 interface Ctx { params: Promise<{ id: string }> }
 
 export async function GET(req: NextRequest, { params }: Ctx) {
-  const authError = await requireAuth(req)
-  if (authError) return authError
-
   const { id } = await params
   const page = await getPageById(id)
   if (!page) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  const permErr = await requireResourcePermission(req, page.workspace_id, 'view')
+  if (permErr) return permErr
 
   const versions = await getVersions(id)
   return NextResponse.json({ versions })
 }
 
 export async function POST(req: NextRequest, { params }: Ctx) {
-  const roleErr = await requireRole(req, 'editor')
-  if (roleErr) return roleErr
-
   const { id } = await params
   const page = await getPageById(id)
   if (!page) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  const permErr = await requireResourcePermission(req, page.workspace_id, 'edit')
+  if (permErr) return permErr
 
   const body = await req.json()
   const { versionId } = body
@@ -62,12 +62,12 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 }
 
 export async function DELETE(req: NextRequest, { params }: Ctx) {
-  const roleErr = await requireRole(req, 'admin')
-  if (roleErr) return roleErr
-
   const { id } = await params
   const page = await getPageById(id)
   if (!page) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  const permErr = await requireResourcePermission(req, page.workspace_id, 'delete')
+  if (permErr) return permErr
 
   const url = new URL(req.url)
   const versionId = url.searchParams.get('versionId')

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, getSessionFromRequest, getActiveWorkspaceId, requireWorkspacePermission } from '@/lib/auth'
+import { getSessionFromRequest, getActiveWorkspaceId, requireWorkspacePermission } from '@/lib/auth'
 import { getCampaigns, createCampaign } from '@/lib/campaigns'
 import { findOrCreateClient, getClientById } from '@/lib/clients'
 import { supabase } from '@/lib/supabase'
@@ -7,14 +7,23 @@ import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
 
 export async function GET(request: NextRequest) {
-  const authErr = await requireAuth(request)
-  if (authErr) return authErr
+  const session = await getSessionFromRequest(request)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const search = searchParams.get('search') || undefined
   const status = searchParams.get('status') || undefined
   const deleted = searchParams.get('deleted') === '1'
   const workspaceId = searchParams.get('workspace_id') || await getActiveWorkspaceId(request) || undefined
+
+  // A caller may only list a workspace they belong to; without a workspace
+  // scope, only global admins/owners may enumerate everything.
+  if (workspaceId) {
+    const permErr = await requireWorkspacePermission(request, workspaceId, 'view')
+    if (permErr) return permErr
+  } else if (!session.isOwner && session.role !== 'admin') {
+    return NextResponse.json([])
+  }
 
   try {
     const campaigns = await getCampaigns({ search, status, workspace_id: workspaceId, deleted })
@@ -39,6 +48,9 @@ export async function POST(request: NextRequest) {
     if (workspaceId) {
       const permErr = await requireWorkspacePermission(request, workspaceId, 'create')
       if (permErr) return permErr
+    } else if (!session.isOwner && session.role === 'viewer') {
+      // No workspace scope — viewers may not create orphan resources
+      return NextResponse.json({ error: 'אין הרשאה לפעולה זו' }, { status: 403 })
     }
 
     if (!client || !campaign_name) {
