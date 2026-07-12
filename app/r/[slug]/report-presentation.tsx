@@ -3,6 +3,8 @@
 import { useState, useMemo } from 'react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
 import type { ReportTab, ReportBlock } from '@/lib/performance-reports'
+import he from '@/lib/i18n/he'
+import en from '@/lib/i18n/en'
 import './report.css'
 
 interface Props {
@@ -77,7 +79,7 @@ export default function ReportPresentation({ report, brandColor }: Props) {
           {activeTabs.length > 1 && (
             <div className="report-nav">
               <button className="report-nav-btn" disabled={activeTab === 0} onClick={() => navigate(-1)}>
-                ← {lang === 'he' ? 'הקודם' : 'Previous'}
+                ← {(lang === 'en' ? en : he)['public.previous']}
               </button>
               <div className="report-dots">
                 {activeTabs.map((_, i) => (
@@ -86,7 +88,7 @@ export default function ReportPresentation({ report, brandColor }: Props) {
               </div>
               <span className="report-slide-num">{activeTab + 1} / {activeTabs.length}</span>
               <button className="report-nav-btn" disabled={activeTab === activeTabs.length - 1} onClick={() => navigate(1)}>
-                {lang === 'he' ? 'הבא' : 'Next'} →
+                {(lang === 'en' ? en : he)['public.next']} →
               </button>
             </div>
           )}

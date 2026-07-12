@@ -7,6 +7,8 @@ import type { ReportTab, ReportBlock, ReportBlockType, PerformanceReport } from 
 import { createStandardTemplate } from '@/lib/performance-reports'
 import BlockEditor from './BlockEditor'
 import { useT, useLocale } from '@/lib/i18n'
+import { useUnsavedChanges } from '@/lib/use-unsaved-changes'
+import { useToast } from '../../_components/toast'
 
 interface Client {
   id: string
@@ -43,8 +45,12 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
   const router = useRouter()
   const t = useT()
   const locale = useLocale()
+  const { showToast } = useToast()
   const [saving, setSaving] = useState(false)
   const [status, setStatus] = useState(initial.status)
+  const [dirty, setDirty] = useState(false)
+
+  useUnsavedChanges(dirty)
   const [clients, setClients] = useState<Client[]>([])
   const [activeTabIdx, setActiveTabIdx] = useState(0)
 
@@ -91,7 +97,10 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
   }
 
   // Tab management
+  const markDirty = () => setDirty(true)
+
   const addTab = () => {
+    markDirty()
     setTabs(prev => [...prev, {
       id: crypto.randomUUID(),
       title: locale === 'en' ? `Tab ${prev.length + 1}` : `טאב ${prev.length + 1}`,
@@ -108,6 +117,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
   }
 
   const updateTab = (idx: number, patch: Partial<ReportTab>) => {
+    markDirty()
     setTabs(prev => prev.map((t, i) => i === idx ? { ...t, ...patch } : t))
   }
 
@@ -165,7 +175,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
   // Save
   const save = useCallback(async (newStatus?: 'draft' | 'published' | 'archived') => {
     if (!client.trim() || !reportName.trim()) {
-      alert(t('reports.requiredFields'))
+      showToast(t('reports.requiredFields'))
       return
     }
     setSaving(true)
@@ -186,12 +196,14 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        alert(err.error || t('reports.saveError'))
+        showToast(err.error || t('reports.saveError'))
         return
       }
 
       const saved = await res.json()
       if (newStatus) setStatus(newStatus)
+      setDirty(false)
+      showToast(newStatus === 'published' ? t('common.published') : t('reports.saving').replace('...', ''), 'success')
 
       if (mode === 'new') {
         router.push(`/admin/reports/${saved.id}`)
@@ -212,7 +224,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
       const res = await fetch('/api/reports/import-excel', { method: 'POST', body: formData })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        alert(err.error || t('reports.importError'))
+        showToast(err.error || t('reports.importError'))
         return
       }
       const { tabs: imported } = await res.json()
@@ -226,7 +238,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
 
   const translate = useCallback(async (direction: 'he-to-en' | 'en-to-he') => {
     if (mode === 'new') {
-      alert(t('reports.saveBeforeTranslate'))
+      showToast(t('reports.saveBeforeTranslate'))
       return
     }
     setTranslating(true)
@@ -240,14 +252,14 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        alert(err.error || t('reports.translateError'))
+        showToast(err.error || t('reports.translateError'))
         return
       }
       const result = await res.json()
       if (direction === 'en-to-he') {
         setTabs(result.tabs)
       }
-      alert(direction === 'he-to-en' ? t('reports.enCreated') : t('reports.heCreated'))
+      showToast(direction === 'he-to-en' ? t('reports.enCreated') : t('reports.heCreated'), 'success')
     } finally {
       setTranslating(false)
     }
@@ -391,14 +403,15 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
                 placeholder={t('reports.tabSubtitle')} className="px-3 py-2 rounded-lg text-sm outline-none" style={fieldStyle} />
             </div>
             <button onClick={() => moveTab(activeTabIdx, -1)} disabled={activeTabIdx === 0}
-              className="p-1.5 rounded disabled:opacity-20" style={{ color: 'rgba(255,255,255,0.4)' }}><ChevronUp className="w-4 h-4" /></button>
+              className="p-1.5 rounded disabled:opacity-20" style={{ color: 'rgba(255,255,255,0.4)' }} aria-label="הזז למעלה"><ChevronUp className="w-4 h-4" /></button>
             <button onClick={() => moveTab(activeTabIdx, 1)} disabled={activeTabIdx === tabs.length - 1}
-              className="p-1.5 rounded disabled:opacity-20" style={{ color: 'rgba(255,255,255,0.4)' }}><ChevronDown className="w-4 h-4" /></button>
+              className="p-1.5 rounded disabled:opacity-20" style={{ color: 'rgba(255,255,255,0.4)' }} aria-label="הזז למטה"><ChevronDown className="w-4 h-4" /></button>
             {tabs.length > 1 && (
               <button onClick={() => removeTab(activeTabIdx)} className="p-1.5 rounded transition-colors"
                 style={{ color: 'rgba(255,255,255,0.3)' }}
                 onMouseEnter={e => { e.currentTarget.style.color = '#ef4444' }}
-                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)' }}>
+                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)' }}
+                aria-label="מחק לשונית">
                 <Trash2 className="w-4 h-4" />
               </button>
             )}
@@ -413,13 +426,14 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
                   <span className="text-[10px] font-bold uppercase" style={{ color: 'rgba(64,225,211,0.5)' }}>{t(BLOCK_TYPE_KEYS[block.type] as any)}</span>
                   <div className="flex-1" />
                   <button onClick={() => moveBlock(block.id, -1)} disabled={bIdx === 0}
-                    className="p-1 rounded disabled:opacity-20" style={{ color: 'rgba(255,255,255,0.3)' }}><ChevronUp className="w-3.5 h-3.5" /></button>
+                    className="p-1 rounded disabled:opacity-20" style={{ color: 'rgba(255,255,255,0.3)' }} aria-label="הזז למעלה"><ChevronUp className="w-3.5 h-3.5" /></button>
                   <button onClick={() => moveBlock(block.id, 1)} disabled={bIdx === activeTab.blocks.length - 1}
-                    className="p-1 rounded disabled:opacity-20" style={{ color: 'rgba(255,255,255,0.3)' }}><ChevronDown className="w-3.5 h-3.5" /></button>
+                    className="p-1 rounded disabled:opacity-20" style={{ color: 'rgba(255,255,255,0.3)' }} aria-label="הזז למטה"><ChevronDown className="w-3.5 h-3.5" /></button>
                   <button onClick={() => removeBlock(block.id)} className="p-1 rounded transition-colors"
                     style={{ color: 'rgba(255,255,255,0.2)' }}
                     onMouseEnter={e => { e.currentTarget.style.color = '#ef4444' }}
-                    onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.2)' }}>
+                    onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.2)' }}
+                    aria-label="מחק בלוק">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>

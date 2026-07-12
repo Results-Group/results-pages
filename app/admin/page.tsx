@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Plus, Search, Eye, ExternalLink, Pencil, ToggleLeft, ToggleRight, Trash2, Monitor, Smartphone, X, Copy, MessageCircle, Lock, Building, CheckSquare, Square } from 'lucide-react'
 import { whatsappShareUrl } from '@/lib/share'
 import { useT, useLocale } from '@/lib/i18n'
+import { useToast } from './_components/toast'
 
 interface PageItem {
   id: string
@@ -42,6 +43,7 @@ interface Workspace {
 export default function AdminDashboard() {
   const t = useT()
   const locale = useLocale()
+  const { showToast } = useToast()
   const [pages, setPages] = useState<PageItem[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('')
@@ -85,7 +87,7 @@ export default function AdminDashboard() {
     if (!confirm(locale === 'en' ? `Delete "${title}"?` : `למחוק את "${title}"?`)) return
     const res = await fetch(`/api/pages/${id}`, { method: 'DELETE' })
     if (!res.ok) {
-      alert(locale === 'en' ? 'Delete failed' : 'שגיאה במחיקה')
+      showToast(locale === 'en' ? 'Delete failed' : 'שגיאה במחיקה')
       return
     }
     fetchPages()
@@ -98,7 +100,7 @@ export default function AdminDashboard() {
       fetchPages()
     } else {
       const err = await res.json()
-      alert(`${locale === 'en' ? 'Duplication error:' : 'שגיאה בשכפול:'} ${err.error || 'Unknown error'}`)
+      showToast(`${locale === 'en' ? 'Duplication error:' : 'שגיאה בשכפול:'} ${err.error || 'Unknown error'}`)
     }
   }
 
@@ -117,7 +119,7 @@ export default function AdminDashboard() {
       body: JSON.stringify({ active: !currentActive }),
     })
     if (!res.ok) {
-      alert(locale === 'en' ? 'Update failed' : 'שגיאה בעדכון')
+      showToast(locale === 'en' ? 'Update failed' : 'שגיאה בעדכון')
       return
     }
     fetchPages()
@@ -151,7 +153,7 @@ export default function AdminDashboard() {
     ))
     const failed = results.filter(ok => !ok).length
     if (failed > 0) {
-      alert(locale === 'en' ? `${failed} item(s) failed to move` : `${failed} פריטים נכשלו בהעברה`)
+      showToast(locale === 'en' ? `${failed} item(s) failed to move` : `${failed} פריטים נכשלו בהעברה`)
     }
     setSelectedIds(new Set())
     setMoveTarget('')
@@ -280,7 +282,7 @@ export default function AdminDashboard() {
               <tr style={{ background: 'var(--admin-bg-elevated)', borderBottom: '1px solid var(--admin-border)' }}>
                 {workspaces.length > 1 && (
                   <th className="px-3 py-2.5 w-10">
-                    <button type="button" onClick={toggleAll} style={{ color: 'var(--admin-text-muted)' }}>
+                    <button type="button" onClick={toggleAll} style={{ color: 'var(--admin-text-muted)' }} aria-label={t('pages.selectAll')}>
                       {selectedIds.size === filtered.length && filtered.length > 0
                         ? <CheckSquare className="w-4 h-4" />
                         : <Square className="w-4 h-4" />}
@@ -311,7 +313,7 @@ export default function AdminDashboard() {
                   >
                     {workspaces.length > 1 && (
                       <td className="px-3 py-4 w-10">
-                        <button type="button" onClick={() => toggleSelect(page.id)} style={{ color: 'var(--admin-text-muted)' }}>
+                        <button type="button" onClick={() => toggleSelect(page.id)} style={{ color: 'var(--admin-text-muted)' }} aria-label={t('pages.selectRow')}>
                           {selectedIds.has(page.id)
                             ? <CheckSquare className="w-4 h-4" style={{ color: 'var(--admin-accent)' }} />
                             : <Square className="w-4 h-4" />}

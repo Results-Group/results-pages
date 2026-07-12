@@ -1,8 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import he from '@/lib/i18n/he'
+import en from '@/lib/i18n/en'
 
-export default function PasswordGate({ slug, clientName }: { slug: string; clientName: string }) {
+export default function PasswordGate({ slug, clientName, lang = 'he' }: { slug: string; clientName: string; lang?: 'he' | 'en' }) {
+  const dict = lang === 'en' ? en : he
+  const t = (key: keyof typeof he) => dict[key] ?? he[key] ?? key
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -21,10 +25,10 @@ export default function PasswordGate({ slug, clientName }: { slug: string; clien
         window.location.reload()
       } else {
         const data = await res.json().catch(() => ({}))
-        setError(data.error || 'סיסמה שגויה')
+        setError(data.error || t('public.wrongPassword'))
       }
     } catch {
-      setError('שגיאה, נסו שוב')
+      setError(t('public.errorTryAgain'))
     } finally {
       setLoading(false)
     }
@@ -42,19 +46,19 @@ export default function PasswordGate({ slug, clientName }: { slug: string; clien
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
           </div>
-          <h1 className="pw-title">תוכן מוגן</h1>
-          <p className="pw-subtitle">{clientName ? `הקמפיין של ${clientName} מוגן בסיסמה` : 'הזינו סיסמה לצפייה בקמפיין'}</p>
+          <h1 className="pw-title">{t('public.protectedContent')}</h1>
+          <p className="pw-subtitle">{clientName ? t('public.campaignProtected').replace('{client}', clientName) : t('public.enterPasswordCampaign')}</p>
           <input
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            placeholder="הזינו סיסמה"
+            placeholder={t('public.enterPassword')}
             className="pw-input"
             autoFocus
           />
           {error && <p className="pw-error">{error}</p>}
           <button type="submit" disabled={loading || !password} className="pw-btn">
-            {loading ? 'בודק...' : 'כניסה'}
+            {loading ? t('public.checking') : t('public.enter')}
           </button>
         </form>
         <div className="pw-footer">By Results Group</div>

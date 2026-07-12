@@ -219,6 +219,11 @@ input[type="date"] {
                 color 0.3s ease, border-color 0.3s ease,
                 box-shadow 0.3s ease !important;
   }
+
+  .outline-none:focus-visible {
+    outline: 2px solid var(--admin-accent) !important;
+    outline-offset: 1px;
+  }
 }
 
 @media (max-width: 1024px) {
@@ -238,4 +243,12 @@ input[type="date"] {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up {
+  animation: slide-up 0.25s ease-out;
 }

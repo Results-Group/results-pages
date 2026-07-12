@@ -212,6 +212,7 @@ export default function Inspector({
                       style={{ color: 'rgba(255,255,255,0.2)' }}
                       onMouseEnter={e => { e.currentTarget.style.color = '#ef4444' }}
                       onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.2)' }}
+                      aria-label={`${t('campaigns.versionLabel')} ${idx + 1} — הסר`}
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -266,7 +267,8 @@ export default function Inspector({
                   <button onClick={() => onUpdateMeta({ logoPath: null, logoUrl: null })} className="p-2 rounded-lg transition-colors"
                     style={{ color: 'rgba(255,255,255,0.3)' }}
                     onMouseEnter={e => { e.currentTarget.style.color = '#ef4444' }}
-                    onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)' }}>
+                    onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)' }}
+                    aria-label={t('campaigns.deleteLogo')}>
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 )}

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, MessageCircle, Files, Image as ImageIcon, Calendar } from 'lucide-react'
 import { whatsappShareUrl } from '@/lib/share'
 import { useT, useLocale } from '@/lib/i18n'
+import { useToast } from '../_components/toast'
 
 interface Campaign {
   id: string
@@ -41,6 +42,7 @@ const STATUS_DOT: Record<string, string> = {
 export default function CampaignsListPage() {
   const t = useT()
   const locale = useLocale()
+  const { showToast } = useToast()
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -106,7 +108,7 @@ export default function CampaignsListPage() {
         setCampaigns(prev => [created, ...prev])
       } else {
         const err = await res.json().catch(() => ({}))
-        alert(`שגיאה בשכפול: ${err.error || 'Unknown error'}`)
+        showToast(`שגיאה בשכפול: ${err.error || 'Unknown error'}`)
       }
     } finally {
       setDuplicating(null)

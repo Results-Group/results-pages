@@ -245,7 +245,8 @@ export default function SlideCanvas({
                   <button onClick={() => onRemoveAsset(asset.id)} className="p-2 rounded-lg transition-colors"
                     style={{ color: 'rgba(239,68,68,0.6)' }}
                     onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = 'rgba(239,68,68,0.1)' }}
-                    onMouseLeave={e => { e.currentTarget.style.color = 'rgba(239,68,68,0.6)'; e.currentTarget.style.background = 'transparent' }}>
+                    onMouseLeave={e => { e.currentTarget.style.color = 'rgba(239,68,68,0.6)'; e.currentTarget.style.background = 'transparent' }}
+                    aria-label="הסר נכס">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>

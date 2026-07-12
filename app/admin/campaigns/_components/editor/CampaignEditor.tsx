@@ -645,7 +645,8 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
               </div>
               <button onClick={() => setShowApprovals(false)} className="p-1.5 rounded-lg transition-colors" style={{ color: 'rgba(255,255,255,0.3)' }}
                 onMouseEnter={e => { e.currentTarget.style.color = '#fff' }}
-                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)' }}>
+                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)' }}
+                aria-label="סגור">
                 <X className="w-4 h-4" />
               </button>
             </div>

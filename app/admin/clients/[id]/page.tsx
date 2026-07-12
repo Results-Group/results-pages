@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, use } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Upload, Plus, Trash2, Megaphone, FileText, Save } from 'lucide-react'
 import { useUnsavedChanges } from '@/lib/use-unsaved-changes'
+import { useToast } from '../../_components/toast'
 
 interface Contact { name?: string; role?: string; email?: string; phone?: string }
 interface Client {
@@ -30,6 +31,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
   const [campaigns, setCampaigns] = useState<LinkedCampaign[]>([])
   const [pages, setPages] = useState<LinkedPage[]>([])
   const [dirty, setDirty] = useState(false)
+  const { showToast } = useToast()
 
   useUnsavedChanges(dirty)
 
@@ -102,10 +104,10 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
         await load()
       } else {
         const data = await res.json().catch(() => null)
-        alert(data?.error || 'שגיאה בשמירת הלקוח')
+        showToast(data?.error || 'שגיאה בשמירת הלקוח')
       }
     } catch {
-      alert('שגיאה בשמירת הלקוח')
+      showToast('שגיאה בשמירת הלקוח')
     } finally {
       setSaving(false)
     }
@@ -178,7 +180,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                 <input placeholder="אימייל" dir="ltr" value={ct.email || ''} onChange={e => updateContact(i, { email: e.target.value })} className="px-3 py-2 rounded-lg text-sm outline-none" style={fieldStyle} />
                 <div className="flex items-center gap-1.5">
                   <input placeholder="טלפון" dir="ltr" value={ct.phone || ''} onChange={e => updateContact(i, { phone: e.target.value })} className="flex-1 px-3 py-2 rounded-lg text-sm outline-none" style={fieldStyle} />
-                  <button onClick={() => removeContact(i)} className="p-2 rounded-lg" style={{ color: 'var(--admin-text-muted)' }}><Trash2 className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => removeContact(i)} className="p-2 rounded-lg" style={{ color: 'var(--admin-text-muted)' }} aria-label="הסר איש קשר"><Trash2 className="w-3.5 h-3.5" /></button>
                 </div>
               </div>
             ))}

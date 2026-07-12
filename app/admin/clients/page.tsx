@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useT, useLocale } from '@/lib/i18n'
+import { useToast } from '../_components/toast'
 import { Plus, Search, Contact, Trash2, Edit3, X, RefreshCw, GitMerge, ArrowRight, CheckCircle } from 'lucide-react'
 
 interface Client {
@@ -41,6 +42,7 @@ interface DuplicatePair { a: Client; b: Client; score: number }
 export default function ClientsPage() {
   const t = useT()
   const locale = useLocale()
+  const { showToast } = useToast()
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -100,7 +102,7 @@ export default function ClientsPage() {
     try {
       const res = await fetch(`/api/clients/${id}`, { method: 'DELETE' })
       if (!res.ok) {
-        alert(t('clients.deleteError'))
+        showToast(t('clients.deleteError'))
         return
       }
       await load()
@@ -162,7 +164,7 @@ export default function ClientsPage() {
           }}
         >
           <span>{syncMessage.text}</span>
-          <button onClick={() => setSyncMessage(null)} style={{ opacity: 0.6 }}><X className="w-3.5 h-3.5" /></button>
+          <button onClick={() => setSyncMessage(null)} style={{ opacity: 0.6 }} aria-label={t('common.close')}><X className="w-3.5 h-3.5" /></button>
         </div>
       )}
 
@@ -228,7 +230,7 @@ export default function ClientsPage() {
                   <Link href={`/admin/clients/${c.id}`} className="p-1.5 rounded-lg" style={{ color: 'var(--admin-text-muted)' }}>
                     <Edit3 className="w-3.5 h-3.5" />
                   </Link>
-                  <button onClick={() => handleDelete(c.id)} className="p-1.5 rounded-lg" style={{ color: 'var(--admin-danger)' }}>
+                  <button onClick={() => handleDelete(c.id)} className="p-1.5 rounded-lg" style={{ color: 'var(--admin-danger)' }} aria-label={t('common.delete')}>
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -324,7 +326,7 @@ function MergeModal({ clients, onClose, onMerged }: { clients: Client[]; onClose
               {t('clients.mergeHint')}
             </p>
           </div>
-          <button onClick={onClose} style={{ color: 'var(--admin-text-muted)' }}><X className="w-4 h-4" /></button>
+          <button onClick={onClose} style={{ color: 'var(--admin-text-muted)' }} aria-label={t('common.close')}><X className="w-4 h-4" /></button>
         </div>
 
         {/* Body */}
@@ -441,7 +443,7 @@ function CreateClientModal({ onClose, onCreated }: { onClose: () => void; onCrea
       <div className="w-full max-w-sm rounded-xl p-5" style={{ background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)' }} onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-base font-semibold" style={{ color: 'var(--admin-text-primary)' }}>{t('clients.createTitle')}</h3>
-          <button onClick={onClose} style={{ color: 'var(--admin-text-muted)' }}><X className="w-4 h-4" /></button>
+          <button onClick={onClose} style={{ color: 'var(--admin-text-muted)' }} aria-label={t('common.close')}><X className="w-4 h-4" /></button>
         </div>
 
         <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--admin-text-secondary)' }}>{t('clients.clientName')}</label>

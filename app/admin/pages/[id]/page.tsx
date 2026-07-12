@@ -7,6 +7,8 @@ import Link from 'next/link'
 import VisualEditor, { type VisualEditorRef } from './visual-editor'
 import ClientAutocomplete from '../../_components/client-autocomplete'
 import WorkspaceSelector from '../../_components/workspace-selector'
+import { useUnsavedChanges } from '@/lib/use-unsaved-changes'
+import { useToast } from '../../_components/toast'
 
 type UserRole = 'admin' | 'editor' | 'viewer'
 
@@ -62,6 +64,8 @@ export default function EditPage() {
   const [expiresAt, setExpiresAt] = useState('')
   const [publishAt, setPublishAt] = useState('')
   const [password, setPassword] = useState('')
+  const [hasPassword, setHasPassword] = useState(false)
+  const [passwordTouched, setPasswordTouched] = useState(false)
   const [shortUrl, setShortUrl] = useState('')
   const [workspaceId, setWorkspaceId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -86,6 +90,10 @@ export default function EditPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [userRole, setUserRole] = useState<UserRole>('admin')
+  const [dirty, setDirty] = useState(false)
+  const { showToast } = useToast()
+
+  useUnsavedChanges(dirty)
 
   // Version history state
   const [showVersions, setShowVersions] = useState(false)
@@ -114,7 +122,9 @@ export default function EditPage() {
         setActive(data.active)
         setExpiresAt(data.expiresAt ? data.expiresAt.split('T')[0] : '')
         setPublishAt(data.publish_at ? toLocalDatetimeInput(data.publish_at) : '')
-        setPassword(data.password || '')
+        setHasPassword(!!data.has_password)
+        setPassword('')
+        setPasswordTouched(false)
         setShortUrl(data.short_url || '')
         setWorkspaceId(data.workspace_id || null)
         setViewCount(data._count?.views || 0)
@@ -236,7 +246,7 @@ export default function EditPage() {
       headers: { 'Content-Type': 'application/json' },
       // datetime-local values are local wall time — convert to UTC ISO client-side,
       // since the server (UTC on Vercel) would otherwise parse them 3h off
-      body: JSON.stringify({ title, client, slug, active, expiresAt: expiresAt || null, publishAt: publishAt ? new Date(publishAt).toISOString() : null, password: password || null, shortUrl: shortUrl || null, workspace_id: workspaceId }),
+      body: JSON.stringify({ title, client, slug, active, expiresAt: expiresAt || null, publishAt: publishAt ? new Date(publishAt).toISOString() : null, ...(passwordTouched ? { password: password || null } : {}), shortUrl: shortUrl || null, workspace_id: workspaceId }),
     })
 
     if (!res.ok) {
@@ -637,7 +647,7 @@ export default function EditPage() {
           <input
             type="text"
             value={title}
-            onChange={e => setTitle(e.target.value)}
+            onChange={e => { setTitle(e.target.value); setDirty(true) }}
             className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
             style={inputStyle}
             onFocus={e => e.currentTarget.style.borderColor = 'var(--admin-accent)'}
@@ -700,8 +710,8 @@ export default function EditPage() {
           <input
             type="text"
             value={password}
-            onChange={e => setPassword(e.target.value)}
-            placeholder="השאר ריק ללא הגנה"
+            onChange={e => { setPassword(e.target.value); setPasswordTouched(true); setDirty(true) }}
+            placeholder={hasPassword && !passwordTouched ? '••••••••' : 'השאר ריק ללא הגנה'}
             dir="ltr"
             className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
             style={inputStyle}
@@ -709,7 +719,13 @@ export default function EditPage() {
             onBlur={e => e.currentTarget.style.borderColor = 'var(--admin-border)'}
           />
           <p className="text-xs mt-1.5" style={{ color: 'var(--admin-text-muted)' }}>
-            {password ? '🔒 הדף מוגן בסיסמה' : 'ללא סיסמה — הדף נגיש לכולם'}
+            {hasPassword && !passwordTouched
+              ? '🔒 הדף מוגן בסיסמה (הקלד כדי לשנות)'
+              : passwordTouched && password
+                ? '🔒 סיסמה חדשה תוגדר בשמירה'
+                : passwordTouched && !password
+                  ? 'הסיסמה תוסר בשמירה'
+                  : 'ללא סיסמה — הדף נגיש לכולם'}
           </p>
         </div>
 

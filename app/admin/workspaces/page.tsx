@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, Users, X, Save, Building } from 'lucide-react'
 import { useT, useLocale } from '@/lib/i18n'
+import { useToast } from '../_components/toast'
 
 interface Workspace {
   id: string
@@ -20,6 +21,7 @@ const WORKSPACE_COLORS = [
 export default function WorkspacesPage() {
   const t = useT()
   const locale = useLocale()
+  const { showToast } = useToast()
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
@@ -63,7 +65,7 @@ export default function WorkspacesPage() {
       fetchWorkspaces()
     } else {
       const err = await res.json()
-      alert(err.error || t('common.error'))
+      showToast(err.error || t('common.error'))
     }
   }
 
@@ -127,6 +129,7 @@ export default function WorkspacesPage() {
               onClick={() => { setShowCreate(false); setEditingId(null) }}
               className="p-1 rounded-lg"
               style={{ color: 'var(--admin-text-muted)' }}
+              aria-label={t('common.close')}
             >
               <X className="w-5 h-5" />
             </button>

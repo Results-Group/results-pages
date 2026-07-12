@@ -23,7 +23,8 @@ function RemoveBtn({ onClick }: { onClick: () => void }) {
     <button onClick={onClick} className="p-1 rounded transition-colors shrink-0"
       style={{ color: 'rgba(255,255,255,0.2)' }}
       onMouseEnter={e => { e.currentTarget.style.color = '#ef4444' }}
-      onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.2)' }}>
+      onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.2)' }}
+      aria-label="מחק">
       <Trash2 className="w-3 h-3" />
     </button>
   )

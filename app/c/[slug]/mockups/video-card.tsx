@@ -1,15 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import he from '@/lib/i18n/he'
+import en from '@/lib/i18n/en'
 
 interface VideoCardProps {
   url: string;
   embedUrl?: string;
   platform: 'youtube' | 'vimeo' | 'other';
   caption?: string;
+  lang?: 'he' | 'en';
 }
 
-export default function VideoCard({ url, embedUrl, platform, caption }: VideoCardProps) {
+export default function VideoCard({ url, embedUrl, platform, caption, lang = 'he' }: VideoCardProps) {
+  const dict = lang === 'en' ? en : he
+  const t = (key: keyof typeof he) => dict[key] ?? he[key] ?? key
   const [showEmbed, setShowEmbed] = useState(false);
 
   const thumbnailUrl = getThumbnail(url, platform);
@@ -67,7 +72,7 @@ export default function VideoCard({ url, embedUrl, platform, caption }: VideoCar
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 </div>
-                <span className="text-xs font-bold" style={{ color: '#40e1d3' }}>צפייה בסרטון</span>
+                <span className="text-xs font-bold" style={{ color: '#40e1d3' }}>{t('public.watchVideo')}</span>
               </a>
             )}
 

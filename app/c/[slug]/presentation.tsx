@@ -12,6 +12,8 @@ import VideoCard from './mockups/video-card'
 import GeneralCard from './mockups/general-card'
 import { parseVideoUrl } from '@/lib/video-utils'
 import { assetProxyUrl } from '@/lib/asset-url'
+import he from '@/lib/i18n/he'
+import en from '@/lib/i18n/en'
 
 interface Props {
   slides: SlideData[]
@@ -20,6 +22,7 @@ interface Props {
   brandColor?: string | null
   campaignId?: string
   feedbackEnabled?: boolean
+  lang?: 'he' | 'en'
 }
 
 type FeedbackStatus = 'approved' | 'rejected' | 'pending'
@@ -58,7 +61,9 @@ const staggerChild = {
   visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } }),
 }
 
-export default function CampaignPresentation({ slides, clientName, campaignName, brandColor, campaignId, feedbackEnabled }: Props) {
+export default function CampaignPresentation({ slides, clientName, campaignName, brandColor, campaignId, feedbackEnabled, lang = 'he' }: Props) {
+  const dict = lang === 'en' ? en : he
+  const t = (key: keyof typeof he) => dict[key] ?? he[key] ?? key
   const [activeSlide, setActiveSlide] = useState(0)
   const [exporting, setExporting] = useState(false)
   const [lightboxAsset, setLightboxAsset] = useState<{ url: string; caption?: string } | null>(null)
@@ -164,11 +169,11 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   }
 
   function getSlideLabel(slide: SlideData, i: number): string {
-    if (slide.type === 'cover') return 'שער'
-    if (slide.type === 'concept') return 'קונספט'
-    if (slide.type === 'closing') return 'סיום'
-    if (slide.type === 'divider') return slide.title || `חוצץ ${i}`
-    return slide.title || `סקציה ${i}`
+    if (slide.type === 'cover') return t('public.cover')
+    if (slide.type === 'concept') return t('public.concept')
+    if (slide.type === 'closing') return t('public.closing')
+    if (slide.type === 'divider') return slide.title || `${t('public.divider')} ${i}`
+    return slide.title || `${t('public.section')} ${i}`
   }
 
   const parallaxX = (mousePos.x - 0.5) * -20
@@ -208,7 +213,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
             {/* Global copy switcher — shown only when campaign has copies */}
             {globalCopies.length > 1 && (
               <div className="global-copy-switcher">
-                <span className="global-copy-label">קופי:</span>
+                <span className="global-copy-label">{t('public.copyLabel')}</span>
                 {globalCopies.map((_, i) => (
                   <button
                     key={i}
@@ -227,7 +232,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
                 <polyline points="7 10 12 15 17 10" />
                 <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
-              {exporting ? 'מכין...' : 'ייצוא PDF'}
+              {exporting ? t('public.preparing') : t('public.exportPdf')}
             </button>
           </div>
         </header>
@@ -262,7 +267,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
               {slides[activeSlide].type === 'concept' && <ConceptSlide slide={slides[activeSlide]} />}
               {slides[activeSlide].type === 'divider' && <DividerSlide slide={slides[activeSlide]} index={activeSlide} />}
               {slides[activeSlide].type === 'creatives' && (
-                <CreativesSlide slide={slides[activeSlide]} activeCopyIdx={activeCopyIdx} onAssetClick={setLightboxAsset} />
+                <CreativesSlide slide={slides[activeSlide]} activeCopyIdx={activeCopyIdx} onAssetClick={setLightboxAsset} lang={lang} />
               )}
               {slides[activeSlide].type === 'closing' && <ClosingSlide slide={slides[activeSlide]} />}
             </motion.section>
@@ -275,6 +280,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
               current={feedback[slides[activeSlide].key as string]}
               error={!!feedbackError[slides[activeSlide].key as string]}
               onSubmit={submitFeedback}
+              lang={lang}
             />
           )}
         </main>
@@ -283,11 +289,11 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
         <div className="slide-footer-nav">
           <button onClick={() => goSlide(Math.max(0, activeSlide - 1))} disabled={activeSlide === 0} className="nav-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
-            הקודם
+            {t('public.previous')}
           </button>
           <span className="slide-counter">{activeSlide + 1} / {slides.length}</span>
           <button onClick={() => goSlide(Math.min(slides.length - 1, activeSlide + 1))} disabled={activeSlide === slides.length - 1} className="nav-btn">
-            הבא
+            {t('public.next')}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
           </button>
         </div>
@@ -328,12 +334,15 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   )
 }
 
-function ApprovalBar({ slideKey, current, error, onSubmit }: {
+function ApprovalBar({ slideKey, current, error, onSubmit, lang = 'he' }: {
   slideKey: string
   current?: SlideFeedback
   error?: boolean
   onSubmit: (slideKey: string, status: FeedbackStatus, comment: string, author: string) => void
+  lang?: 'he' | 'en'
 }) {
+  const dict = lang === 'en' ? en : he
+  const t = (key: keyof typeof he) => dict[key] ?? he[key] ?? key
   const [comment, setComment] = useState(current?.comment || '')
   const [author, setAuthor] = useState(current?.author || '')
   const [touched, setTouched] = useState(false)
@@ -357,16 +366,16 @@ function ApprovalBar({ slideKey, current, error, onSubmit }: {
           className={`approval-btn approve ${status === 'approved' ? 'active' : ''}`}
           onClick={() => onSubmit(slideKey, 'approved', effectiveComment, author)}
         >
-          ✓ מאושר
+          {'✓ ' + t('public.approved')}
         </button>
         <button
           className={`approval-btn reject ${status === 'rejected' ? 'active' : ''}`}
           onClick={() => { setShowComment(true); onSubmit(slideKey, 'rejected', effectiveComment, author) }}
         >
-          ✕ דורש שינוי
+          {'✕ ' + t('public.needsChange')}
         </button>
         <button className="approval-btn comment-toggle" onClick={() => setShowComment(s => !s)}>
-          💬 הערה
+          {'💬 ' + t('public.comment')}
         </button>
       </div>
 
@@ -374,13 +383,13 @@ function ApprovalBar({ slideKey, current, error, onSubmit }: {
         <div className="approval-comment">
           <input
             className="approval-input"
-            placeholder="השם שלך"
+            placeholder={t('public.yourName')}
             value={author}
             onChange={e => { setTouched(true); setAuthor(e.target.value) }}
           />
           <textarea
             className="approval-textarea"
-            placeholder="הוסף הערה או בקשת שינוי..."
+            placeholder={t('public.addComment')}
             value={comment}
             onChange={e => { setTouched(true); setComment(e.target.value) }}
             rows={2}
@@ -389,18 +398,18 @@ function ApprovalBar({ slideKey, current, error, onSubmit }: {
             className="approval-save"
             onClick={() => onSubmit(slideKey, status === 'pending' ? 'rejected' : status, effectiveComment, author)}
           >
-            שמירת הערה
+            {t('public.saveComment')}
           </button>
         </div>
       )}
 
       {error && (
-        <div className="approval-error">שגיאה בשמירה, נסו שוב</div>
+        <div className="approval-error">{t('public.saveError')}</div>
       )}
 
       {current && (
         <div className={`approval-status-badge ${status}`}>
-          {status === 'approved' ? 'אושר על ידי הלקוח' : status === 'rejected' ? 'נדרש שינוי' : 'ממתין לאישור'}
+          {status === 'approved' ? t('public.approvedByClient') : status === 'rejected' ? t('public.changeRequired') : t('public.pendingApproval')}
           {current.author ? ` · ${current.author}` : ''}
         </div>
       )}
@@ -536,11 +545,14 @@ function DividerSlide({ slide, index }: { slide: SlideData; index: number }) {
   )
 }
 
-function CreativesSlide({ slide, activeCopyIdx, onAssetClick }: {
+function CreativesSlide({ slide, activeCopyIdx, onAssetClick, lang = 'he' }: {
   slide: SlideData
   activeCopyIdx: number
   onAssetClick: (a: { url: string; caption?: string }) => void
+  lang?: 'he' | 'en'
 }) {
+  const dict = lang === 'en' ? en : he
+  const t = (key: keyof typeof he) => dict[key] ?? he[key] ?? key
   const assets = slide.assets || []
   const isStory = slide.mockupType === 'instagram_story'
   const copies = slide.copies || []
@@ -563,7 +575,7 @@ function CreativesSlide({ slide, activeCopyIdx, onAssetClick }: {
       {/* Copy preview box — shown on this slide when copies are enabled for it */}
       {activeCopy !== undefined && activeCopy !== '' && (
         <motion.div className="copy-switcher" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.4 }}>
-          <span className="copy-switcher-label">טקסט פעיל — ורסיה {activeCopyIdx + 1}</span>
+          <span className="copy-switcher-label">{t('public.activeCopy')} {activeCopyIdx + 1}</span>
           <div className="copy-text-preview" dir="auto">{activeCopy}</div>
         </motion.div>
       )}
