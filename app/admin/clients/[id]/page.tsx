@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback, use } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Upload, Plus, Trash2, Megaphone, FileText, Save, Sparkles, Loader2, FileCheck2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ArrowRight, Upload, Plus, Trash2, Megaphone, FileText, Save, Sparkles, Loader2, FileCheck2, Files } from 'lucide-react'
 import { useUnsavedChanges } from '@/lib/use-unsaved-changes'
 import { useToast } from '../../_components/toast'
 
@@ -34,7 +35,9 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
   const [pages, setPages] = useState<LinkedPage[]>([])
   const [dirty, setDirty] = useState(false)
   const [distilling, setDistilling] = useState(false)
+  const [dupLoading, setDupLoading] = useState(false)
   const { showToast } = useToast()
+  const router = useRouter()
 
   useUnsavedChanges(dirty)
 
@@ -87,6 +90,26 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
   }
   function removeContact(i: number) {
     updateField('contacts', (client?.contacts || []).filter((_, idx) => idx !== i))
+  }
+
+  // Duplicate the client's most recent campaign — a one-click "same as last month".
+  async function handleDuplicateLatest() {
+    const latest = campaigns[0]
+    if (!latest) return
+    setDupLoading(true)
+    try {
+      const res = await fetch(`/api/campaigns/${latest.id}/duplicate`, { method: 'POST' })
+      if (res.ok) {
+        const created = await res.json()
+        router.push(`/admin/campaigns/${created.id}`)
+      } else {
+        showToast('שגיאה בשכפול הקמפיין')
+      }
+    } catch {
+      showToast('שגיאה בשכפול הקמפיין')
+    } finally {
+      setDupLoading(false)
+    }
   }
 
   async function handlePositioningUpload(file: File) {
@@ -256,9 +279,23 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
       {/* Linked work */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="rounded-xl p-4" style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}>
-          <h3 className="text-sm font-semibold mb-2 flex items-center gap-1.5" style={{ color: 'var(--admin-text-primary)' }}>
-            <Megaphone className="w-4 h-4" /> קמפיינים ({campaigns.length})
-          </h3>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold flex items-center gap-1.5" style={{ color: 'var(--admin-text-primary)' }}>
+              <Megaphone className="w-4 h-4" /> קמפיינים ({campaigns.length})
+            </h3>
+            {campaigns.length > 0 && (
+              <button
+                onClick={handleDuplicateLatest}
+                disabled={dupLoading}
+                className="flex items-center gap-1.5 text-xs font-medium disabled:opacity-40"
+                style={{ color: 'var(--admin-accent)' }}
+                title="יוצר קמפיין חדש כהעתק של האחרון"
+              >
+                {dupLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Files className="w-3.5 h-3.5" />}
+                שכפל את האחרון
+              </button>
+            )}
+          </div>
           {campaigns.length === 0 ? <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>אין קמפיינים</p> : (
             <div className="space-y-1">
               {campaigns.map(c => (

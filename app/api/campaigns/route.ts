@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
   const search = searchParams.get('search') || undefined
   const status = searchParams.get('status') || undefined
   const deleted = searchParams.get('deleted') === '1'
+  const templates = searchParams.get('templates') === '1'
   const workspaceId = searchParams.get('workspace_id') || await getActiveWorkspaceId(request) || undefined
 
   // A caller may only list a workspace they belong to; without a workspace
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const campaigns = await getCampaigns({ search, status, workspace_id: workspaceId, deleted })
+    const campaigns = await getCampaigns({ search, status, workspace_id: workspaceId, deleted, templates })
     const safe = campaigns.map(c => ({ ...c, has_password: !!c.password, password: undefined }))
     return NextResponse.json(safe)
   } catch (err) {

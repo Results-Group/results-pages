@@ -43,16 +43,20 @@ export interface Campaign {
   created_by: string | null
   workspace_id: string | null
   deleted_at: string | null
+  is_template?: boolean
   created_at: string
   updated_at: string
 }
 
 // ── Queries ──
 
-export async function getCampaigns(filters?: { search?: string; status?: string; workspace_id?: string; deleted?: boolean }) {
+export async function getCampaigns(filters?: { search?: string; status?: string; workspace_id?: string; deleted?: boolean; templates?: boolean }) {
   let query = supabase.from('campaigns')
-    .select('id,client,client_id,campaign_name,slug,concept,logo_path,status,publish_at,password,created_by,workspace_id,deleted_at,created_at,updated_at')
+    .select('id,client,client_id,campaign_name,slug,concept,logo_path,status,publish_at,password,created_by,workspace_id,deleted_at,is_template,created_at,updated_at')
     .order('created_at', { ascending: false })
+
+  // Templates are a separate list; the normal list never shows them.
+  query = query.eq('is_template', !!filters?.templates)
 
   if (filters?.deleted) query = query.not('deleted_at', 'is', null)
   else query = query.is('deleted_at', null)
@@ -90,6 +94,7 @@ export async function getCampaignBySlug(slug: string): Promise<Campaign | null> 
     .select('*')
     .eq('slug', slug)
     .is('deleted_at', null)
+    .eq('is_template', false) // templates are never served publicly
     .single()
   if (error || !data) return null
   return data as Campaign
@@ -108,6 +113,7 @@ export async function createCampaign(data: {
   created_by?: string
   workspace_id?: string
   client_id?: string | null
+  is_template?: boolean
 }): Promise<Campaign> {
   const hashedPw = data.password ? await bcrypt.hash(data.password, 12) : null
   const insertData: Record<string, unknown> = {
@@ -121,6 +127,7 @@ export async function createCampaign(data: {
     publish_at: data.publish_at || null,
     password: hashedPw,
   }
+  if (data.is_template) insertData.is_template = true
   if (data.created_by) insertData.created_by = data.created_by
   if (data.workspace_id) insertData.workspace_id = data.workspace_id
   if (data.client_id !== undefined) insertData.client_id = data.client_id
@@ -161,6 +168,7 @@ export async function updateCampaign(
   }
   if (data.workspace_id !== undefined) updateData.workspace_id = data.workspace_id
   if (data.copies !== undefined) updateData.copies = data.copies
+  if (data.is_template !== undefined) updateData.is_template = data.is_template
 
   // Optimistic concurrency: when the caller passes the updated_at it loaded,
   // only write if the row hasn't changed since — otherwise a second editor's

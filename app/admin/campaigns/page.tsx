@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
-import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, MessageCircle, Files, Image as ImageIcon, Calendar } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, MessageCircle, Files, Image as ImageIcon, Calendar, LayoutTemplate, Bookmark, X, Loader2 } from 'lucide-react'
 import { whatsappShareUrl } from '@/lib/share'
 import { useT, useLocale } from '@/lib/i18n'
 import { useToast } from '../_components/toast'
@@ -50,6 +51,10 @@ export default function CampaignsListPage() {
   const [duplicating, setDuplicating] = useState<string | null>(null)
   const [userRole, setUserRole] = useState('admin')
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
+  const [templatesOpen, setTemplatesOpen] = useState(false)
+  const [templates, setTemplates] = useState<Campaign[] | null>(null)
+  const [creatingFrom, setCreatingFrom] = useState<string | null>(null)
+  const router = useRouter()
 
   const STATUS_LABELS: Record<string, string> = { draft: t('common.draft'), published: t('common.published'), archived: t('common.archived') }
 
@@ -121,6 +126,48 @@ export default function CampaignsListPage() {
     setCampaigns(prev => prev.filter(c => c.id !== id))
   }
 
+  async function handleSaveAsTemplate(campaign: Campaign) {
+    setDuplicating(campaign.id)
+    try {
+      const res = await fetch(`/api/campaigns/${campaign.id}/duplicate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ asTemplate: true }),
+      })
+      showToast(res.ok ? t('campaigns.savedAsTemplate') : 'שגיאה', res.ok ? 'success' : 'error')
+    } finally {
+      setDuplicating(null)
+    }
+  }
+
+  function openTemplates() {
+    setTemplatesOpen(true)
+    setTemplates(null)
+    fetch('/api/campaigns?templates=1')
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setTemplates(Array.isArray(data) ? data : []))
+      .catch(() => setTemplates([]))
+  }
+
+  async function handleUseTemplate(template: Campaign) {
+    setCreatingFrom(template.id)
+    try {
+      const res = await fetch(`/api/campaigns/${template.id}/duplicate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: template.campaign_name }),
+      })
+      if (res.ok) {
+        const created = await res.json()
+        router.push(`/admin/campaigns/${created.id}`)
+      } else {
+        showToast('שגיאה ביצירת קמפיין מהתבנית', 'error')
+      }
+    } finally {
+      setCreatingFrom(null)
+    }
+  }
+
   function parseSections(raw: unknown): { assets: unknown[] }[] {
     if (Array.isArray(raw)) return raw
     if (typeof raw === 'string') { try { const p = JSON.parse(raw); if (Array.isArray(p)) return p } catch {} }
@@ -154,18 +201,28 @@ export default function CampaignsListPage() {
             <p className="text-sm mt-0.5" style={{ color: 'var(--admin-text-muted)' }}>{t('campaigns.subtitle')}</p>
           </div>
         </div>
-        <Link
-          href="/admin/campaigns/new"
-          className="campaign-btn-primary flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200"
-          style={{
-            background: 'rgba(64,225,211,0.12)',
-            border: '1px solid rgba(64,225,211,0.4)',
-            color: '#40e1d3',
-          }}
-        >
-          <Plus className="w-4 h-4" />
-          {t('campaigns.new')}
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={openTemplates}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200"
+            style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-secondary)' }}
+          >
+            <LayoutTemplate className="w-4 h-4" />
+            {t('campaigns.fromTemplate')}
+          </button>
+          <Link
+            href="/admin/campaigns/new"
+            className="campaign-btn-primary flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200"
+            style={{
+              background: 'rgba(64,225,211,0.12)',
+              border: '1px solid rgba(64,225,211,0.4)',
+              color: '#40e1d3',
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            {t('campaigns.new')}
+          </Link>
+        </div>
       </div>
 
       {/* KPI Summary */}
@@ -357,6 +414,19 @@ export default function CampaignsListPage() {
                               <Files className="w-4 h-4" />
                             </button>
                           )}
+                          {userRole !== 'viewer' && (
+                            <button
+                              onClick={() => handleSaveAsTemplate(c)}
+                              disabled={duplicating === c.id}
+                              className="p-2 rounded-lg transition-all duration-200 disabled:opacity-30"
+                              style={{ color: 'rgba(255,255,255,0.4)' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.1)'; e.currentTarget.style.color = '#40e1d3' }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+                              title={t('campaigns.saveAsTemplate')}
+                            >
+                              <Bookmark className="w-4 h-4" />
+                            </button>
+                          )}
                           <Link
                             href={`/admin/campaigns/${c.id}`}
                             className="p-2 rounded-lg transition-all duration-200"
@@ -387,6 +457,46 @@ export default function CampaignsListPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* From-template modal */}
+      {templatesOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} onClick={() => setTemplatesOpen(false)}>
+          <div className="w-full max-w-lg rounded-2xl p-5" style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-1.5">
+              <h3 className="text-base font-bold flex items-center gap-2" style={{ color: 'var(--admin-text-primary)' }}>
+                <LayoutTemplate className="w-5 h-5" style={{ color: 'var(--admin-accent)' }} /> {t('campaigns.templatesTitle')}
+              </h3>
+              <button onClick={() => setTemplatesOpen(false)} className="p-1 rounded-lg" style={{ color: 'var(--admin-text-muted)' }} aria-label="close"><X className="w-5 h-5" /></button>
+            </div>
+            <p className="text-xs mb-4" style={{ color: 'var(--admin-text-muted)' }}>{t('campaigns.templatesHint')}</p>
+            {templates === null ? (
+              <p className="text-sm py-6 text-center" style={{ color: 'var(--admin-text-muted)' }}>...</p>
+            ) : templates.length === 0 ? (
+              <p className="text-sm py-6 text-center" style={{ color: 'var(--admin-text-muted)' }}>{t('campaigns.noTemplates')}</p>
+            ) : (
+              <div className="space-y-2 max-h-80 overflow-y-auto">
+                {templates.map(tpl => (
+                  <div key={tpl.id} className="flex items-center justify-between gap-3 p-3 rounded-lg" style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold truncate" style={{ color: 'var(--admin-text-primary)' }}>{tpl.campaign_name}</p>
+                      <p className="text-xs truncate" style={{ color: 'var(--admin-text-muted)' }}>{tpl.client}</p>
+                    </div>
+                    <button
+                      onClick={() => handleUseTemplate(tpl)}
+                      disabled={creatingFrom === tpl.id}
+                      className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold disabled:opacity-40"
+                      style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
+                    >
+                      {creatingFrom === tpl.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+                      {creatingFrom === tpl.id ? t('campaigns.creating') : t('campaigns.useTemplate')}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

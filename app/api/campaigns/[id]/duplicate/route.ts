@@ -35,6 +35,12 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     if (permErr) return permErr
   }
 
+  // Optional body: { asTemplate?: boolean, name?: string }
+  const body = await req.json().catch(() => ({} as { asTemplate?: boolean; name?: string }))
+  const asTemplate = !!body?.asTemplate
+  const suffix = asTemplate ? ' (תבנית)' : ' (עותק)'
+  const newName = (typeof body?.name === 'string' && body.name.trim()) || `${source.campaign_name}${suffix}`
+
   try {
     // Parse the source sections BEFORE creating the draft so a parse error
     // can't leave an orphaned empty campaign behind
@@ -52,7 +58,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     // Create the new campaign first (draft) so we have its id for asset paths
     const duplicate = await createCampaign({
       client: source.client,
-      campaign_name: `${source.campaign_name} (עותק)`,
+      campaign_name: newName,
       slug,
       concept: source.concept || undefined,
       sections: [],
@@ -60,6 +66,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       created_by: session.userId,
       workspace_id: source.workspace_id || undefined,
       client_id: source.client_id,
+      is_template: asTemplate,
     })
 
     try {
