@@ -298,13 +298,13 @@ export default function PizzaHouseDashboard() {
       </header>
 
       {/* ── Date picker bar ── */}
-      <div className="sticky top-0 z-20 px-4 sm:px-6 py-2.5 sm:py-3 mb-3 sm:mb-6" style={{ background: pal.stickyBg, backdropFilter: 'blur(12px)', borderBottom: `1px solid ${pal.border}` }}>
-        <div className="max-w-7xl mx-auto space-y-2 sm:space-y-0">
-          {/* Presets: grid on mobile, flex on desktop */}
+      <div className="sticky top-0 z-20 px-4 sm:px-6 py-3 sm:py-4 mb-3 sm:mb-6" style={{ background: pal.stickyBg, backdropFilter: 'blur(12px)', borderBottom: `1px solid ${pal.border}` }}>
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5 lg:gap-6">
+          {/* Presets: grid on mobile, inline group on desktop */}
           <div className="grid grid-cols-4 sm:flex sm:flex-wrap gap-1.5 sm:gap-2">
             {PRESETS.map(pr => (
               <button key={pr.id} onClick={() => applyPreset(pr.id)}
-                className="px-2 sm:px-3 py-2 sm:py-1.5 rounded-lg text-[11px] sm:text-sm font-bold transition-colors whitespace-nowrap text-center"
+                className="px-2 sm:px-3.5 py-2 sm:py-2 rounded-lg text-[11px] sm:text-sm font-bold transition-colors whitespace-nowrap text-center"
                 style={preset === pr.id
                   ? { background: pal.yellow, color: pal.colorScheme === 'dark' ? '#050505' : '#ffffff' }
                   : { background: pal.bgElevated, color: pal.textSecondary }}>
@@ -312,18 +312,25 @@ export default function PizzaHouseDashboard() {
               </button>
             ))}
           </div>
-          {/* Custom date inputs + comparison text */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <input type="date" value={from} max={to} onChange={e => applyCustom(e.target.value, to)}
-              className="px-2 py-1.5 rounded-lg text-xs outline-none flex-1 sm:flex-none sm:w-auto min-w-0"
-              style={{ background: pal.bgElevated, border: `1px solid ${pal.borderInput}`, color: pal.text, colorScheme: pal.colorScheme }} />
-            <span className="text-xs" style={{ color: pal.textMuted }}>עד</span>
-            <input type="date" value={to} min={from} onChange={e => applyCustom(from, e.target.value)}
-              className="px-2 py-1.5 rounded-lg text-xs outline-none flex-1 sm:flex-none sm:w-auto min-w-0"
-              style={{ background: pal.bgElevated, border: `1px solid ${pal.borderInput}`, color: pal.text, colorScheme: pal.colorScheme }} />
-            {data && <span className="text-[10px] sm:text-xs mr-auto whitespace-nowrap hidden sm:inline" style={{ color: pal.textMuted }}>השוואה מול {data.prev_range.from} — {data.prev_range.to}</span>}
+          {/* Custom date range — one labelled, bordered group so it reads as a unit */}
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-xs font-bold whitespace-nowrap" style={{ color: pal.textMuted }}>טווח מותאם</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl" style={{ background: pal.bgElevated, border: `1px solid ${pal.borderInput}` }}>
+              <input type="date" value={from} max={to} onChange={e => applyCustom(e.target.value, to)}
+                className="bg-transparent border-0 text-xs outline-none min-w-0"
+                style={{ color: pal.text, colorScheme: pal.colorScheme }} />
+              <span className="text-xs px-0.5" style={{ color: pal.textMuted }}>—</span>
+              <input type="date" value={to} min={from} onChange={e => applyCustom(from, e.target.value)}
+                className="bg-transparent border-0 text-xs outline-none min-w-0"
+                style={{ color: pal.text, colorScheme: pal.colorScheme }} />
+            </div>
           </div>
         </div>
+        {data && (
+          <div className="max-w-7xl mx-auto mt-2 text-[11px] whitespace-nowrap" style={{ color: pal.textMuted }}>
+            השוואה מול התקופה הקודמת: {data.prev_range.from} — {data.prev_range.to}
+          </div>
+        )}
       </div>
 
       <main className="px-4 sm:px-6 max-w-7xl mx-auto">
