@@ -14,6 +14,7 @@ import {
   fetchFreshness,
   type DateRange,
 } from '@/lib/pizza-house-queries'
+import { runWithBranch, isPizzaBranch, listPizzaBranches } from '@/lib/pizza-house-db'
 import { captureException } from '@/lib/logger'
 
 export const dynamic = 'force-dynamic'
@@ -57,12 +58,16 @@ export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
   const from = searchParams.get('from') ?? ''
   const to = searchParams.get('to') ?? '' // inclusive calendar date
+  const branch = searchParams.get('branch') || 'main'
 
   if (!DATE_RE.test(from) || !DATE_RE.test(to) || from > to) {
     return NextResponse.json({ error: 'Invalid date range' }, { status: 400 })
   }
+  if (!isPizzaBranch(branch)) {
+    return NextResponse.json({ error: 'Invalid branch' }, { status: 400 })
+  }
 
-  const cacheKey = `${from}|${to}`
+  const cacheKey = `${branch}|${from}|${to}`
   const cached = cache.get(cacheKey)
   const isCurrentRange = to >= new Date().toISOString().slice(0, 10)
   // Ranges including today get a short TTL so fresh sales show up quickly
@@ -78,7 +83,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const [summary, prevSummary, timeseries, heatmap, weekdays, customers, products, channels, payments, orderTiming, deadItems, freshness] =
-      await Promise.all([
+      await runWithBranch(branch, () => Promise.all([
         fetchSummary(range),
         fetchSummary(prevRange),
         fetchTimeseries(range, rangeDays),
@@ -91,9 +96,11 @@ export async function GET(req: NextRequest) {
         fetchOrderTiming(range),
         fetchDeadItems(range),
         fetchFreshness(),
-      ])
+      ]))
 
     const data = {
+      branch,
+      branches: listPizzaBranches(),
       range: { from, to, days: rangeDays },
       prev_range: { from: prevFrom, to: addDays(from, -1) },
       summary,

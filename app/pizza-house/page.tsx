@@ -39,6 +39,8 @@ interface Summary {
 }
 
 interface DashboardData {
+  branch: string
+  branches: { id: string; label: string }[]
   range: { from: string; to: string; days: number }
   prev_range: { from: string; to: string }
   summary: Summary
@@ -196,6 +198,7 @@ export default function PizzaHouseDashboard() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [branch, setBranch] = useState('main')
 
   useEffect(() => {
     const saved = localStorage.getItem('ph_theme') as 'dark' | 'light' | null
@@ -215,21 +218,22 @@ export default function PizzaHouseDashboard() {
   const tipLabel = { color: pal.textSecondary }
 
   const load = useCallback(
-    async (f: string, t: string, refresh = false) => {
+    async (f: string, t: string, refresh = false, b = branch) => {
       setLoading(true); setError('')
       try {
-        const res = await fetch(`/api/pizza-house/dashboard?from=${f}&to=${t}${refresh ? '&refresh=1' : ''}`)
+        const res = await fetch(`/api/pizza-house/dashboard?from=${f}&to=${t}&branch=${b}${refresh ? '&refresh=1' : ''}`)
         if (res.status === 401) { router.push('/pizza-house/login'); return }
         if (!res.ok) throw new Error((await res.json()).error || 'שגיאה בטעינת נתונים')
         setData(await res.json())
       } catch (e) { setError(e instanceof Error ? e.message : 'שגיאה בטעינת נתונים') }
       finally { setLoading(false) }
-    }, [router])
+    }, [router, branch])
 
   useEffect(() => { load(from, to) }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   function applyPreset(id: string) { const p = PRESETS.find(x => x.id === id)!; const r = p.range(); setPreset(id); setFrom(r.from); setTo(r.to); load(r.from, r.to) }
   function applyCustom(f: string, t: string) { setPreset('custom'); setFrom(f); setTo(t); if (f && t && f <= t) load(f, t) }
+  function changeBranch(b: string) { setBranch(b); load(from, to, false, b) }
   async function logout() { await fetch('/api/pizza-house/auth', { method: 'DELETE' }); router.push('/pizza-house/login') }
 
   const heatmap = useMemo(() => {
@@ -266,6 +270,17 @@ export default function PizzaHouseDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+            {data && data.branches && data.branches.length > 1 && (
+              <select
+                value={branch}
+                onChange={e => changeBranch(e.target.value)}
+                className="px-2.5 sm:px-3 py-2 rounded-xl text-sm font-bold outline-none cursor-pointer"
+                style={{ background: pal.bgCard, border: `1px solid ${pal.border}`, color: pal.text }}
+                title="בחירת סניף"
+              >
+                {data.branches.map(b => <option key={b.id} value={b.id}>{b.label}</option>)}
+              </select>
+            )}
             <button onClick={toggleTheme} className="p-2 sm:p-2.5 rounded-xl transition-colors" style={{ border: `1px solid ${pal.border}`, color: pal.textSecondary }} title={theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'}>
               {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
