@@ -4,6 +4,7 @@ import { getSessionFromRequest, getActiveWorkspaceId, requireWorkspacePermission
 import { findOrCreateClient } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
 import { minifyHtml } from '@/lib/minify'
+import { slugifyPath } from '@/lib/slug'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -23,10 +24,11 @@ export async function POST(req: NextRequest) {
   const formData = await req.formData()
   const file = formData.get('file') as File | null
   const rawClient = (formData.get('client') as string)?.trim()
-  // Slugified only for URL/storage path — the raw name stays the client entity name
-  const client = rawClient?.toLowerCase().replace(/\s+/g, '-')
+  // Slugified (+ Hebrew→Latin transliterated) only for URL/storage path — the raw
+  // name stays the client entity name. Supabase Storage rejects non-ASCII keys.
+  const client = slugifyPath(rawClient, '')
   const title = (formData.get('title') as string)?.trim()
-  const slug = (formData.get('slug') as string)?.trim().toLowerCase().replace(/\s+/g, '-').replace(/\.html$/, '')
+  const slug = slugifyPath((formData.get('slug') as string)?.replace(/\.html$/i, ''), '')
   const expiresAt = formData.get('expiresAt') as string | null
   const password = (formData.get('password') as string)?.trim() || null
   const shortUrl = (formData.get('shortUrl') as string)?.trim().toLowerCase().replace(/[^a-z0-9-]/g, '') || null

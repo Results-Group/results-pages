@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Upload, FileUp } from 'lucide-react'
 import ClientAutocomplete from '../_components/client-autocomplete'
 import { useT, useLocale } from '@/lib/i18n'
+import { slugifyPath } from '@/lib/slug'
 
 function getWorkspaceCookie(): string | null {
   try {
@@ -157,7 +158,7 @@ export default function UploadPage() {
           />
           {slug && client && (
             <p className="text-xs mt-2" dir="ltr" style={{ color: 'var(--admin-text-muted)' }}>
-              URL: /pages/{client.toLowerCase().replace(/\s+/g, '-')}/{slug}
+              URL: /pages/{slugifyPath(client)}/{slugifyPath(slug)}
             </p>
           )}
         </div>
