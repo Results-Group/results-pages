@@ -317,39 +317,37 @@ export default function PizzaHouseDashboard() {
               className="w-10 h-10 sm:w-12 sm:h-12 object-contain flex-shrink-0"
             />
             <div className="min-w-0">
-              <h1 className="text-base sm:text-2xl font-black truncate" style={{ color: pal.yellow }}>
-                <span className="sm:hidden">Pizza House</span>
-                <span className="hidden sm:inline">Pizza House — דאשבורד שיווק</span>
-              </h1>
-              {data?.freshness.last_deal && (
-                <p className="text-[10px] sm:text-xs truncate" style={{ color: pal.textMuted }}>
-                  עסקה אחרונה: {data.freshness.last_deal.replace('T', ' ').slice(0, 16)}
-                </p>
-              )}
+              <h1 className="text-base sm:text-xl font-black truncate leading-tight" style={{ color: pal.text }}>דאשבורד שיווק</h1>
+              <p className="text-[10px] sm:text-xs truncate" style={{ color: pal.textMuted }}>
+                {data?.freshness.last_deal
+                  ? `עסקה אחרונה: ${data.freshness.last_deal.replace('T', ' ').slice(0, 16)}`
+                  : 'Pizza House'}
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+          {/* All controls share one height (h-9/h-10) and radius so the row reads as a tidy toolbar */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             {data && data.branches && data.branches.length > 1 && (
               <select
                 value={branch}
                 onChange={e => changeBranch(e.target.value)}
-                className="px-2.5 sm:px-3 py-2 rounded-xl text-sm font-bold outline-none cursor-pointer"
+                className="h-9 sm:h-10 px-3 rounded-xl text-sm font-bold outline-none cursor-pointer"
                 style={{ background: pal.bgCard, border: `1px solid ${pal.border}`, color: pal.text }}
                 title="בחירת סניף"
               >
                 {data.branches.map(b => <option key={b.id} value={b.id}>{b.label}</option>)}
               </select>
             )}
-            <button onClick={toggleTheme} className="p-2 sm:p-2.5 rounded-xl transition-colors" style={{ border: `1px solid ${pal.border}`, color: pal.textSecondary }} title={theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'}>
+            <button onClick={toggleTheme} className="h-9 w-9 sm:h-10 sm:w-10 inline-flex items-center justify-center rounded-xl transition-colors" style={{ background: pal.bgCard, border: `1px solid ${pal.border}`, color: pal.textSecondary }} title={theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'}>
               {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
-            <button onClick={() => load(from, to, true)} className="flex items-center gap-1.5 px-2.5 sm:px-4 py-2 rounded-xl text-sm font-bold transition-transform hover:-translate-y-0.5"
+            <button onClick={logout} className="h-9 w-9 sm:h-10 sm:w-10 inline-flex items-center justify-center rounded-xl transition-colors" style={{ background: pal.bgCard, border: `1px solid ${pal.border}`, color: pal.textMuted }} title="התנתקות">
+              <LogOut className="w-4 h-4" />
+            </button>
+            <button onClick={() => load(from, to, true)} className="h-9 sm:h-10 inline-flex items-center gap-1.5 px-3 sm:px-4 rounded-xl text-sm font-bold transition-transform hover:-translate-y-0.5"
               style={{ background: pal.yellow, color: pal.colorScheme === 'dark' ? '#050505' : '#ffffff' }}>
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">רענון</span>
-            </button>
-            <button onClick={logout} className="p-2 sm:p-2.5 rounded-xl transition-colors" style={{ border: `1px solid ${pal.border}`, color: pal.textMuted }} title="התנתקות">
-              <LogOut className="w-4 h-4" />
             </button>
           </div>
         </div>
