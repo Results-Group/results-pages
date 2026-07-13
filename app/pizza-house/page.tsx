@@ -16,8 +16,9 @@ import {
   Cell,
   Legend,
   BarChart,
+  CartesianGrid,
 } from 'recharts'
-import { RefreshCw, LogOut, TrendingUp, TrendingDown, Minus, Pizza, Truck, Store, Sun, Moon, Clock, PackageX } from 'lucide-react'
+import { RefreshCw, LogOut, TrendingUp, TrendingDown, Minus, Pizza, Truck, Store, Sun, Moon, Clock, PackageX, Wallet, Receipt, ShoppingBag } from 'lucide-react'
 
 // ── Types ──
 
@@ -155,32 +156,85 @@ const PRESETS: { id: string; label: string; range: () => { from: string; to: str
 
 // ── Sub-components ──
 
-function Delta({ current, previous, invert = false, pal }: { current: number; previous: number; invert?: boolean; pal: Palette }) {
+function Delta({ current, previous, invert = false, pal, pill = false }: { current: number; previous: number; invert?: boolean; pal: Palette; pill?: boolean }) {
   const cur = Number(current), prev = Number(previous)
-  if (!prev) return <span className="text-xs" style={{ color: pal.textMuted }}>—</span>
+  if (!prev) return <span className="text-xs tabular-nums" style={{ color: pal.textMuted }}>—</span>
   const pct = Math.round(((cur - prev) / prev) * 100)
-  if (pct === 0)
-    return <span className="inline-flex items-center gap-1 text-xs" style={{ color: pal.textSecondary }}><Minus className="w-3 h-3" /> 0%</span>
+  const neutral = pct === 0
   const good = invert ? pct < 0 : pct > 0
+  const color = neutral ? pal.textSecondary : good ? pal.success : pal.danger
+  const Icon = neutral ? Minus : pct > 0 ? TrendingUp : TrendingDown
+  const pillStyle = pill
+    ? {
+        padding: '2px 7px',
+        borderRadius: 9999,
+        background: neutral ? pal.bgElevated : `${color}1f`,
+      }
+    : undefined
   return (
-    <span className="inline-flex items-center gap-1 text-xs font-bold" style={{ color: good ? pal.success : pal.danger }}>
-      {pct > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+    <span className="inline-flex items-center gap-1 text-xs font-bold tabular-nums" style={{ color, ...pillStyle }}>
+      <Icon className="w-3 h-3 flex-shrink-0" />
       {pct > 0 ? '+' : ''}{pct}%
     </span>
   )
 }
 
-function Card({ children, className = '', pal }: { children: React.ReactNode; className?: string; pal: Palette }) {
+function Card({ children, className = '', pal, accent = false }: { children: React.ReactNode; className?: string; pal: Palette; accent?: boolean }) {
   return (
     <div className={`rounded-xl sm:rounded-2xl p-3 sm:p-5 ${className}`}
-      style={{ background: pal.bgCard, border: `1px solid ${pal.border}`, boxShadow: pal.colorScheme === 'light' ? '0 1px 3px rgba(0,0,0,0.06)' : 'none' }}>
+      style={{
+        background: pal.bgCard,
+        border: `1px solid ${accent ? pal.yellowMedium : pal.border}`,
+        boxShadow: pal.colorScheme === 'light' ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
+      }}>
       {children}
     </div>
   )
 }
 
+// Consistent title for the content inside a Card, with optional units caption.
+function CardTitle({ children, pal, hint }: { children: React.ReactNode; pal: Palette; hint?: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-2 mb-3 sm:mb-4">
+      <span className="text-xs sm:text-sm font-bold" style={{ color: pal.textSecondary }}>{children}</span>
+      {hint && <span className="text-[10px] sm:text-[11px] whitespace-nowrap" style={{ color: pal.textMuted }}>{hint}</span>}
+    </div>
+  )
+}
+
 function SectionTitle({ children, pal }: { children: React.ReactNode; pal: Palette }) {
-  return <h2 className="text-sm sm:text-lg font-bold mb-2.5 sm:mb-4 mt-6 sm:mt-10 first:mt-0" style={{ color: pal.text }}>{children}</h2>
+  return (
+    <h2 className="flex items-center gap-2.5 text-sm sm:text-lg font-bold mb-3 sm:mb-5 mt-8 sm:mt-12 first:mt-0" style={{ color: pal.text }}>
+      <span className="inline-block w-1 h-4 sm:h-5 rounded-full flex-shrink-0" style={{ background: pal.yellow }} />
+      {children}
+    </h2>
+  )
+}
+
+// Loading skeleton that mirrors the real layout so the page doesn't jump on load.
+function DashboardSkeleton({ pal }: { pal: Palette }) {
+  const block = (h: string, w = 'w-full') => (
+    <div className={`${h} ${w} rounded-lg animate-pulse`} style={{ background: pal.bgElevated }} />
+  )
+  return (
+    <div aria-hidden>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Card key={i} pal={pal}><div className="space-y-3">{block('h-4', 'w-24')}{block('h-9', 'w-32')}{block('h-3', 'w-20')}</div></Card>
+        ))}
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 mt-2 sm:mt-4">
+        {Array.from({ length: 7 }).map((_, i) => (
+          <Card key={i} pal={pal}><div className="space-y-2.5">{block('h-3', 'w-16')}{block('h-6', 'w-20')}</div></Card>
+        ))}
+      </div>
+      <div className="grid lg:grid-cols-2 gap-2 sm:gap-4 mt-8">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <Card key={i} pal={pal}><div className="space-y-3">{block('h-4', 'w-40')}{block('h-[220px]')}</div></Card>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 // recharts Legend text needs explicit color override via formatter
@@ -214,7 +268,8 @@ export default function PizzaHouseDashboard() {
     localStorage.setItem('ph_theme', next)
   }
 
-  const tooltipStyle = { background: pal.tooltipBg, border: `1px solid ${pal.border}`, borderRadius: 12, color: pal.text, direction: 'rtl' as const, ...FONT }
+  const tooltipStyle = { background: pal.tooltipBg, border: `1px solid ${pal.border}`, borderRadius: 12, color: pal.text, direction: 'rtl' as const, boxShadow: pal.colorScheme === 'dark' ? '0 8px 32px rgba(0,0,0,0.45)' : '0 8px 32px rgba(0,0,0,0.12)', padding: '8px 12px', ...FONT }
+  const gridStroke = pal.border
   const tipItem = { color: pal.text }
   const tipLabel = { color: pal.textSecondary }
 
@@ -341,20 +396,46 @@ export default function PizzaHouseDashboard() {
         )}
 
         {loading && !data && (
-          <div className="flex items-center justify-center h-64" style={{ color: pal.textMuted }}>
-            <RefreshCw className="w-6 h-6 animate-spin ml-3" /> טוען נתונים מהקופה...
-          </div>
+          <>
+            <div className="flex items-center justify-center gap-2.5 py-4 mb-2 text-sm" style={{ color: pal.textMuted }}>
+              <RefreshCw className="w-4 h-4 animate-spin" /> טוען נתונים מהקופה...
+            </div>
+            <DashboardSkeleton pal={pal} />
+          </>
         )}
 
         {data && s && p && (
           <div className={loading ? 'opacity-50 pointer-events-none transition-opacity' : 'transition-opacity'}>
 
-            {/* ── KPIs ── */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
+            {/* ── Hero KPIs — the numbers that matter most ── */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
               {([
-                { label: 'הכנסות', val: money(s.revenue), color: pal.yellow, k: 'revenue' as const, invert: false },
-                { label: 'הזמנות', val: num(s.orders), color: pal.text, k: 'orders' as const, invert: false },
-                { label: 'סל ממוצע', val: money(s.avg_order), color: pal.text, k: 'avg_order' as const, invert: false },
+                { label: 'הכנסות', val: money(s.revenue), color: pal.yellow, k: 'revenue' as const, icon: Wallet, accent: true },
+                { label: 'הזמנות', val: num(s.orders), color: pal.text, k: 'orders' as const, icon: Receipt, accent: false },
+                { label: 'סל ממוצע', val: money(s.avg_order), color: pal.text, k: 'avg_order' as const, icon: ShoppingBag, accent: false },
+              ]).map((kpi) => {
+                const Icon = kpi.icon
+                return (
+                  <Card key={kpi.k} pal={pal} accent={kpi.accent}>
+                    <div className="flex items-center justify-between mb-2 sm:mb-3">
+                      <span className="text-xs sm:text-sm font-bold" style={{ color: pal.textMuted }}>{kpi.label}</span>
+                      <span className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: kpi.accent ? pal.yellowMedium : pal.bgElevated }}>
+                        <Icon className="w-4 h-4" style={{ color: kpi.accent ? pal.yellow : pal.textSecondary }} />
+                      </span>
+                    </div>
+                    <div className="text-3xl sm:text-4xl font-black leading-none tabular-nums" style={{ color: kpi.color }}>{kpi.val}</div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <Delta current={s[kpi.k]} previous={p[kpi.k]} pal={pal} pill />
+                      <span className="text-[10px] sm:text-xs" style={{ color: pal.textMuted }}>מול תקופה קודמת</span>
+                    </div>
+                  </Card>
+                )
+              })}
+            </div>
+
+            {/* ── Secondary KPIs ── */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 mt-2 sm:mt-4">
+              {([
                 { label: 'פריטים להזמנה', val: String(s.items_per_order), color: pal.text, k: 'items_per_order' as const, invert: false },
                 { label: 'אחוז משלוחים', val: s.delivery_pct + '%', color: pal.text, k: 'delivery_pct' as const, invert: false },
                 { label: 'לקוחות ייחודיים', val: num(s.unique_customers), color: pal.cyan, k: 'unique_customers' as const, invert: false },
@@ -364,9 +445,9 @@ export default function PizzaHouseDashboard() {
                 { label: 'פריטים שנמכרו', val: num(s.items_sold), color: pal.text, k: 'items_sold' as const, invert: false },
               ]).map((kpi) => (
                 <Card key={kpi.k} pal={pal}>
-                  <div className="text-[10px] sm:text-xs mb-0.5 sm:mb-1" style={{ color: pal.textMuted }}>{kpi.label}</div>
-                  <div className="text-lg sm:text-2xl font-black leading-tight" style={{ color: kpi.color }}>{kpi.val}</div>
-                  <Delta current={s[kpi.k]} previous={p[kpi.k]} invert={kpi.invert} pal={pal} />
+                  <div className="text-[10px] sm:text-xs mb-1" style={{ color: pal.textMuted }}>{kpi.label}</div>
+                  <div className="text-lg sm:text-2xl font-black leading-tight tabular-nums" style={{ color: kpi.color }}>{kpi.val}</div>
+                  <div className="mt-1"><Delta current={s[kpi.k]} previous={p[kpi.k]} invert={kpi.invert} pal={pal} /></div>
                 </Card>
               ))}
             </div>
@@ -386,7 +467,7 @@ export default function PizzaHouseDashboard() {
                     </div>
                   </Card>
                   <Card className="sm:col-span-1 lg:col-span-2" pal={pal}>
-                    <div className="text-[11px] sm:text-xs mb-2 sm:mb-3" style={{ color: pal.textMuted }}>זמן טיפול לפי שעה ביום</div>
+                    <CardTitle pal={pal} hint="דקות · הזמנות">זמן טיפול לפי שעה ביום</CardTitle>
                     <div className="h-[150px] sm:h-[180px]"><ResponsiveContainer width="100%" height="100%">
                       <ComposedChart data={data.orderTiming.byHour}>
                         <defs>
@@ -395,6 +476,7 @@ export default function PizzaHouseDashboard() {
                             <stop offset="100%" stopColor={pal.cyan} stopOpacity={0} />
                           </linearGradient>
                         </defs>
+                        <CartesianGrid vertical={false} stroke={gridStroke} strokeDasharray="3 3" />
                         <XAxis dataKey="hour" tick={{ fill: pal.textSecondary, fontSize: 11, ...FONT }} tickFormatter={(v: number) => `${v}:00`} axisLine={false} tickLine={false} reversed />
                         <YAxis yAxisId="m" orientation="right" tick={{ fill: pal.textSecondary, fontSize: 11, ...FONT }} tickFormatter={(v: number) => v + '′'} axisLine={false} tickLine={false} />
                         <YAxis yAxisId="o" orientation="left" tick={{ fill: pal.textMuted, fontSize: 10, ...FONT }} axisLine={false} tickLine={false} />
@@ -420,32 +502,32 @@ export default function PizzaHouseDashboard() {
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm min-w-[520px]" style={{ borderCollapse: 'collapse' }}>
                         <thead>
-                          <tr style={{ color: pal.textMuted, textAlign: 'right' }}>
-                            <th className="py-2 pl-3 font-bold">סניף</th>
-                            <th className="py-2 px-3 font-bold">הכנסות</th>
-                            <th className="py-2 px-3 font-bold">הזמנות</th>
-                            <th className="py-2 px-3 font-bold">ממוצע להזמנה</th>
-                            <th className="py-2 px-3 font-bold">חלק מההכנסות</th>
+                          <tr style={{ color: pal.textMuted, textAlign: 'right', borderBottom: `1px solid ${pal.border}` }}>
+                            <th className="py-2.5 pl-3 font-bold">סניף</th>
+                            <th className="py-2.5 px-3 font-bold">הכנסות</th>
+                            <th className="py-2.5 px-3 font-bold">הזמנות</th>
+                            <th className="py-2.5 px-3 font-bold">ממוצע להזמנה</th>
+                            <th className="py-2.5 px-3 font-bold">חלק מההכנסות</th>
                           </tr>
                         </thead>
                         <tbody>
                           {rows.map((b, i) => {
                             const share = Number(b.summary.revenue || 0) / totalRev
                             return (
-                              <tr key={b.id} style={{ borderTop: `1px solid ${pal.border}` }}>
-                                <td className="py-2.5 pl-3 font-bold" style={{ color: pal.text }}>
+                              <tr key={b.id} style={{ background: i % 2 ? pal.bgElevated : 'transparent' }}>
+                                <td className="py-2.5 pl-3 font-bold rounded-r-lg" style={{ color: pal.text }}>
                                   <span className="inline-block w-2.5 h-2.5 rounded-full ml-2 align-middle" style={{ background: pal.chartColors[i % pal.chartColors.length] }} />
                                   {b.label}
                                 </td>
-                                <td className="py-2.5 px-3 font-bold" style={{ color: pal.yellow }}>{money(b.summary.revenue)}</td>
-                                <td className="py-2.5 px-3" style={{ color: pal.text }}>{num(b.summary.orders)}</td>
-                                <td className="py-2.5 px-3" style={{ color: pal.textSecondary }}>{money(b.summary.avg_order)}</td>
-                                <td className="py-2.5 px-3" style={{ minWidth: 140 }}>
+                                <td className="py-2.5 px-3 font-bold tabular-nums" style={{ color: pal.yellow }}>{money(b.summary.revenue)}</td>
+                                <td className="py-2.5 px-3 tabular-nums" style={{ color: pal.text }}>{num(b.summary.orders)}</td>
+                                <td className="py-2.5 px-3 tabular-nums" style={{ color: pal.textSecondary }}>{money(b.summary.avg_order)}</td>
+                                <td className="py-2.5 px-3 rounded-l-lg" style={{ minWidth: 140 }}>
                                   <div className="flex items-center gap-2">
                                     <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: pal.bgElevated }}>
                                       <div className="h-full rounded-full" style={{ width: `${share * 100}%`, background: pal.chartColors[i % pal.chartColors.length] }} />
                                     </div>
-                                    <span className="text-xs tabular-nums" style={{ color: pal.textMuted }}>{Math.round(share * 100)}%</span>
+                                    <span className="text-xs tabular-nums w-9 text-left" style={{ color: pal.textMuted }}>{Math.round(share * 100)}%</span>
                                   </div>
                                 </td>
                               </tr>
@@ -453,10 +535,10 @@ export default function PizzaHouseDashboard() {
                           })}
                           <tr style={{ borderTop: `2px solid ${pal.border}` }}>
                             <td className="py-2.5 pl-3 font-black" style={{ color: pal.text }}>סה״כ</td>
-                            <td className="py-2.5 px-3 font-black" style={{ color: pal.yellow }}>{money(data.summary.revenue)}</td>
-                            <td className="py-2.5 px-3 font-black" style={{ color: pal.text }}>{num(data.summary.orders)}</td>
-                            <td className="py-2.5 px-3 font-black" style={{ color: pal.textSecondary }}>{money(data.summary.avg_order)}</td>
-                            <td className="py-2.5 px-3" style={{ color: pal.textMuted }}>100%</td>
+                            <td className="py-2.5 px-3 font-black tabular-nums" style={{ color: pal.yellow }}>{money(data.summary.revenue)}</td>
+                            <td className="py-2.5 px-3 font-black tabular-nums" style={{ color: pal.text }}>{num(data.summary.orders)}</td>
+                            <td className="py-2.5 px-3 font-black tabular-nums" style={{ color: pal.textSecondary }}>{money(data.summary.avg_order)}</td>
+                            <td className="py-2.5 px-3 tabular-nums" style={{ color: pal.textMuted }}>100%</td>
                           </tr>
                         </tbody>
                       </table>
@@ -469,9 +551,9 @@ export default function PizzaHouseDashboard() {
             {/* ── Trends ── */}
             <SectionTitle pal={pal}>מגמות וזמנים</SectionTitle>
             <Card className="mb-4" pal={pal}>
-              <div className="text-xs sm:text-sm mb-3" style={{ color: pal.textMuted }}>
+              <CardTitle pal={pal} hint="₪ הכנסות · מס׳ הזמנות">
                 הכנסות והזמנות {data.timeseries.granularity === 'hour' ? 'לפי שעה' : data.timeseries.granularity === 'week' ? 'לפי שבוע' : 'לפי יום'}
-              </div>
+              </CardTitle>
               <div className="h-[220px] sm:h-[280px]"><ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={data.timeseries.points} margin={{ top: 8, right: 4, left: 4, bottom: 0 }}>
                   <defs>
@@ -484,11 +566,12 @@ export default function PizzaHouseDashboard() {
                       <stop offset="100%" stopColor={pal.cyan} stopOpacity={0} />
                     </linearGradient>
                   </defs>
+                  <CartesianGrid vertical={false} stroke={gridStroke} strokeDasharray="3 3" />
                   <XAxis dataKey="bucket" tick={{ fill: pal.textSecondary, fontSize: 11, ...FONT }} axisLine={false} tickLine={false}
                     tickFormatter={(v: string) => (data.timeseries.granularity === 'hour' ? v.slice(11) : v.slice(5).split('-').reverse().join('/'))} reversed />
-                  <YAxis yAxisId="rev" orientation="right" tick={{ fill: pal.textSecondary, fontSize: 11, ...FONT }} tickFormatter={(v: number) => nf.format(v)} axisLine={false} tickLine={false} />
-                  <YAxis yAxisId="ord" orientation="left" tick={{ fill: pal.cyan, fontSize: 11, ...FONT }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ ...tooltipStyle, boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }} itemStyle={tipItem} labelStyle={tipLabel} cursor={{ fill: pal.bgElevated }} formatter={(v, name) => (name === 'הכנסות' ? money(v as number) : num(v as number))} />
+                  <YAxis yAxisId="rev" orientation="right" tick={{ fill: pal.textSecondary, fontSize: 11, ...FONT }} tickFormatter={(v: number) => nf.format(v)} axisLine={false} tickLine={false} width={44} />
+                  <YAxis yAxisId="ord" orientation="left" tick={{ fill: pal.cyan, fontSize: 11, ...FONT }} axisLine={false} tickLine={false} width={32} />
+                  <Tooltip contentStyle={tooltipStyle} itemStyle={tipItem} labelStyle={tipLabel} cursor={{ fill: pal.bgElevated }} formatter={(v, name) => (name === 'הכנסות' ? money(v as number) : num(v as number))} />
                   <Legend wrapperStyle={FONT} formatter={legendFmt(pal)} />
                   <Bar yAxisId="rev" dataKey="revenue" name="הכנסות" fill="url(#gradYellow)" radius={[6, 6, 0, 0]} />
                   <Area yAxisId="ord" dataKey="orders" name="הזמנות" type="monotone" stroke={pal.cyan} strokeWidth={2.5} fill="url(#gradCyanArea)" dot={false} activeDot={{ r: 5, fill: pal.cyan, strokeWidth: 0 }} />
@@ -499,7 +582,7 @@ export default function PizzaHouseDashboard() {
             <div className="grid lg:grid-cols-2 gap-2 sm:gap-4">
               {/* Heatmap */}
               <Card pal={pal}>
-                <div className="text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: pal.textMuted }}>מפת חום: הזמנות לפי יום ושעה</div>
+                <CardTitle pal={pal} hint="לפי הזמנות">מפת חום: הזמנות לפי יום ושעה</CardTitle>
                 {heatmap && (
                   <div className="overflow-x-auto">
                     <div className="grid gap-[2px] sm:gap-[3px]" style={{ gridTemplateColumns: `36px repeat(${heatmap.hours.length}, minmax(16px, 1fr))`, minWidth: 340 }}>
@@ -523,14 +606,18 @@ export default function PizzaHouseDashboard() {
                         </Fragment>
                       ))}
                     </div>
-                    <div className="text-[10px] mt-2" style={{ color: pal.textMuted }}>כהה = פחות הזמנות, בהיר = יותר</div>
+                    <div className="flex items-center gap-2 mt-3">
+                      <span className="text-[10px]" style={{ color: pal.textMuted }}>פחות</span>
+                      <div className="flex-1 h-2 rounded-full" style={{ background: `linear-gradient(to left, ${pal.bgElevated}, ${pal.yellow})` }} />
+                      <span className="text-[10px]" style={{ color: pal.textMuted }}>יותר</span>
+                    </div>
                   </div>
                 )}
               </Card>
 
               {/* Weekdays */}
               <Card pal={pal}>
-                <div className="text-xs sm:text-sm mb-3" style={{ color: pal.textMuted }}>ימי שבוע: הזמנות וסל ממוצע</div>
+                <CardTitle pal={pal} hint="מס׳ הזמנות · ₪ סל">ימי שבוע: הזמנות וסל ממוצע</CardTitle>
                 <div className="h-[200px] sm:h-[260px]"><ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={data.weekdays.map(w => ({ ...w, name: DAY_NAMES[w.dow] }))} margin={{ top: 8, right: 4, left: 4, bottom: 0 }}>
                     <defs>
@@ -543,10 +630,11 @@ export default function PizzaHouseDashboard() {
                         <stop offset="100%" stopColor={pal.cyan} stopOpacity={0} />
                       </linearGradient>
                     </defs>
+                    <CartesianGrid vertical={false} stroke={gridStroke} strokeDasharray="3 3" />
                     <XAxis dataKey="name" tick={{ fill: pal.textSecondary, fontSize: 12, ...FONT }} axisLine={false} tickLine={false} reversed />
-                    <YAxis yAxisId="o" orientation="right" tick={{ fill: pal.textSecondary, fontSize: 11, ...FONT }} axisLine={false} tickLine={false} />
-                    <YAxis yAxisId="a" orientation="left" tick={{ fill: pal.cyan, fontSize: 11, ...FONT }} tickFormatter={(v: number) => '₪' + v} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={{ ...tooltipStyle, boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }} itemStyle={tipItem} labelStyle={tipLabel} cursor={{ fill: pal.bgElevated }} formatter={(v, name) => (name === 'סל ממוצע' ? money(v as number) : num(v as number))} />
+                    <YAxis yAxisId="o" orientation="right" tick={{ fill: pal.textSecondary, fontSize: 11, ...FONT }} axisLine={false} tickLine={false} width={32} />
+                    <YAxis yAxisId="a" orientation="left" tick={{ fill: pal.cyan, fontSize: 11, ...FONT }} tickFormatter={(v: number) => '₪' + v} axisLine={false} tickLine={false} width={40} />
+                    <Tooltip contentStyle={tooltipStyle} itemStyle={tipItem} labelStyle={tipLabel} cursor={{ fill: pal.bgElevated }} formatter={(v, name) => (name === 'סל ממוצע' ? money(v as number) : num(v as number))} />
                     <Legend wrapperStyle={FONT} formatter={legendFmt(pal)} />
                     <Bar yAxisId="o" dataKey="orders" name="הזמנות" fill="url(#gradYellowWk)" radius={[6, 6, 0, 0]} />
                     <Area yAxisId="a" dataKey="avg_order" name="סל ממוצע" type="monotone" stroke={pal.cyan} strokeWidth={2.5} fill="url(#gradCyanWk)" dot={false} activeDot={{ r: 5, fill: pal.cyan, strokeWidth: 0 }} />
@@ -562,7 +650,7 @@ export default function PizzaHouseDashboard() {
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
               <Card pal={pal}>
-                <div className="text-xs sm:text-sm mb-3" style={{ color: pal.textMuted }}>חדשים מול חוזרים</div>
+                <CardTitle pal={pal} hint="מס׳ לקוחות">חדשים מול חוזרים</CardTitle>
                 <div className="h-[180px] sm:h-[220px]"><ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={data.customers.newVsReturning.map(x => ({ name: x.kind === 'new' ? 'חדשים' : 'חוזרים', value: x.customers }))} dataKey="value" innerRadius={40} outerRadius={65} paddingAngle={3}>
@@ -574,7 +662,7 @@ export default function PizzaHouseDashboard() {
                 </ResponsiveContainer></div>
               </Card>
               <Card pal={pal}>
-                <div className="text-xs sm:text-sm mb-3" style={{ color: pal.textMuted }}>תדירות ביקורים (כל הזמנים)</div>
+                <CardTitle pal={pal} hint="כל הזמנים">תדירות ביקורים</CardTitle>
                 <div className="h-[180px] sm:h-[220px]"><ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data.customers.frequency.map(f => ({ ...f, name: f.bucket + ' ביקורים' }))}>
                     <defs>
@@ -583,50 +671,54 @@ export default function PizzaHouseDashboard() {
                         <stop offset="100%" stopColor={pal.info} stopOpacity={0.3} />
                       </linearGradient>
                     </defs>
+                    <CartesianGrid vertical={false} stroke={gridStroke} strokeDasharray="3 3" />
                     <XAxis dataKey="name" tick={{ fill: pal.textSecondary, fontSize: 11, ...FONT }} axisLine={false} tickLine={false} reversed />
-                    <YAxis tick={{ fill: pal.textSecondary, fontSize: 11, ...FONT }} orientation="right" axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={{ ...tooltipStyle, boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }} itemStyle={tipItem} labelStyle={tipLabel} cursor={{ fill: pal.bgElevated }} />
+                    <YAxis tick={{ fill: pal.textSecondary, fontSize: 11, ...FONT }} orientation="right" axisLine={false} tickLine={false} width={28} />
+                    <Tooltip contentStyle={tooltipStyle} itemStyle={tipItem} labelStyle={tipLabel} cursor={{ fill: pal.bgElevated }} />
                     <Bar dataKey="customers" name="לקוחות" fill="url(#gradInfo)" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer></div>
               </Card>
               <Card pal={pal}>
-                <div className="text-xs sm:text-sm mb-3" style={{ color: pal.textMuted }}>כרטיסי סועד לפי חברה</div>
-                <div className="space-y-2 max-h-[220px] overflow-y-auto">
+                <CardTitle pal={pal}>כרטיסי סועד לפי חברה</CardTitle>
+                <div className="space-y-1.5 max-h-[220px] overflow-y-auto -mx-1 px-1">
                   {data.customers.mealCards.map((m, i) => (
-                    <div key={i} className="flex items-center justify-between text-sm py-1.5 px-2 rounded-lg" style={{ background: pal.bgElevated }}>
-                      <span style={{ color: pal.textSecondary }}>{m.company}</span>
-                      <span className="text-xs" style={{ color: pal.textMuted }}>{num(m.orders)} הזמנות</span>
-                      <span className="font-bold" style={{ color: pal.cyan }}>{money(m.revenue)}</span>
+                    <div key={i} className="flex items-center gap-3 text-sm py-2 px-2.5 rounded-lg" style={{ background: pal.bgElevated }}>
+                      <span className="flex-1 min-w-0 truncate" style={{ color: pal.textSecondary }}>{m.company}</span>
+                      <span className="text-xs whitespace-nowrap tabular-nums" style={{ color: pal.textMuted }}>{num(m.orders)} הזמנות</span>
+                      <span className="font-bold whitespace-nowrap tabular-nums" style={{ color: pal.cyan }}>{money(m.revenue)}</span>
                     </div>
                   ))}
-                  {data.customers.mealCards.length === 0 && <div className="text-sm" style={{ color: pal.textMuted }}>אין נתונים בטווח</div>}
+                  {data.customers.mealCards.length === 0 && <div className="text-sm py-6 text-center" style={{ color: pal.textMuted }}>אין נתונים בטווח</div>}
                 </div>
               </Card>
             </div>
 
             {/* VIP table — desktop table, mobile cards */}
             <Card className="mt-3 sm:mt-4" pal={pal}>
-              <div className="text-xs sm:text-sm mb-3" style={{ color: pal.textMuted }}>לקוחות VIP שהיו פעילים בטווח (לפי סך הוצאה כולל)</div>
+              <CardTitle pal={pal} hint="מדורג לפי הוצאה כוללת">לקוחות VIP שהיו פעילים בטווח</CardTitle>
+              {data.customers.vip.length === 0 ? (
+                <div className="text-sm py-8 text-center" style={{ color: pal.textMuted }}>אין לקוחות VIP פעילים בטווח</div>
+              ) : (<>
               {/* Desktop table */}
               <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-sm" style={{ minWidth: 520 }}>
                   <thead>
                     <tr style={{ borderBottom: `1px solid ${pal.border}` }}>
                       {['כרטיס (4 ספרות)', 'סוג', 'ביקורים', 'הוצאה בטווח', 'הוצאה כוללת', 'ביקור אחרון'].map(h => (
-                        <th key={h} className="text-right py-2 px-3 text-xs font-bold" style={{ color: pal.textMuted }}>{h}</th>
+                        <th key={h} className="text-right py-2.5 px-3 text-xs font-bold" style={{ color: pal.textMuted }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {data.customers.vip.map((v, i) => (
-                      <tr key={i} style={{ borderBottom: `1px solid ${pal.border}33` }}>
-                        <td className="py-2 px-3 font-mono" style={{ color: pal.textSecondary }}>•••• {v.last4}</td>
-                        <td className="py-2 px-3" style={{ color: pal.textMuted }}>{v.nm_card || '—'}</td>
-                        <td className="py-2 px-3" style={{ color: pal.text }}>{num(v.visits)}</td>
-                        <td className="py-2 px-3 font-medium" style={{ color: pal.cyan }}>{money(v.range_spend)}</td>
-                        <td className="py-2 px-3 font-bold" style={{ color: pal.yellow }}>{money(v.total_spend)}</td>
-                        <td className="py-2 px-3 text-xs" style={{ color: pal.textMuted }}>{v.last_visit?.slice(0, 10)}</td>
+                      <tr key={i} style={{ background: i % 2 ? pal.bgElevated : 'transparent' }}>
+                        <td className="py-2.5 px-3 font-mono rounded-r-lg" style={{ color: pal.textSecondary }}>•••• {v.last4}</td>
+                        <td className="py-2.5 px-3" style={{ color: pal.textMuted }}>{v.nm_card || '—'}</td>
+                        <td className="py-2.5 px-3 tabular-nums" style={{ color: pal.text }}>{num(v.visits)}</td>
+                        <td className="py-2.5 px-3 font-medium tabular-nums" style={{ color: pal.cyan }}>{money(v.range_spend)}</td>
+                        <td className="py-2.5 px-3 font-bold tabular-nums" style={{ color: pal.yellow }}>{money(v.total_spend)}</td>
+                        <td className="py-2.5 px-3 text-xs tabular-nums rounded-l-lg" style={{ color: pal.textMuted }}>{v.last_visit?.slice(0, 10)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -640,7 +732,7 @@ export default function PizzaHouseDashboard() {
                       <span className="font-mono text-sm" style={{ color: pal.textSecondary }}>•••• {v.last4}</span>
                       <span className="text-[10px]" style={{ color: pal.textMuted }}>{v.nm_card || '—'}</span>
                     </div>
-                    <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center justify-between text-xs tabular-nums">
                       <span style={{ color: pal.textMuted }}>{num(v.visits)} ביקורים</span>
                       <span className="font-medium" style={{ color: pal.cyan }}>{money(v.range_spend)}</span>
                       <span className="font-bold" style={{ color: pal.yellow }}>{money(v.total_spend)}</span>
@@ -648,31 +740,32 @@ export default function PizzaHouseDashboard() {
                   </div>
                 ))}
               </div>
+              </>)}
             </Card>
 
             {/* ── Products & Promos ── */}
             <SectionTitle pal={pal}>מוצרים, מבצעים וקטגוריות</SectionTitle>
             <div className="grid lg:grid-cols-2 gap-2 sm:gap-4">
               <Card pal={pal}>
-                <div className="text-xs sm:text-sm mb-3" style={{ color: pal.textMuted }}>מוצרים מובילים (מול תקופה קודמת)</div>
+                <CardTitle pal={pal} hint="מול תקופה קודמת">מוצרים מובילים</CardTitle>
                 {/* Desktop table */}
                 <div className="hidden sm:block overflow-x-auto">
                   <table className="w-full text-sm" style={{ minWidth: 420 }}>
                     <thead>
                       <tr style={{ borderBottom: `1px solid ${pal.border}` }}>
                         {['#', 'מוצר', 'כמות', 'הכנסה', 'מגמה'].map(h => (
-                          <th key={h} className="text-right py-2 px-2 text-xs font-bold" style={{ color: pal.textMuted }}>{h}</th>
+                          <th key={h} className="text-right py-2.5 px-2 text-xs font-bold" style={{ color: pal.textMuted }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {data.products.top.map((item, i) => (
-                        <tr key={i} style={{ borderBottom: `1px solid ${pal.border}22` }}>
-                          <td className="py-1.5 px-2" style={{ color: pal.textMuted }}>{i + 1}</td>
-                          <td className="py-1.5 px-2" style={{ color: pal.textSecondary }}>{item.name}</td>
-                          <td className="py-1.5 px-2" style={{ color: pal.textMuted }}>{num(item.qty)}</td>
-                          <td className="py-1.5 px-2 font-bold" style={{ color: pal.text }}>{money(item.revenue)}</td>
-                          <td className="py-1.5 px-2"><Delta current={Number(item.revenue)} previous={Number(item.prev_revenue ?? 0)} pal={pal} /></td>
+                        <tr key={i} style={{ background: i % 2 ? pal.bgElevated : 'transparent' }}>
+                          <td className="py-2 px-2 tabular-nums rounded-r-lg" style={{ color: pal.textMuted }}>{i + 1}</td>
+                          <td className="py-2 px-2" style={{ color: pal.textSecondary }}>{item.name}</td>
+                          <td className="py-2 px-2 tabular-nums" style={{ color: pal.textMuted }}>{num(item.qty)}</td>
+                          <td className="py-2 px-2 font-bold tabular-nums" style={{ color: pal.text }}>{money(item.revenue)}</td>
+                          <td className="py-2 px-2 rounded-l-lg"><Delta current={Number(item.revenue)} previous={Number(item.prev_revenue ?? 0)} pal={pal} /></td>
                         </tr>
                       ))}
                     </tbody>
@@ -682,10 +775,10 @@ export default function PizzaHouseDashboard() {
                 <div className="sm:hidden space-y-1.5">
                   {data.products.top.map((item, i) => (
                     <div key={i} className="flex items-center gap-2 py-1.5 px-2 rounded-lg" style={{ background: i % 2 === 0 ? pal.bgElevated : 'transparent' }}>
-                      <span className="text-[10px] w-4 flex-shrink-0" style={{ color: pal.textMuted }}>{i + 1}</span>
+                      <span className="text-[10px] w-4 flex-shrink-0 tabular-nums" style={{ color: pal.textMuted }}>{i + 1}</span>
                       <span className="text-xs truncate flex-1 min-w-0" style={{ color: pal.textSecondary }}>{item.name}</span>
-                      <span className="text-xs flex-shrink-0" style={{ color: pal.textMuted }}>{num(item.qty)}</span>
-                      <span className="text-xs font-bold flex-shrink-0" style={{ color: pal.text }}>{money(item.revenue)}</span>
+                      <span className="text-xs flex-shrink-0 tabular-nums" style={{ color: pal.textMuted }}>{num(item.qty)}</span>
+                      <span className="text-xs font-bold flex-shrink-0 tabular-nums" style={{ color: pal.text }}>{money(item.revenue)}</span>
                       <span className="flex-shrink-0"><Delta current={Number(item.revenue)} previous={Number(item.prev_revenue ?? 0)} pal={pal} /></span>
                     </div>
                   ))}
@@ -694,7 +787,7 @@ export default function PizzaHouseDashboard() {
 
               <div className="space-y-3 sm:space-y-4">
                 <Card pal={pal}>
-                  <div className="text-xs sm:text-sm mb-3" style={{ color: pal.textMuted }}>הכנסות לפי קטגוריה</div>
+                  <CardTitle pal={pal} hint="₪ הכנסות">הכנסות לפי קטגוריה</CardTitle>
                   <div className="h-[190px] sm:h-[230px]"><ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie data={data.products.categories.map(c => ({ name: c.category, value: Number(c.revenue) }))} dataKey="value" innerRadius={38} outerRadius={62} paddingAngle={2}>
@@ -706,32 +799,32 @@ export default function PizzaHouseDashboard() {
                   </ResponsiveContainer></div>
                 </Card>
                 <Card pal={pal}>
-                  <div className="text-xs sm:text-sm mb-3" style={{ color: pal.textMuted }}>מבצעים ובאנדלים</div>
-                  <div className="space-y-1.5 max-h-[180px] overflow-y-auto">
+                  <CardTitle pal={pal}>מבצעים ובאנדלים</CardTitle>
+                  <div className="space-y-1.5 max-h-[180px] overflow-y-auto -mx-1 px-1">
                     {data.products.bundles.map((b, i) => (
-                      <div key={i} className="flex items-center justify-between text-sm py-1.5 px-2 rounded-lg" style={{ background: pal.bgElevated }}>
-                        <span className="truncate ml-2" style={{ color: pal.textSecondary }}>{b.name}</span>
-                        <span className="text-xs whitespace-nowrap" style={{ color: pal.textMuted }}>{num(b.qty)} יח׳</span>
-                        <span className="font-bold whitespace-nowrap mr-3" style={{ color: pal.cyan }}>{money(b.revenue)}</span>
+                      <div key={i} className="flex items-center gap-3 text-sm py-2 px-2.5 rounded-lg" style={{ background: pal.bgElevated }}>
+                        <span className="flex-1 min-w-0 truncate" style={{ color: pal.textSecondary }}>{b.name}</span>
+                        <span className="text-xs whitespace-nowrap tabular-nums" style={{ color: pal.textMuted }}>{num(b.qty)} יח׳</span>
+                        <span className="font-bold whitespace-nowrap tabular-nums" style={{ color: pal.cyan }}>{money(b.revenue)}</span>
                       </div>
                     ))}
-                    {data.products.bundles.length === 0 && <div className="text-sm" style={{ color: pal.textMuted }}>אין מבצעים בטווח</div>}
+                    {data.products.bundles.length === 0 && <div className="text-sm py-6 text-center" style={{ color: pal.textMuted }}>אין מבצעים בטווח</div>}
                   </div>
                 </Card>
               </div>
             </div>
 
             <Card className="mt-4" pal={pal}>
-              <div className="text-xs sm:text-sm mb-3" style={{ color: pal.textMuted }}>פריטים עם הכי הרבה הנחות</div>
+              <CardTitle pal={pal} hint="₪ סך הנחה">פריטים עם הכי הרבה הנחות</CardTitle>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5 sm:gap-2">
                 {data.products.discountedItems.map((d, i) => (
-                  <div key={i} className="flex items-center justify-between text-sm py-1.5 px-3 rounded-lg" style={{ background: pal.yellowSubtle }}>
-                    <span className="truncate ml-2" style={{ color: pal.textSecondary }}>{d.name}</span>
-                    <span className="text-xs whitespace-nowrap" style={{ color: pal.textMuted }}>{num(d.times)} פעמים</span>
-                    <span className="font-bold whitespace-nowrap mr-3" style={{ color: pal.yellow }}>-{money(d.discount_total)}</span>
+                  <div key={i} className="flex items-center gap-3 text-sm py-2 px-3 rounded-lg" style={{ background: pal.yellowSubtle }}>
+                    <span className="flex-1 min-w-0 truncate" style={{ color: pal.textSecondary }}>{d.name}</span>
+                    <span className="text-xs whitespace-nowrap tabular-nums" style={{ color: pal.textMuted }}>{num(d.times)} פעמים</span>
+                    <span className="font-bold whitespace-nowrap tabular-nums" style={{ color: pal.yellow }}>-{money(d.discount_total)}</span>
                   </div>
                 ))}
-                {data.products.discountedItems.length === 0 && <div className="text-sm" style={{ color: pal.textMuted }}>אין הנחות בטווח</div>}
+                {data.products.discountedItems.length === 0 && <div className="text-sm py-6 text-center col-span-full" style={{ color: pal.textMuted }}>אין הנחות בטווח</div>}
               </div>
             </Card>
 
@@ -749,7 +842,7 @@ export default function PizzaHouseDashboard() {
                         <div className="truncate" style={{ color: pal.textSecondary }}>{d.name}</div>
                         <div className="text-[10px]" style={{ color: pal.textMuted }}>{d.category}</div>
                       </div>
-                      <span className="font-bold whitespace-nowrap" style={{ color: pal.textMuted }}>{money(d.sale_price)}</span>
+                      <span className="font-bold whitespace-nowrap tabular-nums" style={{ color: pal.textMuted }}>{money(d.sale_price)}</span>
                     </div>
                   ))}
                 </div>
@@ -760,7 +853,7 @@ export default function PizzaHouseDashboard() {
             <SectionTitle pal={pal}>ערוצים ואמצעי תשלום</SectionTitle>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
               <Card pal={pal}>
-                <div className="text-xs sm:text-sm mb-3" style={{ color: pal.textMuted }}>משלוחים מול איסוף/ישיבה</div>
+                <CardTitle pal={pal}>משלוחים מול איסוף/ישיבה</CardTitle>
                 <div className="space-y-3">
                   {data.channels.map((c, i) => (
                     <div key={i} className="p-3 rounded-xl" style={{ background: pal.bgElevated }}>
@@ -768,15 +861,15 @@ export default function PizzaHouseDashboard() {
                         <span className="font-bold inline-flex items-center gap-1.5" style={{ color: pal.textSecondary }}>
                           {c.channel === 'delivery' ? <><Truck className="w-4 h-4" style={{ color: pal.cyan }} /> משלוחים</> : <><Store className="w-4 h-4" style={{ color: pal.yellow }} /> איסוף / ישיבה</>}
                         </span>
-                        <span className="font-black" style={{ color: pal.yellow }}>{money(c.revenue)}</span>
+                        <span className="font-black tabular-nums" style={{ color: pal.yellow }}>{money(c.revenue)}</span>
                       </div>
-                      <div className="text-xs" style={{ color: pal.textMuted }}>{num(c.orders)} הזמנות · סל ממוצע {money(c.avg_order)}</div>
+                      <div className="text-xs tabular-nums" style={{ color: pal.textMuted }}>{num(c.orders)} הזמנות · סל ממוצע {money(c.avg_order)}</div>
                     </div>
                   ))}
                 </div>
               </Card>
               <Card pal={pal}>
-                <div className="text-xs sm:text-sm mb-3" style={{ color: pal.textMuted }}>אמצעי תשלום</div>
+                <CardTitle pal={pal} hint="₪ סכום">אמצעי תשלום</CardTitle>
                 <div className="h-[190px] sm:h-[230px]"><ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={data.payments.methods.map(m => ({ name: m.label, value: Number(m.total) }))} dataKey="value" innerRadius={38} outerRadius={62} paddingAngle={2}>
@@ -788,18 +881,18 @@ export default function PizzaHouseDashboard() {
                 </ResponsiveContainer></div>
               </Card>
               <Card pal={pal}>
-                <div className="text-xs sm:text-sm mb-3" style={{ color: pal.textMuted }}>מותגי אשראי</div>
-                <div className="space-y-2">
+                <CardTitle pal={pal} hint="₪ · חלק יחסי">מותגי אשראי</CardTitle>
+                <div className="space-y-2.5">
                   {data.payments.brands.map((b, i) => {
                     const total = data.payments.brands.reduce((acc, x) => acc + Number(x.total), 0)
                     const pct = total ? Math.round((Number(b.total) / total) * 100) : 0
                     return (
                       <div key={i}>
-                        <div className="flex justify-between text-sm mb-1">
+                        <div className="flex justify-between text-sm mb-1.5">
                           <span style={{ color: pal.textSecondary }}>{b.label}</span>
-                          <span style={{ color: pal.textMuted }}>{money(b.total)} · {pct}%</span>
+                          <span className="tabular-nums" style={{ color: pal.textMuted }}>{money(b.total)} · {pct}%</span>
                         </div>
-                        <div className="h-2 rounded-full" style={{ background: pal.bgElevated }}>
+                        <div className="h-2 rounded-full overflow-hidden" style={{ background: pal.bgElevated }}>
                           <div className="h-2 rounded-full" style={{ width: `${pct}%`, background: pal.chartColors[i % pal.chartColors.length] }} />
                         </div>
                       </div>
