@@ -10,7 +10,7 @@ export interface PizzaBranch { id: string; label: string }
 
 /** id → env-var prefix + default label. Add a branch by adding a row + its env vars. */
 const BRANCH_REGISTRY: Record<string, { prefix: string; label: string }> = {
-  main: { prefix: 'PIZZAHOUSE_DB', label: process.env.PIZZAHOUSE_MAIN_LABEL || 'סניף ראשי' },
+  main: { prefix: 'PIZZAHOUSE_DB', label: process.env.PIZZAHOUSE_MAIN_LABEL || 'גבעת זאב' },
   mevaseret: { prefix: 'PIZZAHOUSE_MEVASERET_DB', label: 'מבשרת ציון' },
 }
 
