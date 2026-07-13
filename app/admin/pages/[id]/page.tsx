@@ -241,27 +241,37 @@ export default function EditPage() {
     setError('')
     setSuccessMsg('')
 
-    const res = await fetch(`/api/pages/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      // datetime-local values are local wall time — convert to UTC ISO client-side,
-      // since the server (UTC on Vercel) would otherwise parse them 3h off
-      body: JSON.stringify({ title, client, slug, active, expiresAt: expiresAt || null, publishAt: publishAt ? new Date(publishAt).toISOString() : null, ...(passwordTouched ? { password: password || null } : {}), shortUrl: shortUrl || null, workspace_id: workspaceId }),
-    })
-
-    if (!res.ok) {
-      const data = await res.json()
-      setError(data.error || 'שגיאה בשמירה')
-    } else {
-      router.push('/admin')
+    try {
+      const res = await fetch(`/api/pages/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        // datetime-local values are local wall time — convert to UTC ISO client-side,
+        // since the server (UTC on Vercel) would otherwise parse them 3h off
+        body: JSON.stringify({ title, client, slug, active, expiresAt: expiresAt || null, publishAt: publishAt ? new Date(publishAt).toISOString() : null, ...(passwordTouched ? { password: password || null } : {}), shortUrl: shortUrl || null, workspace_id: workspaceId }),
+      })
+      if (res.status === 401) { window.location.href = '/admin/login'; return }
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setError(data.error || 'שגיאה בשמירה')
+      } else {
+        router.push('/admin')
+      }
+    } catch {
+      setError('שגיאה בשמירה')
+    } finally {
+      setSaving(false)
     }
-    setSaving(false)
   }
 
   async function handleDelete() {
     if (!confirm(`למחוק את "${page?.title}"? פעולה זו בלתי הפיכה.`)) return
-    await fetch(`/api/pages/${id}`, { method: 'DELETE' })
-    router.push('/admin')
+    try {
+      const res = await fetch(`/api/pages/${id}`, { method: 'DELETE' })
+      if (!res.ok) { setError('שגיאה במחיקת הדף'); return }
+      router.push('/admin')
+    } catch {
+      setError('שגיאה במחיקת הדף')
+    }
   }
 
   async function handleResetStats() {

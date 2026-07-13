@@ -238,6 +238,11 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  /* Header: wrap + shrink so it doesn't overflow a phone (clients open via WhatsApp) */
+  .report-header { flex-wrap: wrap; gap: 10px; padding: 14px 16px; }
+  .report-header-title { gap: 12px; }
+  .report-header-title h1 { font-size: 1.05rem; }
+  .report-date-badge { display: none; }
   .report-content { padding: 28px 20px; }
   .report-tab-title { font-size: 1.6rem; }
   .rpt-kpi-grid { grid-template-columns: 1fr 1fr; }

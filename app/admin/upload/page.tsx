@@ -61,16 +61,20 @@ export default function UploadPage() {
     if (password.trim()) formData.append('password', password.trim())
     if (shortUrl.trim()) formData.append('shortUrl', shortUrl.trim())
 
-    const res = await fetch('/api/upload', { method: 'POST', body: formData })
-    const data = await res.json()
-
-    if (!res.ok) {
-      setError(data.error || t('upload.error'))
+    try {
+      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      if (res.status === 401) { window.location.href = '/admin/login'; return }
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setError(data.error || t('upload.error'))
+        return
+      }
+      router.push('/admin')
+    } catch {
+      setError(t('upload.error'))
+    } finally {
       setUploading(false)
-      return
     }
-
-    router.push('/admin')
   }
 
   const inputStyle = {

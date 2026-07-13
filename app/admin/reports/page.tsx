@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, Calendar, BarChart3 } from 'lucide-react'
 import { useT, useLocale } from '@/lib/i18n'
+import { useToast } from '../_components/toast'
 
 interface Report {
   id: string
@@ -30,6 +31,7 @@ const STATUS_DOT: Record<string, string> = { draft: '#f59e0b', published: '#40e1
 export default function ReportsListPage() {
   const t = useT()
   const locale = useLocale()
+  const { showToast } = useToast()
   const [reports, setReports] = useState<Report[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -68,8 +70,13 @@ export default function ReportsListPage() {
 
   async function handleDelete(id: string, name: string) {
     if (!confirm(locale === 'en' ? `Delete report "${name}"?` : `למחוק את הדוח "${name}"?`)) return
-    await fetch(`/api/reports/${id}`, { method: 'DELETE' })
-    setReports(prev => prev.filter(r => r.id !== id))
+    try {
+      const res = await fetch(`/api/reports/${id}`, { method: 'DELETE' })
+      if (!res.ok) { showToast(locale === 'en' ? 'Error deleting report' : 'שגיאה במחיקת הדוח', 'error'); return }
+      setReports(prev => prev.filter(r => r.id !== id))
+    } catch {
+      showToast(locale === 'en' ? 'Error deleting report' : 'שגיאה במחיקת הדוח', 'error')
+    }
   }
 
   const groupedByClient = (() => {

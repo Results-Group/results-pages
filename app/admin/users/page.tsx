@@ -99,15 +99,21 @@ export default function UsersPage() {
 
   const fetchUsers = useCallback(async () => {
     setLoading(true)
-    const res = await fetch('/api/users')
-    if (res.ok) {
-      setUsers(await res.json())
-    } else if (res.status === 403) {
-      setError(t('users.noPermission'))
-    } else {
+    try {
+      const res = await fetch('/api/users')
+      if (res.status === 401) { window.location.href = '/admin/login'; return }
+      if (res.ok) {
+        setUsers(await res.json())
+      } else if (res.status === 403) {
+        setError(t('users.noPermission'))
+      } else {
+        setError(t('users.loadError'))
+      }
+    } catch {
       setError(t('users.loadError'))
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }, [])
 
   async function fetchWorkspaces() {
@@ -125,22 +131,26 @@ export default function UsersPage() {
     setAdding(true)
     setError('')
 
-    const res = await fetch('/api/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newName, email: newEmail, password: newPassword, role: newRole }),
-    })
-
-    if (res.ok) {
-      setShowAddForm(false)
-      setNewName(''); setNewEmail(''); setNewPassword(''); setNewRole('editor')
-      showSuccess(t('users.userCreated'))
-      fetchUsers()
-    } else {
-      const data = await res.json()
-      setError(data.error || t('users.createError'))
+    try {
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName, email: newEmail, password: newPassword, role: newRole }),
+      })
+      if (res.ok) {
+        setShowAddForm(false)
+        setNewName(''); setNewEmail(''); setNewPassword(''); setNewRole('editor')
+        showSuccess(t('users.userCreated'))
+        fetchUsers()
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setError(data.error || t('users.createError'))
+      }
+    } catch {
+      setError(t('users.createError'))
+    } finally {
+      setAdding(false)
     }
-    setAdding(false)
   }
 
   function startEdit(user: AdminUser) {
@@ -160,21 +170,25 @@ export default function UsersPage() {
     if (editRole) body.role = editRole
     if (editPassword) body.password = editPassword
 
-    const res = await fetch('/api/users', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-
-    if (res.ok) {
-      setEditingId(null)
-      showSuccess(t('users.userUpdated'))
-      fetchUsers()
-    } else {
-      const data = await res.json()
-      setError(data.error || t('users.updateError'))
+    try {
+      const res = await fetch('/api/users', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (res.ok) {
+        setEditingId(null)
+        showSuccess(t('users.userUpdated'))
+        fetchUsers()
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setError(data.error || t('users.updateError'))
+      }
+    } catch {
+      setError(t('users.updateError'))
+    } finally {
+      setSaving(false)
     }
-    setSaving(false)
   }
 
   async function handleDelete(id: string, name: string) {

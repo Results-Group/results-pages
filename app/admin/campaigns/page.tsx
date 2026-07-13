@@ -127,8 +127,13 @@ export default function CampaignsListPage() {
 
   async function handleDelete(id: string, name: string) {
     if (!confirm(`למחוק את הקמפיין "${name}"?`)) return
-    await fetch(`/api/campaigns/${id}`, { method: 'DELETE' })
-    setCampaigns(prev => prev.filter(c => c.id !== id))
+    try {
+      const res = await fetch(`/api/campaigns/${id}`, { method: 'DELETE' })
+      if (!res.ok) { showToast('שגיאה במחיקת הקמפיין', 'error'); return }
+      setCampaigns(prev => prev.filter(c => c.id !== id))
+    } catch {
+      showToast('שגיאה במחיקת הקמפיין', 'error')
+    }
   }
 
   async function handleSaveAsTemplate(campaign: Campaign) {

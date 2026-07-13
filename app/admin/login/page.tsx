@@ -17,20 +17,23 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
 
-    const res = await fetch('/api/auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email || undefined, password }),
-    })
-
-    if (res.ok) {
-      window.location.href = '/admin'
-      return
-    } else {
-      const data = await res.json()
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email || undefined, password }),
+      })
+      if (res.ok) {
+        window.location.href = '/admin'
+        return
+      }
+      const data = await res.json().catch(() => ({}))
       setError(data.error || 'שגיאה בהתחברות')
+    } catch {
+      setError('שגיאת התחברות, נסו שוב')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   return (
