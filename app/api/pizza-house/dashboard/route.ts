@@ -58,14 +58,18 @@ export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
   const from = searchParams.get('from') ?? ''
   const to = searchParams.get('to') ?? '' // inclusive calendar date
-  const branch = searchParams.get('branch') || 'main'
-
   if (!DATE_RE.test(from) || !DATE_RE.test(to) || from > to) {
     return NextResponse.json({ error: 'Invalid date range' }, { status: 400 })
   }
-  if (!isPizzaBranch(branch)) {
-    return NextResponse.json({ error: 'Invalid branch' }, { status: 400 })
+
+  const available = listPizzaBranches()
+  if (available.length === 0) {
+    return NextResponse.json({ error: 'No branch configured' }, { status: 503 })
   }
+  // Fall back to the first configured branch rather than erroring if the
+  // requested branch (default 'main') isn't set up in this environment.
+  let branch = searchParams.get('branch') || 'main'
+  if (!isPizzaBranch(branch)) branch = available[0].id
 
   const cacheKey = `${branch}|${from}|${to}`
   const cached = cache.get(cacheKey)
