@@ -41,6 +41,7 @@ interface Summary {
 interface DashboardData {
   branch: string
   branches: { id: string; label: string }[]
+  perBranch: { id: string; label: string; summary: Summary; prev_summary: Summary }[] | null
   range: { from: string; to: string; days: number }
   prev_range: { from: string; to: string }
   summary: Summary
@@ -198,7 +199,7 @@ export default function PizzaHouseDashboard() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [branch, setBranch] = useState('main')
+  const [branch, setBranch] = useState('all')
 
   useEffect(() => {
     const saved = localStorage.getItem('ph_theme') as 'dark' | 'light' | null
@@ -400,6 +401,63 @@ export default function PizzaHouseDashboard() {
                 </div>
               </>
             )}
+
+            {/* ── Branch comparison (unified view only) ── */}
+            {data.perBranch && data.perBranch.length > 1 && (() => {
+              const rows = [...data.perBranch].sort((a, b) => Number(b.summary.revenue) - Number(a.summary.revenue))
+              const totalRev = rows.reduce((acc, r) => acc + Number(r.summary.revenue || 0), 0) || 1
+              return (
+                <>
+                  <SectionTitle pal={pal}>השוואת סניפים</SectionTitle>
+                  <Card className="mb-4" pal={pal}>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm min-w-[520px]" style={{ borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr style={{ color: pal.textMuted, textAlign: 'right' }}>
+                            <th className="py-2 pl-3 font-bold">סניף</th>
+                            <th className="py-2 px-3 font-bold">הכנסות</th>
+                            <th className="py-2 px-3 font-bold">הזמנות</th>
+                            <th className="py-2 px-3 font-bold">ממוצע להזמנה</th>
+                            <th className="py-2 px-3 font-bold">חלק מההכנסות</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {rows.map((b, i) => {
+                            const share = Number(b.summary.revenue || 0) / totalRev
+                            return (
+                              <tr key={b.id} style={{ borderTop: `1px solid ${pal.border}` }}>
+                                <td className="py-2.5 pl-3 font-bold" style={{ color: pal.text }}>
+                                  <span className="inline-block w-2.5 h-2.5 rounded-full ml-2 align-middle" style={{ background: pal.chartColors[i % pal.chartColors.length] }} />
+                                  {b.label}
+                                </td>
+                                <td className="py-2.5 px-3 font-bold" style={{ color: pal.yellow }}>{money(b.summary.revenue)}</td>
+                                <td className="py-2.5 px-3" style={{ color: pal.text }}>{num(b.summary.orders)}</td>
+                                <td className="py-2.5 px-3" style={{ color: pal.textSecondary }}>{money(b.summary.avg_order)}</td>
+                                <td className="py-2.5 px-3" style={{ minWidth: 140 }}>
+                                  <div className="flex items-center gap-2">
+                                    <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: pal.bgElevated }}>
+                                      <div className="h-full rounded-full" style={{ width: `${share * 100}%`, background: pal.chartColors[i % pal.chartColors.length] }} />
+                                    </div>
+                                    <span className="text-xs tabular-nums" style={{ color: pal.textMuted }}>{Math.round(share * 100)}%</span>
+                                  </div>
+                                </td>
+                              </tr>
+                            )
+                          })}
+                          <tr style={{ borderTop: `2px solid ${pal.border}` }}>
+                            <td className="py-2.5 pl-3 font-black" style={{ color: pal.text }}>סה״כ</td>
+                            <td className="py-2.5 px-3 font-black" style={{ color: pal.yellow }}>{money(data.summary.revenue)}</td>
+                            <td className="py-2.5 px-3 font-black" style={{ color: pal.text }}>{num(data.summary.orders)}</td>
+                            <td className="py-2.5 px-3 font-black" style={{ color: pal.textSecondary }}>{money(data.summary.avg_order)}</td>
+                            <td className="py-2.5 px-3" style={{ color: pal.textMuted }}>100%</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </Card>
+                </>
+              )
+            })()}
 
             {/* ── Trends ── */}
             <SectionTitle pal={pal}>מגמות וזמנים</SectionTitle>
