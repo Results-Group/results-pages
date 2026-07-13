@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionFromRequest, requireWorkspacePermission, type SessionUser } from '@/lib/auth'
+import { getSessionFromRequest, requireWorkspacePermission, requireResourcePermission, type SessionUser } from '@/lib/auth'
 import { getClientById, updateClient, deleteClient, uploadClientLogo, type ClientContact } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
@@ -14,10 +14,10 @@ export async function GET(req: NextRequest, { params }: Ctx) {
   const { id } = await params
   const client = await getClientById(id)
   if (!client) return NextResponse.json({ error: 'לקוח לא נמצא' }, { status: 404 })
-  if (client.workspace_id) {
-    const permErr = await requireWorkspacePermission(req, client.workspace_id, 'view')
-    if (permErr) return permErr
-  }
+  // requireResourcePermission also restricts orphan (null-workspace) clients to
+  // admin/owner, instead of leaking them to any authenticated viewer.
+  const permErr = await requireResourcePermission(req, client.workspace_id, 'view')
+  if (permErr) return permErr
   return NextResponse.json(client)
 }
 

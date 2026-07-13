@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCampaignById, restoreCampaign } from '@/lib/campaigns'
-import { getSessionFromRequest, requireWorkspacePermission } from '@/lib/auth'
+import { getSessionFromRequest, requireResourcePermission } from '@/lib/auth'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
 
@@ -14,10 +14,9 @@ export async function POST(req: NextRequest, { params }: Ctx) {
   const campaign = await getCampaignById(id)
   if (!campaign) return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
 
-  if (campaign.workspace_id) {
-    const permErr = await requireWorkspacePermission(req, campaign.workspace_id, 'delete')
-    if (permErr) return permErr
-  }
+  // requireResourcePermission gates orphan (null-workspace) campaigns to admin/owner.
+  const permErr = await requireResourcePermission(req, campaign.workspace_id, 'delete')
+  if (permErr) return permErr
 
   try {
     await restoreCampaign(id)

@@ -3,7 +3,7 @@ import { getCampaignById, setCampaignMondayFeedbackItem, type Campaign, type Cam
 import { getFeedback, upsertFeedback, type FeedbackStatus } from '@/lib/feedback'
 import { postMondayUpdate, createMondayItem, isMondayFeedbackConfigured } from '@/lib/monday'
 import { verifyAccessToken } from '@/lib/content-access'
-import { getSessionFromRequest } from '@/lib/auth'
+import { getSessionFromRequest, requireWorkspacePermission } from '@/lib/auth'
 import { rateLimit } from '@/lib/rate-limit'
 import { captureException } from '@/lib/logger'
 
@@ -55,6 +55,29 @@ function parseSections(campaign: Campaign): CampaignSection[] {
   }
 }
 
+/**
+ * Access gate. Staff access is workspace-scoped (admin/owner always; a plain
+ * global `editor` must be a member of THIS campaign's workspace). A logged-in
+ * non-member falls through and is treated like a visitor — no access to another
+ * team's drafts. Returns `isClient` (true = visitor/client submission) so the
+ * caller only pings Monday on genuine client feedback.
+ */
+async function authorize(req: NextRequest, campaign: Campaign, action: 'view' | 'edit'): Promise<{ ok: boolean; isClient: boolean }> {
+  const session = await getSessionFromRequest(req)
+  if (session) {
+    const staff = session.isOwner || session.role === 'admin'
+      || (campaign.workspace_id ? !(await requireWorkspacePermission(req, campaign.workspace_id, action)) : false)
+    if (staff) return { ok: true, isClient: false }
+  }
+  if (campaign.status !== 'published') return { ok: false, isClient: true }
+  if (campaign.password) {
+    const token = req.cookies.get(`cmp_${campaign.id}`)?.value
+    const ok = token ? await verifyAccessToken(token, campaign.id, campaign.password) : false
+    return { ok, isClient: true }
+  }
+  return { ok: true, isClient: true }
+}
+
 /** Feedback is readable only by whoever is allowed to view the campaign. */
 export async function GET(req: NextRequest, { params }: Ctx) {
   const rl = await rateLimit(req, { windowMs: 60_000, max: 120, prefix: 'feedback-read' })
@@ -67,17 +90,8 @@ export async function GET(req: NextRequest, { params }: Ctx) {
       return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
     }
 
-    // Non-public campaigns (password-protected or not published) require a staff
-    // session or a valid content-access token — same gate as the POST handler.
-    if (campaign.password || campaign.status !== 'published') {
-      const session = await getSessionFromRequest(req)
-      const isStaff = !!session && (session.role === 'admin' || session.role === 'editor')
-      if (!isStaff) {
-        const token = req.cookies.get(`cmp_${campaign.id}`)?.value
-        const ok = token ? await verifyAccessToken(token, campaign.id, campaign.password) : false
-        if (!ok) return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
-      }
-    }
+    const { ok } = await authorize(req, campaign, 'view')
+    if (!ok) return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
 
     const feedback = await getFeedback(id)
     return NextResponse.json(feedback)
@@ -102,17 +116,8 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
     }
 
-    // Authorize: staff session OR (password set AND valid access token) OR public (no password)
-    const session = await getSessionFromRequest(req)
-    const isStaff = !!session && (session.role === 'admin' || session.role === 'editor')
-    if (!isStaff && campaign.status !== 'published') {
-      return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
-    }
-    if (!isStaff && campaign.password) {
-      const token = req.cookies.get(`cmp_${campaign.id}`)?.value
-      const ok = token ? await verifyAccessToken(token, campaign.id, campaign.password) : false
-      if (!ok) return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
-    }
+    const { ok, isClient } = await authorize(req, campaign, 'edit')
+    if (!ok) return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
 
     const body = await req.json()
     const sections = parseSections(campaign)
@@ -132,7 +137,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
           author: typeof it.author === 'string' ? it.author.slice(0, 120) : null,
         }))
       }
-      if (!isStaff && items.length) {
+      if (isClient && items.length) {
         const who = items.find(i => i.author?.trim())?.author?.trim() || 'הלקוח'
         const approved = items.filter(i => i.status === 'approved').length
         const rejected = items.filter(i => i.status === 'rejected').length
@@ -162,7 +167,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     })
 
     // When the client (not staff) responds, drop an update on their Monday card.
-    if (!isStaff) {
+    if (isClient) {
       const section = sections.find(s => s.id === slideKey)
       await mondayNotify(campaign, singleText(campaign, section, statusVal, feedback.comment, feedback.author))
     }

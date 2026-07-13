@@ -4,6 +4,7 @@ import { getSessionFromRequest, requireResourcePermission } from '@/lib/auth'
 import { findOrCreateClient } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
+import { slugifyPath } from '@/lib/slug'
 
 interface Ctx { params: Promise<{ id: string }> }
 
@@ -28,7 +29,16 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
   if (permErr) return permErr
 
   const body = await req.json()
-  const { title, client, slug, active, expiresAt, publishAt, password, shortUrl, workspace_id } = body
+  const { title, active, expiresAt, publishAt, password, workspace_id } = body
+  const rawClient = body.client
+  // client + slug are the ASCII storage key / public URL path — transliterate
+  // Hebrew and strip specials so the move never hits an "Invalid key" (same
+  // hardening as /api/upload). The client ENTITY keeps its raw display name.
+  const client = rawClient !== undefined ? slugifyPath(rawClient, '') : undefined
+  const slug = body.slug !== undefined ? slugifyPath(String(body.slug).replace(/\.html$/i, ''), '') : undefined
+  const shortUrl = body.shortUrl !== undefined
+    ? (String(body.shortUrl).trim().toLowerCase().replace(/[^a-z0-9-]/g, '') || null)
+    : undefined
 
   // Moving the page to another workspace requires permission there too
   if (workspace_id !== undefined && workspace_id !== existing.workspace_id) {
@@ -36,9 +46,9 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
     if (moveErr) return moveErr
   }
   let clientId: string | null | undefined = body.client_id
-  if (clientId === undefined && client && client !== existing.client) {
+  if (clientId === undefined && rawClient && client !== existing.client) {
     try {
-      const c = await findOrCreateClient(client, workspace_id ?? existing.workspace_id)
+      const c = await findOrCreateClient(rawClient, workspace_id ?? existing.workspace_id)
       clientId = c.id
     } catch { /* non-fatal */ }
   }

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getCampaignById, type Campaign, type CampaignSection } from '@/lib/campaigns'
 import { getPins, createPin, setPinResolved, deletePin } from '@/lib/pins'
 import { verifyAccessToken } from '@/lib/content-access'
-import { getSessionFromRequest } from '@/lib/auth'
+import { getSessionFromRequest, requireWorkspacePermission } from '@/lib/auth'
 import { rateLimit } from '@/lib/rate-limit'
 import { captureException } from '@/lib/logger'
 
@@ -18,11 +18,22 @@ function parseSections(campaign: Campaign): CampaignSection[] {
   }
 }
 
-/** Same gate as slide feedback: staff session, or valid access token, or public-if-published. */
-async function authorize(req: NextRequest, campaign: Campaign): Promise<boolean> {
+/**
+ * Same gate as slide feedback. Staff access is workspace-scoped: admins/owners
+ * always, but an editor/viewer must actually be a member of the campaign's
+ * workspace (a global `editor` role alone is NOT enough — that was a cross-
+ * workspace hole). Otherwise the public path: published (+ password token).
+ */
+async function authorize(req: NextRequest, campaign: Campaign, action: 'view' | 'edit'): Promise<boolean> {
   const session = await getSessionFromRequest(req)
-  const isStaff = !!session && (session.role === 'admin' || session.role === 'editor')
-  if (isStaff) return true
+  if (session) {
+    const staff = session.isOwner || session.role === 'admin'
+      || (campaign.workspace_id ? !(await requireWorkspacePermission(req, campaign.workspace_id, action)) : false)
+    if (staff) return true
+    // Logged in but not a member of this campaign's workspace → treated like any
+    // visitor below (public content only; no access to another team's drafts).
+  }
+  // Public / client path
   if (campaign.status !== 'published') return false
   if (campaign.password) {
     const token = req.cookies.get(`cmp_${campaign.id}`)?.value
@@ -38,7 +49,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
   try {
     const campaign = await getCampaignById(id)
     if (!campaign || campaign.deleted_at) return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
-    if (!(await authorize(req, campaign))) return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
+    if (!(await authorize(req, campaign, 'view'))) return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
     return NextResponse.json(await getPins(id))
   } catch (err) {
     captureException(err, { route: 'GET /api/campaigns/[id]/pins', id })
@@ -53,7 +64,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
   try {
     const campaign = await getCampaignById(id)
     if (!campaign || campaign.deleted_at) return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
-    if (!(await authorize(req, campaign))) return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
+    if (!(await authorize(req, campaign, 'edit'))) return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
 
     const body = await req.json()
     const slideKey = String(body.slide_key || '').trim()
@@ -81,11 +92,13 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 }
 
 export async function PATCH(req: NextRequest, { params }: Ctx) {
+  const rl = await rateLimit(req, { windowMs: 60_000, max: 60, prefix: 'pins-write' })
+  if (rl) return rl
   const { id } = await params
   try {
     const campaign = await getCampaignById(id)
     if (!campaign || campaign.deleted_at) return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
-    if (!(await authorize(req, campaign))) return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
+    if (!(await authorize(req, campaign, 'edit'))) return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
     const body = await req.json()
     const pinId = String(body.id || '').trim()
     if (!pinId) return NextResponse.json({ error: 'נתונים חסרים' }, { status: 400 })
@@ -98,11 +111,13 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
 }
 
 export async function DELETE(req: NextRequest, { params }: Ctx) {
+  const rl = await rateLimit(req, { windowMs: 60_000, max: 60, prefix: 'pins-write' })
+  if (rl) return rl
   const { id } = await params
   try {
     const campaign = await getCampaignById(id)
     if (!campaign || campaign.deleted_at) return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
-    if (!(await authorize(req, campaign))) return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
+    if (!(await authorize(req, campaign, 'edit'))) return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
     const body = await req.json()
     const pinId = String(body.id || '').trim()
     if (!pinId) return NextResponse.json({ error: 'נתונים חסרים' }, { status: 400 })

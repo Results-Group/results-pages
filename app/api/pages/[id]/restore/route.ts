@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPageById, restorePage } from '@/lib/db'
-import { getSessionFromRequest, requireWorkspacePermission } from '@/lib/auth'
+import { getSessionFromRequest, requireResourcePermission } from '@/lib/auth'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
 
@@ -14,10 +14,9 @@ export async function POST(req: NextRequest, { params }: Ctx) {
   const page = await getPageById(id)
   if (!page) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  if (page.workspace_id) {
-    const permErr = await requireWorkspacePermission(req, page.workspace_id, 'delete')
-    if (permErr) return permErr
-  }
+  // requireResourcePermission gates orphan (null-workspace) pages to admin/owner.
+  const permErr = await requireResourcePermission(req, page.workspace_id, 'delete')
+  if (permErr) return permErr
 
   try {
     await restorePage(id)

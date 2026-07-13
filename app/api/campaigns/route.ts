@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest, getActiveWorkspaceId, requireWorkspacePermission } from '@/lib/auth'
 import { getCampaigns, createCampaign } from '@/lib/campaigns'
 import { findOrCreateClient, getClientById } from '@/lib/clients'
+import { slugifyPath } from '@/lib/slug'
 import { supabase } from '@/lib/supabase'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
@@ -77,12 +78,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'שם לקוח ושם קמפיין הם שדות חובה' }, { status: 400 })
     }
 
-    const baseSlug = (body.slug || campaign_name)
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9-]/g, '')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '')
+    // Transliterate Hebrew → Latin so a Hebrew campaign name yields a readable
+    // slug (e.g. "kmpyyn-abc") instead of being stripped to just the suffix.
+    const baseSlug = slugifyPath(body.slug || campaign_name, '')
     const suffix = crypto.randomUUID().slice(0, 6)
     const slug = baseSlug ? `${baseSlug}-${suffix}` : suffix
 

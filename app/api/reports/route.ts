@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest, getActiveWorkspaceId, requireWorkspacePermission } from '@/lib/auth'
 import { getReports, createReport } from '@/lib/performance-reports'
 import { findOrCreateClient, getClientById } from '@/lib/clients'
+import { slugifyPath } from '@/lib/slug'
 import { supabase } from '@/lib/supabase'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
@@ -53,12 +54,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'שם לקוח ושם דוח הם שדות חובה' }, { status: 400 })
     }
 
-    const baseSlug = (body.slug || report_name)
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9-]/g, '')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '')
+    // Transliterate Hebrew → Latin so Hebrew report names yield a readable slug.
+    const baseSlug = slugifyPath(body.slug || report_name, '')
     const suffix = crypto.randomUUID().slice(0, 6)
     const slug = baseSlug ? `${baseSlug}-${suffix}` : suffix
 

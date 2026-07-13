@@ -45,10 +45,12 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       .eq('client_id', id)
     if (campErr) throw campErr
 
-    // Reassign landing pages
+    // Reassign landing pages — reassign ownership but keep `client` untouched:
+    // it's the ASCII slug in the public /pages/<client>/<slug> URL, not a display
+    // name, so overwriting it would 404 every already-shared link.
     const { error: pageErr } = await supabase
       .from('landing_pages')
-      .update({ client_id: mergeIntoId, client: target.name })
+      .update({ client_id: mergeIntoId })
       .eq('client_id', id)
     if (pageErr) throw pageErr
 
