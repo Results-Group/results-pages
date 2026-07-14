@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic'
 import {
   ArrowRight, Copy, Check, ExternalLink, Eye, EyeOff, Monitor, Smartphone,
   Undo2, Redo2, Save, Send, Loader2, CheckCircle2, MessageSquare, X,
+  ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import { assetProxyUrl } from '@/lib/asset-url'
 import { compressImageClient, isImageFile, MAX_FILE_BYTES } from '@/lib/image-compress'
@@ -654,7 +655,36 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
           />
         </aside>
 
-        <main className="flex-1 min-w-0 relative">
+        <main className="flex-1 min-w-0 relative flex flex-col">
+          {/* Always-available slide navigation — works even when the filmstrip is
+              hidden (narrow screens) so you can always move between slides. */}
+          {!showFullPreview && activeSection && doc.sections.length > 1 && (() => {
+            const idx = doc.sections.findIndex(s => s.id === activeId)
+            return (
+              <div className="flex items-center justify-between gap-2 px-4 py-2 shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(10,10,10,0.6)' }}>
+                <button
+                  type="button"
+                  disabled={idx <= 0}
+                  onClick={() => idx > 0 && setActiveId(doc.sections[idx - 1].id)}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors disabled:opacity-30"
+                  style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.7)' }}
+                >
+                  <ChevronRight className="w-3.5 h-3.5" /> הקודם
+                </button>
+                <span className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>שקף {idx + 1} מתוך {doc.sections.length}</span>
+                <button
+                  type="button"
+                  disabled={idx >= doc.sections.length - 1}
+                  onClick={() => idx < doc.sections.length - 1 && setActiveId(doc.sections[idx + 1].id)}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors disabled:opacity-30"
+                  style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.7)' }}
+                >
+                  הבא <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )
+          })()}
+          <div className="flex-1 min-h-0 relative">
           {showFullPreview ? (
             <div className="h-full overflow-auto" style={{ background: '#090c0e' }}>
               <CampaignPresentation slides={previewSlides} clientName={doc.meta.client || 'שם לקוח'} campaignName={doc.meta.campaignName || 'שם קמפיין'} />
@@ -679,6 +709,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
               onAddVideo={addVideo}
             />
           )}
+          </div>
         </main>
 
         <aside className="w-72 shrink-0 overflow-y-auto p-4 hidden lg:block" style={{ borderRight: '1px solid rgba(255,255,255,0.06)', background: 'rgba(10,10,10,0.95)' }}>
