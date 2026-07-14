@@ -650,6 +650,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
             onDuplicate={duplicateSection}
             onRemove={removeSection}
             onMove={moveSection}
+            onClearConcept={() => { if (confirm('למחוק את שקף הקונספט? תוכן הקונספט יימחק.')) setMeta({ concept: '' }) }}
           />
         </aside>
 

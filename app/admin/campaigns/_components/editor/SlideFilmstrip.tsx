@@ -28,11 +28,12 @@ const STATUS_DOT: Record<string, string> = {
   pending: '#64748b',
 }
 
-/** Non-interactive chip for cover / concept / closing slides */
-function SystemSlideChip({ label, icon, dim }: { label: string; icon: React.ReactNode; dim?: boolean }) {
+/** Non-interactive chip for cover / concept / closing slides. When `onDelete`
+ * is supplied (concept slide), a hover ✕ lets the user remove that slide. */
+function SystemSlideChip({ label, icon, dim, onDelete }: { label: string; icon: React.ReactNode; dim?: boolean; onDelete?: () => void }) {
   return (
     <div
-      className="flex items-center gap-2 rounded-xl px-2 py-2"
+      className="group relative flex items-center gap-2 rounded-xl px-2 py-2"
       style={{
         background: 'rgba(255,255,255,0.02)',
         border: '1px solid rgba(255,255,255,0.05)',
@@ -54,6 +55,19 @@ function SystemSlideChip({ label, icon, dim }: { label: string; icon: React.Reac
         <p className="text-xs font-semibold truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</p>
         <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.2)' }}>אוטומטי</p>
       </div>
+
+      {onDelete && (
+        <button
+          type="button"
+          onClick={onDelete}
+          className="absolute top-1 left-1 p-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+          style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}
+          aria-label={`מחק ${label}`}
+          title={`מחק ${label}`}
+        >
+          <Trash2 className="w-3 h-3" />
+        </button>
+      )}
     </div>
   )
 }
@@ -140,7 +154,7 @@ function SortableItem({ section, index, active, status, onSelect, onDuplicate, o
   )
 }
 
-export default function SlideFilmstrip({ sections, activeId, feedback, meta, onSelect, onAdd, onSmartUpload, onDuplicate, onRemove, onMove }: {
+export default function SlideFilmstrip({ sections, activeId, feedback, meta, onSelect, onAdd, onSmartUpload, onDuplicate, onRemove, onMove, onClearConcept }: {
   sections: EditorSection[]
   activeId: string | null
   feedback?: Record<string, 'approved' | 'rejected' | 'pending'>
@@ -151,6 +165,7 @@ export default function SlideFilmstrip({ sections, activeId, feedback, meta, onS
   onDuplicate: (id: string) => void
   onRemove: (id: string) => void
   onMove: (from: number, to: number) => void
+  onClearConcept?: () => void
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -182,9 +197,9 @@ export default function SlideFilmstrip({ sections, activeId, feedback, meta, onS
       {/* Cover — always first */}
       <SystemSlideChip label="שקף שער" icon={<Star className="w-3 h-3" />} />
 
-      {/* Concept — only when filled */}
+      {/* Concept — only when filled; deletable (clears the concept text) */}
       {meta.concept && (
-        <SystemSlideChip label="קונספט" icon={<BookOpen className="w-3 h-3" />} />
+        <SystemSlideChip label="קונספט" icon={<BookOpen className="w-3 h-3" />} onDelete={onClearConcept} />
       )}
 
       {/* Thin divider */}
