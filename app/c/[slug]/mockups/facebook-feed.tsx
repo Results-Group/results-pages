@@ -35,7 +35,7 @@ export default function FacebookFeed({ imageUrl, clientName, logoUrl, caption }:
           <div className="flex items-center gap-2.5 px-4 py-3">
             <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-white flex items-center justify-center" style={{ border: '1px solid #e4e6eb' }}>
               {logoUrl ? (
-                <img src={logoUrl} alt={clientName} className="w-[80%] h-[80%] object-contain" />
+                <img src={logoUrl} alt={clientName} className="max-w-[70%] max-h-[70%] object-contain" />
               ) : (
                 <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }} />
               )}
