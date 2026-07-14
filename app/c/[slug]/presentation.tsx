@@ -803,14 +803,6 @@ function CreativesSlide({ slide, activeCopyIdx, onAssetClick, lang = 'he' }: {
         </motion.p>
       )}
 
-      {/* Copy preview box — shown on this slide when copies are enabled for it */}
-      {activeCopy !== undefined && activeCopy !== '' && (
-        <motion.div className="copy-switcher" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.4 }}>
-          <span className="copy-switcher-label">{t('public.activeCopy')} {activeCopyIdx + 1}</span>
-          <div className="copy-text-preview" dir="auto">{activeCopy}</div>
-        </motion.div>
-      )}
-
       {assets.length > 0 && (
         <div className={`assets-grid ${isStory ? 'story-grid' : 'standard-grid'}`}>
           {assets.map((asset, i) => (

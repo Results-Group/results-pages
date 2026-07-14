@@ -196,14 +196,14 @@ export default function Inspector({
                           {suggestions.captions.map((s, i) => (
                             <button
                               key={i} type="button" dir="auto"
-                              onClick={() => onUpdateMeta({ copies: [...meta.copies, s] })}
-                              title={t('campaigns.addAsCopy')}
+                              onClick={() => onUpdateSection({ description: s })}
+                              title={t('campaigns.applyCaption')}
                               className="flex items-start gap-2 w-full text-right px-2.5 py-1.5 rounded-md text-xs leading-relaxed transition-colors"
                               style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.8)' }}
                               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.1)' }}
                               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
                             >
-                              <Plus className="w-3 h-3 shrink-0 mt-0.5" style={{ color: '#40e1d3' }} />
+                              <Check className="w-3 h-3 shrink-0 mt-0.5" style={{ color: '#40e1d3' }} />
                               <span className="flex-1 min-w-0">{s}</span>
                             </button>
                           ))}

@@ -230,7 +230,7 @@ export default function SlideCanvas({
                 <div className="flex items-start gap-3">
                   <div className="flex-1 space-y-2">
                     <input type="url" value={asset.url} onChange={e => onUpdateAsset(asset.id, { url: e.target.value })}
-                      placeholder="קישור לסרטון (YouTube, Vimeo...)" dir="ltr"
+                      placeholder="קישור לסרטון (YouTube, Vimeo, Google Drive...)" dir="ltr"
                       className="w-full px-3 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={videoFieldStyle}
                       onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
                       onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}

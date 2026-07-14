@@ -19,6 +19,8 @@ export default function UploadPage() {
   const t = useT()
   const locale = useLocale()
   const [file, setFile] = useState<File | null>(null)
+  const [mode, setMode] = useState<'file' | 'code'>('file')
+  const [code, setCode] = useState('')
   const [client, setClient] = useState('')
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null)
 
@@ -44,7 +46,11 @@ export default function UploadPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!file || !client || !title || !slug) {
+    // In "paste code" mode, wrap the pasted HTML as a file so the API is unchanged.
+    const htmlFile = mode === 'code'
+      ? (code.trim() ? new File([code], `${slug || 'page'}.html`, { type: 'text/html' }) : null)
+      : file
+    if (!htmlFile || !client || !title || !slug) {
       setError(t('upload.fillRequired'))
       return
     }
@@ -53,7 +59,7 @@ export default function UploadPage() {
     setError('')
 
     const formData = new FormData()
-    formData.append('file', file)
+    formData.append('file', htmlFile)
     formData.append('client', client)
     formData.append('title', title)
     formData.append('slug', slug)
@@ -91,38 +97,71 @@ export default function UploadPage() {
         {/* File upload */}
         <div>
           <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>{t('upload.htmlFile')}</label>
-          <div
-            className="rounded-xl p-7 text-center cursor-pointer transition-colors"
-            style={{
-              border: `2px dashed ${dragOver ? 'var(--admin-accent)' : 'var(--admin-border)'}`,
-              background: dragOver ? 'var(--admin-accent-subtle)' : 'var(--admin-bg-elevated)',
-            }}
-            onDragOver={e => { e.preventDefault(); setDragOver(true) }}
-            onDragLeave={() => setDragOver(false)}
-            onDrop={e => { e.preventDefault(); setDragOver(false); handleFileChange(e.dataTransfer.files[0] || null) }}
-            onClick={() => document.getElementById('file-input')?.click()}
-          >
-            {file ? (
-              <div className="flex items-center justify-center gap-2">
-                <FileUp className="w-5 h-5" style={{ color: 'var(--admin-accent)' }} />
-                <p className="text-sm font-medium" style={{ color: 'var(--admin-text-primary)' }}>
-                  {file.name} <span style={{ color: 'var(--admin-text-muted)' }}>({(file.size / 1024).toFixed(0)} KB)</span>
-                </p>
-              </div>
-            ) : (
-              <div>
-                <Upload className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--admin-text-muted)' }} />
-                <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>{t('upload.dragHint')}</p>
-              </div>
-            )}
+
+          {/* Tabs: upload a file vs paste code */}
+          <div className="flex gap-1 p-0.5 rounded-lg mb-3" style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}>
+            {(['file', 'code'] as const).map(m => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMode(m)}
+                className="flex-1 py-2 rounded-md text-sm font-bold transition-colors"
+                style={mode === m
+                  ? { background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }
+                  : { background: 'transparent', color: 'var(--admin-text-muted)' }}
+              >
+                {m === 'file' ? t('upload.tabFile') : t('upload.tabCode')}
+              </button>
+            ))}
           </div>
-          <input
-            id="file-input"
-            type="file"
-            accept=".html"
-            className="hidden"
-            onChange={e => handleFileChange(e.target.files?.[0] || null)}
-          />
+
+          {mode === 'file' ? (
+            <>
+              <div
+                className="rounded-xl p-7 text-center cursor-pointer transition-colors"
+                style={{
+                  border: `2px dashed ${dragOver ? 'var(--admin-accent)' : 'var(--admin-border)'}`,
+                  background: dragOver ? 'var(--admin-accent-subtle)' : 'var(--admin-bg-elevated)',
+                }}
+                onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={e => { e.preventDefault(); setDragOver(false); handleFileChange(e.dataTransfer.files[0] || null) }}
+                onClick={() => document.getElementById('file-input')?.click()}
+              >
+                {file ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <FileUp className="w-5 h-5" style={{ color: 'var(--admin-accent)' }} />
+                    <p className="text-sm font-medium" style={{ color: 'var(--admin-text-primary)' }}>
+                      {file.name} <span style={{ color: 'var(--admin-text-muted)' }}>({(file.size / 1024).toFixed(0)} KB)</span>
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <Upload className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--admin-text-muted)' }} />
+                    <p className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>{t('upload.dragHint')}</p>
+                  </div>
+                )}
+              </div>
+              <input
+                id="file-input"
+                type="file"
+                accept=".html"
+                className="hidden"
+                onChange={e => handleFileChange(e.target.files?.[0] || null)}
+              />
+            </>
+          ) : (
+            <textarea
+              value={code}
+              onChange={e => setCode(e.target.value)}
+              placeholder={t('upload.codePlaceholder')}
+              dir="ltr"
+              spellCheck={false}
+              rows={12}
+              className="w-full px-3 py-2.5 rounded-xl text-xs outline-none resize-y font-mono"
+              style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)' }}
+            />
+          )}
         </div>
 
         {/* Client */}

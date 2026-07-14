@@ -13,8 +13,8 @@ export default function InstagramStory({ imageUrl, clientName, logoUrl }: Instag
       <div className="relative rounded-[2.4rem] p-[3px]" style={{ background: 'linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0.03))' }}>
         <div className="relative rounded-[2.2rem] overflow-hidden" style={{ boxShadow: '0 25px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.1)' }}>
           <div className="relative w-full aspect-[9/16] bg-black">
-            {/* Image */}
-            <img src={imageUrl} alt="Story" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+            {/* Image — contain so non-9:16 creatives aren't cropped (letterboxed on black) */}
+            <img src={imageUrl} alt="Story" className="absolute inset-0 w-full h-full object-contain" loading="lazy" />
 
             {/* Top gradient */}
             <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/70 to-transparent pointer-events-none" />

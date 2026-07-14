@@ -1,19 +1,20 @@
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
-import { X, UploadCloud, Sparkles, Image as ImageIcon, Film } from 'lucide-react'
+import { X, UploadCloud, Sparkles, Image as ImageIcon } from 'lucide-react'
 import { isImageFile, MAX_FILE_BYTES } from '@/lib/image-compress'
 import type { MockupType } from './types'
 
 const MAX_ASSETS_PER_SLIDE = 4
 
 /** Mockup types the employee can bulk-upload into (divider has no assets). */
+// Smart upload is for image files only; video slides use a link (YouTube/Vimeo/
+// Google Drive) and are added manually, so 'video' isn't offered here.
 const SMART_TYPES: { value: MockupType; label: string; icon: React.ReactNode }[] = [
   { value: 'instagram_feed', label: 'פיד אינסטגרם', icon: <ImageIcon className="w-4 h-4" /> },
   { value: 'instagram_story', label: 'סטוריז אינסטגרם', icon: <ImageIcon className="w-4 h-4" /> },
   { value: 'facebook_feed', label: 'פיד פייסבוק', icon: <ImageIcon className="w-4 h-4" /> },
   { value: 'general', label: 'כללי', icon: <ImageIcon className="w-4 h-4" /> },
-  { value: 'video', label: 'סרטונים', icon: <Film className="w-4 h-4" /> },
 ]
 
 export default function SmartUploadModal({ open, onClose, onConfirm }: {
