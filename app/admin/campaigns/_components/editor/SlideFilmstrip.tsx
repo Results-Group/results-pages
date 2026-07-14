@@ -33,7 +33,7 @@ const STATUS_DOT: Record<string, string> = {
 function SystemSlideChip({ label, icon, dim, onDelete }: { label: string; icon: React.ReactNode; dim?: boolean; onDelete?: () => void }) {
   return (
     <div
-      className="group relative flex items-center gap-2 rounded-xl px-2 py-2"
+      className="flex items-center gap-2 rounded-xl px-2 py-2"
       style={{
         background: 'rgba(255,255,255,0.02)',
         border: '1px solid rgba(255,255,255,0.05)',
@@ -60,8 +60,8 @@ function SystemSlideChip({ label, icon, dim, onDelete }: { label: string; icon: 
         <button
           type="button"
           onClick={onDelete}
-          className="absolute top-1 left-1 p-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-          style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}
+          className="p-1 rounded-md shrink-0 opacity-70 hover:opacity-100 transition-opacity"
+          style={{ background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}
           aria-label={`מחק ${label}`}
           title={`מחק ${label}`}
         >
@@ -93,7 +93,7 @@ function SortableItem({ section, index, active, status, onSelect, onDuplicate, o
     <div ref={setNodeRef} style={style}>
       <div
         onClick={onSelect}
-        className="group relative rounded-xl p-2 cursor-pointer transition-all duration-200"
+        className="group rounded-xl p-2 cursor-pointer transition-all duration-200"
         style={{
           background: active ? 'rgba(64,225,211,0.08)' : 'rgba(255,255,255,0.03)',
           border: `1px solid ${active ? 'rgba(64,225,211,0.35)' : 'rgba(255,255,255,0.06)'}`,
@@ -137,17 +137,18 @@ function SortableItem({ section, index, active, status, onSelect, onDuplicate, o
               {section.mockup_type === 'divider' ? 'חוצץ' : `${section.assets.length} פריטים`}
             </span>
           </div>
-        </div>
 
-        <div className="absolute top-1 left-1 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button type="button" onClick={e => { e.stopPropagation(); onDuplicate() }} className="p-1 rounded-md transition-colors"
-            style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }} aria-label="שכפל">
-            <Copy className="w-3 h-3" />
-          </button>
-          <button type="button" onClick={e => { e.stopPropagation(); onRemove() }} className="p-1 rounded-md transition-colors"
-            style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }} aria-label="מחק">
-            <Trash2 className="w-3 h-3" />
-          </button>
+          {/* Actions — inline (reserved space) so they never cover the title, and visible without hover */}
+          <div className="flex items-center gap-0.5 shrink-0">
+            <button type="button" onClick={e => { e.stopPropagation(); onDuplicate() }} className="p-1 rounded-md transition-opacity opacity-60 hover:opacity-100"
+              style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)' }} aria-label="שכפל" title="שכפל">
+              <Copy className="w-3 h-3" />
+            </button>
+            <button type="button" onClick={e => { e.stopPropagation(); onRemove() }} className="p-1 rounded-md transition-opacity opacity-70 hover:opacity-100"
+              style={{ background: 'rgba(239,68,68,0.12)', color: '#ef4444' }} aria-label="מחק" title="מחק">
+              <Trash2 className="w-3 h-3" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
