@@ -24,6 +24,24 @@ function getSecret(): string {
   return s
 }
 
+// UTF-8-safe base64. Plain btoa() throws InvalidCharacterError on any
+// character outside Latin1 (e.g. Hebrew names in the session payload), which
+// crashed login for users with non-ASCII names. Encoding via UTF-8 bytes first
+// is byte-identical to btoa() for pure-ASCII input, so existing tokens still verify.
+function b64EncodeUtf8(str: string): string {
+  const bytes = new TextEncoder().encode(str)
+  let bin = ''
+  for (const b of bytes) bin += String.fromCharCode(b)
+  return btoa(bin)
+}
+
+function b64DecodeUtf8(b64: string): string {
+  const bin = atob(b64)
+  const bytes = new Uint8Array(bin.length)
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
+  return new TextDecoder().decode(bytes)
+}
+
 async function hmacSign(payload: string): Promise<string> {
   const enc = new TextEncoder()
   const key = await crypto.subtle.importKey(
@@ -45,7 +63,7 @@ async function hmacVerify(payload: string, signature: string): Promise<boolean> 
 
 async function encodeSession(user: SessionUser, maxAgeSeconds: number = SESSION_MAX_AGE): Promise<string> {
   const exp = Math.floor(Date.now() / 1000) + maxAgeSeconds
-  const payload = btoa(JSON.stringify({ ...user, exp }))
+  const payload = b64EncodeUtf8(JSON.stringify({ ...user, exp }))
   const sig = await hmacSign(payload)
   return `${payload}.${sig}`
 }
@@ -57,7 +75,7 @@ async function decodeSession(token: string): Promise<SessionUser | null> {
     const payload = token.slice(0, dotIdx)
     const sig = token.slice(dotIdx + 1)
     if (!(await hmacVerify(payload, sig))) return null
-    const json = atob(payload)
+    const json = b64DecodeUtf8(payload)
     const parsed = JSON.parse(json)
     if (!parsed.userId || !parsed.email || !parsed.role) return null
     // Reject tokens with no embedded expiry (legacy) or a past expiry.
