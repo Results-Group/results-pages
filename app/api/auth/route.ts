@@ -4,9 +4,13 @@ import { verifyPassword, hashPassword, isLegacyHash } from '@/lib/hash'
 import { destroySession, createSessionCookie, type SessionUser } from '@/lib/auth'
 import { rateLimit } from '@/lib/rate-limit'
 
+const TOO_MANY = 'יותר מדי ניסיונות התחברות. המתינו כדקה ונסו שוב.'
+
 export async function POST(req: NextRequest) {
-  const rl = await rateLimit(req, { windowMs: 60_000, max: 10, prefix: 'auth' })
-  if (rl) return rl
+  // Generous per-IP cap: a whole office often shares one NAT IP, so this only
+  // guards infra from abuse — the real per-account brute-force guard is below.
+  const ipRl = await rateLimit(req, { windowMs: 60_000, max: 60, prefix: 'auth-ip', message: TOO_MANY })
+  if (ipRl) return ipRl
 
   const body = await req.json()
   const { email, password } = body
@@ -14,6 +18,13 @@ export async function POST(req: NextRequest) {
   if (!email || !password) {
     return NextResponse.json({ error: 'יש להזין אימייל וסיסמה' }, { status: 400 })
   }
+
+  // Per-account cap: keyed on email so multiple distinct employees behind the
+  // same office IP each get their own budget, while a single account still
+  // can't be brute-forced.
+  const emailKey = String(email).toLowerCase().trim()
+  const emailRl = await rateLimit(req, { windowMs: 60_000, max: 10, prefix: 'auth-email', key: emailKey, message: TOO_MANY })
+  if (emailRl) return emailRl
 
   const { data: user, error } = await supabase
     .from('admin_users')

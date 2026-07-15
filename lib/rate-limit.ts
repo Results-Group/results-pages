@@ -81,10 +81,13 @@ async function upstashHit(key: string, windowMs: number): Promise<{ count: numbe
  */
 export async function rateLimit(
   req: NextRequest,
-  opts: { windowMs: number; max: number; prefix?: string },
+  opts: { windowMs: number; max: number; prefix?: string; key?: string; message?: string },
 ): Promise<NextResponse | null> {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
-  const key = `${opts.prefix || 'rl'}:${ip}`
+  // `opts.key` lets callers scope a limit to something other than the IP
+  // (e.g. a specific account email) so that many distinct users behind one
+  // shared office NAT IP aren't throttled collectively.
+  const key = `${opts.prefix || 'rl'}:${opts.key ?? ip}`
 
   let limited = false
   let resetAt = Date.now() + opts.windowMs
@@ -109,7 +112,7 @@ export async function rateLimit(
   if (limited) {
     const retryAfter = Math.max(1, Math.ceil((resetAt - Date.now()) / 1000))
     return NextResponse.json(
-      { error: 'Too many requests' },
+      { error: opts.message || 'Too many requests' },
       {
         status: 429,
         headers: {
