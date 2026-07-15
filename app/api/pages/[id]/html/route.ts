@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPageById, downloadFile, uploadFile, createVersion } from '@/lib/db'
 import { requireResourcePermission } from '@/lib/auth'
 import { minifyHtml } from '@/lib/minify'
+import { parseJson, parseForm } from '@/lib/http'
 
 interface Ctx { params: Promise<{ id: string }> }
 
@@ -42,7 +43,8 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
   let htmlContent: string
 
   if (contentType.includes('multipart/form-data')) {
-    const formData = await req.formData()
+    const { data: formData, error: formError } = await parseForm(req)
+    if (formError) return formError
     const file = formData.get('file') as File | null
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
@@ -52,7 +54,8 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
     }
     htmlContent = await file.text()
   } else {
-    const body = await req.json()
+    const { data: body, error: parseError } = await parseJson<{ html?: string }>(req)
+    if (parseError) return parseError
     if (!body.html || typeof body.html !== 'string') {
       return NextResponse.json({ error: 'No HTML content provided' }, { status: 400 })
     }

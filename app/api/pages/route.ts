@@ -4,6 +4,7 @@ import { getSessionFromRequest, getActiveWorkspaceId, requireWorkspacePermission
 import { findOrCreateClient } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
+import { parseJson } from '@/lib/http'
 
 export async function GET(req: NextRequest) {
   const session = await getSessionFromRequest(req)
@@ -39,7 +40,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'אין הרשאה לפעולה זו' }, { status: 403 })
   }
 
-  const body = await req.json()
+  const { data: body, error: parseError } = await parseJson<Record<string, string>>(req)
+  if (parseError) return parseError
   const { client, slug, title, filePath, expiresAt, publishAt } = body
 
   if (!client || !slug || !title || !filePath) {

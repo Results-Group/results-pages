@@ -5,6 +5,7 @@ import { findOrCreateClient } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
 import { slugifyPath } from '@/lib/slug'
+import { parseJson } from '@/lib/http'
 
 interface Ctx { params: Promise<{ id: string }> }
 
@@ -28,7 +29,12 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
   const permErr = await requireResourcePermission(req, existing.workspace_id, 'edit')
   if (permErr) return permErr
 
-  const body = await req.json()
+  const { data: body, error: parseError } = await parseJson<{
+    title?: string; active?: boolean; expiresAt?: string | null; publishAt?: string | null
+    password?: string | null; workspace_id?: string | null; client?: string; slug?: string
+    shortUrl?: string; client_id?: string | null
+  }>(req)
+  if (parseError) return parseError
   const { title, active, expiresAt, publishAt, password, workspace_id } = body
   const rawClient = body.client
   // client + slug are the ASCII storage key / public URL path — transliterate

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSessionCookie, type SessionUser } from '@/lib/auth'
 import { rateLimit } from '@/lib/rate-limit'
+import { parseJson } from '@/lib/http'
 
 const PH_COOKIE = 'ph_session'
 const MAX_AGE = 60 * 60 * 24 * 30 // 30 days
@@ -9,7 +10,9 @@ export async function POST(req: NextRequest) {
   const rl = await rateLimit(req, { windowMs: 60_000, max: 10, prefix: 'ph-auth' })
   if (rl) return rl
 
-  const { password } = await req.json()
+  const { data: body, error: parseError } = await parseJson<{ password?: string }>(req)
+  if (parseError) return parseError
+  const { password } = body
   const expected = process.env.PIZZAHOUSE_DASHBOARD_PASSWORD
 
   if (!expected || password !== expected) {

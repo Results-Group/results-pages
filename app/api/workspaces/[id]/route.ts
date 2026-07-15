@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest } from '@/lib/auth'
 import { updateWorkspace, deleteWorkspace } from '@/lib/workspaces'
+import { parseJson } from '@/lib/http'
 
 interface Ctx { params: Promise<{ id: string }> }
 
@@ -11,7 +12,8 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
   }
 
   const { id } = await params
-  const body = await req.json()
+  const { data: body, error: parseError } = await parseJson<Partial<{ name: string; slug: string; color: string; icon: string }>>(req)
+  if (parseError) return parseError
 
   try {
     const workspace = await updateWorkspace(id, body)

@@ -4,6 +4,7 @@ import { getClientById, deleteClient } from '@/lib/clients'
 import { supabase } from '@/lib/supabase'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
+import { parseJson } from '@/lib/http'
 
 interface Ctx { params: Promise<{ id: string }> }
 
@@ -19,7 +20,8 @@ export async function POST(req: NextRequest, { params }: Ctx) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
-  const body = await req.json() as { merge_into_id?: string }
+  const { data: body, error: parseError } = await parseJson<{ merge_into_id?: string }>(req)
+  if (parseError) return parseError
   const mergeIntoId = body.merge_into_id?.trim()
 
   if (!mergeIntoId) return NextResponse.json({ error: 'merge_into_id is required' }, { status: 400 })

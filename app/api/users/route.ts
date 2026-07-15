@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { getSessionFromRequest } from '@/lib/auth'
 import { hashPassword } from '@/lib/hash'
 import { addAdminToAllWorkspaces } from '@/lib/workspaces'
+import { parseJson } from '@/lib/http'
 
 export async function GET(req: NextRequest) {
   const session = await getSessionFromRequest(req)
@@ -45,7 +46,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
   }
 
-  const { email, password, name, role } = await req.json()
+  const { data: body, error: parseError } = await parseJson<{ email?: string; password?: string; name?: string; role?: string }>(req)
+  if (parseError) return parseError
+  const { email, password, name, role } = body
 
   if (!email || !password || !name) {
     return NextResponse.json({ error: 'יש למלא אימייל, שם וסיסמה' }, { status: 400 })
@@ -93,7 +96,9 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
   }
 
-  const { id, name, role, password, is_owner } = await req.json()
+  const { data: body, error: parseError } = await parseJson<{ id?: string; name?: string; role?: string; password?: string; is_owner?: boolean }>(req)
+  if (parseError) return parseError
+  const { id, name, role, password, is_owner } = body
 
   if (!id) {
     return NextResponse.json({ error: 'חסר מזהה משתמש' }, { status: 400 })
@@ -155,7 +160,9 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
   }
 
-  const { id } = await req.json()
+  const { data: body, error: parseError } = await parseJson<{ id?: string }>(req)
+  if (parseError) return parseError
+  const { id } = body
   if (!id) {
     return NextResponse.json({ error: 'חסר מזהה משתמש' }, { status: 400 })
   }

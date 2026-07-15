@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest } from '@/lib/auth'
 import { getAllWorkspaces, getUserWorkspaces, createWorkspace, syncAdminsToAllWorkspaces, addAllAdminsToWorkspace } from '@/lib/workspaces'
+import { parseJson } from '@/lib/http'
 
 export async function GET(req: NextRequest) {
   const session = await getSessionFromRequest(req)
@@ -23,7 +24,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'רק בעלים או אדמין יכולים ליצור סביבת עבודה' }, { status: 403 })
   }
 
-  const { name, slug, color, icon } = await req.json()
+  const { data: body, error: parseError } = await parseJson<{ name?: string; slug?: string; color?: string; icon?: string }>(req)
+  if (parseError) return parseError
+  const { name, slug, color, icon } = body
   if (!name || !slug) {
     return NextResponse.json({ error: 'שם וסלאג הם שדות חובה' }, { status: 400 })
   }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionFromRequest, requireWorkspacePermission } from '@/lib/auth'
+import { getSessionFromRequest, requireWorkspacePermission, type UserRole } from '@/lib/auth'
 import { getWorkspaceMembers, addWorkspaceMember, updateWorkspaceMember, removeWorkspaceMember } from '@/lib/workspaces'
+import { parseJson } from '@/lib/http'
 
 interface Ctx { params: Promise<{ id: string }> }
 
@@ -24,7 +25,9 @@ export async function POST(req: NextRequest, { params }: Ctx) {
   const permErr = await requireWorkspacePermission(req, id, 'manage_users')
   if (permErr) return permErr
 
-  const { user_id, role, permissions } = await req.json()
+  const { data: body, error: parseError } = await parseJson<{ user_id?: string; role?: UserRole; permissions?: Record<string, boolean> }>(req)
+  if (parseError) return parseError
+  const { user_id, role, permissions } = body
   if (!user_id || !role) {
     return NextResponse.json({ error: 'חסרים שדות חובה' }, { status: 400 })
   }
@@ -45,7 +48,9 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
   const permErr = await requireWorkspacePermission(req, id, 'manage_users')
   if (permErr) return permErr
 
-  const { user_id, role, permissions } = await req.json()
+  const { data: body, error: parseError } = await parseJson<{ user_id?: string; role?: string; permissions?: unknown }>(req)
+  if (parseError) return parseError
+  const { user_id, role, permissions } = body
   if (!user_id) {
     return NextResponse.json({ error: 'חסר מזהה משתמש' }, { status: 400 })
   }
@@ -69,7 +74,9 @@ export async function DELETE(req: NextRequest, { params }: Ctx) {
   const permErr = await requireWorkspacePermission(req, id, 'manage_users')
   if (permErr) return permErr
 
-  const { user_id } = await req.json()
+  const { data: body, error: parseError } = await parseJson<{ user_id?: string }>(req)
+  if (parseError) return parseError
+  const { user_id } = body
   if (!user_id) {
     return NextResponse.json({ error: 'חסר מזהה משתמש' }, { status: 400 })
   }

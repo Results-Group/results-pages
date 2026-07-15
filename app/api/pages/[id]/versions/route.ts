@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPageById, getVersions, getVersion, downloadFile, uploadFile, createVersion, deleteVersion } from '@/lib/db'
 import { requireResourcePermission } from '@/lib/auth'
+import { parseJson } from '@/lib/http'
 
 interface Ctx { params: Promise<{ id: string }> }
 
@@ -24,7 +25,8 @@ export async function POST(req: NextRequest, { params }: Ctx) {
   const permErr = await requireResourcePermission(req, page.workspace_id, 'edit')
   if (permErr) return permErr
 
-  const body = await req.json()
+  const { data: body, error: parseError } = await parseJson<{ versionId?: string }>(req)
+  if (parseError) return parseError
   const { versionId } = body
 
   if (!versionId) {

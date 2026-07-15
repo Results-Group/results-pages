@@ -123,8 +123,10 @@ export async function POST(req: NextRequest, { params }: Ctx) {
   let submittedPassword = ''
   const contentType = req.headers.get('content-type') || ''
   if (contentType.includes('application/x-www-form-urlencoded') || contentType.includes('multipart/form-data')) {
-    const formData = await req.formData()
-    submittedPassword = (formData.get('password') as string) || ''
+    // A malformed body just means "no password submitted" → falls through to the
+    // wrong-password path below, same as the JSON branch's .catch().
+    const formData = await req.formData().catch(() => null)
+    submittedPassword = (formData?.get('password') as string) || ''
   } else {
     const body = await req.json().catch(() => ({}))
     submittedPassword = body.password || ''

@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { verifyPassword, hashPassword, isLegacyHash } from '@/lib/hash'
 import { destroySession, createSessionCookie, type SessionUser } from '@/lib/auth'
 import { rateLimit } from '@/lib/rate-limit'
+import { parseJson } from '@/lib/http'
 
 const TOO_MANY = 'יותר מדי ניסיונות התחברות. המתינו כדקה ונסו שוב.'
 
@@ -12,7 +13,8 @@ export async function POST(req: NextRequest) {
   const ipRl = await rateLimit(req, { windowMs: 60_000, max: 60, prefix: 'auth-ip', message: TOO_MANY })
   if (ipRl) return ipRl
 
-  const body = await req.json()
+  const { data: body, error: parseError } = await parseJson<{ email?: string; password?: string }>(req)
+  if (parseError) return parseError
   const { email, password } = body
 
   if (!email || !password) {

@@ -5,6 +5,7 @@ import { findOrCreateClient } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
 import { minifyHtml } from '@/lib/minify'
 import { slugifyPath } from '@/lib/slug'
+import { parseForm } from '@/lib/http'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -21,7 +22,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'אין הרשאה לפעולה זו' }, { status: 403 })
   }
 
-  const formData = await req.formData()
+  const { data: formData, error: formError } = await parseForm(req)
+  if (formError) return formError
   const file = formData.get('file') as File | null
   const rawClient = (formData.get('client') as string)?.trim()
   // Slugified (+ Hebrew→Latin transliterated) only for URL/storage path — the raw

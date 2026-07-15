@@ -1,0 +1,26 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "finance-tracker",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "/Users/matanbarness/Desktop/LP'S/finance-tracker",
+      "port": 3001,
+      "autoPort": true
+    },
+    {
+      "name": "stock-dashboard",
+      "runtimeExecutable": "/Users/matanbarness/Desktop/LP'S/Stock/.venv/bin/python",
+      "runtimeArgs": ["dashboard/app.py"],
+      "cwd": "/Users/matanbarness/Desktop/LP'S/Stock",
+      "port": 5001
+    }
+  ]
+}
