@@ -706,7 +706,14 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
           })()}
           <div className="flex-1 min-h-0 relative">
           {showFullPreview ? (
-            <div className="h-full overflow-auto" style={{ background: '#090c0e' }}>
+            <div className="fixed inset-0 z-[60] overflow-auto" style={{ background: '#090c0e' }}>
+              <button
+                onClick={() => setShowFullPreview(false)}
+                className="fixed top-4 left-4 z-[61] flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-colors"
+                style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', backdropFilter: 'blur(8px)' }}
+              >
+                <X className="w-4 h-4" /> סגור תצוגה
+              </button>
               <CampaignPresentation slides={previewSlides} clientName={doc.meta.client || 'שם לקוח'} campaignName={doc.meta.campaignName || 'שם קמפיין'} />
             </div>
           ) : (

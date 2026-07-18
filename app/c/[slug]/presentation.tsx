@@ -231,14 +231,6 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
     }
   }
 
-  function getSlideIcon(slide: SlideData): string {
-    if (slide.type === 'cover') return '◉'
-    if (slide.type === 'concept') return '◎'
-    if (slide.type === 'closing') return '✦'
-    if (slide.type === 'divider') return '—'
-    return '◻'
-  }
-
   function getSlideLabel(slide: SlideData, i: number): string {
     if (slide.type === 'cover') return t('public.cover')
     if (slide.type === 'concept') return t('public.concept')
@@ -270,8 +262,8 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
 
         {/* Story-style progress bars */}
         <div className="story-progress">
-          {slides.map((_, i) => (
-            <button key={i} className="story-bar" onClick={() => goSlide(i)}>
+          {slides.map((slide, i) => (
+            <button key={i} className="story-bar" onClick={() => goSlide(i)} title={getSlideLabel(slide, i)} aria-label={getSlideLabel(slide, i)}>
               <div className={`story-bar-fill ${i < activeSlide ? 'done' : i === activeSlide ? 'active' : ''}`} />
             </button>
           ))}
@@ -320,21 +312,6 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
             </button>
           </div>
         </header>
-
-        {/* Floating dock navigation */}
-        <nav className="floating-dock">
-          {slides.map((slide, i) => (
-            <button
-              key={i}
-              className={`dock-item ${activeSlide === i ? 'active' : ''}`}
-              onClick={() => goSlide(i)}
-              title={getSlideLabel(slide, i)}
-            >
-              <span className="dock-icon">{getSlideIcon(slide)}</span>
-              <span className="dock-label">{getSlideLabel(slide, i)}</span>
-            </button>
-          ))}
-        </nav>
 
         <main className="pres-main">
           <AnimatePresence mode="wait">
