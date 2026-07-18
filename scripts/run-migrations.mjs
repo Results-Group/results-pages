@@ -30,6 +30,7 @@ const MIGRATIONS = [
   'migration-approval.sql',
   'migration-slide-pins.sql',
   'migration-campaign-templates.sql',
+  'migration-campaign-copies.sql',
   'migration-monday-feedback.sql',
   'migration-ops.sql',
   'migration-scheduling.sql',

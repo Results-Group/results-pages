@@ -69,6 +69,7 @@ export async function PUT(
     if ((err as { code?: string })?.code === 'CONFLICT') {
       return NextResponse.json({ error: 'הקמפיין עודכן במקום אחר. רעננו את הדף כדי לא לדרוס שינויים.' }, { status: 409 })
     }
+    captureException(err, { route: 'PUT /api/campaigns/[id]', id })
     return NextResponse.json({ error: 'שגיאה בעדכון קמפיין' }, { status: 500 })
   }
 }
