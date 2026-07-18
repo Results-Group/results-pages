@@ -3,7 +3,6 @@
 import { useState, useRef } from 'react'
 import { LayoutGrid, Settings2, Upload, Lock, Trash2, Clock, Plus, X, Sparkles, Loader2, Check, Image as ImageIcon, CopyPlus } from 'lucide-react'
 import ClientAutocomplete from '../../../_components/client-autocomplete'
-import WorkspaceSelector from '../../../_components/workspace-selector'
 import { MOCKUP_TYPES, type CampaignMeta, type EditorSection, type MockupType } from './types'
 import { useT, useDir } from '@/lib/i18n'
 
@@ -445,9 +444,6 @@ export default function Inspector({
                 {t('campaigns.publishScheduleHint')}
               </p>
             </div>
-
-            <SectionDivider label={t('campaigns.workspaceSection')} />
-            <WorkspaceSelector value={meta.workspaceId} onChange={val => onUpdateMeta({ workspaceId: val })} />
           </>
         )}
       </div>

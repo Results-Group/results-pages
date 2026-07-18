@@ -239,7 +239,7 @@
 .campaign-pres .concept-slide{padding:50px 0}
 .campaign-pres .concept-card{background:var(--card-bg);backdrop-filter:blur(16px);border:1px solid var(--border-color);border-radius:20px;padding:44px;position:relative;overflow:hidden}
 .campaign-pres .concept-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--brand-cyan),var(--brand-green),var(--brand-blue),var(--brand-purple))}
-.campaign-pres .concept-card::after{content:'"';position:absolute;top:20px;right:30px;font-size:6rem;line-height:1;color:rgba(64,225,211,0.06);font-family:Georgia,serif;pointer-events:none}
+.campaign-pres .concept-card::after{content:'"';position:absolute;top:20px;right:30px;font-size:6rem;line-height:1;color:rgba(64,225,211,0.06);font-family:'Ping',sans-serif;pointer-events:none}
 .campaign-pres .concept-card p{font-size:1.1rem;color:var(--text-secondary);line-height:2.1;white-space:pre-wrap;position:relative;z-index:1}
 
 /* ── Divider Slide ── */

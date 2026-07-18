@@ -726,13 +726,6 @@ function CoverSlide({ slide }: { slide: SlideData }) {
         </motion.div>
       </div>
 
-      {/* Bottom bar */}
-      <motion.div className="cover-bottom-bar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9, duration: 0.5 }}>
-        <span />
-        <a href="https://www.resultsdigital.org" target="_blank" rel="noopener noreferrer" className="cover-url">
-          www.resultsdigital.org
-        </a>
-      </motion.div>
     </div>
   )
 }

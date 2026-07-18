@@ -15,7 +15,7 @@ export default function GeneralCard({ imageUrl, caption }: GeneralCardProps) {
           style={{ background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 45%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 55%, transparent 60%)' }} />
       </div>
       {caption && (
-        <p className="mt-3 text-sm leading-relaxed" style={{ color: '#a0aab0' }}>{caption}</p>
+        <p className="mt-3 text-sm leading-relaxed whitespace-pre-line" style={{ color: '#a0aab0' }}>{caption}</p>
       )}
     </div>
   )

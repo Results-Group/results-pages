@@ -103,7 +103,7 @@ export default function VideoCard({ url, embedUrl, platform, caption, lang = 'he
       </div>
 
       {caption && (
-        <p className="mt-3 text-sm" style={{ color: '#a0aab0' }}>{caption}</p>
+        <p className="mt-3 text-sm whitespace-pre-line" style={{ color: '#a0aab0' }}>{caption}</p>
       )}
     </div>
   );

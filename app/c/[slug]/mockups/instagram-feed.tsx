@@ -1,5 +1,7 @@
 'use client'
 
+import AdCaption from './AdCaption'
+
 interface InstagramFeedProps {
   imageUrl: string
   clientName: string
@@ -65,10 +67,7 @@ export default function InstagramFeed({ imageUrl, clientName, logoUrl, caption }
           {/* Caption */}
           {caption && (
             <div className="px-3 pb-3">
-              <p className="text-[13px] text-gray-900 leading-relaxed">
-                <span className="font-semibold">{clientName}</span>{' '}
-                <span className="text-gray-700">{caption}</span>
-              </p>
+              <AdCaption text={caption} clientName={clientName} className="text-[13px] text-gray-900 leading-relaxed" />
             </div>
           )}
 

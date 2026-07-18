@@ -1,5 +1,7 @@
 'use client'
 
+import AdCaption from './AdCaption'
+
 interface FacebookFeedProps {
   imageUrl: string
   clientName: string
@@ -55,7 +57,7 @@ export default function FacebookFeed({ imageUrl, clientName, logoUrl, caption }:
           {/* Caption */}
           {caption && (
             <div className="px-4 pb-3">
-              <p className="text-[15px] text-gray-900 leading-relaxed">{caption}</p>
+              <AdCaption text={caption} className="text-[15px] text-gray-900 leading-relaxed" />
             </div>
           )}
 

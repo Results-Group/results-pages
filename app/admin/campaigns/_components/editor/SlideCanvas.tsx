@@ -212,7 +212,7 @@ export default function SlideCanvas({
                 ))}
               </div>
             </div>
-            <p className="text-sm leading-relaxed" dir="auto" style={{ color: 'rgba(255,255,255,0.7)' }}>{activeCopy}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-line" dir="auto" style={{ color: 'rgba(255,255,255,0.7)' }}>{activeCopy}</p>
           </div>
         )}
 
