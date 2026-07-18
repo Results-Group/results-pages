@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { LayoutGrid, Settings2, Upload, Lock, Trash2, Clock, Plus, X, Sparkles, Loader2, Check, Image as ImageIcon } from 'lucide-react'
+import { LayoutGrid, Settings2, Upload, Lock, Trash2, Clock, Plus, X, Sparkles, Loader2, Check, Image as ImageIcon, CopyPlus } from 'lucide-react'
 import ClientAutocomplete from '../../../_components/client-autocomplete'
 import WorkspaceSelector from '../../../_components/workspace-selector'
 import { MOCKUP_TYPES, type CampaignMeta, type EditorSection, type MockupType } from './types'
@@ -24,7 +24,7 @@ function SectionDivider({ label }: { label?: string }) {
 }
 
 export default function Inspector({
-  section, meta, onUpdateSection, onUpdateMeta, onUploadLogo, uploadingLogo, passwordDirty, onPasswordDirty, onGenerateCopy,
+  section, meta, onUpdateSection, onUpdateMeta, onUploadLogo, uploadingLogo, passwordDirty, onPasswordDirty, onGenerateCopy, onApplyContentToAll,
 }: {
   section: EditorSection | null
   meta: CampaignMeta
@@ -35,6 +35,7 @@ export default function Inspector({
   passwordDirty: boolean
   onPasswordDirty: (dirty: boolean) => void
   onGenerateCopy?: (section: EditorSection) => Promise<{ captions: string[]; titles: string[]; grounded: boolean } | null>
+  onApplyContentToAll?: () => void
 }) {
   const [tab, setTab] = useState<'slide' | 'campaign'>('slide')
   const logoRef = useRef<HTMLInputElement>(null)
@@ -145,6 +146,18 @@ export default function Inspector({
                   onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
                   onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
                 />
+                {onApplyContentToAll && (section.title.trim() || section.description.trim()) && (
+                  <button
+                    type="button"
+                    onClick={onApplyContentToAll}
+                    className="flex items-center gap-1.5 mt-2 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-colors"
+                    style={{ color: 'rgba(255,255,255,0.6)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+                    title={t('campaigns.applyContentToAllHint')}
+                  >
+                    <CopyPlus className="w-3.5 h-3.5" />
+                    {t('campaigns.applyContentToAll')}
+                  </button>
+                )}
               </div>
 
               {/* AI copy generation */}

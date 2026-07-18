@@ -303,6 +303,8 @@ const en: Record<TranslationKey, string> = {
   'campaigns.applyTitle': 'Use as title',
   'campaigns.addAsCopy': 'Add as copy version',
   'campaigns.applyCaption': 'Use as slide description',
+  'campaigns.applyContentToAll': 'Apply title & description to all slides',
+  'campaigns.applyContentToAllHint': 'Copies this slide’s title and description to every other slide',
   'campaigns.copyToClipboard': 'Copy',
   'campaigns.dismissSuggestions': 'Dismiss',
   'campaigns.noSlideSelected': 'No slide selected',

@@ -323,54 +323,6 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
 
   const MAX_ASSETS_PER_SLIDE = 4
 
-  const uploadFiles = useCallback(async (files: FileList | File[]) => {
-    if (!activeSection) return
-    const sectionId = activeSection.id
-
-    // Client-side validation
-    const arr = Array.from(files)
-    const valid: File[] = []
-    for (const f of arr) {
-      if (!isImageFile(f)) { toast(`${f.name} — סוג קובץ לא נתמך`, 'error'); continue }
-      if (f.size > MAX_FILE_BYTES) { toast(`${f.name} — הקובץ גדול מדי`, 'error'); continue }
-      valid.push(f)
-    }
-    if (!valid.length) return
-
-    // 4-image limit
-    const existing = activeSection.assets.length
-    const available = Math.max(0, MAX_ASSETS_PER_SLIDE - existing)
-    if (available === 0) { toast('הגעת למגבלת 4 תמונות לשקף. הוסף שקף חדש כדי להמשיך.', 'error'); return }
-    const limited = valid.slice(0, available)
-    if (valid.length > available) {
-      toast(`ניתן להוסיף רק ${available} תמונה נוספת לשקף זה (מגבלה: ${MAX_ASSETS_PER_SLIDE}).`, 'error')
-    }
-
-    const id = await ensureCampaignExists()
-    if (!id) { toast('יש למלא שם לקוח ושם קמפיין לפני העלאת קבצים', 'error'); return }
-
-    initProgress(sectionId, limited.length)
-
-    // Upload all files in parallel
-    await Promise.allSettled(
-      limited.map(async file => {
-        try {
-          const data = await uploadOneFile(file, id)
-          if (data) {
-            addAsset(sectionId, { id: crypto.randomUUID(), type: 'image', file_path: data.file_path, public_url: data.public_url || '', url: '', caption: '' })
-          } else {
-            throw new Error('empty response')
-          }
-          tickProgress(sectionId, 'done')
-        } catch (err) {
-          tickProgress(sectionId, 'failed')
-          const msg = err instanceof Error ? err.message : ''
-          toast(`שגיאה בהעלאת ${file.name}${msg ? ` — ${msg}` : ''}`, 'error')
-        }
-      })
-    )
-  }, [activeSection, ensureCampaignExists, addAsset, initProgress, tickProgress, uploadOneFile, toast])
-
   /** Smart bulk upload: drop N files → auto-split into slides of 4, all with the chosen mockup type. */
   const smartUpload = useCallback(async (files: File[], mockupType: MockupType) => {
     const valid = files.filter(f => isImageFile(f) && f.size <= MAX_FILE_BYTES)
@@ -408,6 +360,63 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
     toast(`נוצרו ${sections.length} שקפים מ-${valid.length} קבצים`, 'success')
   }, [ensureCampaignExists, addSections, initProgress, tickProgress, uploadOneFile, addAsset, toast])
 
+  const uploadFiles = useCallback(async (files: FileList | File[]) => {
+    if (!activeSection) return
+    const sectionId = activeSection.id
+
+    // Client-side validation
+    const arr = Array.from(files)
+    const valid: File[] = []
+    for (const f of arr) {
+      if (!isImageFile(f)) { toast(`${f.name} — סוג קובץ לא נתמך`, 'error'); continue }
+      if (f.size > MAX_FILE_BYTES) { toast(`${f.name} — הקובץ גדול מדי`, 'error'); continue }
+      valid.push(f)
+    }
+    if (!valid.length) return
+
+    // More than one slide's worth in a single drop → auto-route to smart upload,
+    // which splits them into slides of 4 (keeps the current slide's mockup type)
+    // instead of hitting the 4-per-slide wall.
+    if (valid.length > MAX_ASSETS_PER_SLIDE) {
+      toast(`התקבלו ${valid.length} תמונות — עוברים להעלאה חכמה (${MAX_ASSETS_PER_SLIDE} לשקף)`, 'info')
+      await smartUpload(valid, activeSection.mockup_type)
+      return
+    }
+
+    // 4-image limit
+    const existing = activeSection.assets.length
+    const available = Math.max(0, MAX_ASSETS_PER_SLIDE - existing)
+    if (available === 0) { toast('הגעת למגבלת 4 תמונות לשקף. הוסף שקף חדש כדי להמשיך.', 'error'); return }
+    const limited = valid.slice(0, available)
+    if (valid.length > available) {
+      toast(`ניתן להוסיף רק ${available} תמונה נוספת לשקף זה (מגבלה: ${MAX_ASSETS_PER_SLIDE}).`, 'error')
+    }
+
+    const id = await ensureCampaignExists()
+    if (!id) { toast('יש למלא שם לקוח ושם קמפיין לפני העלאת קבצים', 'error'); return }
+
+    initProgress(sectionId, limited.length)
+
+    // Upload all files in parallel
+    await Promise.allSettled(
+      limited.map(async file => {
+        try {
+          const data = await uploadOneFile(file, id)
+          if (data) {
+            addAsset(sectionId, { id: crypto.randomUUID(), type: 'image', file_path: data.file_path, public_url: data.public_url || '', url: '', caption: '' })
+          } else {
+            throw new Error('empty response')
+          }
+          tickProgress(sectionId, 'done')
+        } catch (err) {
+          tickProgress(sectionId, 'failed')
+          const msg = err instanceof Error ? err.message : ''
+          toast(`שגיאה בהעלאת ${file.name}${msg ? ` — ${msg}` : ''}`, 'error')
+        }
+      })
+    )
+  }, [activeSection, ensureCampaignExists, addAsset, initProgress, tickProgress, uploadOneFile, toast, smartUpload])
+
   /** Generate AI copy suggestions for a slide, grounded in the client's positioning. */
   const generateCopy = useCallback(async (section: EditorSection): Promise<{ captions: string[]; titles: string[]; grounded: boolean } | null> => {
     const id = await ensureCampaignExists()
@@ -427,6 +436,17 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
       return null
     }
   }, [ensureCampaignExists, toast])
+
+  /** Copy the active slide's title + description onto every other slide. */
+  const applyContentToAll = useCallback(() => {
+    if (!activeSection) return
+    const others = doc.sections.filter(s => s.id !== activeSection.id)
+    if (!others.length) { toast('אין שקפים נוספים להחיל עליהם', 'info'); return }
+    if (!window.confirm(`להחיל את הכותרת והתיאור של השקף הזה על עוד ${others.length} שקפים? התוכן הקיים בהם יוחלף.`)) return
+    const { title, description } = activeSection
+    for (const s of others) updateSection(s.id, { title, description })
+    toast(`הוחל על ${others.length} שקפים`, 'success')
+  }, [activeSection, doc.sections, updateSection, toast])
 
   const replaceAsset = useCallback(async (assetId: string, file: File) => {
     if (!activeSection) return
@@ -723,6 +743,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
             passwordDirty={passwordDirty}
             onPasswordDirty={setPasswordDirty}
             onGenerateCopy={generateCopy}
+            onApplyContentToAll={applyContentToAll}
           />
         </aside>
       </div>

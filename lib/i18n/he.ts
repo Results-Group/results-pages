@@ -301,6 +301,8 @@ const he = {
   'campaigns.applyTitle': 'החל ככותרת',
   'campaigns.addAsCopy': 'הוסף כגרסת קופי',
   'campaigns.applyCaption': 'מלא כתיאור השקף',
+  'campaigns.applyContentToAll': 'החל כותרת ותיאור על כל השקפים',
+  'campaigns.applyContentToAllHint': 'מעתיק את הכותרת והתיאור של השקף הזה לכל שאר השקפים',
   'campaigns.copyToClipboard': 'העתק',
   'campaigns.dismissSuggestions': 'סגור הצעות',
   'campaigns.noSlideSelected': 'לא נבחר שקף',

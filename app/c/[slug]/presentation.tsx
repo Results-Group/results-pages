@@ -672,17 +672,10 @@ function PartnerLogos() {
 }
 
 function ResultsLogo() {
-  return (
-    <div className="results-logo">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <rect x="2" y="14" width="4" height="8" rx="1" fill="#F3D56D"/>
-        <rect x="8" y="9" width="4" height="13" rx="1" fill="#F3D56D" opacity="0.85"/>
-        <rect x="14" y="5" width="4" height="17" rx="1" fill="#F3D56D" opacity="0.7"/>
-        <rect x="20" y="1" width="4" height="21" rx="1" fill="#F3D56D" opacity="0.55"/>
-      </svg>
-      <span className="results-logo-text">Results</span>
-    </div>
-  )
+  // The real brand logo (yellow bars + arrow + "Results" wordmark) served from
+  // /logo.png, instead of a hand-drawn imitation.
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src="/logo.png" alt="Results" className="results-logo-img" />
 }
 
 function CoverSlide({ slide }: { slide: SlideData }) {
