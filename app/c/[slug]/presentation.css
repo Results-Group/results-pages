@@ -162,22 +162,14 @@
   letter-spacing:-0.04em;
 }
 
-/* Partner logos */
-.campaign-pres .partner-logos{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
-.campaign-pres .partner-logo{display:flex;align-items:center;gap:5px;opacity:0.55;transition:opacity 0.2s}
-.campaign-pres .partner-logo:hover{opacity:0.85}
-.campaign-pres .partner-logo .partner-text{font-size:0.65rem;letter-spacing:0.03em;color:#fff;font-weight:600;white-space:nowrap}
-.campaign-pres .partner-logo.google .partner-g{
-  font-size:0.85rem;font-weight:900;letter-spacing:-0.04em;
-  background:linear-gradient(135deg,#4285F4,#EA4335,#FBBC05,#34A853);
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+/* Partner logos — real certified-partner badges, normalized to monochrome white */
+.campaign-pres .partner-logos{display:flex;align-items:center;gap:26px;flex-wrap:wrap}
+.campaign-pres .partner-logo-img{
+  height:40px;width:auto;object-fit:contain;
+  filter:brightness(0) invert(1);
+  opacity:0.62;transition:opacity 0.2s ease;
 }
-.campaign-pres .partner-logo.tiktok{color:#fff}
-.campaign-pres .partner-logo.tiktok svg{fill:#fff}
-.campaign-pres .partner-logo.meta svg{fill:rgba(255,255,255,0.9)}
-.campaign-pres .partner-logo.wix .partner-wix{
-  font-size:0.85rem;font-weight:900;color:#fff;font-style:italic;letter-spacing:-0.02em;
-}
+.campaign-pres .partner-logo-img:hover{opacity:0.92}
 
 /* Bottom bar */
 .campaign-pres .cover-bottom-bar{

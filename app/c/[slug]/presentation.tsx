@@ -625,25 +625,22 @@ function PinnableImage({ asset, pins, canPin, reviewerName, onReviewerNameChange
   )
 }
 
+const PARTNER_LOGOS = [
+  { src: '/partners/google.png', alt: 'Google Partner' },
+  { src: '/partners/meta.png', alt: 'Meta Business Partner' },
+  { src: '/partners/tiktok.png', alt: 'TikTok Marketing Partners' },
+  { src: '/partners/wix.png', alt: 'Wix Partner' },
+]
+
 function PartnerLogos() {
   return (
     <div className="partner-logos">
-      <div className="partner-logo google">
-        <span className="partner-g">G</span>
-        <span className="partner-text">Partner</span>
-      </div>
-      <div className="partner-logo tiktok">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.37 6.37 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.82a8.23 8.23 0 0 0 4.81 1.54V6.9a4.85 4.85 0 0 1-1.05-.21z"/></svg>
-        <span className="partner-text">Marketing Partners</span>
-      </div>
-      <div className="partner-logo meta">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.5 6.5c-.9 0-1.6.4-2.2 1.1-.4-.7-1-1.1-1.8-1.1-.7 0-1.3.3-1.7.9V8.7H9.3v6.6h1.5v-3.8c0-.8.4-1.3 1-1.3s.9.5.9 1.3v3.8h1.5v-3.8c0-.8.4-1.3 1-1.3s.9.5.9 1.3v3.8H17V11c0-1.4-.8-2.5-2.5-2.5z"/></svg>
-        <span className="partner-text">Business Partners</span>
-      </div>
-      <div className="partner-logo wix">
-        <span className="partner-wix">WiX</span>
-        <span className="partner-text">Partner</span>
-      </div>
+      {PARTNER_LOGOS.map(p => (
+        // Normalized to monochrome white so the mixed light/dark badge lockups
+        // read uniformly on the dark cover.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img key={p.src} src={p.src} alt={p.alt} className="partner-logo-img" />
+      ))}
     </div>
   )
 }
