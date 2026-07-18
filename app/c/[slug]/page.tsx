@@ -77,6 +77,14 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     notFound()
   }
 
+  // Past the end date (or already auto-archived): no longer public. The daily
+  // cron flips the status to archived, but guard here too so it locks the moment
+  // the date passes, before the cron runs. Staff preview still works.
+  const isExpired = !!rawCampaign.expires_at && new Date(rawCampaign.expires_at) < new Date()
+  if ((isExpired || rawCampaign.status === 'archived') && !isPreview) {
+    notFound()
+  }
+
   if (rawCampaign.password && !isEditorOrAdmin) {
     const cookieStore = await cookies()
     const accessToken = cookieStore.get(`cmp_${rawCampaign.id}`)?.value

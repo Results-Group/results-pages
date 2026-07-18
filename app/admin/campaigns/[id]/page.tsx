@@ -60,6 +60,7 @@ export default function EditCampaignPage() {
             logoUrl: data.logo_url || null,
             workspaceId: data.workspace_id || null,
             publishAt: data.publish_at ? isoToLocalDatetimeInput(data.publish_at) || null : null,
+            expiresAt: data.expires_at ? isoToLocalDatetimeInput(data.expires_at) || null : null,
           },
           sections,
         }

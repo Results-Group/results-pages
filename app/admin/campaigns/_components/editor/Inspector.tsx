@@ -444,6 +444,24 @@ export default function Inspector({
                 {t('campaigns.publishScheduleHint')}
               </p>
             </div>
+
+            <div>
+              <label className="block text-[11px] font-bold mb-1.5 flex items-center gap-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                <Clock className="w-3.5 h-3.5" /> {t('campaigns.expirySchedule')}
+              </label>
+              <input
+                type="datetime-local"
+                value={meta.expiresAt || ''}
+                onChange={e => onUpdateMeta({ expiresAt: e.target.value || null })}
+                dir="ltr"
+                className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={fieldStyle}
+                onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
+              />
+              <p className="text-[10px] mt-2" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                {t('campaigns.expiryScheduleHint')}
+              </p>
+            </div>
           </>
         )}
       </div>

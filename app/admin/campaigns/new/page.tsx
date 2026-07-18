@@ -29,6 +29,7 @@ export default function NewCampaignPage() {
         logoUrl: null,
         workspaceId: getActiveWorkspace(),
         publishAt: null,
+        expiresAt: null,
       },
       sections: [newSection()],
     }

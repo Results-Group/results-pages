@@ -339,6 +339,8 @@ const en: Record<TranslationKey, string> = {
   'campaigns.schedulingSection': 'Scheduling',
   'campaigns.publishSchedule': 'Publish Schedule',
   'campaigns.publishScheduleHint': 'The presentation will not be available to the client until this date.',
+  'campaigns.expirySchedule': 'End date (required)',
+  'campaigns.expiryScheduleHint': 'At least 4 weeks after publish. The campaign auto-archives after this date.',
   'campaigns.workspaceSection': 'Workspace',
   'campaigns.mockup.instagram_feed': 'Instagram Feed',
   'campaigns.mockup.instagram_story': 'Instagram Story',

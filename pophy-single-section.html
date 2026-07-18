@@ -612,15 +612,18 @@
            =========================================== */
         var stickyCta = document.getElementById('sticky-cta');
         var stickyBtn = document.getElementById('sticky-cta-btn');
-        var heroSection = document.querySelector('.hero-single');
+        var downloadArea = document.querySelector('.mobile-app-buttons');
 
         function checkStickyVisibility() {
-            if (window.innerWidth > 768 || !heroSection) return;
-            var heroBottom = heroSection.getBoundingClientRect().bottom;
-            if (heroBottom < window.innerHeight * 0.4) {
-                stickyCta.classList.add('is-visible');
-            } else {
+            if (window.innerWidth > 768 || !downloadArea) return;
+            /* Show the sticky bar whenever the inline download buttons are
+               NOT visible in the viewport (below the fold on load, or scrolled away). */
+            var r = downloadArea.getBoundingClientRect();
+            var inView = r.top < window.innerHeight && r.bottom > 0;
+            if (inView) {
                 stickyCta.classList.remove('is-visible');
+            } else {
+                stickyCta.classList.add('is-visible');
             }
         }
         window.addEventListener('scroll', checkStickyVisibility, { passive: true });

@@ -37,6 +37,7 @@ export interface CampaignMeta {
   logoUrl: string | null
   workspaceId: string | null
   publishAt: string | null
+  expiresAt: string | null
 }
 
 export interface CampaignDocument {

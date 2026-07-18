@@ -22,6 +22,16 @@ import type { CampaignDocument, EditorAsset, EditorSection, MockupType } from '.
 
 const CampaignPresentation = dynamic(() => import('@/app/c/[slug]/presentation'), { ssr: false })
 
+/** Minimum campaign lifetime before it auto-archives. */
+const MIN_CAMPAIGN_MS = 28 * 24 * 60 * 60 * 1000 // 4 weeks
+
+/** Date → local "YYYY-MM-DDTHH:mm" for a datetime-local input. */
+function toDatetimeLocal(ms: number): string {
+  const d = new Date(ms)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
 export interface EditorInitial {
   campaignId?: string | null
   doc: CampaignDocument
@@ -120,6 +130,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
     ...(passwordDirty ? { password: doc.meta.password.trim() || null } : {}),
     logo_path: doc.meta.logoPath,
     publish_at: doc.meta.publishAt ? new Date(doc.meta.publishAt).toISOString() : null,
+    expires_at: doc.meta.expiresAt ? new Date(doc.meta.expiresAt).toISOString() : null,
     status: newStatus ?? status,
     workspace_id: doc.meta.workspaceId,
     base_updated_at: updatedAtRef.current ?? undefined,
@@ -197,6 +208,19 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
     if (!doc.meta.client.trim() || !doc.meta.campaignName.trim()) {
       if (!opts.silent) toast('יש למלא שם לקוח ושם קמפיין', 'error')
       return null
+    }
+    // Publishing requires an end date at least 4 weeks out; the campaign
+    // auto-archives once it passes. Auto-fill a valid default and block so the
+    // user reviews it, rather than publishing with no end date.
+    if (newStatus === 'published') {
+      const base = doc.meta.publishAt ? new Date(doc.meta.publishAt).getTime() : Date.now()
+      const minExpiry = base + MIN_CAMPAIGN_MS
+      const exp = doc.meta.expiresAt ? new Date(doc.meta.expiresAt).getTime() : NaN
+      if (!doc.meta.expiresAt || Number.isNaN(exp) || exp < minExpiry) {
+        setMeta({ expiresAt: toDatetimeLocal(minExpiry) })
+        toast('חובה תאריך סיום של לפחות 4 שבועות (הקמפיין יעבור לארכיון אחריו). קבענו ברירת מחדל — בדקו ולחצו פרסום שוב.', 'error')
+        return null
+      }
     }
     const run = async () => {
       setSaveState('saving')

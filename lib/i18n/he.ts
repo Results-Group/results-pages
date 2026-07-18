@@ -337,6 +337,8 @@ const he = {
   'campaigns.schedulingSection': 'תזמון',
   'campaigns.publishSchedule': 'תזמון פרסום',
   'campaigns.publishScheduleHint': 'המצגת לא תהיה זמינה ללקוח עד למועד זה.',
+  'campaigns.expirySchedule': 'תאריך סיום (חובה)',
+  'campaigns.expiryScheduleHint': 'לפחות 4 שבועות מהפרסום. אחרי מועד זה הקמפיין עובר לארכיון אוטומטית.',
   'campaigns.workspaceSection': 'סביבת עבודה',
   'campaigns.mockup.instagram_feed': 'פיד אינסטגרם',
   'campaigns.mockup.instagram_story': 'סטוריז אינסטגרם',

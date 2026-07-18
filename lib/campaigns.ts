@@ -39,6 +39,7 @@ export interface Campaign {
   sections: CampaignSection[]
   status: 'draft' | 'published' | 'archived'
   publish_at: string | null
+  expires_at: string | null
   password: string | null
   created_by: string | null
   workspace_id: string | null
@@ -53,7 +54,7 @@ export interface Campaign {
 
 export async function getCampaigns(filters?: { search?: string; status?: string; workspace_id?: string; deleted?: boolean; templates?: boolean }) {
   let query = supabase.from('campaigns')
-    .select('id,client,client_id,campaign_name,slug,concept,logo_path,status,publish_at,password,created_by,workspace_id,deleted_at,is_template,created_at,updated_at')
+    .select('id,client,client_id,campaign_name,slug,concept,logo_path,status,publish_at,expires_at,password,created_by,workspace_id,deleted_at,is_template,created_at,updated_at')
     .order('created_at', { ascending: false })
 
   // Templates are a separate list; the normal list never shows them.
@@ -110,6 +111,7 @@ export async function createCampaign(data: {
   sections?: CampaignSection[]
   status?: string
   publish_at?: string | null
+  expires_at?: string | null
   password?: string
   created_by?: string
   workspace_id?: string
@@ -126,6 +128,7 @@ export async function createCampaign(data: {
     sections: data.sections || [],
     status: data.status || 'draft',
     publish_at: data.publish_at || null,
+    expires_at: data.expires_at || null,
     password: hashedPw,
   }
   if (data.is_template) insertData.is_template = true
@@ -164,6 +167,7 @@ export async function updateCampaign(
   if (data.sections !== undefined) updateData.sections = data.sections
   if (data.status !== undefined) updateData.status = data.status
   if (data.publish_at !== undefined) updateData.publish_at = data.publish_at
+  if (data.expires_at !== undefined) updateData.expires_at = data.expires_at
   if (data.password !== undefined) {
     updateData.password = data.password ? await bcrypt.hash(data.password, 12) : null
   }
