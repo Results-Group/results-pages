@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pophy - שמים סוף להתעסקות עם ניקיון המשרד</title>
+
+    <!-- === Tracking (unchanged) === -->
+    <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "sf9syvfjg6");
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17357415233"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'AW-17357415233');
+    </script>
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '613074844727047');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=613074844727047&ev=PageView&noscript=1"
+    /></noscript>
+    <script>
+      !function (w, d, t) {
+        w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
+        ttq.load('D2883SRC77UB6AOKCQI0');
+        ttq.page();
+      }(window, document, 'ttq');
+    </script>
+
+    <style>
+        /* === Fonts === */
+        @font-face { font-family: 'Ping HL'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-regular.woff2') format('woff2'); font-weight: 400; }
+        @font-face { font-family: 'Ping HL'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-bold.woff2') format('woff2'); font-weight: 600; }
+        @font-face { font-family: 'Ping HL'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-heavy.woff2') format('woff2'); font-weight: 800; }
+
+        /* === Variables === */
+        :root {
+            --dark-text: #1D1D1F;
+            --secondary-text: #86868B;
+            --background: #FBFBFD;
+            --border-color: #E5E5EA;
+            --font-bold: 800;
+            --font-semibold: 600;
+            --font-heavy: 800;
+            --pophy-yellow: #FFD400;
+            --pophy-green: #34c759;
+            --cta-background: #1D1D1F;
+            --cta-text-color: #FFFFFF;
+            --text-main: #FFFFFF;
+            --text-muted: #86868B;
+            --bg-deep: #000000;
+            --bg-card: #0A0A0C;
+            --pophy-yellow-glow: rgba(255, 212, 0, 0.4);
+        }
+
+        /* === Base Reset === */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { overflow-x: hidden; width: 100%; max-width: 100vw; }
+        body { margin: 0; padding: 0; overflow-x: hidden; width: 100%; min-width: 0; max-width: 100vw; background-color: var(--bg-deep); color: var(--text-main); font-family: 'Ping HL', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; direction: rtl; }
+
+        /* =========================================================
+           Single Section — Hero + Download (Deep Space)
+           ========================================================= */
+        .hero-single {
+            position: relative;
+            min-height: 100vh;
+            padding: 60px 20px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+            background-color: var(--bg-deep);
+        }
+
+        /* fading grid background */
+        .hero-single::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(circle at center, black 10%, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at center, black 10%, transparent 80%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* central glow */
+        .core-glow {
+            position: absolute;
+            top: 45%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 700px; height: 700px;
+            background: radial-gradient(circle, var(--pophy-yellow-glow) 0%, transparent 70%);
+            filter: blur(90px);
+            z-index: 1;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .hero-inner {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 720px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero-logo { height: 42px; margin-bottom: 30px; }
+
+        .hero-headline {
+            font-size: 3rem;
+            font-weight: var(--font-heavy);
+            line-height: 1.1;
+            letter-spacing: -1.5px;
+            margin: 0 0 18px 0;
+            color: var(--text-main);
+        }
+        .highlight-text {
+            background: linear-gradient(90deg, #FFFFFF 0%, var(--pophy-yellow) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subheadline {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin: 0 auto 30px;
+            max-width: 560px;
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        /* benefits */
+        .hero-benefits {
+            list-style: none; padding: 0; margin: 0 0 28px 0;
+            display: flex; flex-direction: column; gap: 14px; align-items: center;
+        }
+        .hero-benefits li {
+            display: flex; align-items: center; gap: 12px;
+            font-size: 1.15rem; font-weight: 600; color: #F0F0F0;
+        }
+        .hero-benefits li svg {
+            width: 20px; height: 20px; flex-shrink: 0; color: var(--pophy-yellow);
+        }
+
+        /* social proof */
+        .premium-trust {
+            font-size: 0.95rem; color: var(--text-muted);
+            display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600;
+            margin-bottom: 40px; flex-wrap: wrap;
+        }
+        .premium-stars { color: var(--pophy-yellow); letter-spacing: 1px; font-size: 1rem; }
+
+        /* --- Downloads --- */
+        .downloads-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .desktop-qrs {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+            max-width: 600px;
+        }
+        .qr-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            flex: 1;
+            cursor: pointer;
+        }
+        .qr-card:hover {
+            transform: translateY(-6px);
+            background: rgba(255, 212, 0, 0.05);
+            border-color: rgba(255, 212, 0, 0.4);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .qr-image { width: 64px; height: 64px; margin-left: 20px; border-radius: 12px; background: #fff; padding: 4px; }
+        .qr-text { text-align: right; }
+        .qr-text strong { display: block; font-size: 1.15rem; font-weight: var(--font-bold); margin-bottom: 4px; }
+        .qr-text span { font-size: 0.9rem; color: var(--text-muted); }
+
+        .mobile-app-buttons {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+            max-width: 380px;
+        }
+        .app-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: var(--text-main);
+            color: #000000;
+            padding: 15px 24px;
+            border-radius: 980px;
+            text-decoration: none;
+            font-weight: var(--font-bold);
+            font-size: 1.15rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            cursor: pointer;
+        }
+        .app-btn:active { transform: scale(0.98); }
+        .app-btn-secondary {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .app-btn svg { width: 28px; height: 28px; }
+
+        .trust-marker {
+            margin-top: 35px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.03);
+            padding: 12px 24px;
+            border-radius: 980px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Footer */
+        .site-footer {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 30px 20px 26px;
+            background: #0A0A0C;
+            border-top: 2px solid var(--pophy-yellow);
+            font-size: 0.9rem;
+            color: #AEAEB2;
+            direction: rtl;
+        }
+        .footer-links { margin-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .footer-sep { color: #555; }
+        .site-footer a { color: #AEAEB2; text-decoration: none; transition: color 0.2s; }
+        .site-footer a:hover { color: var(--pophy-yellow); }
+        .footer-copy { font-size: 0.82rem; color: #86868B; }
+
+        /* --- Responsive --- */
+        @media (max-width: 768px) {
+            .hero-single { padding: 40px 16px 30px; }
+            .hero-logo { height: 38px; margin-bottom: 22px; }
+            .hero-headline { font-size: 2rem; letter-spacing: -1px; }
+            .hero-subheadline { font-size: 1rem; margin-bottom: 24px; }
+            .hero-benefits { gap: 10px; margin-bottom: 22px; }
+            .hero-benefits li { font-size: 0.95rem; }
+            .premium-trust { font-size: 0.82rem; margin-bottom: 30px; }
+            .desktop-qrs { display: none; }
+            .mobile-app-buttons { display: flex; margin: 0 auto; }
+            .app-btn { font-size: 0.95rem; padding: 13px 20px; }
+            .trust-marker { font-size: 0.95rem; margin-top: 28px; }
+            .site-footer { font-size: 0.8rem; padding: 24px 16px 90px; }
+        }
+        @media (max-width: 480px) {
+            .hero-headline { font-size: 1.7rem; }
+            .hero-subheadline { font-size: 0.9rem; }
+            .hero-benefits li { font-size: 0.9rem; gap: 8px; }
+            .core-glow { width: 400px; height: 400px; }
+        }
+
+        /* =========================================================
+           Social Proof Toast
+           ========================================================= */
+        .social-toast {
+            position: fixed; bottom: 24px; right: 24px;
+            background: #fff; border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.04);
+            padding: 14px 18px 14px 40px;
+            display: flex; align-items: center; gap: 12px;
+            z-index: 9990;
+            transform: translateY(30px); opacity: 0; pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            max-width: 340px; direction: rtl;
+        }
+        .social-toast.is-visible { transform: translateY(0); opacity: 1; pointer-events: auto; }
+        .social-toast-avatar {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: linear-gradient(135deg, #FFD400, #F5C400);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0; color: #1D1D1F;
+        }
+        .social-toast-body { flex: 1; }
+        .social-toast-text { font-size: 0.88rem; color: #1D1D1F; line-height: 1.45; }
+        .social-toast-text strong { font-weight: 700; }
+        .social-toast-time { font-size: 0.75rem; color: #86868B; margin-top: 3px; display: flex; align-items: center; gap: 4px; }
+        .social-toast-time::before { content: ''; width: 6px; height: 6px; background: #34C759; border-radius: 50%; display: inline-block; }
+        .social-toast-close {
+            position: absolute; top: 8px; left: 8px; background: none; border: none;
+            font-size: 1.1rem; color: #AEAEB2; cursor: pointer;
+            width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; line-height: 1;
+        }
+
+        /* =========================================================
+           Sticky Mobile CTA Bar
+           ========================================================= */
+        .sticky-mobile-cta {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(10,10,12,0.92);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding: 10px 16px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+            z-index: 9980; display: none;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .sticky-mobile-cta.is-visible { transform: translateY(0); }
+        .sticky-cta-btn {
+            width: 100%; background: var(--pophy-yellow); color: #1D1D1F;
+            font-family: 'Ping HL', sans-serif; font-size: 0.98rem; font-weight: 800;
+            padding: 14px 20px; border: none; border-radius: 980px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 15px rgba(255,212,0,0.2); transition: all 0.2s ease;
+        }
+        .sticky-cta-btn:active { transform: scale(0.97); }
+        .sticky-cta-btn svg { width: 18px; height: 18px; }
+
+        @media (min-width: 769px) { .sticky-mobile-cta { display: none !important; } }
+        @media (max-width: 768px) {
+            .sticky-mobile-cta { display: block; }
+            .social-toast { bottom: 80px; right: 12px; left: 12px; max-width: none; }
+        }
+
+        /* =========================================================
+           Exit Intent Popup
+           ========================================================= */
+        .exit-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); display: none; z-index: 10001;
+            opacity: 0; transition: opacity 0.3s ease;
+            align-items: center; justify-content: center;
+        }
+        .exit-overlay.is-visible { opacity: 1; }
+        .exit-popup {
+            position: relative; background: #fff; border-radius: 28px;
+            padding: 44px 36px; max-width: 440px; width: calc(100% - 40px);
+            text-align: center; transform: scale(0.9);
+            transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+            direction: rtl; box-sizing: border-box;
+        }
+        .exit-overlay.is-visible .exit-popup { transform: scale(1); }
+        .exit-popup-close {
+            position: absolute; top: 14px; left: 14px; width: 34px; height: 34px;
+            border-radius: 50%; border: none; background: #F5F5F7;
+            font-size: 1.2rem; color: #86868B; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: background 0.2s ease;
+        }
+        .exit-popup-close:hover { background: #E8E8ED; }
+        .exit-popup-badge {
+            display: inline-block; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;
+            color: #1D1D1F; background: rgba(255, 212, 0, 0.15);
+            border: 1px solid rgba(255, 212, 0, 0.4); padding: 5px 14px; border-radius: 980px; margin-bottom: 18px;
+        }
+        .exit-popup h3 { font-size: 1.5rem; font-weight: 700; color: #1D1D1F; margin: 0 0 12px; line-height: 1.35; }
+        .exit-popup p { font-size: 0.95rem; color: #6E6E73; margin: 0 0 28px; line-height: 1.6; }
+        .exit-popup-cta {
+            background: var(--pophy-yellow); color: #1D1D1F;
+            font-family: 'Ping HL', sans-serif; font-size: 1rem; font-weight: 700;
+            padding: 14px 36px; border: none; border-radius: 980px; cursor: pointer; width: 100%;
+            transition: all 0.3s ease; box-shadow: 0 4px 16px rgba(255, 212, 0, 0.25);
+        }
+        .exit-popup-cta:hover { transform: scale(1.02); box-shadow: 0 6px 24px rgba(255, 212, 0, 0.35); }
+        .exit-popup-skip {
+            display: inline-block; margin-top: 16px; font-size: 0.85rem; color: #AEAEB2;
+            background: none; border: none; cursor: pointer; transition: color 0.2s ease;
+        }
+        .exit-popup-skip:hover { color: #86868B; }
+        @media (max-width: 768px) {
+            .exit-popup { padding: 36px 24px; }
+            .exit-popup h3 { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- =========================================================
+         Single Section — Hero + Download
+         ========================================================= -->
+    <section class="hero-single">
+        <div class="core-glow"></div>
+
+        <div class="hero-inner">
+            <img src="https://static.wixstatic.com/media/bb1f28_0f698d00e96e433583a41170ffc64e19~mv2.png" alt="Pophy Logo" class="hero-logo" style="filter: brightness(0) invert(1);">
+
+            <h1 class="hero-headline">
+                סוף לאכזבות מניקיון המשרד.<br>
+                משלמים רק כשמרוצים <span class="highlight-text">ב-100%.</span>
+            </h1>
+
+            <p class="hero-subheadline">
+                הורידו את האפליקציה של Pophy ותנהלו את ניקיון המשרד באפס התעסקות — צוותים מסוננים, פיקוח מלא, ותשלום רק על התוצאה.
+            </p>
+
+            <ul class="hero-benefits">
+                <li><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> צוותים שעברו סינון קפדני</li>
+                <li><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> גוף מפקח שלוקח אחריות מלאה</li>
+                <li><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> אפס התעסקות - משלמים רק בסוף</li>
+            </ul>
+
+            <div class="premium-trust">
+                <span class="premium-stars">★★★★★</span>
+                <span>4.9 מבוסס על מאות בעלי משרדים</span>
+            </div>
+
+            <div class="downloads-wrapper">
+
+                <!-- Desktop: QR codes -->
+                <div class="desktop-qrs">
+                    <a href="https://onelink.to/c5r32b" target="_blank" rel="noopener" class="qr-card download-link">
+                        <div class="qr-text">
+                            <strong>App Store</strong>
+                            <span>סרקו להורדה למכשירי iOS</span>
+                        </div>
+                        <img src="https://static.wixstatic.com/media/f559f1_8fe6c4bc92dd4ac2bf7d45926ac8ebfd~mv2.png" alt="QR iOS" class="qr-image">
+                    </a>
+                    <a href="https://onelink.to/c5r32b" target="_blank" rel="noopener" class="qr-card download-link">
+                        <div class="qr-text">
+                            <strong>Google Play</strong>
+                            <span>סרקו להורדה למכשירי Android</span>
+                        </div>
+                        <img src="https://static.wixstatic.com/media/bb1f28_695f4e8059f44e2fb55ced07064a609b~mv2.png" alt="QR Android" class="qr-image">
+                    </a>
+                </div>
+
+                <!-- Mobile: direct download buttons -->
+                <div class="mobile-app-buttons">
+                    <a href="https://onelink.to/c5r32b" target="_blank" rel="noopener" class="app-btn download-link">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14.88 2.15c.61-.75 1.02-1.72.9-2.73-1.01.05-2.07.64-2.7 1.38-.56.66-.99 1.66-.86 2.65 1.09.08 2.05-.57 2.66-1.3zM16.58 13.9c-.03-2.3 1.88-3.41 1.97-3.47-1.07-1.57-2.73-1.78-3.32-1.81-1.42-.14-2.77.84-3.5.84-.73 0-1.84-.82-3.03-.8-1.55.02-2.98.9-3.78 2.29-1.62 2.82-.41 6.99 1.17 9.27.77 1.12 1.69 2.37 2.91 2.32 1.17-.05 1.63-.76 3.05-.76 1.41 0 1.84.76 3.07.74 1.25-.02 2.04-1.15 2.8-2.27.88-1.28 1.24-2.52 1.26-2.59-.03-.01-2.43-.93-2.6-3.76z"/></svg>
+                        הורדה ל-iOS
+                    </a>
+                    <a href="https://onelink.to/c5r32b" target="_blank" rel="noopener" class="app-btn app-btn-secondary download-link">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.68 2.22A2.43 2.43 0 0 0 4 3.93v16.14a2.43 2.43 0 0 0 .68 1.71l.06.06 9.07-9.07v-.23L4.74 2.16l-.06.06zM15.93 11.2L6.1 5.5l-.26-.14c-.81-.46-1.62.06-1.62 1v12.27c0 .94.81 1.46 1.62 1l9.83-5.7.26-.14c.82-.46.82-1.2 0-1.66z"/></svg>
+                        הורדה ל-Android
+                    </a>
+                </div>
+
+                <div class="trust-marker">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--pophy-green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                    פתיחת חשבון בחינם. משלמים רק על התוצאה.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-links">
+            <a href="https://www.pophy.co.il/privcay" target="_blank" rel="noopener noreferrer">מדיניות פרטיות</a>
+            <span class="footer-sep">·</span>
+            <a href="https://www.pophy.co.il/terms" target="_blank" rel="noopener noreferrer">תנאי שימוש</a>
+        </div>
+        <div class="footer-copy">
+            כל הזכויות שמורות ל-Pophy &copy; 2026 &nbsp;|&nbsp; נבנה ע״י <a href="https://www.resultsdigital.org/creative" target="_blank" rel="noopener">Results Group</a>
+        </div>
+    </footer>
+
+    <!-- Social Proof Toast -->
+    <div class="social-toast" id="social-toast">
+        <div class="social-toast-avatar" id="toast-avatar">👤</div>
+        <div class="social-toast-body">
+            <div class="social-toast-text" id="toast-text"></div>
+            <div class="social-toast-time" id="toast-time"></div>
+        </div>
+        <button class="social-toast-close" id="toast-close">&times;</button>
+    </div>
+
+    <!-- Sticky Mobile CTA Bar -->
+    <div class="sticky-mobile-cta" id="sticky-cta">
+        <button class="sticky-cta-btn" id="sticky-cta-btn">
+            להורדת האפליקציה בחינם
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+    </div>
+
+    <!-- Exit Intent Popup -->
+    <div class="exit-overlay" id="exit-overlay">
+        <div class="exit-popup">
+            <button class="exit-popup-close" id="exit-close">&times;</button>
+            <div class="exit-popup-badge">הידעת?</div>
+            <h3>ב-Pophy לא משלמים על ניקיון המשרד עד הרגע שמאשרים שמרוצים מהתוצאה.</h3>
+            <p>הורידו את האפליקציה עכשיו והזמינו ניקיון ראשון בלי שום סיכון.</p>
+            <button class="exit-popup-cta" id="exit-cta">להורדת האפליקציה</button>
+            <button class="exit-popup-skip" id="exit-skip">אולי בפעם אחרת</button>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         Scripts — download tracking + CRO
+         ========================================================= -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        var DOWNLOAD_URL = 'https://onelink.to/c5r32b';
+
+        /* Fire conversion pixels for a download intent */
+        function fireDownloadEvents() {
+            if (typeof gtag === 'function') {
+                gtag('event', 'conversion', {'send_to': 'AW-17357415233/lk5YCND1p_8aEMHG1NRA'});
+            }
+            if (typeof fbq === 'function') { fbq('track', 'Download'); }
+            if (typeof ttq === 'object' && ttq !== null && typeof ttq.track === 'function') {
+                ttq.track('Download');
+            }
+        }
+
+        /* Programmatic download (for buttons that aren't <a>) */
+        function triggerDownload() {
+            fireDownloadEvents();
+            window.open(DOWNLOAD_URL, '_blank');
+        }
+        window._triggerPophyDownload = triggerDownload;
+
+        /* Real <a> download links: fire pixels, let the browser navigate */
+        document.querySelectorAll('a.download-link').forEach(function(link) {
+            link.addEventListener('click', function() { fireDownloadEvents(); });
+        });
+
+
+        /* ===========================================
+           1. Social Proof Toast Notifications
+           =========================================== */
+        var toastData = [
+            { name: 'שירה', city: 'ראשון לציון', action: 'הזמינה ניקיון', mins: 3 },
+            { name: 'יואב', city: 'חולון', action: 'הצטרף ל-Pophy', mins: 7 },
+            { name: 'מיכל', city: 'רחובות', action: 'הזמינה ניקיון למשרד', mins: 12 },
+            { name: 'אורי', city: 'בת ים', action: 'הוריד את האפליקציה', mins: 18 },
+            { name: 'נועה', city: 'נס ציונה', action: 'הזמינה ניקיון שבועי', mins: 22 },
+            { name: 'עמית', city: 'יבנה', action: 'הצטרף ל-Pophy', mins: 28 },
+            { name: 'דנה', city: 'לוד', action: 'הזמינה ניקיון', mins: 34 },
+            { name: 'גיא', city: 'גדרה', action: 'הוריד את האפליקציה', mins: 41 },
+            { name: 'ליאת', city: 'רמלה', action: 'הצטרפה ל-Pophy', mins: 48 },
+            { name: 'רון', city: 'באר יעקב', action: 'הזמין ניקיון למשרד', mins: 55 }
+        ];
+        var initials = { 'שירה':'ש','יואב':'י','מיכל':'מ','אורי':'א','נועה':'נ','עמית':'ע','דנה':'ד','גיא':'ג','ליאת':'ל','רון':'ר' };
+        var toast = document.getElementById('social-toast');
+        var toastText = document.getElementById('toast-text');
+        var toastTime = document.getElementById('toast-time');
+        var toastAvatar = document.getElementById('toast-avatar');
+        var toastClose = document.getElementById('toast-close');
+        var toastIndex = 0;
+        var toastTimer = null;
+        var toastDismissed = false;
+
+        function showToast() {
+            if (toastDismissed) return;
+            var d = toastData[toastIndex % toastData.length];
+            toastText.innerHTML = '<strong>' + d.name + ' מ' + d.city + '</strong> ' + d.action;
+            toastTime.textContent = 'לפני ' + d.mins + ' דקות';
+            toastAvatar.textContent = initials[d.name] || '👤';
+            toast.classList.add('is-visible');
+            toastIndex++;
+            setTimeout(function() {
+                toast.classList.remove('is-visible');
+                toastTimer = setTimeout(showToast, 6000 + Math.random() * 4000);
+            }, 4500);
+        }
+        toastClose.addEventListener('click', function() {
+            toast.classList.remove('is-visible');
+            toastDismissed = true;
+            if (toastTimer) clearTimeout(toastTimer);
+        });
+        setTimeout(showToast, 6000);
+
+
+        /* ===========================================
+           2. Sticky Mobile CTA Bar
+           =========================================== */
+        var stickyCta = document.getElementById('sticky-cta');
+        var stickyBtn = document.getElementById('sticky-cta-btn');
+        var heroSection = document.querySelector('.hero-single');
+
+        function checkStickyVisibility() {
+            if (window.innerWidth > 768 || !heroSection) return;
+            var heroBottom = heroSection.getBoundingClientRect().bottom;
+            if (heroBottom < window.innerHeight * 0.4) {
+                stickyCta.classList.add('is-visible');
+            } else {
+                stickyCta.classList.remove('is-visible');
+            }
+        }
+        window.addEventListener('scroll', checkStickyVisibility, { passive: true });
+        checkStickyVisibility();
+
+        stickyBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            triggerDownload();
+        });
+
+
+        /* ===========================================
+           3. Exit Intent Popup
+           =========================================== */
+        var exitOverlay = document.getElementById('exit-overlay');
+        var exitClose = document.getElementById('exit-close');
+        var exitCta = document.getElementById('exit-cta');
+        var exitSkip = document.getElementById('exit-skip');
+        var exitShown = false;
+
+        function showExit() {
+            if (exitShown) return;
+            exitShown = true;
+            exitOverlay.style.display = 'flex';
+            exitOverlay.offsetHeight;
+            exitOverlay.classList.add('is-visible');
+            try { sessionStorage.setItem('pophy_exit_shown', '1'); } catch(e) {}
+        }
+        function closeExit() {
+            exitOverlay.classList.remove('is-visible');
+            setTimeout(function() {
+                if (!exitOverlay.classList.contains('is-visible')) {
+                    exitOverlay.style.display = 'none';
+                }
+            }, 350);
+        }
+        exitClose.addEventListener('click', closeExit);
+        exitSkip.addEventListener('click', closeExit);
+        exitOverlay.addEventListener('click', function(e) {
+            if (e.target === exitOverlay) closeExit();
+        });
+        exitCta.addEventListener('click', function() {
+            closeExit();
+            setTimeout(triggerDownload, 300);
+        });
+
+        var alreadyShown = false;
+        try { alreadyShown = sessionStorage.getItem('pophy_exit_shown') === '1'; } catch(e) {}
+
+        if (!alreadyShown) {
+            document.addEventListener('mouseout', function(e) {
+                if (e.clientY <= 5 && !exitShown) { showExit(); }
+            });
+            var inactivityTimer = null;
+            function resetInactivity() {
+                if (inactivityTimer) clearTimeout(inactivityTimer);
+                inactivityTimer = setTimeout(function() {
+                    if (!exitShown && window.innerWidth <= 768) { showExit(); }
+                }, 45000);
+            }
+            window.addEventListener('scroll', resetInactivity, { passive: true });
+            window.addEventListener('touchstart', resetInactivity, { passive: true });
+            resetInactivity();
+        }
+    });
+    </script>
+
+</body>
+</html>

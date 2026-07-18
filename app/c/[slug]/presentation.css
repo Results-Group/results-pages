@@ -108,58 +108,73 @@
 .campaign-pres .slide-title::before{content:'';display:block;width:4px;height:32px;background:linear-gradient(to bottom,var(--brand-cyan),var(--brand-yellow));border-radius:2px;flex-shrink:0}
 .campaign-pres .slide-intro{font-size:1.1rem;line-height:1.85;color:var(--text-secondary);margin:-16px 0 32px;max-width:760px;white-space:pre-wrap}
 
-/* ── Cover Slide v2 ── */
+/* ── Cover Slide (premium / firm) ──
+   Brand language: near-black ground + gold accents from the Results mark.
+   Typography is Ping throughout (weight + tracking carry the premium feel). */
 .campaign-pres .cover-slide-v2{
-  position:relative;min-height:75vh;display:flex;flex-direction:column;
-  padding:28px 40px 24px;background:transparent;overflow:hidden;
-  direction:ltr;text-align:left;
+  --cover-gold:#E8C15A;
+  --cover-gold-soft:#F6E4A6;
+  position:relative;min-height:78vh;display:flex;flex-direction:column;
+  padding:44px 56px 40px;overflow:hidden;direction:ltr;text-align:left;
+  border-radius:18px;
+  background:
+    radial-gradient(85% 120% at 84% 16%, rgba(232,193,90,0.10) 0%, rgba(232,193,90,0) 46%),
+    radial-gradient(70% 90% at 4% 98%, rgba(232,193,90,0.05) 0%, rgba(232,193,90,0) 52%),
+    linear-gradient(160deg,#111217 0%,#0A0B0D 72%);
+  box-shadow:0 40px 120px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.03);
 }
 
-/* Corner brackets */
-.campaign-pres .cover-corner{position:absolute;width:24px;height:24px;pointer-events:none}
-.campaign-pres .cover-corner.tl{top:20px;left:20px;border-top:2px solid rgba(255,255,255,0.5);border-left:2px solid rgba(255,255,255,0.5)}
-.campaign-pres .cover-corner.tr{top:20px;right:20px;border-top:2px solid rgba(255,255,255,0.5);border-right:2px solid rgba(255,255,255,0.5)}
-.campaign-pres .cover-corner.bl{bottom:20px;left:20px;border-bottom:2px solid rgba(255,255,255,0.2);border-left:2px solid rgba(255,255,255,0.2)}
-.campaign-pres .cover-corner.br{bottom:20px;right:20px;border-bottom:2px solid rgba(255,255,255,0.2);border-right:2px solid rgba(255,255,255,0.2)}
+/* Fine inset gold frame — the "firm" cue */
+.campaign-pres .cover-frame{position:absolute;inset:16px;border:1px solid rgba(232,193,90,0.16);border-radius:8px;pointer-events:none}
+
+/* Corner brackets (gold) */
+.campaign-pres .cover-corner{position:absolute;width:22px;height:22px;pointer-events:none;z-index:1}
+.campaign-pres .cover-corner.tl{top:24px;left:24px;border-top:1px solid rgba(232,193,90,0.55);border-left:1px solid rgba(232,193,90,0.55)}
+.campaign-pres .cover-corner.tr{top:24px;right:24px;border-top:1px solid rgba(232,193,90,0.55);border-right:1px solid rgba(232,193,90,0.55)}
+.campaign-pres .cover-corner.bl{bottom:24px;left:24px;border-bottom:1px solid rgba(232,193,90,0.35);border-left:1px solid rgba(232,193,90,0.35)}
+.campaign-pres .cover-corner.br{bottom:24px;right:24px;border-bottom:1px solid rgba(232,193,90,0.35);border-right:1px solid rgba(232,193,90,0.35)}
 
 /* Top bar */
-.campaign-pres .cover-top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:auto;padding-bottom:28px}
+.campaign-pres .cover-top-bar{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;margin-bottom:auto;padding-bottom:32px}
 
 /* Results logo (real brand mark from /logo.png) */
-.campaign-pres .results-logo{display:flex;align-items:center;gap:8px}
-.campaign-pres .results-logo-text{font-size:1rem;font-weight:900;color:#fff;letter-spacing:0.5px}
-.campaign-pres .results-logo-img{height:34px;width:auto;object-fit:contain;display:block}
+.campaign-pres .results-logo-img{height:38px;width:auto;object-fit:contain;display:block}
 
 /* Badge pill */
 .campaign-pres .cover-badge-pill{
-  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
-  border-radius:24px;padding:5px 20px;font-size:0.7rem;letter-spacing:2.5px;
-  text-transform:uppercase;color:rgba(255,255,255,0.55);font-weight:600;
+  background:rgba(232,193,90,0.06);border:1px solid rgba(232,193,90,0.28);
+  border-radius:100px;padding:7px 22px;font-size:0.68rem;letter-spacing:3px;
+  text-transform:uppercase;color:var(--cover-gold-soft);font-weight:700;
 }
 
 /* Body: two-column */
-.campaign-pres .cover-body{display:flex;align-items:center;gap:48px;flex:1;padding:8px 0}
+.campaign-pres .cover-body{position:relative;z-index:1;display:flex;align-items:center;gap:60px;flex:1;padding:24px 0}
 
 /* Left column */
 .campaign-pres .cover-left{flex:1;min-width:0;display:flex;flex-direction:column;gap:0}
-.campaign-pres .cover-eyebrow{font-size:0.78rem;color:rgba(255,255,255,0.4);letter-spacing:0.04em;margin-bottom:12px;font-weight:500}
-.campaign-pres .cover-headline{font-size:clamp(2.4rem,5vw,4.2rem);font-weight:900;line-height:1.05;color:#fff;letter-spacing:-0.03em;margin-bottom:20px}
-.campaign-pres .cover-meta-line{display:flex;align-items:center;gap:8px;margin-bottom:24px}
-.campaign-pres .cover-client-name{font-size:1rem;font-weight:700;color:rgba(255,255,255,0.85)}
-.campaign-pres .cover-meta-sep{color:rgba(255,255,255,0.25)}
-.campaign-pres .cover-by{font-size:0.9rem;color:rgba(255,255,255,0.45);font-weight:400}
-.campaign-pres .cover-h-rule{height:1px;background:linear-gradient(90deg,rgba(255,255,255,0.15),transparent);margin-bottom:24px;width:100%}
+.campaign-pres .cover-eyebrow{display:flex;align-items:center;gap:11px;font-size:0.82rem;color:var(--cover-gold);letter-spacing:0.22em;text-transform:uppercase;margin-bottom:26px;font-weight:700}
+.campaign-pres .cover-eyebrow-dot{width:5px;height:5px;border-radius:50%;background:var(--cover-gold);flex-shrink:0}
+.campaign-pres .cover-headline{font-size:clamp(2.6rem,5.4vw,4.6rem);font-weight:900;line-height:1.02;color:#fff;letter-spacing:-0.025em;margin-bottom:28px;text-wrap:balance}
+.campaign-pres .cover-meta-line{display:flex;align-items:center;gap:14px;margin-bottom:0}
+.campaign-pres .cover-client-name{font-size:1.15rem;font-weight:800;color:#fff}
+.campaign-pres .cover-meta-sep{width:1px;height:18px;background:rgba(255,255,255,0.22)}
+.campaign-pres .cover-by{font-size:0.95rem;color:rgba(255,255,255,0.5);font-weight:400}
+.campaign-pres .cover-h-rule{height:1px;background:linear-gradient(90deg,rgba(232,193,90,0.55),transparent);margin:34px 0 28px;width:100%}
 
-/* Right column: client logo */
+/* Right column: client logo in an elegant framed panel */
 .campaign-pres .cover-right{
-  width:280px;height:240px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
-  border-radius:20px;overflow:hidden;
-  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);
+  position:relative;width:300px;height:260px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  border-radius:14px;overflow:hidden;
+  background:linear-gradient(155deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015));
+  border:1px solid rgba(255,255,255,0.07);
+  box-shadow:inset 0 20px 50px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
 }
-.campaign-pres .cover-client-logo{max-width:68%;max-height:68%;object-fit:contain}
+.campaign-pres .cover-right::before,.campaign-pres .cover-right::after{content:'';position:absolute;width:12px;height:12px;border:1px solid rgba(232,193,90,0.45)}
+.campaign-pres .cover-right::before{top:12px;left:12px;border-right:0;border-bottom:0}
+.campaign-pres .cover-right::after{bottom:12px;right:12px;border-left:0;border-top:0}
+.campaign-pres .cover-client-logo{max-width:66%;max-height:66%;object-fit:contain}
 .campaign-pres .cover-client-initials{
-  font-size:3.5rem;font-weight:900;color:rgba(255,255,255,0.12);
-  letter-spacing:-0.04em;
+  font-size:3.8rem;font-weight:900;color:rgba(244,242,236,0.9);letter-spacing:0.02em;
 }
 
 /* Partner logos — real certified-partner badges, normalized to monochrome white */

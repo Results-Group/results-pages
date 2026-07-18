@@ -655,6 +655,8 @@ function ResultsLogo() {
 function CoverSlide({ slide }: { slide: SlideData }) {
   return (
     <div className="cover-slide-v2">
+      {/* Fine inset gold frame — the "firm" cue */}
+      <div className="cover-frame" aria-hidden />
       {/* Corner decorations */}
       <div className="cover-corner tl" />
       <div className="cover-corner tr" />
@@ -672,7 +674,8 @@ function CoverSlide({ slide }: { slide: SlideData }) {
         {/* Left: campaign info */}
         <div className="cover-left">
           <motion.div className="cover-eyebrow" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
-            {slide.date || ''}
+            <span className="cover-eyebrow-dot" />
+            {slide.date || 'Creative Campaign'}
           </motion.div>
           <motion.h1 className="cover-headline" initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3, duration: 0.6 }}>
             {slide.subtitle || 'New Creative'}
