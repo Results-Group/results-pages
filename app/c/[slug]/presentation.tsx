@@ -760,7 +760,7 @@ function CreativesSlide({ slide, activeCopyIdx, onAssetClick, lang = 'he' }: {
       )}
 
       {assets.length > 0 && !isCarousel && (
-        <div className={`assets-grid ${isStory ? 'story-grid' : 'standard-grid'}`}>
+        <div className={`assets-grid ${isStory ? 'story-grid' : 'standard-grid'} count-${Math.min(assets.length, 4)}`}>
           {assets.map((asset, i) => (
             <div
               key={asset.id}

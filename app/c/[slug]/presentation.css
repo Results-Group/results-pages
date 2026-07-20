@@ -328,6 +328,18 @@
 .campaign-pres .assets-grid{display:grid;gap:28px}
 .campaign-pres .assets-grid.story-grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
 .campaign-pres .assets-grid.standard-grid{grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}
+
+/* Column count follows the number of creatives so the block always reads as a
+   balanced shape. auto-fill produced three across with a lone fourth hanging
+   underneath; four creatives belong in a 2x2. Scoped above the mobile
+   breakpoint because these selectors would otherwise out-specify the
+   single-column mobile rule. */
+@media(min-width:769px){
+  .campaign-pres .assets-grid.standard-grid.count-1{grid-template-columns:minmax(0,520px);justify-content:center}
+  .campaign-pres .assets-grid.standard-grid.count-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .campaign-pres .assets-grid.standard-grid.count-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .campaign-pres .assets-grid.standard-grid.count-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 .campaign-pres .mockup-wrapper{position:relative;transition:transform 0.4s cubic-bezier(0.22,1,0.36,1)}
 .campaign-pres .mockup-wrapper:hover{transform:translateY(-4px)}
 
