@@ -652,34 +652,34 @@ function CoverSlide({ slide }: { slide: SlideData }) {
       <div className="cover-corner br" />
 
       {/* Top bar */}
-      <motion.div className="cover-top-bar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05, duration: 0.5 }}>
+      <div className="cover-top-bar rp-anim rp-up rp-d1">
         <ResultsLogo />
-      </motion.div>
+      </div>
 
       {/* Main content */}
       <div className="cover-body">
         {/* Left: campaign info */}
         <div className="cover-left">
-          <motion.div className="cover-eyebrow" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
+          <div className="cover-eyebrow rp-anim rp-in rp-d2">
             <span className="cover-eyebrow-dot" />
             {slide.date || 'Creative Campaign'}
-          </motion.div>
-          <motion.h1 className="cover-headline" initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3, duration: 0.6 }}>
+          </div>
+          <h1 className="cover-headline rp-anim rp-in rp-d3">
             {slide.subtitle || 'New Creative'}
-          </motion.h1>
-          <motion.div className="cover-meta-line" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5, duration: 0.5 }}>
+          </h1>
+          <div className="cover-meta-line rp-anim rp-up rp-d4">
             <span className="cover-client-name">{slide.title}</span>
             <span className="cover-meta-sep" aria-hidden />
             <span className="cover-by">By Results Group</span>
-          </motion.div>
-          <motion.div className="cover-h-rule" initial={{ scaleX: 0, originX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.65, duration: 0.5 }} />
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75, duration: 0.5 }}>
+          </div>
+          <div className="cover-h-rule rp-anim rp-wipe rp-d5" />
+          <div className="rp-anim rp-up rp-d6">
             <PartnerLogos />
-          </motion.div>
+          </div>
         </div>
 
         {/* Right: client logo */}
-        <motion.div className="cover-right" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.25, duration: 0.7 }}>
+        <div className="cover-right rp-anim rp-scale rp-d2">
           {slide.logoUrl ? (
             <img src={slide.logoUrl} alt={slide.title} className="cover-client-logo" />
           ) : (
@@ -687,7 +687,7 @@ function CoverSlide({ slide }: { slide: SlideData }) {
               {(slide.title || '?').slice(0, 2).toUpperCase()}
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
 
     </div>
@@ -797,53 +797,25 @@ function ClosingSlide({ slide }: { slide: SlideData }) {
       <div className="closing-glow-center" aria-hidden />
 
       <div className="closing-stack">
-        <motion.img
-          src="/logo.png"
-          alt="Results"
-          className="closing-logo"
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.6 }}
-        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.png" alt="Results" className="closing-logo rp-anim rp-up rp-d1" />
 
-        <motion.h1
-          className="closing-headline"
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.6 }}
-        >
-          {slide.title}
-        </motion.h1>
+        <h1 className="closing-headline rp-anim rp-up rp-d3">{slide.title}</h1>
 
         {slide.subtitle && (
-          <motion.p
-            className="closing-client"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-          >
-            {slide.subtitle}
-          </motion.p>
+          <p className="closing-client rp-anim rp-up rp-d4">{slide.subtitle}</p>
         )}
 
-        <motion.div
-          className="closing-rule"
-          initial={{ opacity: 0, scaleX: 0 }}
-          animate={{ opacity: 1, scaleX: 1 }}
-          transition={{ delay: 0.55, duration: 0.5 }}
-        />
+        <div className="closing-rule rp-anim rp-up rp-d5" />
 
-        <motion.a
-          className="closing-url"
+        <a
+          className="closing-url rp-anim rp-up rp-d6"
           href="https://www.resultsdigital.org"
           target="_blank"
           rel="noopener noreferrer"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7, duration: 0.5 }}
         >
           www.resultsdigital.org
-        </motion.a>
+        </a>
       </div>
     </div>
   )

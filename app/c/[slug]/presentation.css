@@ -108,6 +108,33 @@
 .campaign-pres .slide-title::before{content:'';display:block;width:4px;height:32px;background:linear-gradient(to bottom,var(--brand-cyan),var(--brand-yellow));border-radius:2px;flex-shrink:0}
 .campaign-pres .slide-intro{font-size:1.1rem;line-height:1.85;color:var(--text-secondary);margin:-16px 0 32px;max-width:760px;white-space:pre-wrap}
 
+/* ── Entrance animations ──
+   These run in CSS, not JS. The previous Framer Motion entrances were driven by
+   requestAnimationFrame, which browsers pause in a backgrounded tab — a link
+   opened from WhatsApp into a background tab left every element stranded at
+   opacity 0 and the cover rendered completely blank. The resting style here is
+   visible, so the worst case is "no animation", never "no content". */
+@keyframes rp-fade-up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes rp-fade-in{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
+@keyframes rp-fade-scale{from{opacity:0;transform:scale(0.93)}to{opacity:1;transform:none}}
+@keyframes rp-wipe{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
+
+.campaign-pres .rp-anim{animation-duration:0.6s;animation-timing-function:cubic-bezier(0.22,1,0.36,1);animation-fill-mode:both}
+.campaign-pres .rp-up{animation-name:rp-fade-up}
+.campaign-pres .rp-in{animation-name:rp-fade-in}
+.campaign-pres .rp-scale{animation-name:rp-fade-scale}
+.campaign-pres .rp-wipe{animation-name:rp-wipe;transform-origin:left}
+.campaign-pres .rp-d1{animation-delay:0.05s}
+.campaign-pres .rp-d2{animation-delay:0.15s}
+.campaign-pres .rp-d3{animation-delay:0.25s}
+.campaign-pres .rp-d4{animation-delay:0.38s}
+.campaign-pres .rp-d5{animation-delay:0.5s}
+.campaign-pres .rp-d6{animation-delay:0.62s}
+
+@media (prefers-reduced-motion: reduce){
+  .campaign-pres .rp-anim{animation:none}
+}
+
 /* ── Cover Slide (premium / firm) ──
    Brand language: near-black ground + gold accents from the Results mark.
    Typography is Ping throughout (weight + tracking carry the premium feel). */
