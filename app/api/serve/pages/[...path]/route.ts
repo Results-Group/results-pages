@@ -6,6 +6,19 @@ import { rateLimit } from '@/lib/rate-limit'
 
 interface Ctx { params: Promise<{ path: string[] }> }
 
+/**
+ * Cheap deterministic content hash for the ETag (FNV-1a, 32-bit).
+ * Runtime-agnostic — no node:crypto, so this works on any Next runtime.
+ */
+function contentHash(s: string): string {
+  let h = 0x811c9dc5
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i)
+    h = Math.imul(h, 0x01000193)
+  }
+  return (h >>> 0).toString(36)
+}
+
 export async function GET(req: NextRequest, { params }: Ctx) {
   const { path } = await params
 
@@ -88,14 +101,29 @@ export async function GET(req: NextRequest, { params }: Ctx) {
 
   // Password-protected pages must never be cached by the CDN — the cached
   // copy would be served to visitors who never passed the password gate.
+  //
+  // For public pages the CDN still caches (s-maxage), but the browser gets
+  // `max-age=0, must-revalidate` so it always checks back before reusing a copy.
+  // Without an explicit browser directive, browsers fall back to heuristic
+  // caching and can hold a page for hours — which meant a re-uploaded page kept
+  // showing the old, broken version. The ETag below makes that check a cheap 304.
   const cacheControl = page.password
     ? 'private, no-store'
-    : 'public, s-maxage=60, stale-while-revalidate=60'
+    : 'public, max-age=0, must-revalidate, s-maxage=60, stale-while-revalidate=60'
+
+  const etag = `"${contentHash(enrichedHtml)}"`
+  if (!page.password && req.headers.get('if-none-match') === etag) {
+    return new NextResponse(null, {
+      status: 304,
+      headers: { 'Cache-Control': cacheControl, ETag: etag, 'x-vercel-cache-tag': `page-${page.id}` },
+    })
+  }
 
   return new NextResponse(enrichedHtml, {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': cacheControl,
+      ...(page.password ? {} : { ETag: etag }),
       'x-vercel-cache-tag': `page-${page.id}`,
     },
   })
