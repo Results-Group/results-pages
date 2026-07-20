@@ -82,7 +82,7 @@ export default function CarouselFeed({
             <div
               ref={trackRef}
               onScroll={onScroll}
-              className="flex w-full aspect-square overflow-x-auto snap-x snap-mandatory"
+              className="carousel-track flex w-full aspect-square overflow-x-auto snap-x snap-mandatory"
               style={{ scrollbarWidth: 'none' }}
             >
               {images.map((src, i) => (

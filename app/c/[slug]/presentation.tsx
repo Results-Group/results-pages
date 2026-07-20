@@ -149,12 +149,40 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
     }
   }, [campaignId])
 
+  // ── Swipe navigation ──
+  // The deck presents like Instagram stories, so a phone user's instinct is to
+  // swipe. Direction follows the RTL layout and the on-screen arrows: "next"
+  // points left, so a leftward drag advances.
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
+  const SWIPE_MIN_PX = 60
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    // Never hijack a swipe that belongs to the carousel's own scroll track.
+    if ((e.target as HTMLElement)?.closest?.('.carousel-track')) { touchStart.current = null; return }
+    const t = e.touches[0]
+    touchStart.current = { x: t.clientX, y: t.clientY }
+  }, [])
+
   const goSlide = useCallback((n: number) => {
     setActiveSlide(n)
     // 'auto', not 'smooth': smooth scrolling is animation-frame driven, so with
     // animations paused the client stayed 1400px down the previous slide.
     window.scrollTo({ top: 0, behavior: 'auto' })
   }, [])
+
+  const onTouchEnd = useCallback((e: React.TouchEvent) => {
+    const start = touchStart.current
+    touchStart.current = null
+    if (!start || lightboxAsset) return
+    const t = e.changedTouches[0]
+    const dx = t.clientX - start.x
+    const dy = t.clientY - start.y
+    // Ignore short drags, and anything more vertical than horizontal — that's
+    // the reader scrolling a tall creatives slide, not changing slide.
+    if (Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) < Math.abs(dy) * 1.5) return
+    if (dx < 0) goSlide(Math.min(slides.length - 1, activeSlide + 1))
+    else goSlide(Math.max(0, activeSlide - 1))
+  }, [lightboxAsset, activeSlide, slides.length, goSlide])
 
   // Approval progress across all feedback-enabled (creative) slides
   // Divider slides are just section breaks — there's nothing to approve on them,
@@ -291,7 +319,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
           </div>
         </header>
 
-        <main className="pres-main">
+        <main className="pres-main" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           {/* Plain section keyed on the slide index: React swaps it immediately
               and the CSS class replays the transition. AnimatePresence with
               mode="wait" held the next slide until the previous one's exit

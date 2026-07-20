@@ -1,6 +1,9 @@
-@font-face{font-family:'Ping';src:url('/fonts/ping-regular.otf') format('opentype');font-weight:400;font-display:swap}
-@font-face{font-family:'Ping';src:url('/fonts/ping-bold.otf') format('opentype');font-weight:700;font-display:swap}
-@font-face{font-family:'Ping';src:url('/fonts/ping-heavy.otf') format('opentype');font-weight:900;font-display:swap}
+@font-face{font-family:'Ping';src:url('/fonts/ping-regular.woff2') format('woff2'),
+       url('/fonts/ping-regular.otf') format('opentype');font-weight:400;font-display:swap}
+@font-face{font-family:'Ping';src:url('/fonts/ping-bold.woff2') format('woff2'),
+       url('/fonts/ping-bold.otf') format('opentype');font-weight:700;font-display:swap}
+@font-face{font-family:'Ping';src:url('/fonts/ping-heavy.woff2') format('woff2'),
+       url('/fonts/ping-heavy.otf') format('opentype');font-weight:900;font-display:swap}
 
 .campaign-pres{
   --bg-dark:#090c0e;

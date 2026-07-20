@@ -77,9 +77,9 @@ export default function FacebookFeed({ imageUrl, clientName, logoUrl, caption, m
           <div className="flex items-center justify-between px-4 py-2">
             <div className="flex items-center gap-1">
               <div className="flex -space-x-1">
-                <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px]" style={{ background: '#1877f2' }}>👍</span>
-                <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px]" style={{ background: '#ed4956' }}>❤️</span>
-                <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px]" style={{ background: '#f7b928' }}>😂</span>
+                <span className="w-[22px] h-[22px] rounded-full flex items-center justify-center text-[13px] ring-2 ring-white" style={{ background: '#1877f2' }}>👍</span>
+                <span className="w-[22px] h-[22px] rounded-full flex items-center justify-center text-[13px] ring-2 ring-white" style={{ background: '#ed4956' }}>❤️</span>
+                <span className="w-[22px] h-[22px] rounded-full flex items-center justify-center text-[13px] ring-2 ring-white" style={{ background: '#f7b928' }}>😂</span>
               </div>
               <span className="text-[13px] text-gray-500 mr-1">2.4K</span>
             </div>
