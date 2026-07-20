@@ -49,6 +49,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
 
   const [campaignId, setCampaignId] = useState<string | null>(initial.campaignId ?? null)
   const [slug, setSlug] = useState<string | null>(initial.slug ?? null)
+  const [slugDirty, setSlugDirty] = useState(false)
   const [status, setStatus] = useState<'draft' | 'published' | 'archived'>(initial.status ?? 'draft')
   const [activeId, setActiveId] = useState<string | null>(initial.doc.sections[0]?.id ?? null)
   const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop')
@@ -129,6 +130,9 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
     // Only send the password when the user actually edited it — omitting the
     // key means "untouched" server-side (null would clear the stored hash).
     ...(passwordDirty ? { password: doc.meta.password.trim() || null } : {}),
+    // Only sent once the user edits it, so autosaves never re-submit (and
+    // re-validate) the server's own generated slug.
+    ...(slugDirty && slug ? { slug } : {}),
     logo_path: doc.meta.logoPath,
     publish_at: doc.meta.publishAt ? new Date(doc.meta.publishAt).toISOString() : null,
     expires_at: doc.meta.expiresAt ? new Date(doc.meta.expiresAt).toISOString() : null,
@@ -143,13 +147,13 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
       useCopies: s.useCopies ?? false,
       assets: s.assets.map(a => ({ id: a.id, type: a.type, file_path: a.file_path, url: a.url, caption: a.caption })),
     })),
-  }), [doc, status, passwordDirty])
+  }), [doc, status, passwordDirty, slug, slugDirty])
 
   // Sync server-resolved fields (slug, client_id) back into local state.
   // clientId is compared against the latest doc before dispatch so an
   // identical value doesn't dirty the document and re-trigger the autosave.
   const syncFromServer = useCallback((data: { slug?: string | null; client_id?: string | null }) => {
-    if (data.slug) setSlug(data.slug)
+    if (data.slug) { setSlug(data.slug); setSlugDirty(false) }
     const serverClientId = data.client_id ?? null
     if (serverClientId && serverClientId !== docRef.current.meta.clientId) {
       setMeta({ clientId: serverClientId })
@@ -786,6 +790,8 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
             onPasswordDirty={setPasswordDirty}
             onGenerateCopy={generateCopy}
             onApplyContentToAll={applyContentToAll}
+            slug={slug}
+            onSlugChange={v => { setSlug(v); setSlugDirty(true) }}
           />
         </aside>
       </div>

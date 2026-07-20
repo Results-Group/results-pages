@@ -16,7 +16,7 @@ export interface CampaignAsset {
 export interface CampaignSection {
   id: string
   title: string
-  mockup_type: 'instagram_feed' | 'instagram_story' | 'facebook_feed' | 'video' | 'general' | 'divider'
+  mockup_type: 'instagram_feed' | 'instagram_story' | 'facebook_feed' | 'carousel' | 'video' | 'general' | 'divider'
   description?: string
   useCopies?: boolean
   assets: CampaignAsset[]

@@ -4,6 +4,8 @@ import { getCampaignById, updateCampaign, deleteCampaign, purgeCampaign, enrichC
 import { findOrCreateClient } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
+import { slugifyPath } from '@/lib/slug'
+import { supabase } from '@/lib/supabase'
 
 export async function GET(
   request: NextRequest,
@@ -44,6 +46,28 @@ export async function PUT(
     if (permErr) return permErr
 
     const body = await request.json()
+
+    // Custom campaign URL. The slug is the public link, so it must be
+    // ASCII-safe and unique; a clash is reported as 409 rather than surfacing
+    // the DB's unique-constraint violation as a generic save error.
+    if (typeof body.slug === 'string') {
+      const desired = slugifyPath(body.slug, '')
+      if (!desired) {
+        return NextResponse.json({ error: 'כתובת לא תקינה — השתמשו באותיות, ספרות ומקפים' }, { status: 400 })
+      }
+      if (desired !== existing.slug) {
+        const { data: taken } = await supabase
+          .from('campaigns')
+          .select('id')
+          .eq('slug', desired)
+          .neq('id', id)
+          .maybeSingle()
+        if (taken) {
+          return NextResponse.json({ error: `הכתובת "${desired}" כבר תפוסה בקמפיין אחר` }, { status: 409 })
+        }
+      }
+      body.slug = desired
+    }
 
     // Moving the campaign to another workspace requires permission there too
     if (body.workspace_id && body.workspace_id !== existing.workspace_id) {

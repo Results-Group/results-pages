@@ -27,7 +27,7 @@ function SectionDivider({ label }: { label?: string }) {
 }
 
 export default function Inspector({
-  section, meta, onUpdateSection, onUpdateMeta, onUploadLogo, uploadingLogo, passwordDirty, onPasswordDirty, onGenerateCopy, onApplyContentToAll,
+  section, meta, onUpdateSection, onUpdateMeta, onUploadLogo, uploadingLogo, passwordDirty, onPasswordDirty, onGenerateCopy, onApplyContentToAll, slug, onSlugChange,
 }: {
   section: EditorSection | null
   meta: CampaignMeta
@@ -39,6 +39,8 @@ export default function Inspector({
   onPasswordDirty: (dirty: boolean) => void
   onGenerateCopy?: (section: EditorSection) => Promise<{ captions: string[]; titles: string[]; grounded: boolean } | null>
   onApplyContentToAll?: () => void
+  slug?: string | null
+  onSlugChange?: (slug: string) => void
 }) {
   const [tab, setTab] = useState<'slide' | 'campaign'>('slide')
   const logoRef = useRef<HTMLInputElement>(null)
@@ -430,6 +432,38 @@ export default function Inspector({
                 </div>
               )}
             </div>
+
+            {onSlugChange && (
+              <>
+                <SectionDivider label={t('campaigns.urlSection')} />
+                <div>
+                  <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                    {t('campaigns.urlLabel')}
+                  </label>
+                  <input
+                    type="text"
+                    value={slug || ''}
+                    // The slug is the public link, so keep it to URL-safe
+                    // characters as the user types; the server slugifies and
+                    // enforces uniqueness on save.
+                    onChange={e => onSlugChange(e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''))}
+                    placeholder="relax-petah-tikva"
+                    dir="ltr"
+                    className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={fieldStyle}
+                    onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
+                    onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
+                  />
+                  {slug && (
+                    <p className="text-[10px] mt-2 break-all" dir="ltr" style={{ color: 'rgba(64,225,211,0.65)' }}>
+                      /c/{slug}
+                    </p>
+                  )}
+                  <p className="text-[10px] mt-1.5" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                    {t('campaigns.urlHint')}
+                  </p>
+                </div>
+              </>
+            )}
 
             <SectionDivider label={t('campaigns.schedulingSection')} />
             <div>
