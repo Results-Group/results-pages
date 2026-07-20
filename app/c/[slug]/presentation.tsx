@@ -64,6 +64,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   // Reviewer name — remembered across slides and visits (per campaign)
   const [reviewerName, setReviewerName] = useState('')
   const [doneDismissed, setDoneDismissed] = useState(false)
+  const [showIndex, setShowIndex] = useState(false)
   // Selected copy variant, shared across slides so the choice sticks as the
   // client moves through the deck.
   const [activeCopyIdx, setActiveCopyIdx] = useState(0)
@@ -217,6 +218,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
     function onKey(e: KeyboardEvent) {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
       if (e.key === 'Escape' && lightboxAsset) { setLightboxAsset(null); return }
+      if (e.key === 'Escape' && showIndex) { setShowIndex(false); return }
       // Route through goSlide so keyboard navigation also resets the scroll
       // position — otherwise arrow keys left the reader mid-way down the page.
       if (e.key === 'ArrowLeft') goSlide(Math.min(slides.length - 1, activeSlide + 1))
@@ -224,7 +226,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [slides.length, lightboxAsset, activeSlide, goSlide])
+  }, [slides.length, lightboxAsset, showIndex, activeSlide, goSlide])
 
   useEffect(() => {
     let rafId = 0
@@ -355,13 +357,48 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
           )}
         </AnimatePresence>
 
+        {/* Slide index — the practical way to reach a specific slide */}
+        {showIndex && (
+          <>
+            <div className="slide-index-backdrop" onClick={() => setShowIndex(false)} />
+            <div className="slide-index" role="dialog" aria-label={t('public.allSlides')}>
+              <div className="slide-index-head">{t('public.allSlides')}</div>
+              <div className="slide-index-list">
+                {slides.map((s, i) => (
+                  <button
+                    key={i}
+                    className={`slide-index-item${i === activeSlide ? ' active' : ''}`}
+                    onClick={() => { goSlide(i); setShowIndex(false) }}
+                  >
+                    <span className="slide-index-num">{i + 1}</span>
+                    <span className="slide-index-name">{getSlideLabel(s, i)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
         {/* Bottom nav arrows */}
         <div className="slide-footer-nav">
           <button onClick={() => goSlide(Math.max(0, activeSlide - 1))} disabled={activeSlide === 0} className="nav-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
             {t('public.previous')}
           </button>
-          <span className="slide-counter">{activeSlide + 1} / {slides.length}</span>
+          {/* The counter doubles as the slide index. With 20 slides the header
+              bars are ~15px wide each, so jumping to a specific slide by
+              tapping a sliver isn't practical at any screen size. */}
+          <button
+            className="slide-counter"
+            onClick={() => setShowIndex(v => !v)}
+            aria-expanded={showIndex}
+            title={t('public.allSlides')}
+          >
+            {activeSlide + 1} / {slides.length}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ transform: showIndex ? 'rotate(180deg)' : undefined }}>
+              <polyline points="18 15 12 9 6 15" />
+            </svg>
+          </button>
           <button onClick={() => goSlide(Math.min(slides.length - 1, activeSlide + 1))} disabled={activeSlide === slides.length - 1} className="nav-btn">
             {t('public.next')}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>

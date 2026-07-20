@@ -36,7 +36,16 @@
 
 /* ── Story Progress Bars ── */
 .campaign-pres .story-progress{position:fixed;top:0;left:0;right:0;z-index:1100;display:flex;gap:3px;padding:6px 12px;background:linear-gradient(to bottom,rgba(9,12,14,0.9),transparent)}
-.campaign-pres .story-bar{flex:1;height:3px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;cursor:pointer;border:none;padding:0}
+/* 5px rail with a 26px invisible hit area (44px on touch, below) — at 20 slides
+   each bar is only ~15px wide, so the vertical target has to carry the click. */
+.campaign-pres .story-bar{
+  position:relative;flex:1;height:5px;background:rgba(255,255,255,0.1);
+  border-radius:3px;cursor:pointer;border:none;padding:0;
+  transition:background 0.2s,transform 0.15s;
+}
+.campaign-pres .story-bar::after{content:'';position:absolute;left:0;right:0;top:-11px;height:26px}
+.campaign-pres .story-bar:hover{background:rgba(255,255,255,0.3);transform:scaleY(1.6)}
+.campaign-pres .story-bar:focus-visible{outline:2px solid var(--brand-cyan);outline-offset:3px}
 .campaign-pres .story-bar-fill{height:100%;border-radius:3px;width:0;transition:width 0.4s ease}
 .campaign-pres .story-bar-fill.done{width:100%;background:var(--brand-cyan)}
 .campaign-pres .story-bar-fill.active{width:100%;background:linear-gradient(90deg,var(--brand-cyan),var(--brand-yellow));animation:progressGlow 2s ease-in-out infinite}
@@ -119,6 +128,51 @@
 @media (prefers-reduced-motion: reduce){
   .campaign-pres .slide-enter{animation:none}
 }
+
+/* ── Slide index ──
+   Opened from the counter. Jumping to a specific slide by hitting a 15px sliver
+   isn't practical at any screen size; this is the real navigation. */
+.campaign-pres .slide-counter{
+  display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);
+  border-radius:99px;padding:8px 16px;min-height:40px;
+  font-family:'Ping',sans-serif;font-weight:700;color:var(--text-primary);
+  font-variant-numeric:tabular-nums;transition:background .2s,border-color .2s;
+}
+.campaign-pres .slide-counter:hover{background:rgba(var(--brand-rgb),0.1);border-color:rgba(var(--brand-rgb),0.4)}
+.campaign-pres .slide-counter svg{transition:transform .2s}
+
+.campaign-pres .slide-index-backdrop{position:fixed;inset:0;z-index:1250;background:rgba(0,0,0,0.5)}
+.campaign-pres .slide-index{
+  position:fixed;z-index:1300;bottom:84px;left:50%;transform:translateX(-50%);
+  width:min(420px,calc(100vw - 32px));max-height:min(60vh,520px);
+  display:flex;flex-direction:column;overflow:hidden;
+  background:rgba(14,18,21,0.98);backdrop-filter:blur(20px);
+  border:1px solid rgba(var(--brand-rgb),0.25);border-radius:18px;
+  box-shadow:0 24px 70px rgba(0,0,0,0.6);
+}
+.campaign-pres .slide-index-head{
+  padding:14px 18px;font-size:0.8rem;font-weight:800;letter-spacing:0.08em;
+  text-transform:uppercase;color:var(--brand-cyan);
+  border-bottom:1px solid rgba(255,255,255,0.07);
+}
+.campaign-pres .slide-index-list{overflow-y:auto;padding:8px}
+.campaign-pres .slide-index-item{
+  display:flex;align-items:center;gap:12px;width:100%;
+  padding:11px 12px;border-radius:10px;border:none;cursor:pointer;
+  background:transparent;color:var(--text-secondary);text-align:start;
+  font-family:'Ping',sans-serif;font-size:0.88rem;min-height:44px;
+  transition:background .15s,color .15s;
+}
+.campaign-pres .slide-index-item:hover{background:rgba(255,255,255,0.06);color:#fff}
+.campaign-pres .slide-index-item.active{background:rgba(var(--brand-rgb),0.14);color:var(--brand-cyan);font-weight:700}
+.campaign-pres .slide-index-num{
+  flex-shrink:0;min-width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;
+  border-radius:8px;background:rgba(255,255,255,0.07);font-size:0.75rem;font-weight:700;
+  font-variant-numeric:tabular-nums;
+}
+.campaign-pres .slide-index-item.active .slide-index-num{background:var(--brand-cyan);color:#04211d}
+.campaign-pres .slide-index-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ── Copy switcher (in-slide) ──
    Lives next to the creatives it changes rather than as a small pill in the
@@ -421,10 +475,9 @@
   .campaign-pres .pres-main{padding:16px 12px calc(88px + env(safe-area-inset-bottom))}
   .campaign-pres .story-progress{padding:4px 8px}
 
-  /* The 3px bars are the primary navigation but were a 3px tap target. Give
-     each a 44px transparent hit area while keeping the thin visual fill. */
-  .campaign-pres .story-bar{position:relative;padding:0}
-  .campaign-pres .story-bar::after{content:'';position:absolute;left:0;right:0;top:-20px;height:44px}
+  /* Full 44px touch target on phones, visual rail unchanged */
+  .campaign-pres .story-bar::after{top:-20px;height:44px}
+  .campaign-pres .slide-index{bottom:78px;max-height:56vh}
 
   /* Clear the iOS home indicator, which covers ~34px of the fixed bar */
   .campaign-pres .slide-footer-nav{padding-bottom:calc(10px + env(safe-area-inset-bottom))}
