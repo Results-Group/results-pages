@@ -112,6 +112,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
 
   const removeTab = (idx: number) => {
     if (!confirm(t('reports.deleteTab'))) return
+    markDirty()
     setTabs(prev => prev.filter((_, i) => i !== idx))
     if (activeTabIdx >= tabs.length - 1) setActiveTabIdx(Math.max(0, tabs.length - 2))
   }
@@ -124,6 +125,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
   const moveTab = (idx: number, dir: -1 | 1) => {
     const newIdx = idx + dir
     if (newIdx < 0 || newIdx >= tabs.length) return
+    markDirty()
     setTabs(prev => {
       const next = [...prev]
       ;[next[idx], next[newIdx]] = [next[newIdx], next[idx]]
@@ -141,7 +143,11 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
     updateTab(activeTabIdx, { blocks: [...activeTab.blocks, newBlock] })
   }
 
+  // This is the path for ALL block content — every KPI, table cell and insight.
+  // Without markDirty the unsaved-changes guard never armed, so a whole tab of
+  // work could be closed away without a warning.
   const updateBlock = useCallback((blockId: string, patch: Partial<ReportBlock>) => {
+    markDirty()
     setTabs(prev => prev.map((t, i) => {
       if (i !== activeTabIdx) return t
       return { ...t, blocks: t.blocks.map(b => b.id === blockId ? { ...b, ...patch } : b) }
@@ -165,6 +171,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
 
   // Load template
   const loadTemplate = () => {
+    markDirty()
     if (tabs.length > 0 && tabs.some(tb => tb.blocks.length > 0)) {
       if (!confirm(t('reports.replaceConfirm'))) return
     }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
-import { getPageByClientSlug, downloadFile } from '@/lib/db'
+import { getPageByClientSlug, downloadFile, createPageView } from '@/lib/db'
 import { signAccessToken, verifyAccessToken, CONTENT_ACCESS_MAX_AGE } from '@/lib/content-access'
 import { rateLimit } from '@/lib/rate-limit'
 
@@ -112,6 +112,15 @@ export async function GET(req: NextRequest, { params }: Ctx) {
   const cacheControl = page.password
     ? 'private, no-store'
     : 'public, max-age=0, must-revalidate, s-maxage=60, stale-while-revalidate=60'
+
+  // Record the visit. Fire-and-forget: a stats write must never delay or fail
+  // serving the page. createPageView existed but had no callers, so every
+  // landing page reported 0 views and "reset statistics" reset nothing.
+  createPageView({
+    page_id: page.id,
+    ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || undefined,
+    user_agent: req.headers.get('user-agent') || undefined,
+  }).catch(() => { /* never blocks the response */ })
 
   const etag = `"${contentHash(enrichedHtml)}"`
   if (!page.password && req.headers.get('if-none-match') === etag) {

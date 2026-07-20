@@ -32,7 +32,19 @@ export async function POST(
     const body = await request.json()
     const direction: 'he-to-en' | 'en-to-he' = body.direction || 'he-to-en'
 
-    const sourceTabs = direction === 'he-to-en' ? report.tabs : (report.tabs_en || report.tabs)
+    // Guard the destructive direction: en-to-he overwrites `tabs`, the primary
+    // Hebrew report. Falling back to `report.tabs` as the source meant that with
+    // no English version yet, the Hebrew content was fed in as "English",
+    // round-tripped through the model, and written back over the master copy —
+    // and reports have no version history.
+    if (direction === 'en-to-he' && !(report.tabs_en?.length)) {
+      return NextResponse.json(
+        { error: 'אין גרסה אנגלית לתרגם ממנה. הריצו קודם תרגום מעברית לאנגלית.' },
+        { status: 409 },
+      )
+    }
+
+    const sourceTabs = direction === 'he-to-en' ? report.tabs : report.tabs_en
     const targetLang = direction === 'he-to-en' ? 'English' : 'Hebrew'
     const sourceLang = direction === 'he-to-en' ? 'Hebrew' : 'English'
 

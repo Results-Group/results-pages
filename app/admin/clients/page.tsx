@@ -25,7 +25,10 @@ function similarityScore(a: string, b: string): number {
   const na = normaliseName(a)
   const nb = normaliseName(b)
   if (na === nb) return 1
-  if (na.includes(nb) || nb.includes(na)) return 0.9
+  // A substring match is NOT near-identity: "פיצה האוס" is contained in
+  // "פיצה האוס מבשרת", but they are different branches. Scoring it 0.9 put
+  // genuinely distinct clients at the top of an irreversible merge list, so it
+  // now falls through to word-overlap scoring like any other pair.
   const wa = new Set(na.split(' ').filter(Boolean))
   const wb = new Set(nb.split(' ').filter(Boolean))
   const intersection = [...wa].filter(w => wb.has(w)).length
@@ -307,7 +310,9 @@ function MergeModal({ clients, onClose, onMerged }: { clients: Client[]; onClose
   }
   pairs.sort((x, y) => y.score - x.score)
 
-  const mergedAway = new Set<string>()
+  // State, not a local: a plain Set was rebuilt on every render, so pairs
+  // referencing an already-deleted client stayed listed and clickable.
+  const [mergedAway, setMergedAway] = useState<Set<string>>(new Set())
   const activePairs = pairs.filter(p => !mergedAway.has(p.a.id) && !mergedAway.has(p.b.id) && !done.has(`${p.a.id}-${p.b.id}`))
 
   function pairKey(p: DuplicatePair) { return `${p.a.id}-${p.b.id}` }
@@ -317,6 +322,14 @@ function MergeModal({ clients, onClose, onMerged }: { clients: Client[]; onClose
   async function handleMerge(p: DuplicatePair) {
     const deleteId = deleteFor(p)
     const keepId = keepFor(p)
+    // Irreversible: the source client's row — logo, contacts, notes, brand
+    // colour and positioning — is deleted, not merged. Name both sides.
+    const deleteName = deleteId === p.a.id ? p.a.name : p.b.name
+    const keepName = keepId === p.a.id ? p.a.name : p.b.name
+    if (!window.confirm(
+      `למזג את "${deleteName}" לתוך "${keepName}"?\n\n` +
+      `הקמפיינים, הדפים והדוחות יועברו ל"${keepName}", ו"${deleteName}" יימחק לצמיתות. לא ניתן לבטל.`
+    )) return
     setMerging(pairKey(p))
     setError(null)
     try {
@@ -325,7 +338,7 @@ function MergeModal({ clients, onClose, onMerged }: { clients: Client[]; onClose
         body: JSON.stringify({ merge_into_id: keepId }),
       })
       if (!res.ok) { const d = await res.json() as { error?: string }; setError(d.error ?? t('clients.mergeError')); return }
-      mergedAway.add(deleteId)
+      setMergedAway(prev => new Set([...prev, deleteId]))
       setDone(prev => new Set([...prev, pairKey(p)]))
     } catch { setError(t('clients.mergeError')) } finally { setMerging(null) }
   }

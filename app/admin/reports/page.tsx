@@ -59,7 +59,7 @@ export default function ReportsListPage() {
 
   function getReportUrl(slug: string) {
     const base = typeof window !== 'undefined' ? window.location.origin : ''
-    return `${base}/r/${slug}`
+    return `${base}/report/${slug}`
   }
 
   function handleCopy(slug: string) {
