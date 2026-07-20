@@ -108,6 +108,13 @@
 .campaign-pres .slide-title::before{content:'';display:block;width:4px;height:32px;background:linear-gradient(to bottom,var(--brand-cyan),var(--brand-yellow));border-radius:2px;flex-shrink:0}
 .campaign-pres .slide-intro{font-size:1.1rem;line-height:1.85;color:var(--text-secondary);margin:-16px 0 32px;max-width:760px;white-space:pre-wrap}
 
+/* Slide transition — CSS so navigation never depends on an animation frame */
+@keyframes rp-slide-enter{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.campaign-pres .slide-enter{animation:rp-slide-enter 0.45s cubic-bezier(0.22,1,0.36,1)}
+@media (prefers-reduced-motion: reduce){
+  .campaign-pres .slide-enter{animation:none}
+}
+
 /* Carousel renders as one post, centred like a single mockup */
 .campaign-pres .carousel-slide-wrap{display:flex;justify-content:center;margin-top:8px}
 /* Hide the native scrollbar on the swipe track (Chrome/Safari) */

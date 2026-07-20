@@ -299,25 +299,21 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
         </header>
 
         <main className="pres-main">
-          <AnimatePresence mode="wait">
-            <motion.section
-              key={activeSlide}
-              className="slide active"
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {slides[activeSlide].type === 'cover' && <CoverSlide slide={slides[activeSlide]} />}
-              {slides[activeSlide].type === 'concept' && <ConceptSlide slide={slides[activeSlide]} />}
-              {slides[activeSlide].type === 'divider' && <DividerSlide slide={slides[activeSlide]} index={activeSlide} />}
-              {slides[activeSlide].type === 'creatives' && (
-                <CreativesSlide slide={slides[activeSlide]} activeCopyIdx={activeCopyIdx} onAssetClick={setLightboxAsset} lang={lang} />
-              )}
-              {slides[activeSlide].type === 'closing' && <ClosingSlide slide={slides[activeSlide]} />}
-            </motion.section>
-          </AnimatePresence>
+          {/* Plain section keyed on the slide index: React swaps it immediately
+              and the CSS class replays the transition. AnimatePresence with
+              mode="wait" held the next slide until the previous one's exit
+              animation finished — and when animations are paused (backgrounded
+              tab, battery saver) that exit never completed, so the counter
+              advanced but the deck never moved. */}
+          <section key={activeSlide} className="slide active slide-enter">
+            {slides[activeSlide].type === 'cover' && <CoverSlide slide={slides[activeSlide]} />}
+            {slides[activeSlide].type === 'concept' && <ConceptSlide slide={slides[activeSlide]} />}
+            {slides[activeSlide].type === 'divider' && <DividerSlide slide={slides[activeSlide]} index={activeSlide} />}
+            {slides[activeSlide].type === 'creatives' && (
+              <CreativesSlide slide={slides[activeSlide]} activeCopyIdx={activeCopyIdx} onAssetClick={setLightboxAsset} lang={lang} />
+            )}
+            {slides[activeSlide].type === 'closing' && <ClosingSlide slide={slides[activeSlide]} />}
+          </section>
 
           {showFeedback && isApprovable(slides[activeSlide]) && (
             <ApprovalBar
