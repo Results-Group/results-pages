@@ -16,6 +16,15 @@ interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
+/** Flatten multi-paragraph text into one clean line for a link preview. */
+function shareDescription(text: string | null, max = 200): string {
+  const flat = (text || '').replace(/\s+/g, ' ').trim()
+  if (flat.length <= max) return flat
+  const cut = flat.slice(0, max)
+  const lastSpace = cut.lastIndexOf(' ')
+  return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trim()}…`
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
   const campaign = await getCampaignBySlug(slug)
@@ -38,7 +47,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const title = `${campaign.client} – ${campaign.campaign_name}`
-  const description = campaign.concept || `מצגת קריאייטיב עבור ${campaign.client}`
+  // The concept is multi-paragraph free text. Share cards render a single
+  // truncated line, so collapse the line breaks and cut at a word boundary
+  // rather than letting the scraper chop mid-sentence.
+  const description = shareDescription(campaign.concept) || `מצגת קריאייטיב עבור ${campaign.client}`
 
   return {
     title: `${title} | Results Creative`,

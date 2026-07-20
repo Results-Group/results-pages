@@ -120,6 +120,33 @@
   .campaign-pres .slide-enter{animation:none}
 }
 
+/* ── Copy switcher (in-slide) ──
+   Lives next to the creatives it changes rather than as a small pill in the
+   header, where it was easy to miss — especially on a phone. */
+.campaign-pres .copy-switch{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  margin:0 0 26px;padding:12px 16px;border-radius:14px;
+  background:rgba(var(--brand-rgb),0.05);
+  border:1px solid rgba(var(--brand-rgb),0.18);
+}
+.campaign-pres .copy-switch-label{
+  font-size:0.82rem;font-weight:700;color:var(--brand-cyan);letter-spacing:0.01em;
+}
+.campaign-pres .copy-switch-options{display:flex;gap:8px;flex-wrap:wrap}
+.campaign-pres .copy-switch-btn{
+  font-family:'Ping',sans-serif;cursor:pointer;
+  min-height:40px;padding:8px 20px;border-radius:99px;
+  font-size:0.85rem;font-weight:700;white-space:nowrap;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.12);
+  color:var(--text-secondary);
+  transition:background .2s,color .2s,border-color .2s;
+}
+.campaign-pres .copy-switch-btn:hover{color:#fff;border-color:rgba(var(--brand-rgb),0.4)}
+.campaign-pres .copy-switch-btn.active{
+  background:var(--brand-cyan);border-color:var(--brand-cyan);color:#04211d;
+}
+
 /* Carousel renders as one post, centred like a single mockup */
 .campaign-pres .carousel-slide-wrap{display:flex;justify-content:center;margin-top:8px}
 /* Hide the native scrollbar on the swipe track (Chrome/Safari) */
@@ -407,9 +434,11 @@
   .campaign-pres .divider-slide{min-height:calc(100vh - 190px);min-height:calc(100dvh - 190px)}
   .campaign-pres .divider-number{font-size:3.4rem;opacity:0.5;-webkit-text-stroke-width:0}
 
-  /* Copy switcher lives in the sticky header on every slide — make it tappable */
-  .campaign-pres .global-copy-btn{min-width:30px;height:30px;font-size:0.78rem}
-  .campaign-pres .global-copy-label{font-size:0.72rem}
+  /* Copy switcher: full-width options so both variants are obvious and easy to
+     hit on a phone, where the old header pill was routinely missed. */
+  .campaign-pres .copy-switch{flex-direction:column;align-items:stretch;gap:10px;padding:12px;margin-bottom:20px}
+  .campaign-pres .copy-switch-options{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px}
+  .campaign-pres .copy-switch-btn{min-height:44px;padding:10px 8px;text-align:center}
   .campaign-pres .lightbox-overlay{padding:16px}
   .campaign-pres .slide-footer-nav{gap:14px;padding:10px 12px}
   .campaign-pres .pres-footer{padding:16px 16px 96px;flex-direction:column;gap:8px;text-align:center}

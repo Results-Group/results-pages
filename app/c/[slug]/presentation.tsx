@@ -64,10 +64,9 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   // Reviewer name — remembered across slides and visits (per campaign)
   const [reviewerName, setReviewerName] = useState('')
   const [doneDismissed, setDoneDismissed] = useState(false)
-  // Global copy switcher — shared across all slides that have copies enabled
+  // Selected copy variant, shared across slides so the choice sticks as the
+  // client moves through the deck.
   const [activeCopyIdx, setActiveCopyIdx] = useState(0)
-  // Collect all copies from any slide (they're all the same set from campaign meta)
-  const globalCopies = slides.find(s => s.copies?.length)?.copies || []
 
   const showFeedback = Boolean(feedbackEnabled && campaignId)
 
@@ -287,21 +286,10 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
               to review; the agency name sits on the opposite side. */}
           <div className="brand">{clientName} — {campaignName}</div>
           <div className="header-right">
-            {/* Global copy switcher — shown only when campaign has copies */}
-            {globalCopies.length > 1 && (
-              <div className="global-copy-switcher">
-                <span className="global-copy-label">{t('public.copyLabel')}</span>
-                {globalCopies.map((_, i) => (
-                  <button
-                    key={i}
-                    className={`global-copy-btn${activeCopyIdx === i ? ' active' : ''}`}
-                    onClick={() => setActiveCopyIdx(i)}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-              </div>
-            )}
+            {/* The copy switcher used to live here, but a small pill in the
+                header was easy to miss (especially on mobile) and appeared even
+                on slides with no variants. It now sits inside the slide, next to
+                the text it actually changes. */}
             {showFeedback && feedbackSlides.length > 0 && (
               <div className={`approval-progress${allApproved ? ' complete' : ''}`}>
                 <span className="approval-progress-count">
@@ -331,7 +319,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
             {slides[activeSlide].type === 'concept' && <ConceptSlide slide={slides[activeSlide]} />}
             {slides[activeSlide].type === 'divider' && <DividerSlide slide={slides[activeSlide]} index={activeSlide} />}
             {slides[activeSlide].type === 'creatives' && (
-              <CreativesSlide slide={slides[activeSlide]} activeCopyIdx={activeCopyIdx} onAssetClick={setLightboxAsset} lang={lang} />
+              <CreativesSlide slide={slides[activeSlide]} activeCopyIdx={activeCopyIdx} onActiveCopyChange={setActiveCopyIdx} onAssetClick={setLightboxAsset} lang={lang} />
             )}
             {slides[activeSlide].type === 'closing' && <ClosingSlide slide={slides[activeSlide]} />}
           </section>
@@ -744,9 +732,10 @@ function DividerSlide({ slide, index }: { slide: SlideData; index: number }) {
   )
 }
 
-function CreativesSlide({ slide, activeCopyIdx, onAssetClick, lang = 'he' }: {
+function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick, lang = 'he' }: {
   slide: SlideData
   activeCopyIdx: number
+  onActiveCopyChange: (idx: number) => void
   onAssetClick: (a: { url: string; caption?: string; slideKey?: string; assetId?: string }) => void
   lang?: 'he' | 'en'
 }) {
@@ -770,6 +759,27 @@ function CreativesSlide({ slide, activeCopyIdx, onAssetClick, lang = 'he' }: {
         <p className="slide-intro rp-anim rp-up rp-d2">
           {slide.content}
         </p>
+      )}
+
+      {/* Copy switcher, in context: it sits right above the creatives whose text
+          it swaps, only on slides that actually have variants. */}
+      {copies.length > 1 && (
+        <div className="copy-switch rp-anim rp-up">
+          <span className="copy-switch-label">{t('public.copyLabel')}</span>
+          <div className="copy-switch-options" role="tablist">
+            {copies.map((_, i) => (
+              <button
+                key={i}
+                role="tab"
+                aria-selected={activeCopyIdx === i}
+                className={`copy-switch-btn${activeCopyIdx === i ? ' active' : ''}`}
+                onClick={() => onActiveCopyChange(i)}
+              >
+                {t('public.copyVersion')} {i + 1}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* A carousel is one post containing every creative, so it renders as a
