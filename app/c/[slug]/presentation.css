@@ -397,17 +397,25 @@
   .campaign-pres .cover-corner.tr,.campaign-pres .cover-corner.br{right:16px}
   .campaign-pres .cover-top-bar{padding-bottom:20px}
   .campaign-pres .results-logo-img{height:26px}
-  .campaign-pres .cover-body{flex:1;flex-direction:column-reverse;align-items:stretch;justify-content:center;gap:26px;padding:14px 0}
-  .campaign-pres .cover-right{width:100%;max-width:215px;height:172px;margin:0 auto}
-  .campaign-pres .cover-eyebrow{font-size:0.76rem;letter-spacing:0.18em;margin-bottom:16px}
-  .campaign-pres .cover-headline{font-size:clamp(2.1rem,11vw,3.2rem);margin-bottom:18px}
-  .campaign-pres .cover-meta-line{flex-wrap:wrap;gap:10px}
+  /* Everything centres on a phone — the narrow column reads far better stacked
+     and symmetrical. The Results mark stays where it is in the top bar. */
+  .campaign-pres .cover-body{flex:1;flex-direction:column-reverse;align-items:center;justify-content:center;gap:22px;padding:8px 0}
+  .campaign-pres .cover-left{align-items:center;text-align:center;width:100%}
+  /* Client logo is a supporting mark here, not the hero — keep it modest */
+  .campaign-pres .cover-right{width:150px;height:118px;margin:0 auto;border-radius:12px}
+  .campaign-pres .cover-client-logo{max-width:62%;max-height:62%}
+  .campaign-pres .cover-eyebrow{justify-content:center;font-size:0.72rem;letter-spacing:0.22em;margin-bottom:14px}
+  .campaign-pres .cover-headline{font-size:clamp(2.3rem,12vw,3.4rem);margin-bottom:16px;line-height:1}
+  .campaign-pres .cover-meta-line{justify-content:center;flex-wrap:wrap;gap:10px}
   .campaign-pres .cover-client-name{font-size:1.05rem}
   .campaign-pres .cover-by{font-size:0.85rem}
-  .campaign-pres .cover-h-rule{margin:22px 0 20px}
-  /* Legible partner badges: bigger, with room to wrap onto a second row */
-  .campaign-pres .partner-logos{gap:18px;row-gap:12px}
-  .campaign-pres .partner-logo-img{height:26px}
+  /* Centred, symmetric rule instead of the desktop's left-anchored fade */
+  .campaign-pres .cover-h-rule{
+    margin:22px auto 20px;width:140px;
+    background:linear-gradient(90deg,transparent,var(--cover-gold),transparent);
+  }
+  .campaign-pres .partner-logos{justify-content:center;gap:18px;row-gap:12px}
+  .campaign-pres .partner-logo-img{height:24px}
 
   /* ── Closing ── */
   .campaign-pres .closing-slide-v2{
