@@ -69,10 +69,16 @@ export default function VideoPlayer({
             <button onClick={() => setShowEmbed(true)} className="absolute inset-0 flex items-center justify-center group" aria-label="Play video">
               <PlayButton />
             </button>
-          ) : (
+          ) : url ? (
             <a href={url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 flex items-center justify-center group">
               <PlayButton />
             </a>
+          ) : (
+            // No link pasted yet — an <a href=""> would resolve to the current
+            // page, so tapping "play" reloaded the deck back to slide one.
+            <div className="absolute inset-0 flex items-center justify-center opacity-40">
+              <PlayButton />
+            </div>
           )}
         </>
       )}

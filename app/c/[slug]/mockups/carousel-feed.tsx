@@ -25,19 +25,23 @@ export default function CarouselFeed({
   const [index, setIndex] = useState(0)
   const count = images.length
 
+  // The track is inside a dir="rtl" subtree, where browsers report scrollLeft as
+  // negative (and older Safari as positive-descending). Scrolling the target
+  // child into view sidesteps the sign convention entirely, and the index is
+  // read back from the absolute offset.
   function goTo(i: number) {
     const next = Math.max(0, Math.min(count - 1, i))
     setIndex(next)
-    const track = trackRef.current
-    if (track) track.scrollTo({ left: track.clientWidth * next, behavior: 'smooth' })
+    trackRef.current?.children[next]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
   }
 
   // Keep the dots in sync when the user swipes natively.
   function onScroll() {
     const track = trackRef.current
     if (!track || !track.clientWidth) return
-    const i = Math.round(track.scrollLeft / track.clientWidth)
-    if (i !== index) setIndex(i)
+    const i = Math.round(Math.abs(track.scrollLeft) / track.clientWidth)
+    const clamped = Math.max(0, Math.min(count - 1, i))
+    if (clamped !== index) setIndex(clamped)
   }
 
   return (

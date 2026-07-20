@@ -318,7 +318,7 @@ export default function SlideCanvas({
             {atLimit ? (
               <div className="rounded-2xl px-5 py-4 flex items-center gap-3" style={{ border: '2px dashed rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.01)' }}>
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)' }}>
-                  <span className="text-sm font-black" style={{ color: '#ef4444' }}>4</span>
+                  <span className="text-sm font-black" style={{ color: '#ef4444' }}>{MAX_ASSETS}</span>
                 </div>
                 <div>
                   <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>הגעת למגבלת {MAX_ASSETS} תמונות לשקף</p>

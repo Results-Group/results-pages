@@ -28,7 +28,10 @@ export async function GET(req: NextRequest) {
       .update({ status: 'archived', updated_at: now })
       .lt('expires_at', now)
       .not('expires_at', 'is', null)
-      .neq('status', 'archived')
+      // Only live campaigns: a draft that happens to carry a past end date must
+      // stay a draft, and templates are never "live" to begin with.
+      .eq('status', 'published')
+      .eq('is_template', false)
       .is('deleted_at', null)
       .select('id, campaign_name, workspace_id')
 

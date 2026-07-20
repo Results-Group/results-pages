@@ -190,6 +190,15 @@ export async function updateCampaign(
   return campaign as Campaign
 }
 
+/** Persist an uploaded logo path. Deliberately does NOT touch updated_at: the
+ * editor holds the last-known value for optimistic concurrency, and bumping it
+ * behind their back made the next autosave 409 and lock the editor into the
+ * "changed elsewhere — reload" state, losing everything typed after the upload. */
+export async function setCampaignLogoPath(id: string, logoPath: string) {
+  const { error } = await supabase.from('campaigns').update({ logo_path: logoPath }).eq('id', id)
+  if (error) throw error
+}
+
 /** Persist the campaign's Monday feedback-board item id. Does not touch updated_at
  * (avoids spurious optimistic-concurrency conflicts for an editor with it open). */
 export async function setCampaignMondayFeedbackItem(id: string, itemId: string) {

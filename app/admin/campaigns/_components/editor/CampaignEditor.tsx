@@ -217,8 +217,13 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
       const base = doc.meta.publishAt ? new Date(doc.meta.publishAt).getTime() : Date.now()
       const minExpiry = base + MIN_CAMPAIGN_MS
       const exp = doc.meta.expiresAt ? new Date(doc.meta.expiresAt).getTime() : NaN
-      if (!doc.meta.expiresAt || Number.isNaN(exp) || exp < minExpiry) {
-        setMeta({ expiresAt: toDatetimeLocal(minExpiry) })
+      // Tolerance matters: with no publish date the base is Date.now(), which
+      // advances between clicks. Comparing strictly against it rejected the very
+      // value this branch had just auto-filled, so publishing could never
+      // succeed. Allow a grace window and default a day past the minimum.
+      const GRACE_MS = 10 * 60_000
+      if (!doc.meta.expiresAt || Number.isNaN(exp) || exp < minExpiry - GRACE_MS) {
+        setMeta({ expiresAt: toDatetimeLocal(minExpiry + 24 * 60 * 60 * 1000) })
         toast('חובה תאריך סיום של לפחות 4 שבועות (הקמפיין יעבור לארכיון אחריו). קבענו ברירת מחדל — בדקו ולחצו פרסום שוב.', 'error')
         return null
       }
@@ -308,9 +313,13 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
     })
   }, [])
 
-  // Best-effort storage cleanup when an asset is removed/replaced — never blocks the UI
+  // Best-effort storage cleanup when an asset is replaced — never blocks the UI.
+  // Duplicating a slide copies asset rows but keeps the same file_path, so the
+  // file is only safe to delete once nothing in the document still points at it.
   const deleteStoredAsset = useCallback((cid: string, filePath?: string | null) => {
     if (!cid || !filePath) return
+    const stillReferenced = docRef.current.sections.some(s => s.assets.some(a => a.file_path === filePath))
+    if (stillReferenced) return
     try {
       fetch(`/api/campaigns/${cid}/assets`, {
         method: 'DELETE',
@@ -496,10 +505,12 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
 
   const handleRemoveAsset = useCallback((assetId: string) => {
     if (!activeSection) return
-    const asset = activeSection.assets.find(a => a.id === assetId)
+    // The file is intentionally left in storage: removal is undoable (Cmd+Z
+    // restores the asset with its original file_path), and deleting eagerly
+    // turned an undo into a permanently broken image in the published deck.
+    // Orphans are cleaned up when the campaign is purged.
     removeAsset(activeSection.id, assetId)
-    if (campaignId && asset?.file_path) deleteStoredAsset(campaignId, asset.file_path)
-  }, [activeSection, removeAsset, campaignId, deleteStoredAsset])
+  }, [activeSection, removeAsset])
 
   const uploadLogo = useCallback(async (file: File) => {
     const id = await ensureCampaignExists()

@@ -3,9 +3,8 @@
 import { useCallback, useRef, useState } from 'react'
 import { X, UploadCloud, Sparkles, Image as ImageIcon } from 'lucide-react'
 import { isImageFile, MAX_FILE_BYTES } from '@/lib/image-compress'
-import type { MockupType } from './types'
+import { maxAssetsFor, type MockupType } from './types'
 
-const MAX_ASSETS_PER_SLIDE = 4
 
 /** Mockup types the employee can bulk-upload into (divider has no assets). */
 // Smart upload is for image files only; video slides use a link (YouTube/Vimeo/
@@ -42,7 +41,9 @@ export default function SmartUploadModal({ open, onClose, onConfirm }: {
 
   if (!open) return null
 
-  const slideCount = Math.ceil(files.length / MAX_ASSETS_PER_SLIDE)
+  // Capacity follows the chosen type — a carousel takes 10 per slide, not 4.
+  const perSlide = maxAssetsFor(mockupType)
+  const slideCount = Math.ceil(files.length / perSlide)
 
   return (
     <div
@@ -67,7 +68,7 @@ export default function SmartUploadModal({ open, onClose, onConfirm }: {
         </div>
 
         <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.45)' }}>
-          גרור את כל הקבצים בבת אחת — המערכת תסדר אותם אוטומטית ל-{MAX_ASSETS_PER_SLIDE} גרפיקות בכל שקף.
+          גרור את כל הקבצים בבת אחת — המערכת תסדר אותם אוטומטית ל-{perSlide} גרפיקות בכל שקף.
         </p>
 
         {/* Mockup type — chosen once for all created slides */}

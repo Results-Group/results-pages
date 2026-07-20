@@ -97,5 +97,9 @@ export function isImageFile(file: File): boolean {
   return ['jpg', 'jpeg', 'png', 'webp', 'gif', 'heic', 'heif', 'avif', 'tiff', 'bmp'].includes(ext)
 }
 
-export const MAX_FILE_MB = 150
+// Must not exceed the server's own guard (50 MB in the campaign assets route).
+// Client compression usually shrinks files well below this, but it falls back to
+// the raw file whenever the browser can't decode the source (e.g. HEIC outside
+// Apple), so a larger client limit surfaced as a late, generic upload failure.
+export const MAX_FILE_MB = 50
 export const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024

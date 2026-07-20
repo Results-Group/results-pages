@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireResourcePermission } from '@/lib/auth'
 import {
   getCampaignById,
-  updateCampaign,
+  setCampaignLogoPath,
   compressAndUploadImage,
   uploadLogoImage,
   getAssetPublicUrl,
@@ -60,7 +60,7 @@ export async function POST(
 
     if (type === 'logo') {
       filePath = await uploadLogoImage(file, id)
-      await updateCampaign(id, { logo_path: filePath })
+      await setCampaignLogoPath(id, filePath)
     } else {
       const uuid = crypto.randomUUID()
       const storagePath = `campaigns/${id}/${uuid}.webp`
