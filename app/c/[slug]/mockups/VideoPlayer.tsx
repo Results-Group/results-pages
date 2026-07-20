@@ -22,6 +22,9 @@ export default function VideoPlayer({
 }) {
   const [showEmbed, setShowEmbed] = useState(false)
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(() => getVideoThumbnail(url))
+  // Social video ads are often square or vertical. Forcing 16:9 cropped ~44% off
+  // a 1:1 creative, so the poster's own ratio drives the slot until it plays.
+  const [posterRatio, setPosterRatio] = useState<number | null>(null)
 
   useEffect(() => {
     setThumbnailUrl(getVideoThumbnail(url))
@@ -36,8 +39,12 @@ export default function VideoPlayer({
 
   return (
     <div
-      className={`relative w-full aspect-video overflow-hidden ${rounded ? 'rounded-lg' : ''}`}
-      style={{ background: 'linear-gradient(135deg, #141e20, #0d1112)' }}
+      className={`relative w-full overflow-hidden ${rounded ? 'rounded-lg' : ''}`}
+      style={{
+        background: 'linear-gradient(135deg, #141e20, #0d1112)',
+        // Once playing, the embed is always 16:9; before that, match the poster.
+        aspectRatio: showEmbed ? '16 / 9' : (posterRatio ?? 16 / 9),
+      }}
     >
       {showEmbed && embedUrl ? (
         <iframe
@@ -56,6 +63,10 @@ export default function VideoPlayer({
                 alt="Video thumbnail"
                 className="absolute inset-0 w-full h-full object-cover"
                 loading="lazy"
+                onLoad={e => {
+                  const img = e.currentTarget
+                  if (img.naturalWidth && img.naturalHeight) setPosterRatio(img.naturalWidth / img.naturalHeight)
+                }}
                 onError={() => {
                   const fallback = getYouTubeFallbackThumbnail(url)
                   setThumbnailUrl(fallback && fallback !== thumbnailUrl ? fallback : null)

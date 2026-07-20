@@ -371,8 +371,25 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
 
-  .campaign-pres .pres-main{padding:16px 12px 88px}
+  .campaign-pres .pres-main{padding:16px 12px calc(88px + env(safe-area-inset-bottom))}
   .campaign-pres .story-progress{padding:4px 8px}
+
+  /* The 3px bars are the primary navigation but were a 3px tap target. Give
+     each a 44px transparent hit area while keeping the thin visual fill. */
+  .campaign-pres .story-bar{position:relative;padding:0}
+  .campaign-pres .story-bar::after{content:'';position:absolute;left:0;right:0;top:-20px;height:44px}
+
+  /* Clear the iOS home indicator, which covers ~34px of the fixed bar */
+  .campaign-pres .slide-footer-nav{padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+
+  /* Dividers filled only ~65% of the screen and the watermark number, sized
+     like the title on a phone, collided with it. */
+  .campaign-pres .divider-slide{min-height:calc(100vh - 190px);min-height:calc(100dvh - 190px)}
+  .campaign-pres .divider-number{font-size:3.4rem;opacity:0.5;-webkit-text-stroke-width:0}
+
+  /* Copy switcher lives in the sticky header on every slide — make it tappable */
+  .campaign-pres .global-copy-btn{min-width:30px;height:30px;font-size:0.78rem}
+  .campaign-pres .global-copy-label{font-size:0.72rem}
   .campaign-pres .lightbox-overlay{padding:16px}
   .campaign-pres .slide-footer-nav{gap:14px;padding:10px 12px}
   .campaign-pres .pres-footer{padding:16px 16px 96px;flex-direction:column;gap:8px;text-align:center}

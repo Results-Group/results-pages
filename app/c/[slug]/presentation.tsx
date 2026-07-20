@@ -30,12 +30,6 @@ type FeedbackStatus = 'approved' | 'rejected' | 'pending'
 interface SlideFeedback { slide_key: string; status: FeedbackStatus; comment: string | null; author: string | null }
 interface SlidePin { id: string; slide_key: string; asset_id: string | null; x: number; y: number; comment: string | null; author: string | null; resolved: boolean }
 
-const slideVariants = {
-  enter: { opacity: 0, y: 30, scale: 0.98 },
-  center: { opacity: 1, y: 0, scale: 1 },
-  exit: { opacity: 0, y: -20, scale: 0.98 },
-}
-
 /** Convert a #RRGGBB (or #RGB) hex to an rgba() string. Falls back to the raw value. */
 function hexToRgba(hex: string, alpha: number): string {
   let h = hex.trim().replace('#', '')
@@ -56,11 +50,6 @@ function hexToRgbTriplet(hex: string): string | null {
   const g = parseInt(h.slice(2, 4), 16)
   const b = parseInt(h.slice(4, 6), 16)
   return `${r}, ${g}, ${b}`
-}
-
-const staggerChild = {
-  hidden: { opacity: 0, y: 24 },
-  visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } }),
 }
 
 export default function CampaignPresentation({ slides, clientName, campaignName, brandColor, campaignId, feedbackEnabled, lang = 'he' }: Props) {
@@ -162,7 +151,9 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
 
   const goSlide = useCallback((n: number) => {
     setActiveSlide(n)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    // 'auto', not 'smooth': smooth scrolling is animation-frame driven, so with
+    // animations paused the client stayed 1400px down the previous slide.
+    window.scrollTo({ top: 0, behavior: 'auto' })
   }, [])
 
   // Approval progress across all feedback-enabled (creative) slides
@@ -199,12 +190,14 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
     function onKey(e: KeyboardEvent) {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
       if (e.key === 'Escape' && lightboxAsset) { setLightboxAsset(null); return }
-      if (e.key === 'ArrowLeft') setActiveSlide(s => Math.min(slides.length - 1, s + 1))
-      if (e.key === 'ArrowRight') setActiveSlide(s => Math.max(0, s - 1))
+      // Route through goSlide so keyboard navigation also resets the scroll
+      // position — otherwise arrow keys left the reader mid-way down the page.
+      if (e.key === 'ArrowLeft') goSlide(Math.min(slides.length - 1, activeSlide + 1))
+      if (e.key === 'ArrowRight') goSlide(Math.max(0, activeSlide - 1))
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [slides.length, lightboxAsset])
+  }, [slides.length, lightboxAsset, activeSlide, goSlide])
 
   useEffect(() => {
     let rafId = 0
@@ -694,12 +687,12 @@ function CoverSlide({ slide }: { slide: SlideData }) {
 function ConceptSlide({ slide }: { slide: SlideData }) {
   return (
     <div className="concept-slide">
-      <motion.h2 className="slide-title" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
+      <h2 className="slide-title rp-anim rp-in rp-d1">
         {slide.title}
-      </motion.h2>
-      <motion.div className="concept-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.5 }}>
+      </h2>
+      <div className="concept-card rp-anim rp-up rp-d2">
         <p>{slide.content}</p>
-      </motion.div>
+      </div>
     </div>
   )
 }
@@ -710,15 +703,15 @@ function DividerSlide({ slide, index }: { slide: SlideData; index: number }) {
     <div className="divider-slide">
       <div className="divider-glow" />
       <span className="divider-number">{num}</span>
-      <motion.h2 className="divider-title" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+      <h2 className="divider-title rp-anim rp-up rp-d1">
         {slide.title}
-      </motion.h2>
+      </h2>
       {slide.content && (
-        <motion.p className="divider-desc" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.5 }}>
+        <p className="divider-desc rp-anim rp-up rp-d2">
           {slide.content}
-        </motion.p>
+        </p>
       )}
-      <motion.div className="divider-line" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.35, duration: 0.5 }} />
+      <div className="divider-line rp-anim rp-wipe rp-d3" />
     </div>
   )
 }
@@ -741,14 +734,14 @@ function CreativesSlide({ slide, activeCopyIdx, onAssetClick, lang = 'he' }: {
   return (
     <div>
       {slide.title && (
-        <motion.h2 className="slide-title" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
+        <h2 className="slide-title rp-anim rp-in rp-d1">
           {slide.title}
-        </motion.h2>
+        </h2>
       )}
       {slide.content && (
-        <motion.p className="slide-intro" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1, duration: 0.5 }}>
+        <p className="slide-intro rp-anim rp-up rp-d2">
           {slide.content}
-        </motion.p>
+        </p>
       )}
 
       {/* A carousel is one post containing every creative, so it renders as a
@@ -769,18 +762,19 @@ function CreativesSlide({ slide, activeCopyIdx, onAssetClick, lang = 'he' }: {
       {assets.length > 0 && !isCarousel && (
         <div className={`assets-grid ${isStory ? 'story-grid' : 'standard-grid'}`}>
           {assets.map((asset, i) => (
-            <motion.div
+            <div
               key={asset.id}
-              className="mockup-wrapper"
-              custom={i}
-              initial="hidden"
-              animate="visible"
-              variants={staggerChild}
+              className="mockup-wrapper rp-anim rp-up"
               onClick={() => {
                 const url = asset.file_path ? assetProxyUrl(asset.file_path) : (asset.public_url || '')
                 if (url && asset.type !== 'video') onAssetClick({ url, caption: activeCopy || asset.caption, slideKey: slide.key, assetId: asset.id })
               }}
-              style={{ cursor: asset.type !== 'video' ? 'pointer' : 'default' }}
+              style={{
+                cursor: asset.type !== 'video' ? 'pointer' : 'default',
+                // Stagger without JS — Framer's rAF-driven variants left mockups
+                // below the fold stranded at opacity 0 when animations were paused.
+                animationDelay: `${Math.min(i, 6) * 0.08}s`,
+              }}
             >
               <AssetRenderer
                 asset={asset}
@@ -789,7 +783,7 @@ function CreativesSlide({ slide, activeCopyIdx, onAssetClick, lang = 'he' }: {
                 clientName={slide.clientName || ''}
                 captionOverride={activeCopy}
               />
-            </motion.div>
+            </div>
           ))}
         </div>
       )}
