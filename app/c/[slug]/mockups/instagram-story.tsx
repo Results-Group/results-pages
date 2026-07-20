@@ -1,5 +1,7 @@
 'use client'
 
+import { useLogoNeedsDarkBackdrop } from './useLogoContrast'
+
 interface InstagramStoryProps {
   imageUrl: string
   clientName: string
@@ -7,6 +9,7 @@ interface InstagramStoryProps {
 }
 
 export default function InstagramStory({ imageUrl, clientName, logoUrl }: InstagramStoryProps) {
+  const logoNeedsDark = useLogoNeedsDarkBackdrop(logoUrl)
   return (
     <div dir="rtl" className="w-[260px] mx-auto">
       {/* Phone frame */}
@@ -40,7 +43,10 @@ export default function InstagramStory({ imageUrl, clientName, logoUrl }: Instag
             {/* Username bar */}
             <div className="absolute top-11 inset-x-3 z-10 flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0" style={{ background: 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)', padding: '2px' }}>
-                <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center">
+                <div
+                  className="w-full h-full rounded-full overflow-hidden flex items-center justify-center"
+                  style={{ background: logoNeedsDark ? '#1c1e21' : '#fff' }}
+                >
                   {logoUrl ? (
                     <img src={logoUrl} alt={clientName} className="max-w-[70%] max-h-[70%] object-contain" />
                   ) : (

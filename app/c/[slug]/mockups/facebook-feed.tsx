@@ -1,6 +1,7 @@
 'use client'
 
 import AdCaption from './AdCaption'
+import { useLogoNeedsDarkBackdrop } from './useLogoContrast'
 
 interface FacebookFeedProps {
   imageUrl: string
@@ -10,6 +11,7 @@ interface FacebookFeedProps {
 }
 
 export default function FacebookFeed({ imageUrl, clientName, logoUrl, caption }: FacebookFeedProps) {
+  const logoNeedsDark = useLogoNeedsDarkBackdrop(logoUrl)
   return (
     <div dir="rtl" className="w-full max-w-[500px] mx-auto" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
       {/* Phone frame */}
@@ -35,7 +37,10 @@ export default function FacebookFeed({ imageUrl, clientName, logoUrl, caption }:
 
           {/* Post header */}
           <div className="flex items-center gap-2.5 px-4 py-3">
-            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-white flex items-center justify-center" style={{ border: '1px solid #e4e6eb' }}>
+            <div
+              className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center"
+              style={{ background: logoNeedsDark ? '#1c1e21' : '#fff', border: `1px solid ${logoNeedsDark ? '#1c1e21' : '#e4e6eb'}` }}
+            >
               {logoUrl ? (
                 <img src={logoUrl} alt={clientName} className="max-w-[70%] max-h-[70%] object-contain" />
               ) : (

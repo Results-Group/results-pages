@@ -1,6 +1,7 @@
 'use client'
 
 import AdCaption from './AdCaption'
+import { useLogoNeedsDarkBackdrop } from './useLogoContrast'
 
 interface InstagramFeedProps {
   imageUrl: string
@@ -10,6 +11,7 @@ interface InstagramFeedProps {
 }
 
 export default function InstagramFeed({ imageUrl, clientName, logoUrl, caption }: InstagramFeedProps) {
+  const logoNeedsDark = useLogoNeedsDarkBackdrop(logoUrl)
   return (
     <div dir="rtl" className="w-full max-w-[468px] mx-auto" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
       {/* Phone frame */}
@@ -24,7 +26,10 @@ export default function InstagramFeed({ imageUrl, clientName, logoUrl, caption }
           <div className="flex items-center justify-between px-3 py-2" style={{ borderBottom: '1px solid #efefef' }}>
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0" style={{ background: 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)', padding: '2px' }}>
-                <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center">
+                <div
+                  className="w-full h-full rounded-full overflow-hidden flex items-center justify-center"
+                  style={{ background: logoNeedsDark ? '#1c1e21' : '#fff' }}
+                >
                   {logoUrl ? (
                     <img src={logoUrl} alt={clientName} className="max-w-[70%] max-h-[70%] object-contain" />
                   ) : (
