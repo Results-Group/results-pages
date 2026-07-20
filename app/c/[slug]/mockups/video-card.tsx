@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import he from '@/lib/i18n/he'
 import en from '@/lib/i18n/en'
+import { getVideoThumbnail, getYouTubeFallbackThumbnail } from '@/lib/video-utils'
 
 interface VideoCardProps {
   url: string;
@@ -16,16 +17,20 @@ export default function VideoCard({ url, embedUrl, platform, caption, lang = 'he
   const dict = lang === 'en' ? en : he
   const t = (key: keyof typeof he) => dict[key] ?? he[key] ?? key
   const [showEmbed, setShowEmbed] = useState(false);
+  // Poster image: resolvable up-front for YouTube/Drive, fetched for Vimeo.
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(() => getVideoThumbnail(url));
 
-  const thumbnailUrl = getThumbnail(url, platform);
-
-  function getThumbnail(videoUrl: string, plat: string): string | null {
-    if (plat === 'youtube') {
-      const match = videoUrl.match(/(?:v=|\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-      if (match) return `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`;
-    }
-    return null;
-  }
+  useEffect(() => {
+    setThumbnailUrl(getVideoThumbnail(url))
+    if (platform !== 'vimeo') return
+    // Vimeo has no predictable still URL — ask its public oEmbed endpoint.
+    let cancelled = false
+    fetch(`https://vimeo.com/api/oembed.json?url=${encodeURIComponent(url)}`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(data => { if (!cancelled && data?.thumbnail_url) setThumbnailUrl(data.thumbnail_url) })
+      .catch(() => { /* keep the gradient placeholder */ })
+    return () => { cancelled = true }
+  }, [url, platform])
 
   return (
     <div dir="rtl" className="w-full font-sans">
@@ -40,7 +45,22 @@ export default function VideoCard({ url, embedUrl, platform, caption, lang = 'he
         ) : (
           <>
             {thumbnailUrl && (
-              <img src={thumbnailUrl} alt="Video thumbnail" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+              <>
+                <img
+                  src={thumbnailUrl}
+                  alt="Video thumbnail"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                  onError={() => {
+                    // YouTube's maxres still doesn't exist for every video —
+                    // drop to the always-present hqdefault, else show the gradient.
+                    const fallback = getYouTubeFallbackThumbnail(url)
+                    setThumbnailUrl(fallback && fallback !== thumbnailUrl ? fallback : null)
+                  }}
+                />
+                {/* Keeps the play button legible over bright frames */}
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.45), rgba(0,0,0,0.15))' }} />
+              </>
             )}
 
             {embedUrl ? (

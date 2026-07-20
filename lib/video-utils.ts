@@ -18,3 +18,24 @@ export function parseVideoUrl(url: string): { platform: 'youtube' | 'vimeo' | 'o
 
   return { platform: 'other' }
 }
+
+/**
+ * Best-effort poster image for a video URL, resolvable without an API call.
+ * - YouTube serves predictable still frames.
+ * - Google Drive exposes a thumbnail endpoint for link-shared files (same
+ *   sharing requirement as the embed player).
+ * Vimeo has no static URL — it needs the oEmbed lookup the card does at runtime.
+ */
+export function getVideoThumbnail(url: string): string | null {
+  const { platform, videoId } = parseVideoUrl(url)
+  if (!videoId) return null
+  if (platform === 'youtube') return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+  if (/drive\.google\.com/.test(url)) return `https://drive.google.com/thumbnail?id=${videoId}&sz=w1280`
+  return null
+}
+
+/** Lower-resolution YouTube still that always exists, for maxres 404 fallback. */
+export function getYouTubeFallbackThumbnail(url: string): string | null {
+  const { platform, videoId } = parseVideoUrl(url)
+  return platform === 'youtube' && videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null
+}
