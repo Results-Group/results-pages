@@ -24,8 +24,18 @@ export async function middleware(req: NextRequest) {
     const rpToken = req.cookies.get('rp_session')?.value
 
     let valid = false
-    if (phToken) valid = !!(await verifySessionToken(phToken))
-    if (!valid && rpToken) valid = !!(await verifySessionToken(rpToken))
+    // Mirror the dashboard API's rules, so a token it would reject sends the
+    // viewer to the login screen instead of a page that then fails to load its
+    // data. Sessions minted before the scope claim existed land here and simply
+    // re-authenticate once.
+    if (phToken) {
+      const phSession = await verifySessionToken(phToken)
+      valid = phSession?.scope === 'pizza-house'
+    }
+    if (!valid && rpToken) {
+      const rpSession = await verifySessionToken(rpToken)
+      valid = !!rpSession && !rpSession.scope && (!!rpSession.isOwner || rpSession.role === 'admin')
+    }
 
     if (!valid) {
       return NextResponse.redirect(new URL('/pizza-house/login', req.url))
