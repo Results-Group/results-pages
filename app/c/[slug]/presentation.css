@@ -35,7 +35,9 @@
 .campaign-pres .ambient-light-3{position:fixed;top:40%;left:60%;width:600px;height:600px;background:radial-gradient(circle,rgba(167,139,250,0.03) 0%,transparent 65%);pointer-events:none;z-index:0;transition:transform 0.15s ease-out}
 
 /* ── Story Progress Bars ── */
-.campaign-pres .story-progress{position:fixed;top:0;left:0;right:0;z-index:1100;display:flex;gap:3px;padding:6px 12px;background:linear-gradient(to bottom,rgba(9,12,14,0.9),transparent)}
+/* align-items:center — without it the flex default (stretch) equalises every
+   bar's height and the current one can't stand taller. */
+.campaign-pres .story-progress{position:fixed;top:0;left:0;right:0;z-index:1100;display:flex;align-items:center;gap:4px;padding:8px 12px;background:linear-gradient(to bottom,rgba(9,12,14,0.9),transparent)}
 /* 5px rail with a 26px invisible hit area (44px on touch, below) — at 20 slides
    each bar is only ~15px wide, so the vertical target has to carry the click. */
 .campaign-pres .story-bar{
@@ -46,6 +48,9 @@
 .campaign-pres .story-bar::after{content:'';position:absolute;left:0;right:0;top:-11px;height:26px}
 .campaign-pres .story-bar:hover{background:rgba(255,255,255,0.3);transform:scaleY(1.6)}
 .campaign-pres .story-bar:focus-visible{outline:2px solid var(--brand-cyan);outline-offset:3px}
+/* With 20 equal slivers you can't tell at a glance where you are. The current
+   one grows and thickens so position reads instantly. */
+.campaign-pres .story-bar.current{flex-grow:4;height:7px;transition:flex-grow 0.35s ease,height 0.2s ease}
 .campaign-pres .story-bar-fill{height:100%;border-radius:3px;width:0;transition:width 0.4s ease}
 .campaign-pres .story-bar-fill.done{width:100%;background:var(--brand-cyan)}
 .campaign-pres .story-bar-fill.active{width:100%;background:linear-gradient(90deg,var(--brand-cyan),var(--brand-yellow));animation:progressGlow 2s ease-in-out infinite}

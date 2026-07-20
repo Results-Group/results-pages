@@ -281,7 +281,14 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
         {/* Story-style progress bars */}
         <div className="story-progress">
           {slides.map((slide, i) => (
-            <button key={i} className="story-bar" onClick={() => goSlide(i)} title={getSlideLabel(slide, i)} aria-label={getSlideLabel(slide, i)}>
+            <button
+              key={i}
+              className={`story-bar${i === activeSlide ? ' current' : ''}`}
+              onClick={() => goSlide(i)}
+              title={getSlideLabel(slide, i)}
+              aria-label={getSlideLabel(slide, i)}
+              aria-current={i === activeSlide ? 'step' : undefined}
+            >
               <div className={`story-bar-fill ${i < activeSlide ? 'done' : i === activeSlide ? 'active' : ''}`} />
             </button>
           ))}
