@@ -4,7 +4,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pophy - שמים סוף להתעסקות עם ניקיון המשרד</title>
+    <title>Pophy - אפליקציית שירותי הניקיון הראשונה למשרדים</title>
 
     <!-- === Tracking (unchanged) === -->
     <script type="text/javascript">
@@ -50,439 +50,403 @@
         @font-face { font-family: 'Ping HL'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-bold.woff2') format('woff2'); font-weight: 600; }
         @font-face { font-family: 'Ping HL'; src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-heavy.woff2') format('woff2'); font-weight: 800; }
 
-        /* === Variables === */
         :root {
-            --dark-text: #1D1D1F;
-            --secondary-text: #86868B;
-            --background: #FBFBFD;
-            --border-color: #E5E5EA;
-            --font-bold: 800;
-            --font-semibold: 600;
-            --font-heavy: 800;
-            --pophy-yellow: #FFD400;
-            --pophy-green: #34c759;
-            --cta-background: #1D1D1F;
-            --cta-text-color: #FFFFFF;
-            --text-main: #FFFFFF;
-            --text-muted: #86868B;
-            --bg-deep: #000000;
-            --bg-card: #0A0A0C;
-            --pophy-yellow-glow: rgba(255, 212, 0, 0.4);
+            --ink: #1D1D1F;
+            --muted: #6E6E73;
+            --faint: #86868B;
+            --bg: #FFFFFF;
+            --panel: #F5F5F7;
+            --line: #E8E8ED;
+            --accent: #FFD400;
+            --green: #34C759;
         }
 
-        /* === Base Reset === */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html { overflow-x: hidden; width: 100%; max-width: 100vw; }
-        body { margin: 0; padding: 0; overflow-x: hidden; width: 100%; min-width: 0; max-width: 100vw; background-color: var(--bg-deep); color: var(--text-main); font-family: 'Ping HL', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; direction: rtl; }
+        /* Embedded in an auto-height iframe: hide internal scroll so the host page scrolls */
+        html { overflow: hidden; width: 100%; max-width: 100vw; -webkit-text-size-adjust: 100%; }
+        body {
+            margin: 0; padding: 0; overflow: hidden; width: 100%; max-width: 100vw;
+            background: var(--bg); color: var(--ink);
+            font-family: 'Ping HL', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            -webkit-font-smoothing: antialiased; direction: rtl; line-height: 1.5;
+        }
 
         /* =========================================================
-           Single Section — Hero + Download (Deep Space)
+           Top bar
            ========================================================= */
-        .hero-single {
-            position: relative;
-            min-height: 100vh;
-            padding: 60px 20px 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            overflow: hidden;
-            background-color: var(--bg-deep);
+        .topbar {
+            display: flex; align-items: center; justify-content: center;
+            padding: 22px 24px; border-bottom: 1px solid var(--line);
+        }
+        .topbar img { height: 26px; }
+
+        /* =========================================================
+           Hero (single section)
+           ========================================================= */
+        .hero {
+            max-width: 1180px; margin: 0 auto;
+            padding: 70px 40px 30px;
+            display: grid; grid-template-columns: 1.12fr 0.88fr;
+            gap: 56px; align-items: center;
         }
 
-        /* fading grid background */
-        .hero-single::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-image:
-                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            mask-image: radial-gradient(circle at center, black 10%, transparent 80%);
-            -webkit-mask-image: radial-gradient(circle at center, black 10%, transparent 80%);
-            z-index: 0;
-            pointer-events: none;
+        .hero-copy { display: flex; flex-direction: column; align-items: flex-start; }
+
+        .eyebrow {
+            display: inline-block;
+            font-size: 1.2rem; font-weight: 800; color: #1D1D1F;
+            background: var(--accent); border: none;
+            padding: 8px 18px; border-radius: 12px; margin-bottom: 20px;
+            letter-spacing: -0.2px; box-shadow: 0 8px 20px -10px rgba(255,212,0,.75);
         }
 
-        /* central glow */
-        .core-glow {
-            position: absolute;
-            top: 45%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 700px; height: 700px;
-            background: radial-gradient(circle, var(--pophy-yellow-glow) 0%, transparent 70%);
-            filter: blur(90px);
-            z-index: 1;
-            opacity: 0.4;
-            pointer-events: none;
+        h1.headline {
+            font-size: 3rem; font-weight: 800; line-height: 1.1;
+            letter-spacing: -1.4px; color: var(--ink); margin: 0 0 22px;
+            text-wrap: balance;
+        }
+        h1.headline .accent-line { color: var(--muted); font-weight: 800; }
+
+        .subcopy {
+            font-size: 1.2rem; color: var(--muted); line-height: 1.55;
+            max-width: 520px; margin: 0 0 16px; font-weight: 400;
+        }
+        .subcopy strong { color: var(--ink); font-weight: 600; }
+
+        .hero-punch {
+            font-size: 1.25rem; font-weight: 800; color: var(--ink);
+            line-height: 1.4; max-width: 520px; margin: 0 0 26px; letter-spacing: -0.3px;
         }
 
-        .hero-inner {
-            position: relative;
-            z-index: 10;
-            width: 100%;
-            max-width: 720px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .hero-logo { height: 42px; margin-bottom: 30px; }
-
-        .hero-headline {
-            font-size: 3rem;
-            font-weight: var(--font-heavy);
-            line-height: 1.1;
-            letter-spacing: -1.5px;
-            margin: 0 0 18px 0;
-            color: var(--text-main);
-        }
-        .highlight-text {
-            background: linear-gradient(90deg, #FFFFFF 0%, var(--pophy-yellow) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-subheadline {
-            font-size: 1.25rem;
-            color: var(--text-muted);
-            margin: 0 auto 30px;
-            max-width: 560px;
-            line-height: 1.5;
-            font-weight: 400;
-        }
-
-        /* benefits */
-        .hero-benefits {
-            list-style: none; padding: 0; margin: 0 0 28px 0;
-            display: flex; flex-direction: column; gap: 14px; align-items: center;
-        }
-        .hero-benefits li {
-            display: flex; align-items: center; gap: 12px;
-            font-size: 1.15rem; font-weight: 600; color: #F0F0F0;
-        }
-        .hero-benefits li svg {
-            width: 20px; height: 20px; flex-shrink: 0; color: var(--pophy-yellow);
-        }
-
-        /* social proof */
-        .premium-trust {
-            font-size: 0.95rem; color: var(--text-muted);
-            display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600;
-            margin-bottom: 40px; flex-wrap: wrap;
-        }
-        .premium-stars { color: var(--pophy-yellow); letter-spacing: 1px; font-size: 1rem; }
-
-        /* --- Downloads --- */
-        .downloads-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-
-        .desktop-qrs {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            width: 100%;
-            max-width: 600px;
-        }
-        .qr-card {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 20px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        /* CTA */
+        .cta-col { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 22px; width: 100%; }
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: var(--ink); color: #fff;
+            font-family: 'Ping HL', sans-serif; font-size: 1.1rem; font-weight: 800;
+            padding: 15px 34px; border: none; border-radius: 980px; cursor: pointer;
             text-decoration: none;
-            color: var(--text-main);
-            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-            flex: 1;
-            cursor: pointer;
+            box-shadow: 0 12px 26px -10px rgba(0,0,0,0.4);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
-        .qr-card:hover {
-            transform: translateY(-6px);
-            background: rgba(255, 212, 0, 0.05);
-            border-color: rgba(255, 212, 0, 0.4);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-        }
-        .qr-image { width: 64px; height: 64px; margin-left: 20px; border-radius: 12px; background: #fff; padding: 4px; }
-        .qr-text { text-align: right; }
-        .qr-text strong { display: block; font-size: 1.15rem; font-weight: var(--font-bold); margin-bottom: 4px; }
-        .qr-text span { font-size: 0.9rem; color: var(--text-muted); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 34px -12px rgba(0,0,0,0.45); }
+        .btn-primary svg { width: 18px; height: 18px; transition: transform 0.25s ease; }
+        .btn-primary:hover svg { transform: translateX(-4px); }
 
-        .mobile-app-buttons {
-            display: none;
-            flex-direction: column;
-            gap: 16px;
-            width: 100%;
-            max-width: 380px;
-        }
-        .app-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            background: var(--text-main);
-            color: #000000;
-            padding: 15px 24px;
-            border-radius: 980px;
-            text-decoration: none;
-            font-weight: var(--font-bold);
-            font-size: 1.15rem;
-            transition: all 0.3s ease;
-            width: 100%;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            cursor: pointer;
-        }
-        .app-btn:active { transform: scale(0.98); }
-        .app-btn-secondary {
-            background: transparent;
-            color: var(--text-main);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        .app-btn svg { width: 28px; height: 28px; }
+        .cta-note { font-size: 0.9rem; color: var(--muted); font-weight: 500; margin-bottom: 4px; }
 
-        .trust-marker {
-            margin-top: 35px;
-            font-size: 1.05rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            background: rgba(255,255,255,0.03);
-            padding: 12px 24px;
-            border-radius: 980px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
+        .store-badges { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .store-badges a { display: inline-flex; }
+        .store-badges img { height: 40px; width: auto; display: block; }
+        .store-label { font-size: 0.85rem; color: var(--faint); font-weight: 500; }
+        /* Mobile cluster (chips + proof + store icons) shown only when stacked, below the phone */
+        .mobile-cluster { display: none; flex-direction: column; align-items: center; gap: 12px; margin-top: 26px; }
 
-        /* Footer */
+        /* B2B trust chips */
+        .trust-chips { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-bottom: 14px; }
+        .chip {
+            display: inline-flex; align-items: center; gap: 7px;
+            font-size: 0.9rem; font-weight: 600; color: var(--ink);
+            background: var(--panel); border: 1px solid var(--line);
+            padding: 8px 13px; border-radius: 980px;
+        }
+        .chip svg { width: 15px; height: 15px; flex-shrink: 0; color: var(--ink); }
+        .proof-line { font-size: 0.92rem; color: var(--muted); font-weight: 500; }
+        .proof-line strong { color: var(--ink); font-weight: 800; }
+
+        /* Mockup — "approve before payment" moment */
+        .job-card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-bottom: 16px; box-shadow: 0 10px 24px -14px rgba(0,0,0,0.22); }
+        .job-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: #1c7c33; background: rgba(52,199,89,0.12); padding: 4px 10px; border-radius: 980px; margin-bottom: 10px; }
+        .job-badge .d { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+        .job-title { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+        .job-row { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; color: var(--muted); padding: 9px 0; border-top: 1px solid var(--line); margin-bottom: 10px; }
+        .job-row strong { font-size: 16px; color: var(--ink); font-weight: 800; }
+        .approve-btn { display: block; width: 100%; text-align: center; background: var(--ink); color: #fff; font-size: 13px; font-weight: 800; padding: 12px; border-radius: 12px; border: none; margin-bottom: 8px; font-family: inherit; }
+        .report-btn { display: block; width: 100%; text-align: center; background: var(--panel); color: var(--muted); font-size: 12px; font-weight: 600; padding: 10px; border-radius: 12px; border: none; font-family: inherit; }
+
+        /* =========================================================
+           iPhone mockup (product visual — builds trust)
+           ========================================================= */
+        .hero-visual { display: flex; justify-content: center; position: relative; }
+        .visual-halo {
+            position: absolute; width: 78%; height: 78%; top: 8%; left: 50%; transform: translateX(-50%);
+            background: radial-gradient(circle, rgba(255,212,0,0.16) 0%, transparent 68%);
+            filter: blur(30px); z-index: 0; pointer-events: none;
+        }
+        .phone {
+            position: relative; z-index: 1;
+            width: 300px; height: 616px; flex-shrink: 0;
+            background: #0A0A0C; border-radius: 52px; padding: 11px;
+            box-shadow: 0 40px 80px -24px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.06), inset 0 0 0 2px #2a2a2e;
+        }
+        .phone-screen {
+            width: 100%; height: 100%; background: #F5F5F7; border-radius: 42px;
+            overflow: hidden; position: relative; display: flex; flex-direction: column;
+        }
+        .phone-notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 116px; height: 28px; background: #0A0A0C; border-radius: 0 0 18px 18px; z-index: 20; }
+
+        .app-top {
+            padding: 40px 20px 14px; text-align: center; flex-shrink: 0;
+            background: rgba(255,255,255,0.9); backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--line);
+        }
+        .app-top img { height: 20px; }
+        .app-body { padding: 20px 18px; overflow: hidden; flex-grow: 1; background: #fff; text-align: right; }
+        .app-greet { font-size: 22px; font-weight: 800; margin: 4px 0 3px; color: var(--ink); }
+        .app-sub { font-size: 13px; color: var(--faint); margin: 0 0 18px; }
+        .app-label { font-size: 12px; font-weight: 700; color: var(--faint); margin: 0 0 10px; }
+
+        .app-list { background: var(--panel); border-radius: 16px; overflow: hidden; margin-bottom: 16px; }
+        .app-item { display: flex; align-items: center; gap: 12px; padding: 14px 14px; border-bottom: 1px solid var(--line); }
+        .app-item:last-child { border-bottom: none; }
+        .app-item .ic { width: 34px; height: 34px; border-radius: 10px; background: #fff; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; color: var(--ink); flex-shrink: 0; }
+        .app-item .ic svg { width: 18px; height: 18px; }
+        .app-item .t { flex-grow: 1; font-size: 13.5px; font-weight: 600; color: var(--ink); }
+        .app-item .chev { color: #C7C7CC; font-size: 15px; }
+
+        .app-cta { display: block; text-align: center; background: var(--ink); color: #fff; font-size: 14px; font-weight: 700; padding: 14px; border-radius: 980px; }
+        .app-status-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #1c7c33; background: rgba(52,199,89,0.12); padding: 5px 10px; border-radius: 980px; margin-bottom: 14px; }
+        .app-status-pill .d { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+
+        /* =========================================================
+           How-it-works strip
+           ========================================================= */
+        .steps {
+            max-width: 1180px; margin: 0 auto; padding: 20px 40px 70px;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+        }
+        .step { display: flex; align-items: flex-start; gap: 14px; padding: 22px; border: 1px solid var(--line); border-radius: 18px; background: #fff; transition: box-shadow 0.3s ease, transform 0.3s ease; }
+        .step:hover { box-shadow: 0 16px 34px -18px rgba(0,0,0,0.18); transform: translateY(-3px); }
+        .step .n { width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: #fff; font-size: 0.9rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .step .st { font-size: 1.02rem; font-weight: 600; color: var(--ink); line-height: 1.35; padding-top: 3px; }
+
+        /* =========================================================
+           Footer
+           ========================================================= */
         .site-footer {
-            position: relative;
-            z-index: 10;
-            text-align: center;
-            padding: 30px 20px 26px;
-            background: #0A0A0C;
-            border-top: 2px solid var(--pophy-yellow);
-            font-size: 0.9rem;
-            color: #AEAEB2;
-            direction: rtl;
+            text-align: center; padding: 30px 20px; background: #fff;
+            border-top: 1px solid var(--line); font-size: 0.9rem; color: var(--faint);
         }
-        .footer-links { margin-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 10px; }
-        .footer-sep { color: #555; }
-        .site-footer a { color: #AEAEB2; text-decoration: none; transition: color 0.2s; }
-        .site-footer a:hover { color: var(--pophy-yellow); }
-        .footer-copy { font-size: 0.82rem; color: #86868B; }
+        .footer-links { margin-bottom: 8px; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .footer-sep { color: #C7C7CC; }
+        .site-footer a { color: var(--faint); text-decoration: none; transition: color 0.2s; }
+        .site-footer a:hover { color: var(--ink); }
+        .footer-copy { font-size: 0.82rem; color: #A1A1A6; }
 
-        /* --- Responsive --- */
+        /* =========================================================
+           Sticky mobile CTA (subtle, standard — not scammy)
+           ========================================================= */
+        .sticky-cta {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(255,255,255,0.86); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+            border-top: 1px solid var(--line);
+            padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+            z-index: 900; display: none; transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.25,0.8,0.25,1);
+        }
+        .sticky-cta.show { transform: translateY(0); }
+        .sticky-cta a {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: var(--ink); color: #fff; font-family: 'Ping HL', sans-serif;
+            font-size: 1rem; font-weight: 800; padding: 14px; border-radius: 980px; text-decoration: none;
+        }
+        .sticky-cta a svg { width: 16px; height: 16px; }
+
+        /* =========================================================
+           Responsive
+           ========================================================= */
+        @media (max-width: 980px) {
+            .hero { grid-template-columns: 1fr; gap: 40px; padding: 44px 24px 20px; text-align: center; }
+            .hero-copy { align-items: center; order: 1; }
+            .hero-visual { order: 2; }
+            h1.headline { font-size: 2.5rem; }
+            .subcopy { margin-inline: auto; }
+            /* Stacked: headline + CTA on top; chips, proof & store icons move BELOW the phone */
+            .cta-col { align-items: center; order: 1; }
+            .store-badges { justify-content: center; }
+            .store-badges-inline { display: none; }
+            .hero-copy .trust-chips, .hero-copy .proof-line { display: none; }
+            .trust-chips { justify-content: center; }
+            .proof-line { text-align: center; }
+            .mobile-cluster { display: flex; order: 3; }
+            .steps { grid-template-columns: repeat(2, 1fr); padding: 10px 24px 50px; gap: 14px; }
+        }
         @media (max-width: 768px) {
-            .hero-single { padding: 40px 16px 30px; }
-            .hero-logo { height: 38px; margin-bottom: 22px; }
-            .hero-headline { font-size: 2rem; letter-spacing: -1px; }
-            .hero-subheadline { font-size: 1rem; margin-bottom: 24px; }
-            .hero-benefits { gap: 10px; margin-bottom: 22px; }
-            .hero-benefits li { font-size: 0.95rem; }
-            .premium-trust { font-size: 0.82rem; margin-bottom: 30px; }
-            .desktop-qrs { display: none; }
-            .mobile-app-buttons { display: flex; margin: 0 auto; }
-            .app-btn { font-size: 0.95rem; padding: 13px 20px; }
-            .trust-marker { font-size: 0.95rem; margin-top: 28px; }
-            .site-footer { font-size: 0.8rem; padding: 24px 16px 90px; }
+            .sticky-cta { display: block; }
+            .topbar { padding: 16px 20px; }
+            .topbar img { height: 22px; }
+            .hero { padding: 30px 20px 14px; gap: 30px; }
+            .eyebrow { font-size: 1rem; padding: 7px 16px; margin-bottom: 16px; }
+            h1.headline { font-size: 1.7rem; letter-spacing: -0.7px; margin-bottom: 14px; }
+            .subcopy { font-size: 0.95rem; margin-bottom: 12px; }
+            .hero-punch { font-size: 1.05rem; margin-bottom: 20px; }
+            .cta-col { gap: 10px; margin-bottom: 18px; }
+            .btn-primary { width: 100%; justify-content: center; font-size: 1rem; padding: 13px 28px; }
+            .cta-note { font-size: 0.82rem; }
+            .store-badges { justify-content: center; width: 100%; gap: 8px; }
+            .store-badges img { height: 34px; }
+            .chip { font-size: 0.82rem; padding: 7px 12px; gap: 6px; }
+            .chip svg { width: 14px; height: 14px; }
+            .proof-line { font-size: 0.85rem; }
+            .mobile-cluster { margin-top: 20px; gap: 10px; }
+            .phone { width: 240px; height: 492px; }
+            /* Keep the app screen proportional & un-clipped inside the smaller frame */
+            .app-top { padding: 34px 16px 10px; }
+            .app-top img { height: 17px; }
+            .app-body { padding: 16px 14px; }
+            .app-greet { font-size: 18px; }
+            .app-sub { font-size: 11.5px; margin-bottom: 14px; }
+            .job-card { padding: 12px; margin-bottom: 14px; }
+            .job-badge { font-size: 10px; padding: 3px 9px; margin-bottom: 8px; }
+            .job-title { font-size: 12.5px; }
+            .job-row { font-size: 11px; padding: 7px 0; margin-bottom: 8px; }
+            .job-row strong { font-size: 14px; }
+            .approve-btn { font-size: 12px; padding: 11px; }
+            .job-card { margin-bottom: 0; }
+            /* Focus the compact mockup on the "approve & pay" card — hide the quick-actions list */
+            .app-label, .app-list { display: none; }
+            .site-footer { font-size: 0.82rem; padding: 22px 16px 26px; }
         }
         @media (max-width: 480px) {
-            .hero-headline { font-size: 1.7rem; }
-            .hero-subheadline { font-size: 0.9rem; }
-            .hero-benefits li { font-size: 0.9rem; gap: 8px; }
-            .core-glow { width: 400px; height: 400px; }
-        }
-
-        /* =========================================================
-           Social Proof Toast
-           ========================================================= */
-        .social-toast {
-            position: fixed; bottom: 24px; right: 24px;
-            background: #fff; border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.04);
-            padding: 14px 18px 14px 40px;
-            display: flex; align-items: center; gap: 12px;
-            z-index: 9990;
-            transform: translateY(30px); opacity: 0; pointer-events: none;
-            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-            max-width: 340px; direction: rtl;
-        }
-        .social-toast.is-visible { transform: translateY(0); opacity: 1; pointer-events: auto; }
-        .social-toast-avatar {
-            width: 42px; height: 42px; border-radius: 50%;
-            background: linear-gradient(135deg, #FFD400, #F5C400);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem; flex-shrink: 0; color: #1D1D1F;
-        }
-        .social-toast-body { flex: 1; }
-        .social-toast-text { font-size: 0.88rem; color: #1D1D1F; line-height: 1.45; }
-        .social-toast-text strong { font-weight: 700; }
-        .social-toast-time { font-size: 0.75rem; color: #86868B; margin-top: 3px; display: flex; align-items: center; gap: 4px; }
-        .social-toast-time::before { content: ''; width: 6px; height: 6px; background: #34C759; border-radius: 50%; display: inline-block; }
-        .social-toast-close {
-            position: absolute; top: 8px; left: 8px; background: none; border: none;
-            font-size: 1.1rem; color: #AEAEB2; cursor: pointer;
-            width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; line-height: 1;
-        }
-
-        /* =========================================================
-           Sticky Mobile CTA Bar
-           ========================================================= */
-        .sticky-mobile-cta {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(10,10,12,0.92);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255,255,255,0.08);
-            padding: 10px 16px;
-            padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
-            z-index: 9980; display: none;
-            transform: translateY(100%);
-            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-        .sticky-mobile-cta.is-visible { transform: translateY(0); }
-        .sticky-cta-btn {
-            width: 100%; background: var(--pophy-yellow); color: #1D1D1F;
-            font-family: 'Ping HL', sans-serif; font-size: 0.98rem; font-weight: 800;
-            padding: 14px 20px; border: none; border-radius: 980px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            box-shadow: 0 4px 15px rgba(255,212,0,0.2); transition: all 0.2s ease;
-        }
-        .sticky-cta-btn:active { transform: scale(0.97); }
-        .sticky-cta-btn svg { width: 18px; height: 18px; }
-
-        @media (min-width: 769px) { .sticky-mobile-cta { display: none !important; } }
-        @media (max-width: 768px) {
-            .sticky-mobile-cta { display: block; }
-            .social-toast { bottom: 80px; right: 12px; left: 12px; max-width: none; }
-        }
-
-        /* =========================================================
-           Exit Intent Popup
-           ========================================================= */
-        .exit-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); display: none; z-index: 10001;
-            opacity: 0; transition: opacity 0.3s ease;
-            align-items: center; justify-content: center;
-        }
-        .exit-overlay.is-visible { opacity: 1; }
-        .exit-popup {
-            position: relative; background: #fff; border-radius: 28px;
-            padding: 44px 36px; max-width: 440px; width: calc(100% - 40px);
-            text-align: center; transform: scale(0.9);
-            transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
-            direction: rtl; box-sizing: border-box;
-        }
-        .exit-overlay.is-visible .exit-popup { transform: scale(1); }
-        .exit-popup-close {
-            position: absolute; top: 14px; left: 14px; width: 34px; height: 34px;
-            border-radius: 50%; border: none; background: #F5F5F7;
-            font-size: 1.2rem; color: #86868B; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; transition: background 0.2s ease;
-        }
-        .exit-popup-close:hover { background: #E8E8ED; }
-        .exit-popup-badge {
-            display: inline-block; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;
-            color: #1D1D1F; background: rgba(255, 212, 0, 0.15);
-            border: 1px solid rgba(255, 212, 0, 0.4); padding: 5px 14px; border-radius: 980px; margin-bottom: 18px;
-        }
-        .exit-popup h3 { font-size: 1.5rem; font-weight: 700; color: #1D1D1F; margin: 0 0 12px; line-height: 1.35; }
-        .exit-popup p { font-size: 0.95rem; color: #6E6E73; margin: 0 0 28px; line-height: 1.6; }
-        .exit-popup-cta {
-            background: var(--pophy-yellow); color: #1D1D1F;
-            font-family: 'Ping HL', sans-serif; font-size: 1rem; font-weight: 700;
-            padding: 14px 36px; border: none; border-radius: 980px; cursor: pointer; width: 100%;
-            transition: all 0.3s ease; box-shadow: 0 4px 16px rgba(255, 212, 0, 0.25);
-        }
-        .exit-popup-cta:hover { transform: scale(1.02); box-shadow: 0 6px 24px rgba(255, 212, 0, 0.35); }
-        .exit-popup-skip {
-            display: inline-block; margin-top: 16px; font-size: 0.85rem; color: #AEAEB2;
-            background: none; border: none; cursor: pointer; transition: color 0.2s ease;
-        }
-        .exit-popup-skip:hover { color: #86868B; }
-        @media (max-width: 768px) {
-            .exit-popup { padding: 36px 24px; }
-            .exit-popup h3 { font-size: 1.4rem; }
+            .hero { padding: 24px 16px 12px; gap: 26px; }
+            .eyebrow { font-size: 0.92rem; margin-bottom: 14px; }
+            h1.headline { font-size: 1.5rem; margin-bottom: 12px; }
+            .subcopy { font-size: 0.9rem; }
+            .hero-punch { font-size: 1rem; margin-bottom: 18px; }
+            .btn-primary { font-size: 0.95rem; padding: 12px 24px; }
+            .chip { font-size: 0.8rem; padding: 6px 11px; }
+            .store-badges img { height: 32px; }
+            .phone { width: 208px; height: 427px; }
         }
     </style>
 </head>
 <body>
 
+    <!-- Top bar -->
+    <header class="topbar">
+        <img src="https://static.wixstatic.com/media/bb1f28_0f698d00e96e433583a41170ffc64e19~mv2.png" alt="Pophy">
+    </header>
+
     <!-- =========================================================
-         Single Section — Hero + Download
+         Hero — single section
          ========================================================= -->
-    <section class="hero-single">
-        <div class="core-glow"></div>
+    <section class="hero">
+        <div class="hero-copy">
+            <span class="eyebrow">לראשונה בישראל</span>
 
-        <div class="hero-inner">
-            <img src="https://static.wixstatic.com/media/bb1f28_0f698d00e96e433583a41170ffc64e19~mv2.png" alt="Pophy Logo" class="hero-logo" style="filter: brightness(0) invert(1);">
-
-            <h1 class="hero-headline">
-                סוף לאכזבות מניקיון המשרד.<br>
-                משלמים רק כשמרוצים <span class="highlight-text">ב-100%.</span>
+            <h1 class="headline">
+                אפליקציית שירותי ניקיון למשרדים<br>
+                <span class="accent-line">ששמה סוף להתעסקות ואכזבות.</span>
             </h1>
 
-            <p class="hero-subheadline">
-                הורידו את האפליקציה של Pophy ותנהלו את ניקיון המשרד באפס התעסקות — צוותים מסוננים, פיקוח מלא, ותשלום רק על התוצאה.
+            <p class="subcopy">
+                מורידים את אפליקציית Pophy, מזמינים ניקיון <strong>בלחיצה</strong>,
+                נותנים פידבק ומשלמים <strong>כשמרוצים</strong>.
             </p>
 
-            <ul class="hero-benefits">
-                <li><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> צוותים שעברו סינון קפדני</li>
-                <li><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> גוף מפקח שלוקח אחריות מלאה</li>
-                <li><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> אפס התעסקות - משלמים רק בסוף</li>
-            </ul>
+            <p class="hero-punch">מה שלקח שעות עד היום, נגמר עכשיו בכמה דקות.</p>
 
-            <div class="premium-trust">
-                <span class="premium-stars">★★★★★</span>
-                <span>4.9 מבוסס על מאות בעלי משרדים</span>
+            <!-- Trust, in the brand's own language: vetting · supervision · pay-when-satisfied -->
+            <div class="trust-chips">
+                <span class="chip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+                    סינון קפדני של הצוותים
+                </span>
+                <span class="chip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    פיקוח ואחריות מלאה של Pophy
+                </span>
+                <span class="chip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    משלמים רק כשמרוצים ב-100%
+                </span>
             </div>
 
-            <div class="downloads-wrapper">
+            <div class="cta-col">
+                <a href="https://onelink.to/c5r32b" target="_blank" rel="noopener" class="btn-primary download-link">
+                    להורדה לחצו כאן
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+                <div class="cta-note">הורדה חינם · פתיחת חשבון בכמה דקות.</div>
+                <div class="store-badges store-badges-inline">
+                    <a href="https://onelink.to/c5r32b" target="_blank" rel="noopener" class="download-link" aria-label="Download on the App Store">
+                        <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="הורדה ב-App Store">
+                    </a>
+                    <a href="https://onelink.to/c5r32b" target="_blank" rel="noopener" class="download-link" aria-label="Get it on Google Play">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="הורדה ב-Google Play">
+                    </a>
+                </div>
+            </div>
 
-                <!-- Desktop: QR codes -->
-                <div class="desktop-qrs">
-                    <a href="https://onelink.to/c5r32b" target="_blank" rel="noopener" class="qr-card download-link">
-                        <div class="qr-text">
-                            <strong>App Store</strong>
-                            <span>סרקו להורדה למכשירי iOS</span>
+            <p class="proof-line"><strong>מאות בעלי משרדים</strong> כבר עברו אלינו.</p>
+        </div>
+
+        <!-- Product visual: Pophy app home -->
+        <div class="hero-visual">
+            <div class="visual-halo"></div>
+            <div class="phone">
+                <div class="phone-screen">
+                    <div class="phone-notch"></div>
+                    <div class="app-top">
+                        <img src="https://static.wixstatic.com/media/bb1f28_0f698d00e96e433583a41170ffc64e19~mv2.png" alt="Pophy">
+                    </div>
+                    <div class="app-body">
+                        <div class="app-greet">היי דור,</div>
+                        <div class="app-sub">הניקיון במשרד בוצע ונבדק. נשאר רק לאשר.</div>
+
+                        <!-- The moment that sells "pay only when satisfied" -->
+                        <div class="job-card">
+                            <span class="job-badge"><span class="d"></span> בוצע ונבדק</span>
+                            <div class="job-title">ניקיון משרד · 180 מ"ר</div>
+                            <div class="job-row">
+                                <span>התשלום יבוצע רק לאחר אישורכם</span>
+                                <strong>₪450</strong>
+                            </div>
+                            <button class="approve-btn">אשרו את הניקיון ושלמו</button>
                         </div>
-                        <img src="https://static.wixstatic.com/media/f559f1_8fe6c4bc92dd4ac2bf7d45926ac8ebfd~mv2.png" alt="QR iOS" class="qr-image">
-                    </a>
-                    <a href="https://onelink.to/c5r32b" target="_blank" rel="noopener" class="qr-card download-link">
-                        <div class="qr-text">
-                            <strong>Google Play</strong>
-                            <span>סרקו להורדה למכשירי Android</span>
+
+                        <div class="app-label">פעולות מהירות</div>
+                        <div class="app-list">
+                            <div class="app-item">
+                                <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 5.5L20 8l-4 4 1 6-5-2.8L7 18l1-6-4-4 5.6-.5z"/></svg></div>
+                                <div class="t">הזמנת ניקיון חדש</div>
+                                <div class="chev">‹</div>
+                            </div>
+                            <div class="app-item">
+                                <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg></div>
+                                <div class="t">חשבוניות מס</div>
+                                <div class="chev">‹</div>
+                            </div>
                         </div>
-                        <img src="https://static.wixstatic.com/media/bb1f28_695f4e8059f44e2fb55ced07064a609b~mv2.png" alt="QR Android" class="qr-image">
-                    </a>
+                    </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Mobile: direct download buttons -->
-                <div class="mobile-app-buttons">
-                    <a href="https://onelink.to/c5r32b" target="_blank" rel="noopener" class="app-btn download-link">
-                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14.88 2.15c.61-.75 1.02-1.72.9-2.73-1.01.05-2.07.64-2.7 1.38-.56.66-.99 1.66-.86 2.65 1.09.08 2.05-.57 2.66-1.3zM16.58 13.9c-.03-2.3 1.88-3.41 1.97-3.47-1.07-1.57-2.73-1.78-3.32-1.81-1.42-.14-2.77.84-3.5.84-.73 0-1.84-.82-3.03-.8-1.55.02-2.98.9-3.78 2.29-1.62 2.82-.41 6.99 1.17 9.27.77 1.12 1.69 2.37 2.91 2.32 1.17-.05 1.63-.76 3.05-.76 1.41 0 1.84.76 3.07.74 1.25-.02 2.04-1.15 2.8-2.27.88-1.28 1.24-2.52 1.26-2.59-.03-.01-2.43-.93-2.6-3.76z"/></svg>
-                        הורדה ל-iOS
-                    </a>
-                    <a href="https://onelink.to/c5r32b" target="_blank" rel="noopener" class="app-btn app-btn-secondary download-link">
-                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.68 2.22A2.43 2.43 0 0 0 4 3.93v16.14a2.43 2.43 0 0 0 .68 1.71l.06.06 9.07-9.07v-.23L4.74 2.16l-.06.06zM15.93 11.2L6.1 5.5l-.26-.14c-.81-.46-1.62.06-1.62 1v12.27c0 .94.81 1.46 1.62 1l9.83-5.7.26-.14c.82-.46.82-1.2 0-1.66z"/></svg>
-                        הורדה ל-Android
-                    </a>
-                </div>
-
-                <div class="trust-marker">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--pophy-green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-                    פתיחת חשבון בחינם. משלמים רק על התוצאה.
-                </div>
+        <!-- Mobile-only: chips + proof + store icons, all below the phone -->
+        <div class="mobile-cluster">
+            <div class="trust-chips">
+                <span class="chip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+                    סינון קפדני של הצוותים
+                </span>
+                <span class="chip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    פיקוח ואחריות מלאה של Pophy
+                </span>
+                <span class="chip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    משלמים רק כשמרוצים ב-100%
+                </span>
+            </div>
+            <p class="proof-line"><strong>מאות בעלי משרדים</strong> כבר עברו אלינו.</p>
+            <div class="store-badges">
+                <a href="https://onelink.to/c5r32b" target="_blank" rel="noopener" class="download-link" aria-label="Download on the App Store">
+                    <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="הורדה ב-App Store">
+                </a>
+                <a href="https://onelink.to/c5r32b" target="_blank" rel="noopener" class="download-link" aria-label="Get it on Google Play">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="הורדה ב-Google Play">
+                </a>
             </div>
         </div>
     </section>
@@ -490,7 +454,7 @@
     <!-- Footer -->
     <footer class="site-footer">
         <div class="footer-links">
-            <a href="https://www.pophy.co.il/privcay" target="_blank" rel="noopener noreferrer">מדיניות פרטיות</a>
+            <a href="https://www.pophy.co.il/privacy" target="_blank" rel="noopener noreferrer">מדיניות פרטיות</a>
             <span class="footer-sep">·</span>
             <a href="https://www.pophy.co.il/terms" target="_blank" rel="noopener noreferrer">תנאי שימוש</a>
         </div>
@@ -499,195 +463,42 @@
         </div>
     </footer>
 
-    <!-- Social Proof Toast -->
-    <div class="social-toast" id="social-toast">
-        <div class="social-toast-avatar" id="toast-avatar">👤</div>
-        <div class="social-toast-body">
-            <div class="social-toast-text" id="toast-text"></div>
-            <div class="social-toast-time" id="toast-time"></div>
-        </div>
-        <button class="social-toast-close" id="toast-close">&times;</button>
-    </div>
-
-    <!-- Sticky Mobile CTA Bar -->
-    <div class="sticky-mobile-cta" id="sticky-cta">
-        <button class="sticky-cta-btn" id="sticky-cta-btn">
-            להורדת האפליקציה בחינם
+    <!-- Sticky mobile CTA -->
+    <div class="sticky-cta" id="sticky-cta">
+        <a href="https://onelink.to/c5r32b" target="_blank" rel="noopener" class="download-link">
+            להורדה לחצו כאן
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
+        </a>
     </div>
 
-    <!-- Exit Intent Popup -->
-    <div class="exit-overlay" id="exit-overlay">
-        <div class="exit-popup">
-            <button class="exit-popup-close" id="exit-close">&times;</button>
-            <div class="exit-popup-badge">הידעת?</div>
-            <h3>ב-Pophy לא משלמים על ניקיון המשרד עד הרגע שמאשרים שמרוצים מהתוצאה.</h3>
-            <p>הורידו את האפליקציה עכשיו והזמינו ניקיון ראשון בלי שום סיכון.</p>
-            <button class="exit-popup-cta" id="exit-cta">להורדת האפליקציה</button>
-            <button class="exit-popup-skip" id="exit-skip">אולי בפעם אחרת</button>
-        </div>
-    </div>
-
-    <!-- =========================================================
-         Scripts — download tracking + CRO
-         ========================================================= -->
+    <!-- Scripts -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-
-        var DOWNLOAD_URL = 'https://onelink.to/c5r32b';
-
-        /* Fire conversion pixels for a download intent */
+        /* Fire conversion pixels on any download click */
         function fireDownloadEvents() {
-            if (typeof gtag === 'function') {
-                gtag('event', 'conversion', {'send_to': 'AW-17357415233/lk5YCND1p_8aEMHG1NRA'});
-            }
-            if (typeof fbq === 'function') { fbq('track', 'Download'); }
-            if (typeof ttq === 'object' && ttq !== null && typeof ttq.track === 'function') {
-                ttq.track('Download');
-            }
+            if (typeof gtag === 'function') gtag('event', 'conversion', {'send_to': 'AW-17357415233/lk5YCND1p_8aEMHG1NRA'});
+            if (typeof fbq === 'function') fbq('track', 'Download');
+            if (typeof ttq === 'object' && ttq !== null && typeof ttq.track === 'function') ttq.track('Download');
         }
-
-        /* Programmatic download (for buttons that aren't <a>) */
-        function triggerDownload() {
-            fireDownloadEvents();
-            window.open(DOWNLOAD_URL, '_blank');
-        }
-        window._triggerPophyDownload = triggerDownload;
-
-        /* Real <a> download links: fire pixels, let the browser navigate */
         document.querySelectorAll('a.download-link').forEach(function(link) {
-            link.addEventListener('click', function() { fireDownloadEvents(); });
+            link.addEventListener('click', fireDownloadEvents);
         });
 
-
-        /* ===========================================
-           1. Social Proof Toast Notifications
-           =========================================== */
-        var toastData = [
-            { name: 'שירה', city: 'ראשון לציון', action: 'הזמינה ניקיון', mins: 3 },
-            { name: 'יואב', city: 'חולון', action: 'הצטרף ל-Pophy', mins: 7 },
-            { name: 'מיכל', city: 'רחובות', action: 'הזמינה ניקיון למשרד', mins: 12 },
-            { name: 'אורי', city: 'בת ים', action: 'הוריד את האפליקציה', mins: 18 },
-            { name: 'נועה', city: 'נס ציונה', action: 'הזמינה ניקיון שבועי', mins: 22 },
-            { name: 'עמית', city: 'יבנה', action: 'הצטרף ל-Pophy', mins: 28 },
-            { name: 'דנה', city: 'לוד', action: 'הזמינה ניקיון', mins: 34 },
-            { name: 'גיא', city: 'גדרה', action: 'הוריד את האפליקציה', mins: 41 },
-            { name: 'ליאת', city: 'רמלה', action: 'הצטרפה ל-Pophy', mins: 48 },
-            { name: 'רון', city: 'באר יעקב', action: 'הזמין ניקיון למשרד', mins: 55 }
-        ];
-        var initials = { 'שירה':'ש','יואב':'י','מיכל':'מ','אורי':'א','נועה':'נ','עמית':'ע','דנה':'ד','גיא':'ג','ליאת':'ל','רון':'ר' };
-        var toast = document.getElementById('social-toast');
-        var toastText = document.getElementById('toast-text');
-        var toastTime = document.getElementById('toast-time');
-        var toastAvatar = document.getElementById('toast-avatar');
-        var toastClose = document.getElementById('toast-close');
-        var toastIndex = 0;
-        var toastTimer = null;
-        var toastDismissed = false;
-
-        function showToast() {
-            if (toastDismissed) return;
-            var d = toastData[toastIndex % toastData.length];
-            toastText.innerHTML = '<strong>' + d.name + ' מ' + d.city + '</strong> ' + d.action;
-            toastTime.textContent = 'לפני ' + d.mins + ' דקות';
-            toastAvatar.textContent = initials[d.name] || '👤';
-            toast.classList.add('is-visible');
-            toastIndex++;
-            setTimeout(function() {
-                toast.classList.remove('is-visible');
-                toastTimer = setTimeout(showToast, 6000 + Math.random() * 4000);
-            }, 4500);
+        /* Sticky mobile CTA: show once the primary CTA scrolls out of view */
+        var sticky = document.getElementById('sticky-cta');
+        var primary = document.querySelector('.btn-primary');
+        function setSticky(show) {
+            if (window.innerWidth > 768) { sticky.classList.remove('show'); return; }
+            sticky.classList.toggle('show', show);
         }
-        toastClose.addEventListener('click', function() {
-            toast.classList.remove('is-visible');
-            toastDismissed = true;
-            if (toastTimer) clearTimeout(toastTimer);
+        if ('IntersectionObserver' in window && primary) {
+            new IntersectionObserver(function(e) { setSticky(!e[0].isIntersecting); }, { threshold: 0 }).observe(primary);
+        }
+        window.addEventListener('resize', function() {
+            if (!primary) return;
+            var r = primary.getBoundingClientRect();
+            setSticky(!(r.top < window.innerHeight && r.bottom > 0));
         });
-        setTimeout(showToast, 6000);
-
-
-        /* ===========================================
-           2. Sticky Mobile CTA Bar
-           =========================================== */
-        var stickyCta = document.getElementById('sticky-cta');
-        var stickyBtn = document.getElementById('sticky-cta-btn');
-        var downloadArea = document.querySelector('.mobile-app-buttons');
-
-        function checkStickyVisibility() {
-            if (window.innerWidth > 768 || !downloadArea) return;
-            /* Show the sticky bar whenever the inline download buttons are
-               NOT visible in the viewport (below the fold on load, or scrolled away). */
-            var r = downloadArea.getBoundingClientRect();
-            var inView = r.top < window.innerHeight && r.bottom > 0;
-            if (inView) {
-                stickyCta.classList.remove('is-visible');
-            } else {
-                stickyCta.classList.add('is-visible');
-            }
-        }
-        window.addEventListener('scroll', checkStickyVisibility, { passive: true });
-        checkStickyVisibility();
-
-        stickyBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            triggerDownload();
-        });
-
-
-        /* ===========================================
-           3. Exit Intent Popup
-           =========================================== */
-        var exitOverlay = document.getElementById('exit-overlay');
-        var exitClose = document.getElementById('exit-close');
-        var exitCta = document.getElementById('exit-cta');
-        var exitSkip = document.getElementById('exit-skip');
-        var exitShown = false;
-
-        function showExit() {
-            if (exitShown) return;
-            exitShown = true;
-            exitOverlay.style.display = 'flex';
-            exitOverlay.offsetHeight;
-            exitOverlay.classList.add('is-visible');
-            try { sessionStorage.setItem('pophy_exit_shown', '1'); } catch(e) {}
-        }
-        function closeExit() {
-            exitOverlay.classList.remove('is-visible');
-            setTimeout(function() {
-                if (!exitOverlay.classList.contains('is-visible')) {
-                    exitOverlay.style.display = 'none';
-                }
-            }, 350);
-        }
-        exitClose.addEventListener('click', closeExit);
-        exitSkip.addEventListener('click', closeExit);
-        exitOverlay.addEventListener('click', function(e) {
-            if (e.target === exitOverlay) closeExit();
-        });
-        exitCta.addEventListener('click', function() {
-            closeExit();
-            setTimeout(triggerDownload, 300);
-        });
-
-        var alreadyShown = false;
-        try { alreadyShown = sessionStorage.getItem('pophy_exit_shown') === '1'; } catch(e) {}
-
-        if (!alreadyShown) {
-            document.addEventListener('mouseout', function(e) {
-                if (e.clientY <= 5 && !exitShown) { showExit(); }
-            });
-            var inactivityTimer = null;
-            function resetInactivity() {
-                if (inactivityTimer) clearTimeout(inactivityTimer);
-                inactivityTimer = setTimeout(function() {
-                    if (!exitShown && window.innerWidth <= 768) { showExit(); }
-                }, 45000);
-            }
-            window.addEventListener('scroll', resetInactivity, { passive: true });
-            window.addEventListener('touchstart', resetInactivity, { passive: true });
-            resetInactivity();
-        }
     });
     </script>
 

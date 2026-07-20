@@ -66,7 +66,6 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   const dict = lang === 'en' ? en : he
   const t = (key: keyof typeof he) => dict[key] ?? he[key] ?? key
   const [activeSlide, setActiveSlide] = useState(0)
-  const [exporting, setExporting] = useState(false)
   const [lightboxAsset, setLightboxAsset] = useState<{ url: string; caption?: string; slideKey?: string; assetId?: string } | null>(null)
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 })
   const [feedback, setFeedback] = useState<Record<string, SlideFeedback>>({})
@@ -166,7 +165,10 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   }, [])
 
   // Approval progress across all feedback-enabled (creative) slides
-  const feedbackSlides = showFeedback ? slides.filter(s => s.key) : []
+  // Divider slides are just section breaks — there's nothing to approve on them,
+  // so they're excluded from the approval flow and the approved/total counter.
+  const isApprovable = (s: SlideData) => !!s.key && s.type !== 'divider'
+  const feedbackSlides = showFeedback ? slides.filter(isApprovable) : []
   const approvedCount = feedbackSlides.filter(s => feedback[s.key as string]?.status === 'approved').length
   const allApproved = feedbackSlides.length > 0 && approvedCount === feedbackSlides.length
 
@@ -218,18 +220,6 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
     return () => { window.removeEventListener('mousemove', onMove); cancelAnimationFrame(rafId) }
   }, [])
 
-  async function handleExportPdf() {
-    setExporting(true)
-    document.body.classList.add('printing-all-slides')
-    try {
-      if (document.fonts?.ready) await document.fonts.ready
-      await new Promise(r => setTimeout(r, 150))
-      window.print()
-    } finally {
-      document.body.classList.remove('printing-all-slides')
-      setExporting(false)
-    }
-  }
 
   function getSlideLabel(slide: SlideData, i: number): string {
     if (slide.type === 'cover') return t('public.cover')
@@ -302,14 +292,6 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
               </div>
             )}
             <div className="campaign-badge">{clientName} — {campaignName}</div>
-            <button className="pdf-btn" onClick={handleExportPdf} disabled={exporting}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              {exporting ? t('public.preparing') : t('public.exportPdf')}
-            </button>
           </div>
         </header>
 
@@ -334,7 +316,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
             </motion.section>
           </AnimatePresence>
 
-          {showFeedback && slides[activeSlide].key && (
+          {showFeedback && isApprovable(slides[activeSlide]) && (
             <ApprovalBar
               key={slides[activeSlide].key}
               slideKey={slides[activeSlide].key as string}
@@ -666,7 +648,6 @@ function CoverSlide({ slide }: { slide: SlideData }) {
       {/* Top bar */}
       <motion.div className="cover-top-bar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05, duration: 0.5 }}>
         <ResultsLogo />
-        <div className="cover-badge-pill">Creative Presentation</div>
       </motion.div>
 
       {/* Main content */}

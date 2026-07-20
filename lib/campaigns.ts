@@ -239,8 +239,11 @@ export async function compressAndUploadImage(
   const resized = sharp(buffer).resize(1920, 1920, { fit: 'inside', withoutEnlargement: true })
 
   const [webpBuf, jpegBuf] = await Promise.all([
+    // WebP keeps the alpha channel (transparent logos stay transparent).
     resized.clone().webp({ quality: 90 }).toBuffer(),
-    resized.clone().jpeg({ quality: 85, progressive: true }).toBuffer(),
+    // JPEG can't carry alpha — composite over white rather than sharp's default
+    // black, so the fallback variant never shows a black box behind a logo.
+    resized.clone().flatten({ background: '#ffffff' }).jpeg({ quality: 85, progressive: true }).toBuffer(),
   ])
 
   const finalPath = storagePath.replace(/\.[^.]+$/, '.webp')

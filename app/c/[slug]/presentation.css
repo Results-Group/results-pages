@@ -178,9 +178,9 @@
 }
 
 /* Partner logos — real certified-partner badges, normalized to monochrome white */
-.campaign-pres .partner-logos{display:flex;align-items:center;gap:26px;flex-wrap:wrap}
+.campaign-pres .partner-logos{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
 .campaign-pres .partner-logo-img{
-  height:40px;width:auto;object-fit:contain;
+  height:28px;width:auto;object-fit:contain;
   filter:brightness(0) invert(1);
   opacity:0.62;transition:opacity 0.2s ease;
 }

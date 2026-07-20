@@ -3,11 +3,22 @@
 const MAX_DIM = 1920
 const QUALITY = 0.88
 
+/** Formats that can carry an alpha channel — these must not be flattened to JPEG. */
+function sourceHasAlpha(file: File): boolean {
+  const type = file.type.toLowerCase()
+  if (/png|webp|gif|avif/.test(type)) return true
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
+  return ['png', 'webp', 'gif', 'avif'].includes(ext)
+}
+
 /**
  * Compress an image file in the browser using canvas, before uploading.
  * - Resizes to MAX_DIM × MAX_DIM max (preserves aspect ratio, no upscale)
- * - Outputs as JPEG (works for HEIC too — browser decodes natively on iOS/macOS)
- * - Returns a Blob that is typically 80–95% smaller than a raw iPhone photo
+ * - Transparent sources (PNG/WebP/GIF/AVIF) are encoded as WebP so alpha
+ *   survives. Encoding them as JPEG turned every transparent pixel black,
+ *   which put a black box behind transparent logos.
+ * - Everything else (JPEG/HEIC — browser decodes HEIC natively on iOS/macOS)
+ *   stays JPEG, which compresses photos better.
  */
 export async function compressImageClient(file: File): Promise<{ blob: Blob; filename: string }> {
   return new Promise((resolve, reject) => {
@@ -32,15 +43,29 @@ export async function compressImageClient(file: File): Promise<{ blob: Blob; fil
       if (!ctx) return reject(new Error('canvas not supported'))
       ctx.drawImage(img, 0, 0, w, h)
 
-      canvas.toBlob(
-        blob => {
-          if (!blob) return reject(new Error('canvas.toBlob failed'))
-          const base = file.name.replace(/\.[^.]+$/, '')
-          resolve({ blob, filename: `${base}.jpg` })
-        },
-        'image/jpeg',
-        QUALITY,
-      )
+      const keepAlpha = sourceHasAlpha(file)
+      const base = file.name.replace(/\.[^.]+$/, '')
+
+      const encode = (type: string, ext: string, onFail?: () => void) =>
+        canvas.toBlob(
+          blob => {
+            // Browsers that can't encode the requested type hand back null (or
+            // silently fall back to PNG) — retry once with a safe format.
+            if (!blob) {
+              if (onFail) return onFail()
+              return reject(new Error('canvas.toBlob failed'))
+            }
+            resolve({ blob, filename: `${base}.${ext}` })
+          },
+          type,
+          QUALITY,
+        )
+
+      if (keepAlpha) {
+        encode('image/webp', 'webp', () => encode('image/png', 'png'))
+      } else {
+        encode('image/jpeg', 'jpg')
+      }
     }
 
     img.onerror = () => {

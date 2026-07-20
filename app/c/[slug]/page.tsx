@@ -107,7 +107,9 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     }
   }
   const clientLogoUrl = effectiveLogoPath ? assetProxyUrl(effectiveLogoPath) : null
-  const formattedDate = new Date(campaign.created_at).toLocaleDateString('he-IL', {
+  // The cover eyebrow reads as an English date line (e.g. "July 20, 2026"),
+  // not a Hebrew one — it sits alongside the English brand lockup.
+  const formattedDate = new Date(campaign.created_at).toLocaleDateString('en-US', {
     year: 'numeric', month: 'long', day: 'numeric',
   })
 
