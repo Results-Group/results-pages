@@ -364,18 +364,25 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
 
-  .campaign-pres .pres-main{padding:20px 12px 92px}
+  .campaign-pres .pres-main{padding:16px 12px 88px}
   .campaign-pres .story-progress{padding:4px 8px}
   .campaign-pres .lightbox-overlay{padding:16px}
   .campaign-pres .slide-footer-nav{gap:14px;padding:10px 12px}
-  .campaign-pres .pres-footer{padding:16px 16px 80px;flex-direction:column;gap:8px;text-align:center}
+  .campaign-pres .pres-footer{padding:16px 16px 96px;flex-direction:column;gap:8px;text-align:center}
 
   /* ── Cover ──
      The desktop layout is a two-column flex with a fixed 300px logo panel; at
      phone widths that overflowed the padded container and was clipped by
      overflow:hidden, leaving the slide blank. Stack it instead, logo first. */
-  .campaign-pres .cover-slide-v2{padding:26px 18px 24px;min-height:auto;border-radius:14px}
-  .campaign-pres .cover-frame{inset:10px;border-radius:6px}
+  /* Fill the screen so the cover reads as a full slide instead of a small card
+     floating in empty space. dvh accounts for the mobile browser chrome. */
+  .campaign-pres .cover-slide-v2{
+    padding:24px 20px 26px;border-radius:16px;
+    min-height:calc(100vh - 160px);
+    min-height:calc(100dvh - 160px);
+    justify-content:space-between;
+  }
+  .campaign-pres .cover-frame{inset:10px;border-radius:8px}
   .campaign-pres .cover-corner{width:16px;height:16px}
   .campaign-pres .cover-corner.tl,.campaign-pres .cover-corner.tr{top:16px}
   .campaign-pres .cover-corner.bl,.campaign-pres .cover-corner.br{bottom:16px}
@@ -383,23 +390,28 @@
   .campaign-pres .cover-corner.tr,.campaign-pres .cover-corner.br{right:16px}
   .campaign-pres .cover-top-bar{padding-bottom:20px}
   .campaign-pres .results-logo-img{height:26px}
-  .campaign-pres .cover-body{flex-direction:column-reverse;align-items:stretch;gap:26px;padding:10px 0}
-  .campaign-pres .cover-right{width:100%;max-width:190px;height:150px;margin:0 auto}
-  .campaign-pres .cover-eyebrow{font-size:0.68rem;letter-spacing:0.16em;margin-bottom:14px}
-  .campaign-pres .cover-headline{font-size:clamp(1.8rem,8.5vw,2.6rem);margin-bottom:16px}
+  .campaign-pres .cover-body{flex:1;flex-direction:column-reverse;align-items:stretch;justify-content:center;gap:26px;padding:14px 0}
+  .campaign-pres .cover-right{width:100%;max-width:215px;height:172px;margin:0 auto}
+  .campaign-pres .cover-eyebrow{font-size:0.76rem;letter-spacing:0.18em;margin-bottom:16px}
+  .campaign-pres .cover-headline{font-size:clamp(2.1rem,11vw,3.2rem);margin-bottom:18px}
   .campaign-pres .cover-meta-line{flex-wrap:wrap;gap:10px}
-  .campaign-pres .cover-client-name{font-size:1rem}
-  .campaign-pres .cover-by{font-size:0.82rem}
-  .campaign-pres .cover-h-rule{margin:20px 0 18px}
-  .campaign-pres .partner-logos{gap:14px}
-  .campaign-pres .partner-logo-img{height:20px}
+  .campaign-pres .cover-client-name{font-size:1.05rem}
+  .campaign-pres .cover-by{font-size:0.85rem}
+  .campaign-pres .cover-h-rule{margin:22px 0 20px}
+  /* Legible partner badges: bigger, with room to wrap onto a second row */
+  .campaign-pres .partner-logos{gap:18px;row-gap:12px}
+  .campaign-pres .partner-logo-img{height:26px}
 
   /* ── Closing ── */
-  .campaign-pres .closing-slide-v2{padding:36px 18px;min-height:auto;border-radius:14px}
-  .campaign-pres .closing-logo{height:44px;margin-bottom:26px}
-  .campaign-pres .closing-headline{font-size:clamp(1.9rem,9vw,2.8rem)}
-  .campaign-pres .closing-client{font-size:1rem;margin-top:14px}
-  .campaign-pres .closing-rule{margin:24px 0 20px}
+  .campaign-pres .closing-slide-v2{
+    padding:36px 20px;border-radius:16px;
+    min-height:calc(100vh - 160px);
+    min-height:calc(100dvh - 160px);
+  }
+  .campaign-pres .closing-logo{height:52px;margin-bottom:30px}
+  .campaign-pres .closing-headline{font-size:clamp(2.2rem,11vw,3.2rem)}
+  .campaign-pres .closing-client{font-size:1.05rem;margin-top:16px}
+  .campaign-pres .closing-rule{margin:26px 0 22px}
 
   /* ── Other slides ── */
   .campaign-pres .slide-title{font-size:1.4rem;margin-bottom:20px}
