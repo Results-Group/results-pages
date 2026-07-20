@@ -109,7 +109,9 @@
 .campaign-pres .slide-intro{font-size:1.1rem;line-height:1.85;color:var(--text-secondary);margin:-16px 0 32px;max-width:760px;white-space:pre-wrap}
 
 /* Slide transition — CSS so navigation never depends on an animation frame */
-@keyframes rp-slide-enter{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+/* Same rule as the entrance keyframes: no opacity, or a frozen animation would
+   blank the entire slide. */
+@keyframes rp-slide-enter{from{transform:translateY(16px)}to{transform:none}}
 .campaign-pres .slide-enter{animation:rp-slide-enter 0.45s cubic-bezier(0.22,1,0.36,1)}
 @media (prefers-reduced-motion: reduce){
   .campaign-pres .slide-enter{animation:none}
@@ -126,10 +128,14 @@
    opened from WhatsApp into a background tab left every element stranded at
    opacity 0 and the cover rendered completely blank. The resting style here is
    visible, so the worst case is "no animation", never "no content". */
-@keyframes rp-fade-up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@keyframes rp-fade-in{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
-@keyframes rp-fade-scale{from{opacity:0;transform:scale(0.93)}to{opacity:1;transform:none}}
-@keyframes rp-wipe{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
+/* Transform only — never opacity. An animation that starts and then freezes
+   (paused rAF on a backgrounded phone) holds its t=0 value, so animating from
+   opacity:0 leaves content permanently invisible. Animating position instead
+   means a frozen entrance is at worst slightly offset, never unreadable. */
+@keyframes rp-fade-up{from{transform:translateY(14px)}to{transform:none}}
+@keyframes rp-fade-in{from{transform:translateX(-26px)}to{transform:none}}
+@keyframes rp-fade-scale{from{transform:scale(0.94)}to{transform:none}}
+@keyframes rp-wipe{from{transform:scaleX(0.6)}to{transform:scaleX(1)}}
 
 /* Deliberately NO animation-fill-mode and NO delay. `both` holds the element at
    the keyframe's opacity:0 until the animation actually starts, so on a phone
