@@ -18,6 +18,7 @@ import SlideFilmstrip from './SlideFilmstrip'
 import SlideCanvas from './SlideCanvas'
 import Inspector from './Inspector'
 import SmartUploadModal from './SmartUploadModal'
+import { maxAssetsFor } from './types'
 import type { CampaignDocument, EditorAsset, EditorSection, MockupType } from './types'
 
 const CampaignPresentation = dynamic(() => import('@/app/c/[slug]/presentation'), { ssr: false })
@@ -345,9 +346,8 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
     return await res.json()
   }, [])
 
-  const MAX_ASSETS_PER_SLIDE = 4
-
-  /** Smart bulk upload: drop N files → auto-split into slides of 4, all with the chosen mockup type. */
+  /** Smart bulk upload: split N files across slides, all with the chosen mockup
+   *  type — 10 per slide for a carousel (one post, many frames), 4 otherwise. */
   const smartUpload = useCallback(async (files: File[], mockupType: MockupType) => {
     const valid = files.filter(f => isImageFile(f) && f.size <= MAX_FILE_BYTES)
     if (!valid.length) { toast('לא נבחרו קבצים תקינים', 'error'); return }
@@ -355,9 +355,9 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
     const id = await ensureCampaignExists()
     if (!id) { toast('יש למלא שם לקוח ושם קמפיין לפני העלאת קבצים', 'error'); return }
 
-    // Split into groups of MAX_ASSETS_PER_SLIDE and create one section per group
+    const perSlide = maxAssetsFor(mockupType)
     const groups: File[][] = []
-    for (let i = 0; i < valid.length; i += MAX_ASSETS_PER_SLIDE) groups.push(valid.slice(i, i + MAX_ASSETS_PER_SLIDE))
+    for (let i = 0; i < valid.length; i += perSlide) groups.push(valid.slice(i, i + perSlide))
     const sections: EditorSection[] = groups.map(() => ({
       id: crypto.randomUUID(), title: '', mockup_type: mockupType, description: '', useCopies: false, assets: [],
     }))
@@ -398,22 +398,22 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
     }
     if (!valid.length) return
 
-    // More than one slide's worth in a single drop → auto-route to smart upload,
-    // which splits them into slides of 4 (keeps the current slide's mockup type)
-    // instead of hitting the 4-per-slide wall.
-    if (valid.length > MAX_ASSETS_PER_SLIDE) {
-      toast(`התקבלו ${valid.length} תמונות — עוברים להעלאה חכמה (${MAX_ASSETS_PER_SLIDE} לשקף)`, 'info')
+    // Capacity depends on the slide type: a carousel holds 10 frames, other
+    // mockups 4. More than one slide's worth in a single drop auto-routes to
+    // smart upload instead of hitting the wall.
+    const perSlide = maxAssetsFor(activeSection.mockup_type)
+    if (valid.length > perSlide) {
+      toast(`התקבלו ${valid.length} תמונות — עוברים להעלאה חכמה (${perSlide} לשקף)`, 'info')
       await smartUpload(valid, activeSection.mockup_type)
       return
     }
 
-    // 4-image limit
     const existing = activeSection.assets.length
-    const available = Math.max(0, MAX_ASSETS_PER_SLIDE - existing)
-    if (available === 0) { toast('הגעת למגבלת 4 תמונות לשקף. הוסף שקף חדש כדי להמשיך.', 'error'); return }
+    const available = Math.max(0, perSlide - existing)
+    if (available === 0) { toast(`הגעת למגבלת ${perSlide} תמונות לשקף. הוסף שקף חדש כדי להמשיך.`, 'error'); return }
     const limited = valid.slice(0, available)
     if (valid.length > available) {
-      toast(`ניתן להוסיף רק ${available} תמונה נוספת לשקף זה (מגבלה: ${MAX_ASSETS_PER_SLIDE}).`, 'error')
+      toast(`ניתן להוסיף רק ${available} תמונות נוספות לשקף זה (מגבלה: ${perSlide}).`, 'error')
     }
 
     const id = await ensureCampaignExists()

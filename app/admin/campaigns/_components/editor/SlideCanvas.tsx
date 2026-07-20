@@ -13,6 +13,7 @@ import { Upload, Trash2, GripVertical, Link2, RefreshCw, LayoutTemplate, ImageIc
 import CanvasAsset from './CanvasAsset'
 import type { EditorAsset, EditorSection } from './types'
 import { isImageFile, MAX_FILE_BYTES, MAX_FILE_MB } from '@/lib/image-compress'
+import { maxAssetsFor } from './types'
 
 interface UploadProgress {
   total: number
@@ -158,7 +159,8 @@ export default function SlideCanvas({
   const total = uploadProgress?.total ?? 0
   const isUploading = uploading > 0
   const progressPct = total > 0 ? Math.round((settled / total) * 100) : 0
-  const MAX_ASSETS = 4
+  // Carousels hold 10 frames in one post; other mockups 4 per slide.
+  const MAX_ASSETS = maxAssetsFor(section.mockup_type)
   const atLimit = section.assets.length >= MAX_ASSETS
 
   return (
@@ -319,7 +321,7 @@ export default function SlideCanvas({
                   <span className="text-sm font-black" style={{ color: '#ef4444' }}>4</span>
                 </div>
                 <div>
-                  <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>הגעת למגבלת 4 תמונות לשקף</p>
+                  <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>הגעת למגבלת {MAX_ASSETS} תמונות לשקף</p>
                   <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.18)' }}>הוסף שקף חדש כדי להוסיף תמונות נוספות</p>
                 </div>
               </div>
