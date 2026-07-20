@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
 import type { ReportTab, ReportBlock } from '@/lib/performance-reports'
 import he from '@/lib/i18n/he'
@@ -28,6 +28,13 @@ export default function ReportPresentation({ report, brandColor }: Props) {
   }, [lang, report.tabs, report.tabsEn])
 
   const hasEn = !!report.tabsEn?.length
+  // The English set can be shorter than the Hebrew one (the model may drop a
+  // tab). Without clamping, a client reading tab 5 who switches language got a
+  // blank page with the counter reading "6 / 3".
+  useEffect(() => {
+    setActiveTab(prev => Math.min(prev, Math.max(0, activeTabs.length - 1)))
+  }, [activeTabs.length])
+
   const tab = activeTabs[activeTab] || null
 
   const navigate = (dir: -1 | 1) => {
@@ -69,7 +76,7 @@ export default function ReportPresentation({ report, brandColor }: Props) {
               )}
               {tab.subtitle && <p className="report-tab-subtitle">{tab.subtitle}</p>}
 
-              {tab.blocks.map(block => (
+              {(tab.blocks || []).map(block => (
                 <BlockRenderer key={block.id} block={block} />
               ))}
             </div>

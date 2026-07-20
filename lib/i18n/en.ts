@@ -118,6 +118,8 @@ const en: Record<TranslationKey, string> = {
   'clients.syncMonday': 'Sync from Monday',
   'clients.syncing': 'Syncing...',
   'clients.newClient': 'New Client',
+  'clients.loadError': 'Could not load clients',
+  'clients.loadErrorHint': "We couldn't reach the server. Refresh and try again.",
   'clients.noClients': 'No clients yet',
   'clients.noResults': 'No matching clients found',
   'clients.noClientsHint': 'Click "New Client" to get started',

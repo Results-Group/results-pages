@@ -41,6 +41,18 @@ const BLOCK_TYPE_KEYS: Record<ReportBlockType, string> = {
   text: 'block.text',
 }
 
+/**
+ * Model output is not schema-checked. A tab returned without a `blocks` array
+ * used to be stored verbatim and then thrown on by the published report page,
+ * so every AI path is normalised before it reaches state.
+ */
+function normaliseTabs(raw: unknown): ReportTab[] {
+  if (!Array.isArray(raw)) return []
+  return raw
+    .filter((t): t is ReportTab => !!t && typeof t === 'object')
+    .map(t => ({ ...t, blocks: Array.isArray(t.blocks) ? t.blocks : [] }))
+}
+
 export default function ReportEditor({ mode, initial, reportId }: Props) {
   const router = useRouter()
   const t = useT()
@@ -172,7 +184,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
   // Load template
   const loadTemplate = () => {
     markDirty()
-    if (tabs.length > 0 && tabs.some(tb => tb.blocks.length > 0)) {
+    if (tabs.length > 0 && tabs.some(tb => (tb.blocks || []).length > 0)) {
       if (!confirm(t('reports.replaceConfirm'))) return
     }
     setTabs(createStandardTemplate())
@@ -235,7 +247,8 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
         return
       }
       const { tabs: imported } = await res.json()
-      setTabs(imported)
+      markDirty()
+      setTabs(normaliseTabs(imported))
       setActiveTabIdx(0)
     } finally {
       setImporting(false)
@@ -264,7 +277,8 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
       }
       const result = await res.json()
       if (direction === 'en-to-he') {
-        setTabs(result.tabs)
+        markDirty()
+        setTabs(normaliseTabs(result.tabs))
       }
       showToast(direction === 'he-to-en' ? t('reports.enCreated') : t('reports.heCreated'), 'success')
     } finally {

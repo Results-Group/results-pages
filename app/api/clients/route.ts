@@ -49,7 +49,9 @@ export async function GET(req: NextRequest) {
     )
   } catch (err) {
     captureException(err, { route: 'GET /api/clients' })
-    return NextResponse.json([], { status: 200 })
+    // 500, not an empty 200: returning [] made a database outage look like
+    // "no records", with no way for the UI to tell the difference.
+    return NextResponse.json({ error: 'שגיאה בטעינת הנתונים' }, { status: 500 })
   }
 }
 

@@ -1,0 +1,4214 @@
+<title>Relax LP — קוד המקור</title>
+<style>
+:root {
+  --paper: #F2F5F4;
+  --card: #FFFFFF;
+  --ink: #0E1F1C;
+  --ink-soft: #56706C;
+  --rule: #DBE3E1;
+  --accent: #0F8478;
+  --accent-soft: #E3F2EF;
+  --gold: #96762F;
+  --gutter: #9FB2AE;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #08110F;
+    --card: #0C1B18;
+    --ink: #E4EDEB;
+    --ink-soft: #8AA39E;
+    --rule: #1B2F2B;
+    --accent: #40E1D3;
+    --accent-soft: #10312C;
+    --gold: #D3AE5E;
+    --gutter: #3D5450;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #08110F; --card: #0C1B18; --ink: #E4EDEB; --ink-soft: #8AA39E;
+  --rule: #1B2F2B; --accent: #40E1D3; --accent-soft: #10312C; --gold: #D3AE5E;
+  --gutter: #3D5450; color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --paper: #F2F5F4; --card: #FFFFFF; --ink: #0E1F1C; --ink-soft: #56706C;
+  --rule: #DBE3E1; --accent: #0F8478; --accent-soft: #E3F2EF; --gold: #96762F;
+  --gutter: #9FB2AE; color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px 72px; }
+
+/* ---- masthead ---- */
+header.masthead {
+  padding: 44px 0 26px;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+h1 {
+  margin: 0;
+  font-size: clamp(26px, 4vw, 38px);
+  letter-spacing: -.02em;
+  font-weight: 800;
+  text-wrap: balance;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.meta {
+  display: flex;
+  gap: 22px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.meta b { color: var(--ink); font-weight: 700; }
+
+/* ---- toolbar ---- */
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  padding: 12px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+button.act {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 9px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--paper);
+  cursor: pointer;
+  transition: opacity .15s ease;
+}
+button.act.ghost { background: transparent; color: var(--accent); }
+button.act:hover { opacity: .82; }
+button.act:focus-visible, .jump a:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.status { font-size: 13px; color: var(--accent); font-weight: 700; min-width: 90px; }
+
+/* ---- jump list ---- */
+nav.jump {
+  margin: 26px 0 20px;
+  padding: 18px 20px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+}
+nav.jump h2 {
+  margin: 0 0 12px;
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 700;
+}
+.jump ol {
+  margin: 0; padding: 0; list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 2px 18px;
+}
+.jump a {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 13.5px;
+  border-bottom: 1px solid transparent;
+}
+.jump a:hover { color: var(--accent); border-bottom-color: var(--rule); }
+.jump .ln {
+  color: var(--gutter);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+
+/* ---- code ---- */
+.codebox {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.codebox .bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--rule);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+.codebox .dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--gold); flex: none;
+}
+.scroller { overflow-x: auto; }
+.code {
+  display: flex;
+  align-items: flex-start;
+  min-width: max-content;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.65;
+  direction: ltr;
+  text-align: left;
+}
+.gutter {
+  flex: none;
+  padding: 16px 14px 16px 18px;
+  color: var(--gutter);
+  background: var(--paper);
+  border-right: 1px solid var(--rule);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  position: sticky;
+  left: 0;
+  white-space: pre;
+}
+pre.src {
+  margin: 0;
+  padding: 16px 24px 16px 18px;
+  white-space: pre;
+  color: var(--ink);
+  tab-size: 4;
+}
+.gutter span.hit { color: var(--accent); font-weight: 700; }
+
+footer.foot {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid var(--rule);
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; scroll-behavior: auto !important; }
+}
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div>
+      <p class="eyebrow">דף נחיתה · Relax Group</p>
+      <h1>relax-lp.html</h1>
+    </div>
+    <div class="meta">
+      <span><b>3886</b> שורות</span>
+      <span><b>165</b> KB</span>
+      <span><b>3</b> טפסים</span>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <button class="act" id="copyBtn" type="button">העתקת כל הקוד</button>
+    <button class="act ghost" id="dlBtn" type="button">הורדת הקובץ</button>
+    <span class="status" id="status" role="status" aria-live="polite"></span>
+  </div>
+
+  <nav class="jump">
+    <h2>קפיצה לקטע</h2>
+    <ol id="jumpList"></ol>
+  </nav>
+
+  <div class="codebox">
+    <div class="bar"><span class="dot"></span> relax-lp.html — HTML · CSS · JavaScript</div>
+    <div class="scroller">
+      <div class="code">
+        <div class="gutter" id="gutter" aria-hidden="true"></div>
+<pre class="src" id="src">&lt;!DOCTYPE html&gt;
+&lt;html lang="he" dir="rtl"&gt;&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;!-- Required for YouTube embeds (avoids Error 153) --&gt;
+    &lt;meta name="referrer" content="strict-origin-when-cross-origin"&gt;
+    &lt;title&gt;Relax - עסקאות הנדל"ן הטובות בישראל&lt;/title&gt;
+    &lt;meta name="description" content="Relax – איגוד הנדל״ן הראשון בישראל. גישה בלעדית לפרויקטים במחירון אפס, ליווי פיננסי ומשפטי מלא וניהול סיכונים חסר פשרות. תיאום פגישה ללא עלות."&gt;
+    &lt;meta property="og:title" content="Relax - עסקאות הנדל״ן הטובות בישראל"&gt;
+    &lt;meta property="og:description" content="גישה בלעדית לפרויקטים במחירון אפס, ליווי פיננסי ומשפטי מלא וניהול סיכונים חסר פשרות."&gt;
+    &lt;meta property="og:image" content="https://static.wixstatic.com/media/bb1f28_ab453a1d63854460921bfbac4356aada~mv2.png"&gt;
+    &lt;meta property="og:type" content="website"&gt;
+    &lt;meta property="og:locale" content="he_IL"&gt;
+    &lt;meta name="twitter:card" content="summary_large_image"&gt;
+    &lt;link rel="icon" type="image/png" href="https://static.wixstatic.com/media/bb1f28_ab453a1d63854460921bfbac4356aada~mv2.png"&gt;
+    &lt;link rel="preconnect" href="https://static.wixstatic.com" crossorigin=""&gt;
+    &lt;link rel="preconnect" href="https://www.youtube-nocookie.com" crossorigin=""&gt;
+    &lt;link rel="preconnect" href="https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com" crossorigin=""&gt;
+    &lt;link rel="preload" href="https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-regular.woff2" as="font" type="font/woff2" crossorigin=""&gt;
+    &lt;link rel="preload" href="https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-bold.woff2" as="font" type="font/woff2" crossorigin=""&gt;
+
+    &lt;style&gt;
+        /* === FONTS === */
+        @font-face {
+            font-family: 'Ping';
+            src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-regular.woff2') format('woff2');
+            font-weight: 400; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Ping';
+            src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-bold.woff2') format('woff2');
+            font-weight: 700; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Ping';
+            src: url('https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com/pingnew/ping-heavy.woff2') format('woff2');
+            font-weight: 900; font-display: swap;
+        }
+
+        /* === VARIABLES === */
+        #relax-lp {
+            --brand-turquoise: #40e1d3;
+            --brand-turquoise-dark: #2dbab0;
+            --gold-champagne: #B89246;
+            --strike-red: #FF2A4D;
+            --cliche-red: #E63946;
+        }
+
+        .hero-section, .final-cta-section {
+            --bg-main: #0C2B28;
+            --bg-white: #0F312D;
+            --text-main: #F8F9FA;
+            --text-muted: #A0B8B5;
+            --accent-dark: #FFFFFF;
+            --accent-light: #FFFFFF;
+            --border-light: rgba(64, 225, 211, 0.12);
+        }
+        .process-section {
+            --bg-main: #F8F9FA;
+            --bg-white: #FFFFFF;
+            --text-main: #1A1C20;
+            --text-muted: #6B7280;
+            --accent-dark: #1A1C20;
+            --accent-light: #1A1C20;
+            --border-light: rgba(0, 0, 0, 0.08);
+        }
+
+        .stats-strip, .features-section, .partners-strip, .projects-section,
+        .positioning-section, .faq-section, .site-footer {
+            --bg-light: #F8F9FA;
+            --bg-light-grey: #F8F9FA;
+            --bg-white: #FFFFFF;
+            --text-main: #1A1C20;
+            --text-muted: #6B7280;
+            --accent-dark: #1A1C20;
+            --border-light: rgba(0, 0, 0, 0.08);
+        }
+
+        /* === ELEMENTOR PARENT OVERRIDES === */
+        .elementor-widget-container:has(&gt; #relax-lp),
+        .elementor-widget-wrap:has(#relax-lp),
+        .elementor-column-wrap:has(#relax-lp),
+        .elementor-element:has(#relax-lp) {
+            padding: 0 !important;
+            margin: 0 !important;
+            max-width: none !important;
+            width: 100% !important;
+        }
+
+        /* === SCOPED RESET === */
+        #relax-lp,
+        #relax-lp *,
+        #relax-lp *::before,
+        #relax-lp *::after {
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        #relax-lp {
+            font-family: 'Ping', sans-serif;
+            color: #F8F9FA;
+            background-color: #FFFFFF;
+            overflow: visible;
+            direction: rtl;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            max-width: 100%;
+        }
+        html, body {
+            overflow-x: hidden;
+            max-width: 100%;
+        }
+        /* Scroll lock while the project modal is open */
+        html.relax-modal-open, body.relax-modal-open {
+            overflow: hidden;
+        }
+
+        #relax-lp section,
+        #relax-lp footer {
+            display: block;
+            width: 100%;
+            margin: 0;
+        }
+
+        #relax-lp h1, #relax-lp h2, #relax-lp h3, #relax-lp h4, #relax-lp h5, #relax-lp h6,
+        #relax-lp p, #relax-lp ul, #relax-lp ol, #relax-lp figure, #relax-lp blockquote {
+            margin: 0;
+            padding: 0;
+        }
+
+        #relax-lp img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* === ANIMATIONS === */
+        @keyframes buttonShimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        @keyframes scroll-left {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0.6; }
+            to { opacity: 1; }
+        }
+        @keyframes modalPop {
+            from { opacity: 0; transform: translateY(18px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* ============================================
+           HEADER (site nav)
+           ============================================ */
+        .lp-header {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            padding: 8px 4%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            background: #FFFFFF;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            overflow: visible;
+            min-height: 56px;
+            box-sizing: border-box;
+        }
+        .site-logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            flex-shrink: 0;
+            line-height: 0;
+        }
+        /* Must beat #relax-lp img { height: auto } */
+        #relax-lp .site-logo-img {
+            display: block;
+            height: 32px;
+            width: auto;
+            max-width: 120px;
+            max-height: 32px;
+            object-fit: contain;
+            object-position: right center;
+        }
+        .header-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 28px;
+            flex: 1;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .header-nav a {
+            color: #111111;
+            text-decoration: none;
+            font-size: 0.98rem;
+            font-weight: 700;
+            white-space: nowrap;
+            transition: color 0.2s ease;
+        }
+        .header-nav a:hover {
+            color: #2dbab0;
+        }
+        .header-account {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            padding: 10px 18px;
+            border: 1.5px solid #111111;
+            border-radius: 2px;
+            color: #111111;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 700;
+            background: #FFFFFF;
+            transition: background 0.2s ease, color 0.2s ease;
+            white-space: nowrap;
+        }
+        .header-account svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+        .header-account:hover {
+            background: #111111;
+            color: #FFFFFF;
+        }
+        .header-burger {
+            display: none;
+            width: 42px;
+            height: 42px;
+            border: 1.5px solid #111111;
+            background: #FFFFFF;
+            border-radius: 2px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 5px;
+            padding: 0;
+            flex-shrink: 0;
+        }
+        .header-burger span {
+            display: block;
+            width: 18px;
+            height: 2px;
+            background: #111111;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+        }
+        .lp-header.nav-open .header-burger span:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+        .lp-header.nav-open .header-burger span:nth-child(2) {
+            opacity: 0;
+        }
+        .lp-header.nav-open .header-burger span:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+
+        /* ============================================
+           SECTION 1: HERO
+           ============================================ */
+        .hero-section {
+            min-height: calc(100svh - 56px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: stretch;
+            padding: clamp(56px, 7vh, 96px) clamp(24px, 5vw, 72px) clamp(48px, 6vh, 72px);
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(165deg, #0A2421 0%, #0C2B28 35%, #0F352F 65%, #0C2B28 100%);
+        }
+        @media (min-width: 993px) {
+            .hero-section {
+                min-height: calc(100svh - 56px);
+                padding: clamp(64px, 8vh, 108px) clamp(32px, 5vw, 80px) clamp(56px, 7vh, 88px);
+            }
+        }
+        .hero-section::before {
+            content: ''; position: absolute; top: -30%; right: -10%;
+            width: 800px; height: 800px;
+            background: radial-gradient(circle, rgba(64, 225, 211, 0.08), transparent 65%);
+            border-radius: 50%;
+            z-index: 0; pointer-events: none;
+        }
+        .hero-section::after {
+            content: ''; position: absolute; bottom: -20%; left: -10%;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(64, 225, 211, 0.05), transparent 65%);
+            border-radius: 50%;
+            z-index: 0; pointer-events: none;
+        }
+        .hero-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex: 1;
+            gap: clamp(40px, 5vh, 56px);
+            width: 100%;
+            max-width: 1480px;
+            margin: 0 auto;
+            z-index: 1;
+        }
+        .hero-main {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+            gap: clamp(40px, 4.5vw, 72px);
+            align-items: center;
+            width: 100%;
+        }
+        .hero-main &gt; * {
+            min-width: 0;
+            max-width: 100%;
+        }
+        .hero-text-side {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: clamp(10px, 1.5vh, 18px);
+            position: relative;
+            z-index: 3;
+            width: 100%;
+            overflow: hidden;
+        }
+        .hero-section .cliche-wrapper {
+            font-size: clamp(1.15rem, 1.5vw, 1.45rem);
+            color: #A0B8B5;
+            margin-bottom: clamp(12px, 2vh, 20px);
+            font-weight: 300;
+            position: relative;
+            display: inline-block;
+            align-self: flex-start;
+            min-height: 40px;
+            max-width: 100%;
+        }
+        .hero-section .cliche-text {
+            position: relative;
+            display: inline-block;
+        }
+        .hero-section .cliche-text::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -2%;
+            width: 0;
+            height: 3px;
+            background-color: var(--strike-red);
+            transform: rotate(-2deg);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: none;
+        }
+        .hero-section .cliche-text.strike::after {
+            width: 104%;
+        }
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background-color: #A0B8B5;
+            vertical-align: middle;
+            margin-right: 2px;
+            animation: blink 0.8s infinite;
+        }
+        .main-title {
+            font-size: clamp(2.2rem, 3.8vw, 3.75rem);
+            font-weight: 900;
+            line-height: 1.15;
+            margin-bottom: clamp(16px, 2.5vh, 28px);
+            letter-spacing: -0.5px;
+            color: #FFFFFF;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            max-width: 100%;
+        }
+        .main-title span.title-accent {
+            color: #40e1d3;
+            font-weight: 900;
+            display: block;
+            font-size: inherit;
+            margin-top: 0;
+            line-height: 1.05;
+            white-space: normal;
+            max-width: 100%;
+        }
+        .main-title span.title-mid {
+            color: #FFFFFF;
+            font-weight: 900;
+            display: block;
+            font-size: inherit;
+            margin-top: clamp(6px, 1vh, 10px);
+            margin-bottom: 0;
+            line-height: 1.05;
+            white-space: nowrap;
+            max-width: 100%;
+        }
+        .main-subtitle {
+            font-size: clamp(1.05rem, 1.45vw, 1.35rem);
+            font-weight: 400;
+            color: #A0B8B5;
+            margin-bottom: clamp(28px, 4vh, 44px);
+            line-height: 1.7;
+            max-width: 100%;
+        }
+        .main-subtitle strong {
+            color: #40e1d3;
+            font-weight: 700;
+        }
+
+        /* Hero Projects CTA */
+        .hero-section .hero-projects-cta {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            max-width: 560px;
+            background: linear-gradient(270deg, #2dbab0, #40e1d3, #2dbab0);
+            background-size: 200% 200%;
+            animation: buttonShimmer 6s ease infinite;
+            color: #0C2B28;
+            border: none;
+            padding: clamp(16px, 2vh, 22px) clamp(28px, 3vw, 40px);
+            font-size: clamp(1.05rem, 1.35vw, 1.25rem);
+            font-weight: 900;
+            font-family: 'Ping', sans-serif;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-top: 0;
+            box-shadow: 0 10px 28px rgba(64, 225, 211, 0.28);
+            border-radius: 6px;
+            text-decoration: none;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .hero-section .hero-projects-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(64, 225, 211, 0.3);
+            color: #0C2B28;
+        }
+        .input-group { position: relative; }
+        .trust-features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 16px 24px;
+            margin: clamp(8px, 2vh, 16px) auto 0;
+            padding-top: clamp(32px, 4vh, 48px);
+            width: 100%;
+            max-width: 1040px;
+            border-top: 1px solid rgba(64, 225, 211, 0.18);
+        }
+        .trust-item {
+            font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+            color: #FFFFFF;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 12px 22px;
+            border-radius: 50px;
+            border: 1px solid rgba(64, 225, 211, 0.22);
+            white-space: nowrap;
+        }
+        .trust-item .check-icon {
+            color: #40e1d3;
+            font-weight: 900;
+            font-size: 1.1rem;
+        }
+
+        /* Hero Video */
+        .hero-video-side {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: stretch;
+            align-items: center;
+            width: 100%;
+            min-width: 0;
+        }
+        .hero-section .video-wrapper {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%;
+            background-color: #0a1f1d;
+            border-radius: 16px;
+            overflow: hidden;
+            flex-shrink: 0;
+            box-shadow:
+                0 32px 80px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(64, 225, 211, 0.22);
+        }
+        @media (min-width: 993px) {
+            .hero-section .video-wrapper {
+                padding-bottom: 0;
+                height: clamp(300px, 40vh, 460px);
+                max-width: 100%;
+            }
+        }
+        @media (min-width: 993px) and (max-width: 1280px) {
+            .hero-main {
+                gap: 36px;
+                grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+            }
+            .main-title {
+                font-size: clamp(2rem, 3.2vw, 2.8rem);
+            }
+        }
+        .hero-scroll-cue {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin: clamp(16px, 3vh, 28px) auto 0;
+            color: rgba(160, 184, 181, 0.85);
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+        }
+        .hero-scroll-cue:hover { color: #40e1d3; }
+        .hero-scroll-cue__arrow {
+            color: #40e1d3;
+            font-size: 1.5rem;
+            line-height: 1;
+            animation: heroScrollBounce 2.2s ease-in-out infinite;
+        }
+        @keyframes heroScrollBounce {
+            0%, 100% { transform: translateY(0); opacity: 0.7; }
+            50% { transform: translateY(8px); opacity: 1; }
+        }
+        .hero-section .video-wrapper iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: #0a1f1d;
+            border-radius: 12px;
+            z-index: 1;
+        }
+
+        /* ============================================
+           YOUTUBE FACADE (defers the iframe until click)
+           ============================================ */
+        .video-facade {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            border: none;
+            cursor: pointer;
+            background: #0a1f1d;
+            display: block;
+            z-index: 2;
+        }
+        .video-facade img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 20%;
+            display: block;
+        }
+        .play-btn-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 72px;
+            height: 72px;
+            background: rgba(64, 225, 211, 0.92);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            pointer-events: none;
+        }
+        .play-btn-overlay::after {
+            content: '';
+            display: block;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 12px 0 12px 20px;
+            border-color: transparent transparent transparent #0C2B28;
+            margin-left: 4px;
+        }
+        .video-facade:hover .play-btn-overlay,
+        .video-facade:focus-visible .play-btn-overlay {
+            background: #40e1d3;
+            transform: translate(-50%, -50%) scale(1.08);
+            box-shadow: 0 14px 36px rgba(64, 225, 211, 0.35);
+        }
+
+        /* ============================================
+           SECTION: STATS + FEATURES + PARTNERS
+           ============================================ */
+
+        /* Stats Strip */
+        .stats-strip {
+            background: linear-gradient(180deg, #EEF1F4 0%, #F8F9FA 45%, #FFFFFF 100%);
+            border-top: 3px solid rgba(64, 225, 211, 0.45);
+            border-bottom: 3px solid rgba(64, 225, 211, 0.45);
+            padding: clamp(72px, 10vw, 120px) clamp(20px, 4vw, 48px);
+            position: relative;
+            overflow: hidden;
+        }
+        .stats-strip::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 90% 120% at 50% -20%, rgba(64, 225, 211, 0.09) 0%, transparent 65%);
+            pointer-events: none;
+        }
+        .stats-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1560px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            gap: 0;
+            background: #FFFFFF;
+            border: 1px solid rgba(0, 0, 0, 0.07);
+            border-radius: 20px;
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.06),
+                0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+            padding: clamp(44px, 6vw, 72px) clamp(12px, 2vw, 24px);
+        }
+        .stat-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: clamp(24px, 3.5vw, 40px) clamp(14px, 1.8vw, 22px);
+            min-width: 0;
+            min-height: clamp(130px, 16vw, 170px);
+        }
+        .stat-item:not(:last-child)::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 62%;
+            width: 2px;
+            background: linear-gradient(180deg, transparent 0%, rgba(184, 146, 70, 0.45) 50%, transparent 100%);
+        }
+        .stat-number-wrapper {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: clamp(12px, 1.5vw, 18px);
+            direction: ltr;
+        }
+        .stat-val {
+            font-size: clamp(2.8rem, 5.5vw, 4.75rem);
+            font-weight: 900;
+            color: var(--accent-dark);
+            line-height: 1;
+            letter-spacing: -0.03em;
+            /* reserve space so the counter can't reflow the strip mid-scroll */
+            font-variant-numeric: tabular-nums;
+        }
+        .stat-currency, .stat-suffix {
+            font-size: clamp(1.35rem, 2.4vw, 2.1rem);
+            font-weight: 800;
+            color: var(--gold-champagne);
+        }
+        .stat-label {
+            font-size: clamp(1rem, 1.35vw, 1.2rem);
+            font-weight: 600;
+            color: #4B5563;
+            text-align: center;
+            line-height: 1.45;
+            max-width: 12em;
+        }
+
+        /* Features */
+        .features-section {
+            padding: 80px 5% 100px;
+            position: relative;
+            background-color: var(--bg-light);
+        }
+        .features-section .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .features-section .section-header h2 {
+            font-size: 3.2rem;
+            font-weight: 900;
+            color: var(--accent-dark);
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+        .features-section .section-header p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .feature-card {
+            background: var(--bg-white);
+            padding: 50px 40px;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            text-align: right;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(10, 20, 40, 0.06);
+        }
+        .feature-card .feature-cliche {
+            font-size: 1.1rem;
+            color: #9CA3AF;
+            position: relative;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        .feature-card .feature-cliche::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -5%;
+            width: 110%;
+            height: 2px;
+            background-color: var(--cliche-red);
+            transform: rotate(-2deg);
+        }
+        .feature-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--accent-dark);
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        .feature-desc {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* Partners Marquee */
+        .partners-strip {
+            background-color: #FFFFFF;
+            border-top: 1px solid rgba(64, 225, 211, 0.2);
+            border-bottom: 1px solid rgba(64, 225, 211, 0.2);
+            padding: 50px 0 45px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+        #relax-lp .partners-strip p {
+            color: #40e1d3;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-align: center;
+            text-transform: uppercase;
+            padding-bottom: 30px;
+        }
+        .marquee-wrapper {
+            display: flex;
+            width: 100%;
+            overflow: hidden;
+            direction: ltr;
+            position: relative;
+        }
+        .marquee-wrapper::before,
+        .marquee-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 80px;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .marquee-wrapper::before {
+            left: 0;
+            background: linear-gradient(to right, #FFFFFF, transparent);
+        }
+        .marquee-wrapper::after {
+            right: 0;
+            background: linear-gradient(to left, #FFFFFF, transparent);
+        }
+        .marquee-content {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+            animation: scroll-left 25s linear infinite;
+        }
+        .m-item {
+            color: #1A1C20;
+            font-weight: 900;
+            font-size: 1.3rem;
+            white-space: nowrap;
+            opacity: 0.75;
+        }
+        .m-dot {
+            color: #40e1d3;
+            opacity: 0.6;
+        }
+
+        /* ============================================
+           SECTION: PROCESS
+           ============================================ */
+        .process-section {
+            padding: 80px 5% 100px;
+            background-color: #F8F9FA;
+            position: relative;
+        }
+        .process-section .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+            max-width: 850px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            z-index: 2;
+        }
+        .process-section .section-header h2 {
+            font-size: 3.2rem;
+            font-weight: 900;
+            color: #1A1C20;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+        .process-section .section-header p {
+            font-size: 1.25rem;
+            color: #6B7280;
+            line-height: 1.6;
+        }
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+        .process-step {
+            position: relative;
+            padding: 40px 20px 30px;
+            text-align: right;
+            border-top: 2px solid rgba(0, 0, 0, 0.06);
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.6s ease, background-color 0.6s ease;
+            opacity: 0.78;
+            cursor: pointer;
+            border-radius: 0 0 8px 8px;
+        }
+        .process-step::after {
+            content: '';
+            position: absolute;
+            top: -2px; right: 0;
+            width: 0; height: 2px;
+            background-color: #40e1d3;
+            transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .process-step.active {
+            opacity: 1;
+            background: #FFFFFF;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+            border-radius: 8px;
+        }
+        .process-step.active::after {
+            width: 100%;
+        }
+        .step-number {
+            font-size: 4.5rem;
+            font-weight: 900;
+            color: rgba(0, 0, 0, 0.04);
+            line-height: 1;
+            margin-bottom: 25px;
+            transition: color 0.6s ease, transform 0.6s ease;
+            display: inline-block;
+        }
+        .process-step.active .step-number {
+            color: #40e1d3;
+            transform: translateY(-8px);
+        }
+        .step-title {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: rgba(0, 0, 0, 0.58);
+            margin-bottom: 15px;
+            transition: color 0.4s ease;
+        }
+        .process-step.active .step-title {
+            color: #1A1C20;
+        }
+        .step-desc {
+            color: #6B7280;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            transition: color 0.4s ease;
+        }
+        .process-step.active .step-desc {
+            color: #4B5563;
+        }
+
+        /* ============================================
+           SECTION: PROJECTS
+           ============================================ */
+        .projects-section {
+            padding: 60px 5% 100px;
+            background-color: var(--bg-light);
+        }
+        .projects-section .section-header {
+            text-align: center;
+            margin-bottom: 70px;
+            max-width: 850px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .projects-section .section-header h2 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--accent-dark);
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+            line-height: 1.1;
+        }
+        .projects-section .section-header p {
+            font-size: 1.35rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        .mobile-projects-nav-wrapper {
+            display: none;
+        }
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 50px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .project-card {
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(10, 20, 40, 0.08);
+        }
+        .project-gallery {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .main-img-container {
+            width: 100%;
+            height: 320px;
+            overflow: hidden;
+            background: #eee;
+        }
+        .project-main-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s ease;
+        }
+        .project-main-img.fade-in {
+            animation: fadeIn 0.4s ease forwards;
+        }
+        .project-thumbnails {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2px;
+            background: var(--bg-white);
+            padding-top: 2px;
+        }
+        .project-thumbnails img {
+            width: 100%;
+            height: 85px;
+            object-fit: cover;
+            opacity: 0.6;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: opacity 0.3s ease, border-color 0.3s ease;
+        }
+        .project-thumbnails img.active-thumb {
+            opacity: 1;
+            border-bottom: 3px solid var(--gold-champagne);
+        }
+        .project-content {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .project-tags {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .tag {
+            background-color: rgba(184, 146, 70, 0.08);
+            color: var(--gold-champagne);
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+        .project-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--accent-dark);
+            margin-bottom: 15px;
+        }
+        .project-desc {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        .project-quick-stats {
+            display: flex;
+            gap: 20px;
+            padding-top: 20px;
+            margin-bottom: 30px;
+            border-top: 1px solid var(--border-light);
+        }
+        .quick-stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1A1C20;
+        }
+        .quick-stat::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--gold-champagne);
+            flex-shrink: 0;
+        }
+        .project-cta {
+            align-self: flex-start;
+            margin-top: auto;
+            background-color: #0C2B28;
+            color: #FFFFFF;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-family: 'Ping', sans-serif;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            border-radius: 4px;
+        }
+        .project-cta:hover {
+            background-color: #40e1d3;
+            color: #0C2B28;
+        }
+
+        /* ============================================
+           PROJECT LEAD MODAL (replaces the 7 flip forms)
+           ============================================ */
+        .project-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(6, 22, 20, 0.72);
+            direction: rtl;
+        }
+        .project-modal-overlay.show { display: flex; }
+        .project-modal {
+            position: relative;
+            width: 100%;
+            max-width: 560px;
+            max-height: calc(100svh - 40px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            background: #0C2B28;
+            border: 1px solid rgba(64, 225, 211, 0.22);
+            border-radius: 14px;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
+            padding: 40px 36px 32px;
+            font-family: 'Ping', sans-serif;
+            animation: modalPop 0.28s cubic-bezier(0.2, 0.8, 0.3, 1);
+        }
+        .project-modal__close {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            width: 38px;
+            height: 38px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: transparent;
+            color: #A0B8B5;
+            border-radius: 50%;
+            font-size: 1.4rem;
+            line-height: 1;
+            cursor: pointer;
+            font-family: 'Ping', sans-serif;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .project-modal__close:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #FFFFFF;
+        }
+        .project-modal__eyebrow {
+            display: inline-block;
+            color: #40e1d3;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        .project-modal__title {
+            font-size: 1.65rem;
+            font-weight: 900;
+            color: #FFFFFF;
+            line-height: 1.2;
+            margin-bottom: 8px;
+            padding-left: 44px;
+        }
+        .project-modal__subtitle {
+            font-size: 1rem;
+            color: #A0B8B5;
+            line-height: 1.5;
+            margin-bottom: 26px;
+        }
+        .project-modal .premium-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 26px 22px;
+        }
+        .project-modal .premium-form input,
+        .project-modal .premium-form select {
+            width: 100%;
+            padding: 12px 0;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            color: #FFFFFF;
+            font-family: 'Ping', sans-serif;
+            font-size: 1.05rem;
+            border-radius: 0;
+        }
+        .project-modal .premium-form input[type="tel"] {
+            text-align: right;
+            direction: rtl;
+        }
+        .project-modal .premium-form select {
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+        .project-modal .premium-form select option {
+            background-color: #0F312D;
+            color: #FFFFFF;
+        }
+        .project-modal .premium-form input::placeholder,
+        .project-modal .premium-form select:invalid {
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 300;
+        }
+        .project-modal .premium-form input:focus,
+        .project-modal .premium-form select:focus {
+            outline: none;
+            border-bottom-color: #40e1d3;
+            box-shadow: 0 1px 0 #40e1d3;
+        }
+        .project-modal .submit-btn {
+            grid-column: span 2;
+            background: linear-gradient(270deg, #2dbab0, #40e1d3, #2dbab0);
+            background-size: 200% 200%;
+            animation: buttonShimmer 6s ease infinite;
+            color: #0C2B28;
+            border: none;
+            padding: 18px 12px;
+            font-size: 1.1rem;
+            font-weight: 900;
+            font-family: 'Ping', sans-serif;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1;
+        }
+        .project-modal .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(64, 225, 211, 0.3);
+        }
+        .project-modal .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: default;
+        }
+        .project-modal__note {
+            grid-column: span 2;
+            font-size: 0.85rem;
+            color: #7f9a97;
+            text-align: center;
+            margin-top: -6px;
+        }
+        @media (max-width: 560px) {
+            .project-modal { padding: 34px 22px 26px; border-radius: 12px; }
+            .project-modal__title { font-size: 1.35rem; padding-left: 40px; }
+            .project-modal .premium-form { grid-template-columns: 1fr; gap: 18px; }
+            .project-modal .submit-btn,
+            .project-modal__note { grid-column: span 1; }
+        }
+
+        /* ============================================
+           SECTION: POSITIONING / MANIFESTO
+           ============================================ */
+        .positioning-section {
+            padding: 140px 5% 200px;
+            background-color: var(--bg-white);
+            position: relative;
+            border-top: 1px solid var(--border-light);
+            overflow: visible;
+            z-index: 2;
+        }
+        .positioning-section::before {
+            content: 'RELAX';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 22vw;
+            font-weight: 900;
+            color: rgba(10, 20, 40, 0.02);
+            z-index: 0;
+            pointer-events: none;
+            letter-spacing: -0.05em;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .positioning-container {
+            display: grid;
+            grid-template-columns: 1fr 1.05fr;
+            gap: 80px;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: center;
+            z-index: 2;
+            position: relative;
+        }
+        .positioning-text-side {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            padding-right: 30px;
+            margin-top: -50px;
+        }
+        .positioning-text-side::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            bottom: 10px;
+            right: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, var(--gold-champagne), transparent);
+            border-radius: 2px;
+        }
+        .positioning-section .cliche-wrapper {
+            margin-bottom: 20px;
+        }
+        .positioning-section .feature-cliche {
+            font-size: 1.3rem;
+            color: #9CA3AF;
+            font-weight: 400;
+            position: relative;
+            display: inline-block;
+        }
+        .positioning-section .feature-cliche::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -5%;
+            width: 110%;
+            height: 3px;
+            background-color: var(--cliche-red);
+            transform: rotate(-2deg);
+        }
+        .manifesto-lead {
+            font-size: 3.2rem;
+            font-weight: 900;
+            color: var(--accent-dark);
+            line-height: 1.05;
+            margin-bottom: 40px;
+            letter-spacing: -1px;
+            white-space: nowrap;
+        }
+        .manifesto-lead span {
+            color: var(--gold-champagne);
+            display: block;
+            white-space: nowrap;
+        }
+        .manifesto-bullets {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            text-align: right;
+        }
+        .manifesto-bullet {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        .bullet-icon {
+            color: var(--gold-champagne);
+            font-weight: 900;
+            font-size: 1.2rem;
+            margin-top: 2px;
+        }
+        .manifesto-body {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-weight: 400;
+            margin: 0;
+            max-width: 95%;
+        }
+        .manifesto-body strong {
+            color: var(--accent-dark);
+            font-weight: 700;
+        }
+
+        /* Positioning Image */
+        .positioning-image-side {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-left: 20px;
+        }
+        .image-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 620px;
+            border-radius: 4px;
+            z-index: 2;
+            overflow: visible;
+        }
+        .image-wrapper img {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 3/4;
+            object-fit: cover;
+            border-radius: 4px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            filter: grayscale(30%) contrast(1.05) brightness(0.95);
+            transition: transform 0.6s ease, filter 0.6s ease;
+        }
+        .image-wrapper:hover img {
+            filter: grayscale(0%) contrast(1) brightness(1);
+        }
+        .image-decoration {
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: 30px;
+            bottom: 30px;
+            border: 2px solid rgba(184, 146, 70, 0.3);
+            border-radius: 4px;
+            z-index: -1;
+        }
+        .quote-badge {
+            position: absolute;
+            bottom: -30px;
+            right: -30px;
+            background-color: #0d1112;
+            color: #FFFFFF;
+            padding: 35px 40px;
+            border-radius: 4px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+            z-index: 5;
+            max-width: 340px;
+            border-right: 4px solid #40e1d3;
+            overflow: visible;
+        }
+        .quote-icon {
+            font-size: 3rem;
+            color: var(--gold-champagne);
+            line-height: 0;
+            margin-bottom: 10px;
+            opacity: 0.5;
+            font-family: Arial, sans-serif;
+        }
+        .quote-text {
+            font-size: 1.15rem;
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        /* ============================================
+           SECTION: FINAL CTA
+           ============================================ */
+        .final-cta-section {
+            background: linear-gradient(160deg, #0C2B28 0%, #0F352F 50%, #0C2B28 100%);
+            padding: 120px 5%;
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        .cta-text-side {
+            padding-right: 20px;
+        }
+        .final-cta-section .cta-cliche-text {
+            font-size: 1.4rem;
+            color: #A0B8B5;
+            margin-bottom: 15px;
+            font-weight: 300;
+            position: relative;
+            display: inline-block;
+        }
+        .final-cta-section .cta-cliche-text::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -5%;
+            width: 110%;
+            height: 3px;
+            background-color: var(--strike-red);
+            transform: rotate(-2deg);
+        }
+        .cta-title {
+            font-size: 3.8rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+            color: #FFFFFF;
+        }
+        .cta-title span {
+            color: #40e1d3;
+            display: block;
+        }
+        .cta-desc {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            color: #A0B8B5;
+            margin-bottom: 30px;
+            max-width: 95%;
+        }
+        .cta-form-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        .final-cta-section .premium-form {
+            /* solid instead of backdrop-filter: blur() — the blur forced a
+               full-layer repaint on every scroll frame */
+            background: #10352F;
+            padding: 45px 40px;
+            border-radius: 8px;
+            border: 1px solid rgba(64, 225, 211, 0.12);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px 25px;
+            position: relative;
+        }
+        .final-cta-section .form-title {
+            grid-column: span 2;
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: #FFFFFF;
+            margin-bottom: -10px;
+        }
+        .final-cta-section .premium-form input,
+        .final-cta-section .premium-form select {
+            width: 100%;
+            padding: 12px 0;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            color: #FFFFFF;
+            font-family: 'Ping', sans-serif;
+            font-size: 1.1rem;
+            border-radius: 0;
+        }
+        .final-cta-section .premium-form input[type="tel"] {
+            text-align: right;
+            direction: rtl;
+        }
+        .final-cta-section .premium-form select {
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+        .final-cta-section .premium-form select option {
+            background-color: #0F312D;
+            color: #FFFFFF;
+        }
+        .final-cta-section .premium-form input::placeholder,
+        .final-cta-section .premium-form select:invalid {
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 300;
+        }
+        .final-cta-section .premium-form input:focus,
+        .final-cta-section .premium-form select:focus {
+            outline: none;
+            border-bottom-color: #40e1d3;
+            box-shadow: 0 1px 0 #40e1d3;
+        }
+        .final-cta-section .submit-btn {
+            grid-column: span 2;
+            background: linear-gradient(270deg, #2dbab0, #40e1d3, #2dbab0);
+            background-size: 200% 200%;
+            animation: buttonShimmer 6s ease infinite;
+            color: #0C2B28;
+            border: none;
+            padding: 22px 10px;
+            font-size: 1.25rem;
+            font-weight: 900;
+            font-family: 'Ping', sans-serif;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1;
+            text-rendering: optimizeLegibility;
+        }
+        .final-cta-section .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(64, 225, 211, 0.25);
+        }
+        .final-cta-section .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: default;
+        }
+        .form-extras {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+        .extra-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #A0AABF;
+        }
+        .extra-badge svg {
+            width: 16px;
+            height: 16px;
+            color: var(--brand-turquoise);
+        }
+
+        /* ============================================
+           SECTION: FAQ + FOOTER
+           ============================================ */
+        .faq-section {
+            padding: 60px 5% 30px;
+            background-color: #FFFFFF;
+            position: relative;
+        }
+        .faq-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .faq-section .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .faq-section .section-header h2 {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #1A1C20;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+            line-height: 1.1;
+        }
+        .faq-section .section-header p {
+            font-size: 1.15rem;
+            color: #6B7280;
+            line-height: 1.6;
+        }
+        .faq-item {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+            margin-bottom: 0;
+        }
+        .faq-item:first-of-type {
+            border-top: 1px solid rgba(0, 0, 0, 0.15);
+        }
+        .faq-question {
+            width: 100%;
+            text-align: right;
+            background: none !important;
+            background-color: transparent !important;
+            border: none !important;
+            padding: 35px 20px 35px 0;
+            font-family: 'Ping', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1A1C20 !important;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: none !important;
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-appearance: none;
+            appearance: none;
+            box-shadow: none !important;
+            text-decoration: none !important;
+        }
+        .faq-question:hover,
+        .faq-question:focus,
+        .faq-question:active,
+        .faq-question:visited {
+            color: #1A1C20 !important;
+            background: none !important;
+            background-color: transparent !important;
+            outline: none !important;
+            box-shadow: none !important;
+            text-decoration: none !important;
+            border: none !important;
+        }
+        .faq-question:focus-visible {
+            outline: 2px solid var(--brand-turquoise) !important;
+            outline-offset: 2px;
+            border-radius: 2px;
+        }
+        .icon-plus {
+            position: relative;
+            width: 18px;
+            height: 18px;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+        .icon-plus::before, .icon-plus::after {
+            content: "";
+            position: absolute;
+            background-color: #1A1C20;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease, opacity 0.3s ease;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .icon-plus::before {
+            width: 100%;
+            height: 2px;
+        }
+        .icon-plus::after {
+            height: 100%;
+            width: 2px;
+        }
+        .faq-question:hover .icon-plus::before,
+        .faq-question:hover .icon-plus::after {
+            background-color: #1A1C20 !important;
+        }
+        .faq-item.active .icon-plus::after {
+            transform: translate(-50%, -50%) rotate(90deg);
+            opacity: 0;
+        }
+        .faq-item.active .icon-plus::before {
+            background-color: var(--brand-turquoise);
+        }
+        .faq-item.active .faq-question {
+            color: var(--brand-turquoise-dark);
+            padding-bottom: 20px;
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out;
+        }
+        .faq-answer-inner {
+            padding-bottom: 35px;
+            padding-right: 0;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            font-weight: 400;
+            color: #6B7280;
+            max-width: 95%;
+        }
+
+        /* Footer */
+        .site-footer {
+            text-align: center;
+            padding: 25px 5%;
+            background-color: #FFFFFF;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        .site-footer p {
+            font-size: 0.85rem;
+            color: #6B7280;
+            margin: 0;
+            font-weight: 400;
+            text-align: center;
+        }
+        .site-footer a {
+            color: #1A1C20;
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.3s ease;
+        }
+
+        /* === Field validation === */
+        .field-error {
+            display: block;
+            color: #e05555;
+            font-size: 0.82rem;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        /* ============================================
+           RESPONSIVE: 1200px
+           ============================================ */
+        @media (max-width: 1200px) {
+            .main-title { font-size: 2.7rem; }
+            .trust-item { padding: 6px 10px; font-size: 0.85rem; }
+        }
+
+        @media (max-width: 1100px) {
+            .header-nav { gap: 16px; }
+            .header-nav a { font-size: 0.9rem; }
+            .header-account { padding: 8px 12px; font-size: 0.85rem; }
+            #relax-lp .site-logo-img { height: 28px; max-height: 28px; max-width: 105px; }
+        }
+
+        /* ============================================
+           RESPONSIVE: 992px
+           ============================================ */
+        @media (max-width: 992px) {
+            /* Header */
+            .header-nav,
+            .header-account { display: none; }
+            .header-burger { display: inline-flex; }
+            .lp-header {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .lp-header.nav-open .header-nav {
+                display: flex;
+                width: 100%;
+                order: 3;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+                padding: 8px 0 4px;
+                border-top: 1px solid rgba(0, 0, 0, 0.06);
+            }
+            .lp-header.nav-open .header-nav a {
+                padding: 12px 4px;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+                font-size: 1rem;
+            }
+            .lp-header.nav-open .header-account {
+                display: inline-flex;
+                order: 4;
+                width: 100%;
+                justify-content: center;
+                margin-top: 4px;
+            }
+
+            /* Hero */
+            .hero-container {
+                gap: 36px;
+            }
+            .hero-main {
+                grid-template-columns: 1fr;
+                gap: 36px;
+            }
+            .hero-video-side { justify-content: center; }
+            .hero-section .video-wrapper { width: 100%; }
+            .hero-section .cliche-wrapper { align-self: center; }
+            .hero-text-side { text-align: center; align-items: center; }
+            .main-subtitle { margin: 0 auto 28px; text-align: center; }
+            .trust-features { flex-wrap: wrap; justify-content: center; }
+            .main-title { white-space: normal; }
+            .main-title span.title-accent,
+            .main-title span.title-mid { white-space: normal; }
+
+            /* Positioning */
+            .positioning-container { grid-template-columns: 1fr; gap: 60px; }
+            .positioning-text-side {
+                padding-right: 0;
+                margin-top: 0;
+                text-align: center;
+            }
+            .positioning-text-side::before { display: none; }
+            .manifesto-lead { white-space: normal; text-align: center; }
+            .manifesto-lead span { white-space: normal; display: block; }
+            .manifesto-bullets { text-align: right; max-width: 550px; margin: 0 auto; }
+            .positioning-image-side { max-width: 550px; margin: 40px auto 0; padding-left: 0; }
+            .quote-badge { right: -20px; bottom: -20px; padding: 25px; max-width: 300px; }
+
+            /* Final CTA */
+            .cta-container { grid-template-columns: 1fr; gap: 50px; }
+            .cta-text-side { text-align: center; padding-right: 0; }
+            .cta-desc { margin: 0 auto 30px; }
+            .cta-form-wrapper { width: 100%; max-width: 600px; margin: 0 auto; }
+
+            /* FAQ */
+            .faq-section .section-header h2 { font-size: 2.5rem; }
+        }
+
+        /* ============================================
+           RESPONSIVE: 768px (MOBILE)
+           ============================================ */
+        @media (max-width: 768px) {
+            /* --- HEADER --- */
+            .lp-header {
+                padding: 12px 4%;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            #relax-lp .site-logo-img { height: 26px; max-height: 26px; max-width: 98px; }
+            .header-account { display: none; }
+            .lp-header.nav-open .header-account {
+                display: inline-flex;
+                order: 4;
+                width: 100%;
+                justify-content: center;
+                margin-top: 4px;
+            }
+            .header-burger { display: inline-flex; }
+            .header-nav {
+                display: none;
+                width: 100%;
+                order: 3;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+                padding: 8px 0 4px;
+                border-top: 1px solid rgba(0, 0, 0, 0.06);
+            }
+            .lp-header.nav-open .header-nav { display: flex; }
+            .header-nav a {
+                padding: 12px 4px;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+                font-size: 1rem;
+            }
+
+            /* --- HERO --- */
+            .hero-section {
+                min-height: calc(100svh - 56px);
+                padding: 44px 20px 36px;
+            }
+            .hero-container {
+                display: flex;
+                flex-direction: column;
+                gap: 28px;
+            }
+            .hero-main {
+                display: flex;
+                flex-direction: column;
+                gap: 24px;
+            }
+            .hero-text-side { display: contents; }
+            .hero-section .cliche-wrapper { order: 1; align-self: center; font-size: 1.05rem; text-align: center; min-height: 30px; }
+            .main-title { order: 2; font-size: min(7.5vw, 2.2rem); text-align: center; white-space: normal; margin-bottom: 12px; line-height: 1.25; }
+            .main-title br { display: none; }
+            .main-title span.title-accent,
+            .main-title span.title-mid { display: inline; white-space: normal; margin-top: 0; }
+            .main-title span.title-mid::after { content: " "; }
+            .main-subtitle { order: 3; text-align: center; font-size: 0.95rem; margin-bottom: 8px; line-height: 1.5; }
+            .hero-section .hero-projects-cta {
+                order: 4;
+                width: 100%;
+                max-width: 100%;
+                margin: 0 auto;
+                padding: 14px 18px;
+                font-size: clamp(0.9rem, 4vw, 1.05rem);
+                white-space: normal;
+                box-sizing: border-box;
+            }
+            .hero-video-side { order: 5; }
+            .hero-section .video-wrapper {
+                margin-bottom: 0;
+                width: 100%;
+                box-shadow: none;
+                border: none;
+            }
+            .trust-features {
+                order: 6;
+                position: relative;
+                height: auto;
+                min-height: 52px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin: 8px auto 0;
+                padding-top: 28px;
+                width: 100%;
+                flex-wrap: wrap;
+                gap: 10px;
+                border-top: 1px solid rgba(64, 225, 211, 0.15);
+            }
+            .hero-scroll-cue { display: none; }
+            .trust-item {
+                position: absolute;
+                opacity: 0;
+                transition: opacity 0.5s ease-in-out;
+                background: rgba(64, 225, 211, 0.1);
+                justify-content: center;
+                font-size: 0.85rem;
+                padding: 6px 10px;
+            }
+            .trust-item.active-mobile { opacity: 1; position: relative; z-index: 2; }
+
+            /* --- STATS --- */
+            .stats-strip {
+                padding: 56px 16px;
+                border-top-width: 2px;
+                border-bottom-width: 2px;
+            }
+            .stats-container {
+                position: relative;
+                display: block;
+                border-radius: 16px;
+                padding: 36px 20px;
+                min-height: 200px;
+            }
+            .stat-item {
+                position: absolute;
+                top: 0; left: 0;
+                width: 100%;
+                min-height: 180px;
+                opacity: 0;
+                transition: opacity 0.8s ease, transform 0.8s ease;
+                transform: translateY(10px);
+                padding: 28px 16px;
+            }
+            .stat-item.active { opacity: 1; transform: translateY(0); }
+            .stat-item:not(:last-child)::after { display: none; }
+            .stat-number-wrapper { margin-bottom: 16px; }
+            .stat-val { font-size: 3.2rem; }
+            .stat-currency, .stat-suffix { font-size: 1.6rem; }
+            .stat-label { font-size: 1.05rem; max-width: 16em; }
+
+            /* --- FEATURES --- */
+            .features-section .section-header { padding: 0 8%; margin-bottom: 30px; }
+            .features-section .section-header h2 { font-size: 1.7rem; line-height: 1.2; margin-bottom: 10px; }
+            .features-section .section-header p { font-size: 1rem; }
+            .features-section { padding: 40px 0 50px; }
+            .features-grid {
+                display: flex;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                gap: 15px;
+                padding: 0 8% 25px;
+                scrollbar-width: none;
+                overscroll-behavior-x: contain;
+            }
+            .features-grid::-webkit-scrollbar { display: none; }
+            .feature-card {
+                min-width: 85%;
+                scroll-snap-align: center;
+                text-align: center;
+                border: 1px solid var(--border-light);
+                padding: 30px 20px;
+            }
+            .feature-title { font-size: 1.4rem; }
+            .feature-desc { font-size: 1rem; }
+            .dots-container {
+                display: flex;
+                justify-content: center;
+                gap: 8px;
+                margin-top: -5px;
+            }
+            .dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: #D1D5DB;
+                transition: background 0.3s ease, width 0.3s ease;
+            }
+            .dot.active {
+                background: var(--gold-champagne);
+                width: 18px;
+                border-radius: 4px;
+            }
+
+            /* --- PARTNERS --- */
+            .partners-strip { padding: 35px 0; gap: 20px; }
+            .partners-strip p {
+                font-size: 0.8rem;
+                width: 85%;
+                margin: 0 auto;
+                line-height: 1.4;
+                text-align: center;
+            }
+            .marquee-content { gap: 25px; }
+            .m-item { font-size: 1rem; }
+
+            /* --- PROCESS --- */
+            .process-section { padding: 50px 20px 60px; }
+            .process-section .section-header { margin-bottom: 40px; }
+            .process-section .section-header h2 { font-size: 1.9rem; line-height: 1.2; }
+            .process-section .section-header p { font-size: 1rem; }
+            .process-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .process-step {
+                padding: 22px 18px;
+                background: #FFFFFF;
+                border-top: 1px solid rgba(0, 0, 0, 0.06);
+                opacity: 0.5;
+            }
+            .step-header-mobile {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 8px;
+            }
+            .step-number { font-size: 2.5rem; margin-bottom: 0; }
+            .step-title { font-size: 1.25rem; margin-bottom: 0; }
+            .step-desc { font-size: 0.95rem; padding-right: 5px; }
+            .process-step.active {
+                opacity: 1;
+                background: #FFFFFF;
+                border-top-color: #40e1d3;
+                transform: scale(1.01);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            }
+
+            /* --- PROJECTS --- */
+            .projects-section { padding: 40px 5% 60px; }
+            .projects-section .section-header { margin-bottom: 30px; }
+            .projects-section .section-header h2 { font-size: 1.8rem; line-height: 1.2; }
+            .projects-section .section-header p { font-size: 1rem; }
+            .mobile-projects-nav-wrapper {
+                display: block;
+                position: relative;
+                margin-bottom: 25px;
+                padding: 0 5%;
+            }
+            .mobile-projects-nav-wrapper::after {
+                content: ''; position: absolute; top: 0; left: 0; height: 100%; width: 50px;
+                background: linear-gradient(to right, #F8F9FA, transparent);
+                pointer-events: none; z-index: 2;
+            }
+            .mobile-projects-nav {
+                display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px;
+                scrollbar-width: none; -ms-overflow-style: none; padding-left: 30px;
+                overscroll-behavior-x: contain;
+            }
+            .mobile-projects-nav::-webkit-scrollbar { display: none; }
+            .nav-btn {
+                background-color: #FFFFFF; color: #1A1C20; border: 1px solid rgba(0, 0, 0, 0.08);
+                padding: 8px 14px; font-family: 'Ping', sans-serif; font-weight: 700; font-size: 0.85rem;
+                white-space: nowrap; border-radius: 4px; cursor: pointer; flex-shrink: 0;
+            }
+            .nav-btn.active { background-color: #40e1d3; color: #0d1112; border-color: #40e1d3; }
+            .nav-scroll-indicator {
+                width: 50px; height: 3px; background: #D1D5DB;
+                margin: 5px auto 0; border-radius: 10px;
+                position: relative; overflow: hidden;
+            }
+            .nav-scroll-progress {
+                position: absolute; top: 0; right: 0; height: 100%; width: 30%;
+                background: var(--gold-champagne); border-radius: 10px;
+                transition: transform 0.1s linear; transform-origin: right;
+            }
+            .projects-grid { display: block; }
+            .project-card { display: none; animation: fadeIn 0.5s ease; }
+            .project-card.active-mobile { display: flex; }
+            .main-img-container { height: 220px; }
+            .project-thumbnails img { height: 55px; }
+            .project-content { padding: 20px; }
+            .project-title { font-size: 1.6rem; }
+            .project-desc { font-size: 0.95rem; }
+            .project-cta {
+                width: 100%; text-align: center; display: block;
+                padding: 14px 20px; font-size: 1rem;
+                background-color: #40e1d3;
+                color: #0C2B28;
+                align-self: stretch;
+            }
+            .project-quick-stats { flex-direction: column; gap: 8px; }
+            .project-tags { gap: 8px; }
+            .tag { font-size: 0.8rem; padding: 5px 10px; }
+
+            /* --- POSITIONING --- */
+            .positioning-section { padding: 60px 6%; }
+            .positioning-section .feature-cliche::after { width: 70%; right: 15%; }
+            .manifesto-lead {
+                font-size: clamp(1.6rem, 7vw, 2.2rem);
+                line-height: 1.2;
+                margin-bottom: 25px;
+            }
+            .manifesto-lead br { display: none; }
+            .positioning-section .feature-cliche { font-size: 1rem; line-height: 1.4; }
+            .manifesto-bullets { gap: 18px; width: 100%; }
+            .manifesto-body { font-size: 1rem; line-height: 1.5; max-width: 100%; }
+            .positioning-image-side { width: 100%; margin-top: 40px; }
+            .image-decoration { display: none; }
+            .quote-badge {
+                position: relative;
+                right: 0; bottom: 0;
+                margin-top: -20px;
+                margin-right: auto;
+                margin-left: 0;
+                width: 100%;
+                max-width: none;
+                padding: 18px;
+                border-radius: 4px;
+            }
+            .quote-text { font-size: 1rem; }
+
+            /* --- FINAL CTA --- */
+            .final-cta-section { padding: 60px 5%; }
+            .final-cta-section .cta-cliche-text { font-size: 1rem; margin-bottom: 8px; }
+            .final-cta-section .cta-cliche-text::after { width: 70%; right: 15%; }
+            .cta-title { font-size: 2rem; margin-bottom: 10px; }
+            .cta-title br { display: none; }
+            .cta-desc { font-size: 1rem; line-height: 1.5; margin-bottom: 20px; }
+            .final-cta-section .premium-form {
+                grid-template-columns: 1fr;
+                padding: 25px 20px;
+                gap: 16px;
+            }
+            .final-cta-section .form-title,
+            .final-cta-section .submit-btn,
+            .final-cta-section .success-msg {
+                grid-column: span 1;
+            }
+            .final-cta-section .submit-btn {
+                font-size: 1rem;
+                padding: 16px 10px;
+                line-height: 1;
+            }
+            .form-extras {
+                flex-direction: column;
+                gap: 12px;
+                align-items: center;
+                text-align: center;
+            }
+            .extra-badge { font-size: 0.85rem; }
+
+            /* --- FAQ --- */
+            .faq-section { padding: 40px 6% 60px; }
+            .faq-section .section-header { margin-bottom: 40px; }
+            .faq-section .section-header h2 { font-size: 1.8rem; line-height: 1.2; }
+            .faq-section .section-header p { font-size: 0.95rem; }
+            .faq-question { font-size: 1.05rem; padding: 22px 0; }
+            .faq-answer-inner { font-size: 0.95rem; max-width: 100%; padding-bottom: 25px; }
+            .icon-plus { width: 14px; height: 14px; margin-right: 12px; }
+
+            /* --- FOOTER --- */
+            .site-footer { padding: 20px 5%; }
+            .site-footer p { font-size: 0.8rem; }
+        }
+
+        /* Desktop dots hidden */
+        @media (min-width: 769px) {
+            .dots-container { display: none; }
+            .step-header-mobile { display: contents; }
+        }
+
+        /* Small phones (375px and below) */
+        @media (max-width: 375px) {
+            .main-title { font-size: 1.7rem; }
+            .hero-section .cliche-wrapper { font-size: 0.95rem; }
+            .stat-val { font-size: 2rem; }
+            .step-number { font-size: 2rem; }
+            .step-title { font-size: 1.1rem; }
+            .manifesto-lead { font-size: 1.5rem; }
+            .cta-title { font-size: 1.7rem; }
+            .faq-question { font-size: 0.95rem; }
+            .feature-card { min-width: 90%; }
+        }
+
+        /* ============================================
+           STICKY MOBILE CTA
+           ============================================ */
+        .sticky-mobile-cta {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 99;
+            padding: 12px 16px;
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
+            /* solid, not blurred — backdrop-filter on a fixed bar repaints on
+               every scroll frame and was a main source of the scroll jank */
+            background: #0C2B28;
+            border-top: 1px solid rgba(64, 225, 211, 0.2);
+        }
+        .sticky-mobile-cta .sticky-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(270deg, #2dbab0, #40e1d3, #2dbab0);
+            background-size: 200% 200%;
+            animation: buttonShimmer 6s ease infinite;
+            color: #0C2B28;
+            border: none;
+            font-size: 1.05rem;
+            font-weight: 900;
+            font-family: 'Ping', sans-serif;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+        }
+        @media (max-width: 768px) {
+            .sticky-mobile-cta.visible { display: block; }
+            .site-footer { padding-bottom: 80px; }
+        }
+
+        /* ============================================
+           EXIT-INTENT POPUP
+           ============================================ */
+        .exit-popup-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+        .exit-popup-overlay.show {
+            display: flex;
+        }
+        .exit-popup {
+            background: #0C2B28;
+            border: 1px solid rgba(64, 225, 211, 0.2);
+            border-radius: 12px;
+            padding: 40px 35px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            direction: rtl;
+            font-family: 'Ping', sans-serif;
+        }
+        .exit-popup-close {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: none;
+            border: none;
+            color: #A0B8B5;
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 5px;
+        }
+        .exit-popup h3 {
+            color: #FFFFFF;
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+        .exit-popup p {
+            color: #A0B8B5;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .exit-popup input {
+            width: 100%;
+            padding: 12px 0;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            color: #FFFFFF;
+            font-family: 'Ping', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            text-align: right;
+            direction: rtl;
+        }
+        .exit-popup input::placeholder { color: rgba(255,255,255,0.4); }
+        .exit-popup input:focus { outline: none; border-bottom-color: #40e1d3; }
+        .exit-popup .exit-popup-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(270deg, #2dbab0, #40e1d3, #2dbab0);
+            background-size: 200% 200%;
+            color: #0C2B28;
+            border: none;
+            font-size: 1.05rem;
+            font-weight: 900;
+            font-family: 'Ping', sans-serif;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .exit-popup .exit-success {
+            display: none;
+            color: #10B981;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+
+        /* ============================================
+           REDUCED MOTION
+           ============================================ */
+        @media (prefers-reduced-motion: reduce) {
+            #relax-lp *,
+            #relax-lp *::before,
+            #relax-lp *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+                scroll-behavior: auto !important;
+            }
+            .marquee-content { animation: none !important; }
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id="relax-lp"&gt;
+
+    &lt;!-- ========== HEADER ========== --&gt;
+    &lt;header class="lp-header" id="lpHeader"&gt;
+        &lt;a href="https://relaxgroup.co.il/" class="site-logo" aria-label="Relax — הבית לרוגע כלכלי"&gt;
+            &lt;img class="site-logo-img" src="https://relaxgroup.co.il/wp-content/uploads/2026/02/7b108002-595d-45be-8370-6a1574d2207d.pdf-1-e1770290058247.png" alt="Relax — הבית לרוגע כלכלי" width="120" height="32"&gt;
+        &lt;/a&gt;
+        &lt;nav class="header-nav" id="headerNav" aria-label="תפריט ראשי"&gt;
+            &lt;a href="https://relaxgroup.co.il/"&gt;בית&lt;/a&gt;
+            &lt;a href="https://relaxgroup.co.il/%d7%90%d7%95%d7%93%d7%95%d7%aa/"&gt;אודות&lt;/a&gt;
+            &lt;a href="https://relaxgroup.co.il/%d7%96%d7%99%d7%a8%d7%aa-%d7%9e%d7%9b%d7%99%d7%a8%d7%95%d7%aa/"&gt;זירת מכירות&lt;/a&gt;
+            &lt;a href="#projects-section" data-scroll-projects&gt;פרויקטים&lt;/a&gt;
+            &lt;a href="https://relaxgroup.co.il/%d7%9e%d7%a9%d7%9b%d7%a0%d7%aa%d7%90%d7%95%d7%aa/"&gt;משכנתאות&lt;/a&gt;
+            &lt;a href="https://relaxgroup.co.il/%d7%9e%d7%90%d7%9e%d7%a8%d7%99%d7%9d/"&gt;מאמרים&lt;/a&gt;
+            &lt;a href="https://relaxgroup.co.il/%d7%a6%d7%a8%d7%95-%d7%a7%d7%a9%d7%a8/"&gt;צרו קשר&lt;/a&gt;
+        &lt;/nav&gt;
+        &lt;a href="https://relaxgroup.co.il/%d7%90%d7%99%d7%96%d7%95%d7%a8-%d7%90%d7%99%d7%a9%d7%99/" class="header-account"&gt;
+            &lt;svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"&gt;
+                &lt;circle cx="12" cy="8" r="3.5"&gt;&lt;/circle&gt;
+                &lt;path d="M5.5 19.5c1.8-3.2 4.2-4.8 6.5-4.8s4.7 1.6 6.5 4.8"&gt;&lt;/path&gt;
+            &lt;/svg&gt;
+            איזור אישי
+        &lt;/a&gt;
+        &lt;button type="button" class="header-burger" id="headerBurger" aria-label="תפריט" aria-expanded="false"&gt;
+            &lt;span&gt;&lt;/span&gt;&lt;span&gt;&lt;/span&gt;&lt;span&gt;&lt;/span&gt;
+        &lt;/button&gt;
+    &lt;/header&gt;
+
+    &lt;!-- ========== SECTION 1: HERO ========== --&gt;
+    &lt;section class="hero-section"&gt;
+        &lt;div class="hero-container"&gt;
+            &lt;div class="hero-main"&gt;
+                &lt;div class="hero-text-side"&gt;
+                    &lt;div class="cliche-wrapper"&gt;
+                        &lt;span class="cliche-text" id="cliche-text"&gt;"בית זה מקום&lt;/span&gt;&lt;span class="typing-cursor" aria-hidden="true"&gt;&lt;/span&gt;
+                    &lt;/div&gt;
+                    &lt;h1 class="main-title"&gt;כשעסקת הנדל״ן&lt;br&gt;&lt;span class="title-mid"&gt;כל כך טובה,&lt;/span&gt;&lt;span class="title-accent"&gt;לא צריך לספר סיפורים.&lt;/span&gt;&lt;/h1&gt;
+                    &lt;p class="main-subtitle"&gt;
+                        העסקאות האטרקטיביות בישראל: מחירון אפס, פרויקטים בלעדיים ומעטפת ניהול סיכונים מלאה – משלב התכנון הפיננסי ועד קבלת המפתח.
+                    &lt;/p&gt;
+                    &lt;a href="#projects-section" class="hero-projects-cta" data-scroll-projects&gt;למידע על הפרויקטים שלנו&lt;/a&gt;
+                &lt;/div&gt;
+                &lt;div class="hero-video-side"&gt;
+                    &lt;div class="video-wrapper" id="heroVideoWrapper"&gt;
+                        &lt;!-- Facade: the YouTube iframe is only injected on click, so the
+                             page no longer pays for a third-party player on first paint --&gt;
+                        &lt;button type="button" class="video-facade" id="heroVideoFacade" aria-label="נגן את סרטון Relax"&gt;
+                            &lt;img src="https://i.ytimg.com/vi/KSFJTGTXFQA/hqdefault.jpg" alt="תצוגה מקדימה של סרטון Relax" width="480" height="360" loading="eager" decoding="async"&gt;
+                            &lt;span class="play-btn-overlay" aria-hidden="true"&gt;&lt;/span&gt;
+                        &lt;/button&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class="trust-features"&gt;
+                &lt;div class="trust-item active-mobile"&gt;
+                    &lt;span class="check-icon" aria-hidden="true"&gt;✓&lt;/span&gt; מחירון אפס אמיתי
+                &lt;/div&gt;
+                &lt;div class="trust-item"&gt;
+                    &lt;span class="check-icon" aria-hidden="true"&gt;✓&lt;/span&gt; גישה ל-Pre-Sale בלעדי
+                &lt;/div&gt;
+                &lt;div class="trust-item"&gt;
+                    &lt;span class="check-icon" aria-hidden="true"&gt;✓&lt;/span&gt; מעטפת משפטית ופיננסית
+                &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;a href="#projects-section" class="hero-scroll-cue" data-scroll-projects aria-label="גלול לפרויקטים"&gt;
+                &lt;span class="hero-scroll-cue__text"&gt;גללו למטה&lt;/span&gt;
+                &lt;span class="hero-scroll-cue__arrow" aria-hidden="true"&gt;↓&lt;/span&gt;
+            &lt;/a&gt;
+        &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- ========== SECTION 2: PROJECTS ========== --&gt;
+    &lt;section class="projects-section" id="projects-section"&gt;
+        &lt;div class="section-header"&gt;
+            &lt;h2&gt;עם פרויקטים כאלה? לא צריך לספר סיפורים.&lt;/h2&gt;
+            &lt;p&gt;כשעסקת הנדל״ן כל כך טובה, לא צריך לדבר הרבה. ריכזנו עבורכם את הפרויקטים המבוקשים ביותר.&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div class="mobile-projects-nav-wrapper"&gt;
+            &lt;div class="mobile-projects-nav" id="mobileNav"&gt;
+                &lt;button type="button" class="nav-btn active" data-project-index="0"&gt;רילקס מעלות&lt;/button&gt;
+                &lt;button type="button" class="nav-btn" data-project-index="1"&gt;רילקס אפיקי נחל&lt;/button&gt;
+                &lt;button type="button" class="nav-btn" data-project-index="2"&gt;רילקס פארק הים&lt;/button&gt;
+                &lt;button type="button" class="nav-btn" data-project-index="3"&gt;רילקס ראשון לציון&lt;/button&gt;
+                &lt;button type="button" class="nav-btn" data-project-index="4"&gt;רילקס לוד&lt;/button&gt;
+                &lt;button type="button" class="nav-btn" data-project-index="5"&gt;רילקס עיר היין&lt;/button&gt;
+                &lt;button type="button" class="nav-btn" data-project-index="6"&gt;רילקס פתח תקווה&lt;/button&gt;
+            &lt;/div&gt;
+            &lt;div class="nav-scroll-indicator"&gt;
+                &lt;div class="nav-scroll-progress" id="scrollProgress"&gt;&lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="projects-grid" id="projectsGrid"&gt;
+
+            &lt;article class="project-card active-mobile"&gt;
+                &lt;div class="project-gallery"&gt;
+                    &lt;div class="main-img-container"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_890291c90c9441c4971415927f8e011d~mv2.png" class="project-main-img" alt="רילקס מעלות — הדמיית הפרויקט" loading="lazy" decoding="async"&gt;
+                    &lt;/div&gt;
+                    &lt;div class="project-thumbnails"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_890291c90c9441c4971415927f8e011d~mv2.png" class="active-thumb" alt="רילקס מעלות — תמונה 1" loading="lazy" decoding="async"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_b5abde878d49445b9d8e254cd1239680~mv2.png" alt="רילקס מעלות — תמונה 2" loading="lazy" decoding="async"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_b20af676c3f0441b9d98e41ade699085~mv2.png" alt="רילקס מעלות — תמונה 3" loading="lazy" decoding="async"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_4f2986549d02404dac210cc6413e24ed~mv2.png" alt="רילקס מעלות — תמונה 4" loading="lazy" decoding="async"&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class="project-content"&gt;
+                    &lt;div class="project-tags"&gt;&lt;span class="tag"&gt;מחירון Pre-Sale&lt;/span&gt;&lt;span class="tag"&gt;מעלות תרשיחא&lt;/span&gt;&lt;/div&gt;
+                    &lt;h3 class="project-title"&gt;רילקס מעלות&lt;/h3&gt;
+                    &lt;p class="project-desc"&gt;דירות 3–5 חדרים, גן ופנטהאוזים בשכונת "גבעת הנשיא פרס" על גבעה נישאת עם נוף גלילי מרהיב. שבילים ירוקים, פארקים ושירותי חינוך ותרבות – בסמוך לאגם מונפורט. מבית אאורה – מובילי הנדל"ן למגורים בישראל.&lt;/p&gt;
+                    &lt;div class="project-quick-stats"&gt;
+                        &lt;div class="quick-stat"&gt;הון התחלתי: מ-300K&lt;/div&gt;
+                        &lt;div class="quick-stat"&gt;אכלוס: 2026&lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;button type="button" class="project-cta" data-project-name="רילקס מעלות" data-form-location="project_maalot"&gt;רוצה לשמוע עוד על הפרויקט ←&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/article&gt;
+
+            &lt;article class="project-card"&gt;
+                &lt;div class="project-gallery"&gt;
+                    &lt;div class="main-img-container"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_58bf6c32c088424f990fc2147753a8d2~mv2.png" class="project-main-img" alt="רילקס אפיקי נחל — הדמיית הפרויקט" loading="lazy" decoding="async"&gt;
+                    &lt;/div&gt;
+                    &lt;div class="project-thumbnails"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_58bf6c32c088424f990fc2147753a8d2~mv2.png" class="active-thumb" alt="רילקס אפיקי נחל — תמונה 1" loading="lazy" decoding="async"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_dc80fd103fc44d72ae60517b3acc39c4~mv2.png" alt="רילקס אפיקי נחל — תמונה 2" loading="lazy" decoding="async"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_4f2147ca60eb4fa59548cbeb9066854e~mv2.png" alt="רילקס אפיקי נחל — תמונה 3" loading="lazy" decoding="async"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_2cbb1eff0c78461fb1d841a79bc4f02b~mv2.png" alt="רילקס אפיקי נחל — תמונה 4" loading="lazy" decoding="async"&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class="project-content"&gt;
+                    &lt;div class="project-tags"&gt;&lt;span class="tag"&gt;פוטנציאל השבחה גבוה&lt;/span&gt;&lt;span class="tag"&gt;אופקים&lt;/span&gt;&lt;/div&gt;
+                    &lt;h3 class="project-title"&gt;רילקס אפיקי נחל&lt;/h3&gt;
+                    &lt;p class="project-desc"&gt;שכונה חדשה ומשמעותית במזרח אופקים על 7,000 דונם. 197 יחידות דיור מבית קבוצת אוליצקי בסטנדרט גבוה, עם פארקים, מוסדות חינוך ונגישות מצוינת לרכבת. מחירים אטרקטיביים במיוחד – הזדמנות מצוינת למשקיעים ורוכשי דירה ראשונה.&lt;/p&gt;
+                    &lt;div class="project-quick-stats"&gt;
+                        &lt;div class="quick-stat"&gt;הון התחלתי: מ-250K&lt;/div&gt;
+                        &lt;div class="quick-stat"&gt;אכלוס: 2027&lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;button type="button" class="project-cta" data-project-name="רילקס אפיקי נחל" data-form-location="project_ofakim"&gt;רוצה לשמוע עוד על הפרויקט ←&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/article&gt;
+
+            &lt;article class="project-card"&gt;
+                &lt;div class="project-gallery"&gt;
+                    &lt;div class="main-img-container"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_9c474bda631f426bb57f5d7546dd2486~mv2.jpg" class="project-main-img" alt="רילקס פארק הים — הדמיית הפרויקט" loading="lazy" decoding="async"&gt;
+                    &lt;/div&gt;
+                    &lt;div class="project-thumbnails"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_9c474bda631f426bb57f5d7546dd2486~mv2.jpg" class="active-thumb" alt="רילקס פארק הים — תמונה 1" loading="lazy" decoding="async"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_145fd40dcbb94120b35085206791fc1d~mv2.jpg" alt="רילקס פארק הים — תמונה 2" loading="lazy" decoding="async"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_25d38f1a119d42d1886e537cae6608fb~mv2.jpg" alt="רילקס פארק הים — תמונה 3" loading="lazy" decoding="async"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_4b0e9a177f6c4bd3959eab8652de0966~mv2.png" alt="רילקס פארק הים — תמונה 4" loading="lazy" decoding="async"&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class="project-content"&gt;
+                    &lt;div class="project-tags"&gt;&lt;span class="tag"&gt;קו ראשון לים&lt;/span&gt;&lt;span class="tag"&gt;בת ים&lt;/span&gt;&lt;/div&gt;
+                    &lt;h3 class="project-title"&gt;רילקס פארק הים&lt;/h3&gt;
+                    &lt;p class="project-desc"&gt;מגדלים בני 30–45 קומות בקו ראשון לים, עם פארק ירוק בן 100 דונם ותחנת רכבת קלה פעילה. נוף פנורמי לים, קרבה לתל אביב – במחירים אטרקטיביים ביחס לעיר. הזדמנות השקעה מעולה.&lt;/p&gt;
+                    &lt;div class="project-quick-stats"&gt;
+                        &lt;div class="quick-stat"&gt;הון התחלתי: מ-550K&lt;/div&gt;
+                        &lt;div class="quick-stat"&gt;אכלוס: 2028&lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;button type="button" class="project-cta" data-project-name="רילקס פארק הים" data-form-location="project_batyam"&gt;רוצה לשמוע עוד על הפרויקט ←&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/article&gt;
+
+            &lt;article class="project-card"&gt;
+                &lt;div class="project-gallery"&gt;
+                    &lt;div class="main-img-container"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_a8d6e5e3388b4f2bb942778a8e39d9c2~mv2.png" class="project-main-img" alt="רילקס ראשון לציון — הדמיית הפרויקט" loading="lazy" decoding="async"&gt;
+                    &lt;/div&gt;
+                    &lt;div class="project-thumbnails"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_a8d6e5e3388b4f2bb942778a8e39d9c2~mv2.png" class="active-thumb" alt="רילקס ראשון לציון — תמונה 1" loading="lazy" decoding="async"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_33e384192cfb46bfb5d1f22efc989e2b~mv2.jpg" alt="רילקס ראשון לציון — תמונה 2" loading="lazy" decoding="async"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_e22296831c144e0cb9db21a6eb9a4049~mv2.png" alt="רילקס ראשון לציון — תמונה 3" loading="lazy" decoding="async"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_2782f58c231348b2ad6ab2d8154b8985~mv2.png" alt="רילקס ראשון לציון — תמונה 4" loading="lazy" decoding="async"&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class="project-content"&gt;
+                    &lt;div class="project-tags"&gt;&lt;span class="tag"&gt;אדריכלות אירופאית&lt;/span&gt;&lt;span class="tag"&gt;ראשל"צ&lt;/span&gt;&lt;/div&gt;
+                    &lt;h3 class="project-title"&gt;רילקס ראשון לציון&lt;/h3&gt;
+                    &lt;p class="project-desc"&gt;GALLERY – יצירת מופת אדריכלית בסגנון אירופאי מודרני בלב "הרובע", השכונה הצעירה והתוססת ביותר בראשל"צ. שילוב אידיאלי של דירה אורבאנית מעוצבת, קהילה חמה ומיקום מרכזי עם נגישות מלאה. מבית קבוצת ניסים בובליל.&lt;/p&gt;
+                    &lt;div class="project-quick-stats"&gt;
+                        &lt;div class="quick-stat"&gt;הון התחלתי: מ-450K&lt;/div&gt;
+                        &lt;div class="quick-stat"&gt;אכלוס: 2027&lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;button type="button" class="project-cta" data-project-name="רילקס ראשון לציון" data-form-location="project_rishon"&gt;רוצה לשמוע עוד על הפרויקט ←&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/article&gt;
+
+            &lt;article class="project-card"&gt;
+                &lt;div class="project-gallery"&gt;
+                    &lt;div class="main-img-container"&gt;
+                        &lt;img src="https://relaxgroup.co.il/wp-content/uploads/2025/07/1.webp" class="project-main-img" alt="רילקס לוד — הדמיית הפרויקט" loading="lazy" decoding="async"&gt;
+                    &lt;/div&gt;
+                    &lt;div class="project-thumbnails"&gt;
+                        &lt;img src="https://relaxgroup.co.il/wp-content/uploads/2025/07/1.webp" class="active-thumb" alt="רילקס לוד — תמונה 1" loading="lazy" decoding="async"&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class="project-content"&gt;
+                    &lt;div class="project-tags"&gt;&lt;span class="tag"&gt;כחצי מיליון מתחת לשוק&lt;/span&gt;&lt;span class="tag"&gt;לוד&lt;/span&gt;&lt;/div&gt;
+                    &lt;h3 class="project-title"&gt;רילקס לוד&lt;/h3&gt;
+                    &lt;p class="project-desc"&gt;דירות 5–6 חדרים, 12 דקות מתל אביב, בכחצי מיליון ₪ מתחת למחיר השוק. תנאי 15/85, מרפסות גדולות ולוקיישן מעולה. לוד בתהליך שינוי עמוק – שכונות חדשות, אוכלוסייה חדשה, והקבלנים הגדולים כבר בפנים. המחירים עדיין נמוכים כשכל היישובים מסביב כבר מזנקים. מי שנכנס עכשיו – נכנס בזמן.&lt;/p&gt;
+                    &lt;div class="project-quick-stats"&gt;
+                        &lt;div class="quick-stat"&gt;תנאי 15/85&lt;/div&gt;
+                        &lt;div class="quick-stat"&gt;5–6 חדרים&lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;button type="button" class="project-cta" data-project-name="רילקס לוד" data-form-location="project_lod"&gt;רוצה לשמוע עוד על הפרויקט ←&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/article&gt;
+
+            &lt;article class="project-card"&gt;
+                &lt;div class="project-gallery"&gt;
+                    &lt;div class="main-img-container"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_76e90c4ee4c146bf959872557914fc5e~mv2.png" class="project-main-img" alt="רילקס עיר היין — הדמיית הפרויקט" loading="lazy" decoding="async"&gt;
+                    &lt;/div&gt;
+                    &lt;div class="project-thumbnails"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_76e90c4ee4c146bf959872557914fc5e~mv2.png" class="active-thumb" alt="רילקס עיר היין — תמונה 1" loading="lazy" decoding="async"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_a95fd3a2f5cc4974891a08d70f737729~mv2.png" alt="רילקס עיר היין — תמונה 2" loading="lazy" decoding="async"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_3856c56056c84acab843da7ea08b6f10~mv2.png" alt="רילקס עיר היין — תמונה 3" loading="lazy" decoding="async"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_ffb8f3fa2efb44d0a7cab0d318b307d2~mv2.png" alt="רילקס עיר היין — תמונה 4" loading="lazy" decoding="async"&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class="project-content"&gt;
+                    &lt;div class="project-tags"&gt;&lt;span class="tag"&gt;מחירון Pre-Sale&lt;/span&gt;&lt;span class="tag"&gt;אשקלון&lt;/span&gt;&lt;/div&gt;
+                    &lt;h3 class="project-title"&gt;רילקס עיר היין&lt;/h3&gt;
+                    &lt;p class="project-desc"&gt;מיקום אסטרטגי ליד כביש 4, תחנת הרכבת, המרינה ופארק הטכנולוגי. פרויקט פרימיום עם פוטנציאל השבחה גבוה באזור מתפתח.&lt;/p&gt;
+                    &lt;div class="project-quick-stats"&gt;
+                        &lt;div class="quick-stat"&gt;104 יחידות דיור&lt;/div&gt;
+                        &lt;div class="quick-stat"&gt;אשקלון צפון-מזרח&lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;button type="button" class="project-cta" data-project-name="רילקס עיר היין" data-form-location="project_winecity"&gt;רוצה לשמוע עוד על הפרויקט ←&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/article&gt;
+
+            &lt;article class="project-card"&gt;
+                &lt;div class="project-gallery"&gt;
+                    &lt;div class="main-img-container"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_f4ec22b9cf0f4ce683e44cf91cac38c2~mv2.png" class="project-main-img" alt="רילקס פתח תקווה — הדמיית הפרויקט" loading="lazy" decoding="async"&gt;
+                    &lt;/div&gt;
+                    &lt;div class="project-thumbnails"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_f4ec22b9cf0f4ce683e44cf91cac38c2~mv2.png" class="active-thumb" alt="רילקס פתח תקווה — תמונה 1" loading="lazy" decoding="async"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_a2a2457af35d46ee843e0253da5dab8f~mv2.png" alt="רילקס פתח תקווה — תמונה 2" loading="lazy" decoding="async"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_8a0367c8ed2f42d289ffaf123282213e~mv2.png" alt="רילקס פתח תקווה — תמונה 3" loading="lazy" decoding="async"&gt;
+                        &lt;img src="https://static.wixstatic.com/media/bb1f28_9e9eade1b13749da86e8c353baa28816~mv2.jpg" alt="רילקס פתח תקווה — תמונה 4" loading="lazy" decoding="async"&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class="project-content"&gt;
+                    &lt;div class="project-tags"&gt;&lt;span class="tag"&gt;פתח תקווה&lt;/span&gt;&lt;/div&gt;
+                    &lt;h3 class="project-title"&gt;רילקס פתח תקווה&lt;/h3&gt;
+                    &lt;p class="project-desc"&gt;שני מגדלים בני 35 קומות עם 3 קומות מסחר, בריכה על הגג ומגרש פאדל. דירות 2–5 חדרים בסטנדרט גבוה, קרוב לקו האדום של הרכבת הקלה. לוקיישן מרכזי בעיר עם פוטנציאל עליית ערך.&lt;/p&gt;
+                    &lt;div class="project-quick-stats"&gt;
+                        &lt;div class="quick-stat"&gt;35 קומות&lt;/div&gt;
+                        &lt;div class="quick-stat"&gt;דירות 2–5 חדרים&lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;button type="button" class="project-cta" data-project-name="רילקס פתח תקווה" data-form-location="project_petah_tikva"&gt;רוצה לשמוע עוד על הפרויקט ←&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/article&gt;
+
+        &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- ========== SECTION 3: STATS ========== --&gt;
+    &lt;section class="stats-strip" id="stats-section"&gt;
+        &lt;div class="stats-container"&gt;
+            &lt;div class="stat-item active"&gt;&lt;div class="stat-number-wrapper"&gt;&lt;span class="stat-val" data-target="412"&gt;412&lt;/span&gt;&lt;/div&gt;&lt;div class="stat-label"&gt;עסקאות נדל"ן מאז 2019&lt;/div&gt;&lt;/div&gt;
+            &lt;div class="stat-item"&gt;&lt;div class="stat-number-wrapper"&gt;&lt;span class="stat-currency"&gt;₪&lt;/span&gt;&lt;span class="stat-val" data-target="84.5" data-float="true"&gt;84.5&lt;/span&gt;&lt;span class="stat-suffix"&gt;M&lt;/span&gt;&lt;/div&gt;&lt;div class="stat-label"&gt;חיסכון מצטבר בעסקאות&lt;/div&gt;&lt;/div&gt;
+            &lt;div class="stat-item"&gt;&lt;div class="stat-number-wrapper"&gt;&lt;span class="stat-val" data-target="10"&gt;10&lt;/span&gt;&lt;span class="stat-suffix"&gt;%&lt;/span&gt;&lt;/div&gt;&lt;div class="stat-label"&gt;מתחת למחיר השוק בממוצע&lt;/div&gt;&lt;/div&gt;
+            &lt;div class="stat-item"&gt;&lt;div class="stat-number-wrapper"&gt;&lt;span class="stat-val" data-target="2021"&gt;2021&lt;/span&gt;&lt;/div&gt;&lt;div class="stat-label"&gt;תיקי משכנתאות שנוהלו&lt;/div&gt;&lt;/div&gt;
+            &lt;div class="stat-item"&gt;&lt;div class="stat-number-wrapper"&gt;&lt;span class="stat-currency"&gt;₪&lt;/span&gt;&lt;span class="stat-val" data-target="403"&gt;403&lt;/span&gt;&lt;span class="stat-suffix"&gt;M&lt;/span&gt;&lt;/div&gt;&lt;div class="stat-label"&gt;חיסכון משכנתא מצטבר&lt;/div&gt;&lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- ========== SECTION 4: FEATURES ========== --&gt;
+    &lt;section class="features-section"&gt;
+        &lt;div class="section-header"&gt;
+            &lt;h2&gt;מה זה אומר&lt;br&gt;"בלי סיפורים"?&lt;/h2&gt;
+            &lt;p&gt;במקום לנסות למכור לכם חלומות וקלישאות, אנחנו מניחים על השולחן את הפוטנציאל הגבוה ביותר.&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div class="features-slider-container"&gt;
+            &lt;div class="features-grid" id="featuresGrid"&gt;
+                &lt;div class="feature-card"&gt;
+                    &lt;div class="feature-cliche"&gt;"הזדמנות של פעם בחיים!"&lt;/div&gt;
+                    &lt;h3 class="feature-title"&gt;מחירון אפס ומטה&lt;/h3&gt;
+                    &lt;p class="feature-desc"&gt;כניסה לפרויקטים בשלבי טרום Pre-Sale. אתם נהנים ממחירים הנמוכים משמעותית ממחירי קבלן רגילים.&lt;/p&gt;
+                &lt;/div&gt;
+                &lt;div class="feature-card"&gt;
+                    &lt;div class="feature-cliche"&gt;"נוף פסטורלי עוצר נשימה"&lt;/div&gt;
+                    &lt;h3 class="feature-title"&gt;הדירות המבוקשות ביותר&lt;/h3&gt;
+                    &lt;p class="feature-desc"&gt;בזכות כוח הקנייה שלנו, הלקוחות שלנו זוכים לבחור ראשונים את הדירות הטובות ביותר.&lt;/p&gt;
+                &lt;/div&gt;
+                &lt;div class="feature-card"&gt;
+                    &lt;div class="feature-cliche"&gt;"יחס אישי וחם מהצוות"&lt;/div&gt;
+                    &lt;h3 class="feature-title"&gt;מעטפת ליווי 360°&lt;/h3&gt;
+                    &lt;p class="feature-desc"&gt;ניתוח סיכונים פיננסי, השגת תנאי המשכנתא הטובים ביותר, ועורך דין מלווה שידאג לאינטרסים שלכם.&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class="dots-container" id="dotsContainer"&gt;
+                &lt;div class="dot active"&gt;&lt;/div&gt;
+                &lt;div class="dot"&gt;&lt;/div&gt;
+                &lt;div class="dot"&gt;&lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- ========== SECTION 5: PARTNERS ========== --&gt;
+    &lt;section class="partners-strip"&gt;
+        &lt;p&gt;משווקים פרויקטים של חברות הבנייה המובילות בישראל&lt;/p&gt;
+        &lt;div class="marquee-wrapper" aria-hidden="true"&gt;
+            &lt;div class="marquee-content"&gt;
+                &lt;span class="m-item"&gt;תדהר&lt;/span&gt;&lt;span class="m-dot"&gt;•&lt;/span&gt;&lt;span class="m-item"&gt;דמרי&lt;/span&gt;&lt;span class="m-dot"&gt;•&lt;/span&gt;&lt;span class="m-item"&gt;אאורה&lt;/span&gt;&lt;span class="m-dot"&gt;•&lt;/span&gt;&lt;span class="m-item"&gt;שיכון ובינוי&lt;/span&gt;&lt;span class="m-dot"&gt;•&lt;/span&gt;&lt;span class="m-item"&gt;שפיר&lt;/span&gt;&lt;span class="m-dot"&gt;•&lt;/span&gt;&lt;span class="m-item"&gt;אוליצקי&lt;/span&gt;&lt;span class="m-dot"&gt;•&lt;/span&gt;&lt;span class="m-item"&gt;בובליל&lt;/span&gt;&lt;span class="m-dot"&gt;•&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class="marquee-content"&gt;
+                &lt;span class="m-item"&gt;תדהר&lt;/span&gt;&lt;span class="m-dot"&gt;•&lt;/span&gt;&lt;span class="m-item"&gt;דמרי&lt;/span&gt;&lt;span class="m-dot"&gt;•&lt;/span&gt;&lt;span class="m-item"&gt;אאורה&lt;/span&gt;&lt;span class="m-dot"&gt;•&lt;/span&gt;&lt;span class="m-item"&gt;שיכון ובינוי&lt;/span&gt;&lt;span class="m-dot"&gt;•&lt;/span&gt;&lt;span class="m-item"&gt;שפיר&lt;/span&gt;&lt;span class="m-dot"&gt;•&lt;/span&gt;&lt;span class="m-item"&gt;אוליצקי&lt;/span&gt;&lt;span class="m-dot"&gt;•&lt;/span&gt;&lt;span class="m-item"&gt;בובליל&lt;/span&gt;&lt;span class="m-dot"&gt;•&lt;/span&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- ========== SECTION 6: PROCESS ========== --&gt;
+    &lt;section class="process-section"&gt;
+        &lt;div class="section-header"&gt;
+            &lt;h2&gt;איך זה עובד בפועל?&lt;/h2&gt;
+            &lt;p&gt;מעטפת הניהול שלנו מתוכננת בקפידה כדי להעניק לכם שקט נפשי אמיתי. כל החלטה מבוססת נתונים, וכל שלב מנוהל אקטיבית.&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div class="process-grid" id="processGrid"&gt;
+            &lt;div class="process-step active"&gt;
+                &lt;div class="step-header-mobile"&gt;
+                    &lt;div class="step-number"&gt;01&lt;/div&gt;
+                    &lt;h3 class="step-title"&gt;סינון והתאמה&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;p class="step-desc"&gt;שיחת היכרות לבחינת יכולות ומטרות. מתוך יושרה מקצועית, המותג לא קולט לקוחות שאינם בנויים פיננסית להשקעה.&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;div class="process-step"&gt;
+                &lt;div class="step-header-mobile"&gt;
+                    &lt;div class="step-number"&gt;02&lt;/div&gt;
+                    &lt;h3 class="step-title"&gt;ניהול סיכונים&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;p class="step-desc"&gt;פגישת עומק לניתוח הכנסות, התחייבויות וצרכים, בסופה נתאים לכם את הפרויקט המדויק והבטוח ביותר עבורכם.&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;div class="process-step"&gt;
+                &lt;div class="step-header-mobile"&gt;
+                    &lt;div class="step-number"&gt;03&lt;/div&gt;
+                    &lt;h3 class="step-title"&gt;ליווי פיננסי&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;p class="step-desc"&gt;בניית תמהיל אידיאלי וגיוס הון. אנו פועלים מול הגופים המממנים להשגת תנאי המימון הטובים ביותר בשוק.&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;div class="process-step"&gt;
+                &lt;div class="step-header-mobile"&gt;
+                    &lt;div class="step-number"&gt;04&lt;/div&gt;
+                    &lt;h3 class="step-title"&gt;חתימה בראש שקט&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;p class="step-desc"&gt;במעמד החתימה, יישב לצידכם עורך דין מלווה מטעמנו המכיר את הפרויקט על בוריו, ויוודא כי כל האינטרסים שלכם מוגנים.&lt;/p&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- ========== SECTION 7: POSITIONING ========== --&gt;
+    &lt;section class="positioning-section"&gt;
+        &lt;div class="positioning-container"&gt;
+            &lt;div class="positioning-text-side"&gt;
+                &lt;div class="cliche-wrapper"&gt;
+                    &lt;span class="feature-cliche"&gt;"קניית דירה זו ההחלטה הכי אמוציונלית שתעשו."&lt;/span&gt;
+                &lt;/div&gt;
+                &lt;h2 class="manifesto-lead"&gt;
+                    קאט. אצלנו זו ההחלטה&lt;br&gt;&lt;span&gt;הכי מחושבת שתעשו.&lt;/span&gt;
+                &lt;/h2&gt;
+                &lt;div class="manifesto-bullets"&gt;
+                    &lt;div class="manifesto-bullet"&gt;
+                        &lt;span class="bullet-icon" aria-hidden="true"&gt;■&lt;/span&gt;
+                        &lt;p class="manifesto-body"&gt;
+                             המותג &lt;strong&gt;Relax&lt;/strong&gt; הוא איגוד נדל"ן ראשון מסוגו בישראל. אנחנו מחברים בין עסקאות הפרימיום הטובות בארץ לבין ניהול סיכונים חסר פשרות.
+                        &lt;/p&gt;
+                    &lt;/div&gt;
+                    &lt;div class="manifesto-bullet"&gt;
+                        &lt;span class="bullet-icon" aria-hidden="true"&gt;■&lt;/span&gt;
+                        &lt;p class="manifesto-body"&gt;
+                            לנו יש בלעדיות. לכם יש שקט. אנחנו מספקים גישה לדירות המבוקשות ביותר ב&lt;strong&gt;מחירון אפס&lt;/strong&gt;, ישירות מול חברות הבנייה והקבלנים הגדולים במשק.
+                        &lt;/p&gt;
+                    &lt;/div&gt;
+                    &lt;div class="manifesto-bullet"&gt;
+                        &lt;span class="bullet-icon" aria-hidden="true"&gt;■&lt;/span&gt;
+                        &lt;p class="manifesto-body"&gt;
+                            באמצעות ניהול החלטה מלא הכולל אסטרטגיית מימון, ליווי משכנתא וליווי משפטי, המטרה שלנו היא אחת: למקסם לכם את התשואה ואת השקט הנפשי.
+                        &lt;/p&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class="positioning-image-side"&gt;
+                &lt;div class="image-wrapper"&gt;
+                    &lt;img src="https://static.wixstatic.com/media/515225_93b357cda57e4d7b94d7b271718deba7~mv2.png" alt="פרזנטור Relax" loading="lazy" decoding="async"&gt;
+                    &lt;div class="image-decoration" aria-hidden="true"&gt;&lt;/div&gt;
+                    &lt;div class="quote-badge"&gt;
+                        &lt;div class="quote-icon" aria-hidden="true"&gt;"&lt;/div&gt;
+                        &lt;p class="quote-text"&gt;בענף שמוכר חלומות ותמונות פסטורליות, אנחנו מאמינים שעסקת נדל״ן נמדדת רק בשני דברים: שורת הרווח, והשקט הנפשי שלכם.&lt;/p&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- ========== SECTION 8: FINAL CTA ========== --&gt;
+    &lt;section class="final-cta-section"&gt;
+        &lt;div class="cta-container"&gt;
+            &lt;div class="cta-text-side"&gt;
+                &lt;div class="cta-cliche-text"&gt;"נשארו 3 דירות אחרונות בפרויקט!"&lt;/div&gt;
+                &lt;h2 class="cta-title"&gt;שורה תחתונה.&lt;br&gt;&lt;span&gt;עוברים למספרים.&lt;/span&gt;&lt;/h2&gt;
+                &lt;p class="cta-desc"&gt;מספיק עם הקלישאות של עולם הנדל״ן. אם אתם רציניים לגבי ההשקעה הבאה שלכם, השאירו פרטים לתיאום פגישת ניהול סיכונים.&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;div class="cta-form-wrapper"&gt;
+                &lt;form id="ctaForm" class="premium-form" data-lead-form data-form-location="cta" novalidate&gt;
+                    &lt;div class="form-title"&gt;בואו נדבר תכל'ס:&lt;/div&gt;
+                    &lt;div class="input-group"&gt;
+                        &lt;label class="sr-only" for="cta-name" hidden&gt;שם מלא&lt;/label&gt;
+                        &lt;input id="cta-name" type="text" name="full_name" placeholder="שם מלא" required autocomplete="name"&gt;
+                    &lt;/div&gt;
+                    &lt;div class="input-group"&gt;
+                        &lt;label class="sr-only" for="cta-phone" hidden&gt;טלפון נייד&lt;/label&gt;
+                        &lt;input id="cta-phone" type="tel" name="phone" placeholder="טלפון נייד" required inputmode="tel" autocomplete="tel"&gt;
+                    &lt;/div&gt;
+                    &lt;div class="input-group"&gt;
+                        &lt;select name="budget" required aria-label="הון עצמי התחלתי"&gt;
+                            &lt;option value="" disabled selected&gt;הון עצמי התחלתי&lt;/option&gt;
+                            &lt;option value="300-450"&gt;300,000 ₪ - 450,000 ₪&lt;/option&gt;
+                            &lt;option value="450-600"&gt;450,000 ₪ - 600,000 ₪&lt;/option&gt;
+                            &lt;option value="600-750"&gt;600,000 ₪ - 750,000 ₪&lt;/option&gt;
+                            &lt;option value="750plus"&gt;מעל 750,000 ₪ / בעלי נכסים&lt;/option&gt;
+                        &lt;/select&gt;
+                    &lt;/div&gt;
+                    &lt;div class="input-group"&gt;
+                        &lt;select name="purchase_purpose" required aria-label="מטרת הרכישה"&gt;
+                            &lt;option value="" disabled selected&gt;מה מטרת הרכישה?&lt;/option&gt;
+                            &lt;option value="living"&gt;מגורים&lt;/option&gt;
+                            &lt;option value="investment"&gt;השקעה&lt;/option&gt;
+                        &lt;/select&gt;
+                    &lt;/div&gt;
+                    &lt;input type="hidden" name="utm_source" value=""&gt;&lt;input type="hidden" name="utm_medium" value=""&gt;&lt;input type="hidden" name="utm_campaign" value=""&gt;&lt;input type="hidden" name="utm_term" value=""&gt;&lt;input type="hidden" name="utm_content" value=""&gt;&lt;input type="hidden" name="page_url" value=""&gt;&lt;input type="hidden" name="form_location" value="cta"&gt;
+                    &lt;button type="submit" class="submit-btn"&gt;חזרו אליי לפרטים נוספים&lt;/button&gt;
+                &lt;/form&gt;
+                &lt;div class="form-extras"&gt;
+                    &lt;div class="extra-badge"&gt;
+                        &lt;svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"&gt;&lt;path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"&gt;&lt;/path&gt;&lt;/svg&gt;
+                        &lt;span&gt;ניהול סיכונים חסר פשרות&lt;/span&gt;
+                    &lt;/div&gt;
+                    &lt;div class="extra-badge"&gt;
+                        &lt;svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"&gt;&lt;path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"&gt;&lt;/path&gt;&lt;/svg&gt;
+                        &lt;span&gt;מחירון אפס מובטח&lt;/span&gt;
+                    &lt;/div&gt;
+                    &lt;div class="extra-badge"&gt;
+                        &lt;svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"&gt;&lt;rect x="2" y="7" width="20" height="14" rx="2" ry="2"&gt;&lt;/rect&gt;&lt;path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"&gt;&lt;/path&gt;&lt;/svg&gt;
+                        &lt;span&gt;מעטפת פיננסית ומשפטית&lt;/span&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- ========== SECTION 9: FAQ ========== --&gt;
+    &lt;section class="faq-section"&gt;
+        &lt;div class="faq-container"&gt;
+            &lt;div class="section-header"&gt;
+                &lt;h2&gt;ניהול סיכונים מתחיל בשקיפות מלאה.&lt;/h2&gt;
+                &lt;p&gt;עולם הנדל"ן מלא בהבטחות ריקות ואותיות קטנות. ריכזנו את השאלות החשובות באמת, וענינו עליהן בלי פילטרים.&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;div class="faq-item active"&gt;
+                &lt;button type="button" class="faq-question" aria-expanded="true" aria-controls="faq-a1"&gt;
+                    מה מיוחד בפרויקטים של RELAX?
+                    &lt;span class="icon-plus" aria-hidden="true"&gt;&lt;/span&gt;
+                &lt;/button&gt;
+                &lt;div class="faq-answer" id="faq-a1" role="region"&gt;
+                    &lt;div class="faq-answer-inner"&gt;
+                        אנחנו ב-RELAX עובדים אך ורק עם פרויקטים ועסקאות בלעדיות בתנאים שוברי שוק במחירון אפס בלבד. כל פרויקט עובר סינון מוקדם ובדיקה פיננסית, משפטית ותכנונית. עסקאות שלא עומדות ברף שהוגדר מראש פשוט לא מגיעות ללקוח.
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class="faq-item"&gt;
+                &lt;button type="button" class="faq-question" aria-expanded="false" aria-controls="faq-a2"&gt;
+                    למה לא לפנות ישירות לקבלן או למתווך?
+                    &lt;span class="icon-plus" aria-hidden="true"&gt;&lt;/span&gt;
+                &lt;/button&gt;
+                &lt;div class="faq-answer" id="faq-a2" role="region"&gt;
+                    &lt;div class="faq-answer-inner"&gt;
+                        פנייה ישירה עוסקת בדרך כלל במכירה. אנחנו עוסקים בניהול החלטה. התהליך שהלקוח עובר איתנו כולל בחינת סיכונים, התאמת העסקה למטרות האישיות שלו וניהול התיק לאורך כל הדרך - לא רק עד החתימה. בנוסף, RELAX עובדת בתנאים ומחירים שלא זמינים בפנייה ישירה, עם עסקאות במחירי שוברי שוק שלא תמצאו במקום אחר, ועם מעטפת מלאה הכוללת פתרונות מימון, אסטרטגיה ומשפטים.
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class="faq-item"&gt;
+                &lt;button type="button" class="faq-question" aria-expanded="false" aria-controls="faq-a3"&gt;
+                    מה כוללת מעטפת הניהול של RELAX?
+                    &lt;span class="icon-plus" aria-hidden="true"&gt;&lt;/span&gt;
+                &lt;/button&gt;
+                &lt;div class="faq-answer" id="faq-a3" role="region"&gt;
+                    &lt;div class="faq-answer-inner"&gt;
+                        העבודה עם RELAX מקנה מעטפת מלאה שמרכזת את כלל מרכיבי העסקה במקום אחד: בחינה פיננסית, ניהול משכנתא, בדיקות משפטיות וניהול סיכונים - כך שהלקוח לא צריך לנהל ספקים או לקבל החלטות לבד, אלא לעבור תהליך מסודר, שקוף ומנוהל בצורה מקצועית על ידי מומחים.
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class="faq-item"&gt;
+                &lt;button type="button" class="faq-question" aria-expanded="false" aria-controls="faq-a4"&gt;
+                    האם ניתן להיעזר ב-RELAX גם בלקיחת משכנתא?
+                    &lt;span class="icon-plus" aria-hidden="true"&gt;&lt;/span&gt;
+                &lt;/button&gt;
+                &lt;div class="faq-answer" id="faq-a4" role="region"&gt;
+                    &lt;div class="faq-answer-inner"&gt;
+                        כן. ל-RELAX מחלקת משכנתאות ייעודית שמנהלת את התיק הפיננסי עבור הלקוח משלב התכנון ועד החתימה, כולל התאמת תמהיל, עבודה מול הבנקים וניהול התהליך בצורה מדויקת שמשרתת את העסקה כולה.
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class="faq-item"&gt;
+                &lt;button type="button" class="faq-question" aria-expanded="false" aria-controls="faq-a5"&gt;
+                    אילו סוגי פרויקטים RELAX משווקת?
+                    &lt;span class="icon-plus" aria-hidden="true"&gt;&lt;/span&gt;
+                &lt;/button&gt;
+                &lt;div class="faq-answer" id="faq-a5" role="region"&gt;
+                    &lt;div class="faq-answer-inner"&gt;
+                        RELAX משווקת אך ורק פרויקטים יד ראשונה, במחירי טרום פריסייל שנבחרו מראש ועומדים בקריטריונים ברורים של איכות, תנאים ופוטנציאל. הפרויקטים מוצעים במחירון אפס ובתנאים שאינם זמינים בשוק הפתוח.
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class="faq-item"&gt;
+                &lt;button type="button" class="faq-question" aria-expanded="false" aria-controls="faq-a6"&gt;
+                    למי השירות של RELAX מתאים?
+                    &lt;span class="icon-plus" aria-hidden="true"&gt;&lt;/span&gt;
+                &lt;/button&gt;
+                &lt;div class="faq-answer" id="faq-a6" role="region"&gt;
+                    &lt;div class="faq-answer-inner"&gt;
+                        השירות מיועד לאנשים שמחפשים יותר מעסקה - כאלה שרוצים למקסם תשואה, לקבל החלטה רגועה מבוססת נתונים, וליהנות ממעטפת 360° שמנהלת עבורם את התהליך מהצעד הראשון ועד הרבה אחרי קבלת המפתח.
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- ========== FOOTER ========== --&gt;
+    &lt;footer class="site-footer"&gt;
+        &lt;p&gt;© כל הזכויות שמורות ל-Relax | נבנה ע"י &lt;a href="https://www.resultsdigital.org/creative" target="_blank" rel="noopener noreferrer"&gt;Results Group&lt;/a&gt;&lt;/p&gt;
+    &lt;/footer&gt;
+
+    &lt;!-- ========== STICKY MOBILE CTA ========== --&gt;
+    &lt;div class="sticky-mobile-cta" id="stickyMobileCta"&gt;
+        &lt;a href="#projects-section" class="sticky-btn" data-scroll-projects&gt;רוצה לשמוע על העסקאות&lt;/a&gt;
+    &lt;/div&gt;
+
+    &lt;!-- ========== PROJECT LEAD MODAL (one form for all projects) ========== --&gt;
+    &lt;div class="project-modal-overlay" id="projectModal" role="dialog" aria-modal="true" aria-labelledby="projectModalTitle" hidden&gt;
+        &lt;div class="project-modal"&gt;
+            &lt;button type="button" class="project-modal__close" id="projectModalClose" aria-label="סגירת החלון"&gt;×&lt;/button&gt;
+            &lt;span class="project-modal__eyebrow" id="projectModalEyebrow"&gt;פרויקט&lt;/span&gt;
+            &lt;h2 class="project-modal__title" id="projectModalTitle"&gt;רוצים לשמוע עוד?&lt;/h2&gt;
+            &lt;p class="project-modal__subtitle"&gt;השאירו פרטים ונחזור אליכם עם כל המידע על הפרויקט.&lt;/p&gt;
+            &lt;form class="premium-form" id="projectModalForm" data-lead-form data-form-location="project_modal" novalidate&gt;
+                &lt;div class="input-group"&gt;
+                    &lt;input type="text" name="full_name" placeholder="שם מלא" required autocomplete="name" aria-label="שם מלא"&gt;
+                &lt;/div&gt;
+                &lt;div class="input-group"&gt;
+                    &lt;input type="tel" name="phone" placeholder="טלפון נייד" required inputmode="tel" autocomplete="tel" aria-label="טלפון נייד"&gt;
+                &lt;/div&gt;
+                &lt;div class="input-group"&gt;
+                    &lt;select name="budget" aria-label="הון עצמי התחלתי"&gt;
+                        &lt;option value="" disabled selected&gt;הון עצמי התחלתי (אופציונלי)&lt;/option&gt;
+                        &lt;option value="300-450"&gt;300,000 ₪ - 450,000 ₪&lt;/option&gt;
+                        &lt;option value="450-600"&gt;450,000 ₪ - 600,000 ₪&lt;/option&gt;
+                        &lt;option value="600-750"&gt;600,000 ₪ - 750,000 ₪&lt;/option&gt;
+                        &lt;option value="750plus"&gt;מעל 750,000 ₪ / בעלי נכסים&lt;/option&gt;
+                    &lt;/select&gt;
+                &lt;/div&gt;
+                &lt;div class="input-group"&gt;
+                    &lt;select name="purchase_purpose" aria-label="מטרת הרכישה"&gt;
+                        &lt;option value="" disabled selected&gt;מטרת הרכישה (אופציונלי)&lt;/option&gt;
+                        &lt;option value="living"&gt;מגורים&lt;/option&gt;
+                        &lt;option value="investment"&gt;השקעה&lt;/option&gt;
+                    &lt;/select&gt;
+                &lt;/div&gt;
+                &lt;input type="hidden" name="utm_source" value=""&gt;&lt;input type="hidden" name="utm_medium" value=""&gt;&lt;input type="hidden" name="utm_campaign" value=""&gt;&lt;input type="hidden" name="utm_term" value=""&gt;&lt;input type="hidden" name="utm_content" value=""&gt;&lt;input type="hidden" name="page_url" value=""&gt;&lt;input type="hidden" name="form_location" value="project_modal"&gt;&lt;input type="hidden" name="project_name" value=""&gt;
+                &lt;button type="submit" class="submit-btn"&gt;חזרו אליי לפרטים נוספים&lt;/button&gt;
+                &lt;p class="project-modal__note"&gt;ללא עלות וללא התחייבות. הפרטים שלכם נשמרים אצלנו בלבד.&lt;/p&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- ========== EXIT-INTENT POPUP ========== --&gt;
+    &lt;div class="exit-popup-overlay" id="exitPopup" role="dialog" aria-modal="true" aria-labelledby="exitPopupTitle" hidden&gt;
+        &lt;div class="exit-popup"&gt;
+            &lt;button type="button" class="exit-popup-close" id="exitPopupClose" aria-label="סגירת החלון"&gt;×&lt;/button&gt;
+            &lt;h3 id="exitPopupTitle"&gt;רגע לפני שעוזבים...&lt;/h3&gt;
+            &lt;p&gt;השאירו מספר טלפון ונחזור אליכם עם הפרטים על העסקאות הכי שוות בשוק.&lt;/p&gt;
+            &lt;form id="exitForm" novalidate&gt;
+                &lt;input type="tel" name="phone" placeholder="טלפון נייד" required inputmode="tel" aria-label="טלפון נייד"&gt;
+                &lt;input type="hidden" name="utm_source" value=""&gt;&lt;input type="hidden" name="utm_medium" value=""&gt;&lt;input type="hidden" name="utm_campaign" value=""&gt;&lt;input type="hidden" name="utm_term" value=""&gt;&lt;input type="hidden" name="utm_content" value=""&gt;&lt;input type="hidden" name="page_url" value=""&gt;&lt;input type="hidden" name="form_location" value="exit_intent"&gt;
+                &lt;button type="submit" class="exit-popup-btn"&gt;שלחו לי את העסקאות&lt;/button&gt;
+                &lt;div class="exit-success"&gt;תודה! ניצור קשר בהקדם.&lt;/div&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+&lt;/div&gt;&lt;!-- end #relax-lp --&gt;
+
+    &lt;!-- ========== SCRIPTS ========== --&gt;
+    &lt;script&gt;
+    (function () {
+        'use strict';
+
+        var WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/5142875/4ygkuif/';
+        var THANKS_URL  = 'https://relaxgroup.co.il/thanks/';
+        var YT_ID       = 'KSFJTGTXFQA';
+
+        var prefersReducedMotion = window.matchMedia &amp;&amp;
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        /* ============================================================
+           ELEMENTOR PARENT CLEANUP
+           ============================================================ */
+        (function () {
+            var el = document.getElementById('relax-lp');
+            if (!el) return;
+            var parent = el.parentElement;
+            while (parent &amp;&amp; parent !== document.body) {
+                parent.style.padding = '0';
+                parent.style.margin = '0';
+                parent.style.maxWidth = 'none';
+                parent.style.width = '100%';
+                parent = parent.parentElement;
+            }
+        })();
+
+        /* ============================================================
+           IFRAME AUTO-RESIZE
+           Was: a MutationObserver on the whole body (childList + subtree +
+           attributes) that fired on every typewriter character — dozens of
+           forced layouts + postMessages per second, which is what made the
+           parent page's scroll feel stuck. Now: a ResizeObserver on the
+           document element, throttled to one rAF, that only posts when the
+           height actually changed.
+           ============================================================ */
+        var lastPostedHeight = 0;
+        var heightFrame = 0;
+
+        function postHeight() {
+            heightFrame = 0;
+            var h = document.documentElement.scrollHeight;
+            if (Math.abs(h - lastPostedHeight) &lt; 2) return;
+            lastPostedHeight = h;
+            try {
+                window.parent.postMessage({ type: 'relax-iframe-height', height: h }, '*');
+            } catch (e) {}
+        }
+
+        function notifyParentHeight() {
+            if (heightFrame) return;
+            heightFrame = requestAnimationFrame(postHeight);
+        }
+
+        function initHeightSync() {
+            if (window.self === window.top) return; // not embedded — nothing to sync
+            notifyParentHeight();
+            if (typeof ResizeObserver === 'function') {
+                new ResizeObserver(notifyParentHeight).observe(document.documentElement);
+            } else {
+                window.addEventListener('resize', notifyParentHeight, { passive: true });
+            }
+        }
+
+        /* ============================================================
+           UTM / PAGE URL
+           ============================================================ */
+        function getUTMParams() {
+            var params = new URLSearchParams(window.location.search);
+            try {
+                var parentParams = new URLSearchParams(window.parent.location.search);
+                parentParams.forEach(function (val, key) {
+                    if (!params.has(key)) params.set(key, val);
+                });
+            } catch (e) {}
+            return {
+                utm_source: params.get('utm_source') || '',
+                utm_medium: params.get('utm_medium') || '',
+                utm_campaign: params.get('utm_campaign') || '',
+                utm_term: params.get('utm_term') || '',
+                utm_content: params.get('utm_content') || ''
+            };
+        }
+
+        function fillUTMFields() {
+            var utm = getUTMParams();
+            var pageUrl = window.location.href;
+            try { pageUrl = window.parent.location.href; } catch (e) {}
+
+            document.querySelectorAll('form').forEach(function (form) {
+                Object.keys(utm).forEach(function (key) {
+                    var field = form.querySelector('input[name="' + key + '"]');
+                    if (field) field.value = utm[key];
+                });
+                var urlField = form.querySelector('input[name="page_url"]');
+                if (urlField) urlField.value = pageUrl;
+            });
+        }
+
+        /* ============================================================
+           VALIDATION
+           ============================================================ */
+        var NAME_RE  = /^[א-תa-zA-Z'"\-]{2,}(\s+[א-תa-zA-Z'"\-]{2,})+$/;
+        // 05X + 7 digits (mobile) or 0X + 7 digits (landline, X != 0/1/5)
+        var MOBILE_RE   = /^05[0-9]{8}$/;
+        var LANDLINE_RE = /^0[2-46-9][0-9]{7}$/;
+
+        function normalizePhone(value) {
+            return String(value || '').replace(/[\s\-.()]/g, '').replace(/^\+972/, '0');
+        }
+        function isValidPhone(raw) {
+            return MOBILE_RE.test(raw) || LANDLINE_RE.test(raw);
+        }
+
+        function setFieldError(el, msg) {
+            el.style.borderColor = '#e05555';
+            el.style.borderBottomColor = '#e05555';
+            el.setAttribute('aria-invalid', 'true');
+            var errEl = el.parentElement.querySelector('.field-error');
+            if (!errEl) {
+                errEl = document.createElement('span');
+                errEl.className = 'field-error';
+                el.parentElement.appendChild(errEl);
+            }
+            errEl.textContent = msg;
+        }
+
+        function clearFieldError(el) {
+            el.style.borderColor = '';
+            el.style.borderBottomColor = '';
+            el.removeAttribute('aria-invalid');
+            var errEl = el.parentElement.querySelector('.field-error');
+            if (errEl) errEl.remove();
+        }
+
+        function validateLeadForm(form) {
+            var firstInvalid = null;
+
+            var nameEl = form.querySelector('input[name="full_name"]');
+            if (nameEl) {
+                var name = nameEl.value.trim();
+                if (!name) {
+                    setFieldError(nameEl, 'יש להזין שם מלא');
+                    firstInvalid = firstInvalid || nameEl;
+                } else if (!NAME_RE.test(name)) {
+                    setFieldError(nameEl, 'יש להזין שם פרטי ושם משפחה (אותיות בלבד)');
+                    firstInvalid = firstInvalid || nameEl;
+                } else {
+                    clearFieldError(nameEl);
+                }
+            }
+
+            var phoneEl = form.querySelector('input[name="phone"]');
+            if (phoneEl) {
+                var raw = normalizePhone(phoneEl.value);
+                if (!raw) {
+                    setFieldError(phoneEl, 'יש להזין מספר טלפון');
+                    firstInvalid = firstInvalid || phoneEl;
+                } else if (!isValidPhone(raw)) {
+                    setFieldError(phoneEl, 'מספר טלפון לא תקין. לדוגמה: 0501234567');
+                    firstInvalid = firstInvalid || phoneEl;
+                } else {
+                    clearFieldError(phoneEl);
+                    phoneEl.value = raw;
+                }
+            }
+
+            ['budget', 'purchase_purpose'].forEach(function (fieldName) {
+                var el = form.querySelector('select[name="' + fieldName + '"]');
+                if (!el) return;
+                if (el.hasAttribute('required') &amp;&amp; !el.value) {
+                    setFieldError(el, fieldName === 'budget' ? 'יש לבחור הון עצמי' : 'יש לבחור מטרת רכישה');
+                    firstInvalid = firstInvalid || el;
+                } else {
+                    clearFieldError(el);
+                }
+            });
+
+            if (firstInvalid) {
+                firstInvalid.focus({ preventScroll: false });
+                return false;
+            }
+            return true;
+        }
+
+        /* ============================================================
+           SUBMISSION
+           A 6s watchdog guarantees we still redirect if the network hangs,
+           and the button is re-enabled on failure instead of staying stuck
+           on "שולח...".
+           ============================================================ */
+        function sendLead(payload) {
+            return fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify(payload),
+                mode: 'no-cors',
+                keepalive: true
+            });
+        }
+
+        function collectLead(form) {
+            var data = {};
+            new FormData(form).forEach(function (value, key) {
+                data[key] = typeof value === 'string' ? value.trim() : value;
+            });
+            return data;
+        }
+
+        function handleLeadSubmit(e) {
+            e.preventDefault();
+            var form = e.currentTarget;
+            if (form.dataset.submitting === '1') return;
+            if (!validateLeadForm(form)) return;
+
+            var btn = form.querySelector('button[type="submit"]');
+            var originalText = btn ? btn.textContent : '';
+            form.dataset.submitting = '1';
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = 'שולח...';
+            }
+
+            var done = false;
+            function finish() {
+                if (done) return;
+                done = true;
+                try {
+                    (window.top || window).location.href = THANKS_URL;
+                } catch (err) {
+                    window.location.href = THANKS_URL;
+                }
+            }
+
+            var watchdog = setTimeout(finish, 6000);
+
+            sendLead(collectLead(form))
+                .then(function () {
+                    clearTimeout(watchdog);
+                    finish();
+                })
+                .catch(function () {
+                    clearTimeout(watchdog);
+                    form.dataset.submitting = '';
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.textContent = originalText;
+                    }
+                    var phoneEl = form.querySelector('input[name="phone"]');
+                    if (phoneEl) setFieldError(phoneEl, 'השליחה נכשלה. נסו שוב או התקשרו אלינו.');
+                });
+        }
+
+        function initLeadForms() {
+            document.querySelectorAll('form[data-lead-form]').forEach(function (form) {
+                form.addEventListener('submit', handleLeadSubmit);
+            });
+        }
+
+        /* ============================================================
+           PROJECT MODAL — one form, project name injected
+           ============================================================ */
+        var modal, modalForm, lastFocusedEl = null;
+
+        function lockScroll(lock) {
+            document.documentElement.classList.toggle('relax-modal-open', lock);
+            document.body.classList.toggle('relax-modal-open', lock);
+        }
+
+        function openProjectModal(projectName, formLocation) {
+            if (!modal) return;
+            lastFocusedEl = document.activeElement;
+
+            document.getElementById('projectModalTitle').textContent =
+                'רוצים לשמוע עוד על ' + projectName + '?';
+            document.getElementById('projectModalEyebrow').textContent = 'פרויקט Relax';
+            modalForm.querySelector('input[name="project_name"]').value = projectName;
+            modalForm.querySelector('input[name="form_location"]').value = formLocation || 'project_modal';
+            modalForm.dataset.formLocation = formLocation || 'project_modal';
+
+            modal.hidden = false;
+            modal.classList.add('show');
+            lockScroll(true);
+            fillUTMFields();
+
+            var firstInput = modalForm.querySelector('input[name="full_name"]');
+            if (firstInput) setTimeout(function () { firstInput.focus(); }, 40);
+            notifyParentHeight();
+        }
+
+        function closeProjectModal() {
+            if (!modal || !modal.classList.contains('show')) return;
+            modal.classList.remove('show');
+            modal.hidden = true;
+            lockScroll(false);
+            if (lastFocusedEl &amp;&amp; lastFocusedEl.focus) lastFocusedEl.focus();
+            lastFocusedEl = null;
+        }
+
+        function initProjectModal() {
+            modal = document.getElementById('projectModal');
+            modalForm = document.getElementById('projectModalForm');
+            if (!modal || !modalForm) return;
+
+            document.querySelectorAll('.project-cta[data-project-name]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    openProjectModal(btn.dataset.projectName, btn.dataset.formLocation);
+                });
+            });
+
+            document.getElementById('projectModalClose').addEventListener('click', closeProjectModal);
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) closeProjectModal();
+            });
+
+            // Keep tab focus inside the dialog while it's open
+            modal.addEventListener('keydown', function (e) {
+                if (e.key !== 'Tab') return;
+                var focusables = modal.querySelectorAll(
+                    'button, input:not([type="hidden"]), select, textarea, a[href]'
+                );
+                if (!focusables.length) return;
+                var first = focusables[0];
+                var last = focusables[focusables.length - 1];
+                if (e.shiftKey &amp;&amp; document.activeElement === first) {
+                    e.preventDefault(); last.focus();
+                } else if (!e.shiftKey &amp;&amp; document.activeElement === last) {
+                    e.preventDefault(); first.focus();
+                }
+            });
+        }
+
+        /* ============================================================
+           SCROLL HELPERS
+           ============================================================ */
+        function scrollToProjects() {
+            var target = document.getElementById('projects-section');
+            if (!target) return;
+            target.scrollIntoView({
+                behavior: prefersReducedMotion ? 'auto' : 'smooth',
+                block: 'start'
+            });
+        }
+
+        function initScrollLinks() {
+            document.querySelectorAll('[data-scroll-projects]').forEach(function (el) {
+                el.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    closeMobileNav();
+                    scrollToProjects();
+                });
+            });
+        }
+
+        /* ============================================================
+           MOBILE NAV
+           ============================================================ */
+        function closeMobileNav() {
+            var header = document.getElementById('lpHeader');
+            var burger = document.getElementById('headerBurger');
+            if (header) header.classList.remove('nav-open');
+            if (burger) burger.setAttribute('aria-expanded', 'false');
+        }
+
+        function initMobileNav() {
+            var header = document.getElementById('lpHeader');
+            var burger = document.getElementById('headerBurger');
+            if (!header || !burger) return;
+            burger.addEventListener('click', function () {
+                var open = header.classList.toggle('nav-open');
+                burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+            });
+        }
+
+        /* ============================================================
+           HERO TYPEWRITER
+           Pauses when the tab is hidden or the hero scrolls out of view, so
+           it stops mutating the DOM (and burning frames) mid-scroll.
+           ============================================================ */
+        var cliches = [
+            '"בית זה מקום שבו הנפש שלך יחפה"',
+            '"הזדמנות נדל״ן של פעם בחיים!"',
+            '"פנינה קסומה מול נוף עוצר נשימה"',
+            '"נותרו 3 דירות אחרונות בלבד!"'
+        ];
+
+        function initTypewriter() {
+            var textElement = document.getElementById('cliche-text');
+            if (!textElement) return;
+
+            if (prefersReducedMotion) {
+                textElement.textContent = cliches[0];
+                return;
+            }
+
+            var heroVisible = true;
+            var heroSection = document.querySelector('.hero-section');
+            if (heroSection &amp;&amp; 'IntersectionObserver' in window) {
+                new IntersectionObserver(function (entries) {
+                    heroVisible = entries[0].isIntersecting;
+                }, { threshold: 0 }).observe(heroSection);
+            }
+
+            function idle() {
+                return document.hidden || !heroVisible;
+            }
+            function wait(ms) {
+                return new Promise(function (r) { setTimeout(r, ms); });
+            }
+            async function pauseWhileIdle() {
+                while (idle()) { await wait(300); }
+            }
+
+            (async function loop() {
+                var i = 0;
+                while (true) {
+                    await pauseWhileIdle();
+                    var text = cliches[i];
+                    textElement.classList.remove('strike');
+                    textElement.textContent = '';
+                    for (var c = 0; c &lt;= text.length; c++) {
+                        textElement.textContent = text.substring(0, c);
+                        await wait(60);
+                    }
+                    await wait(600);
+                    textElement.classList.add('strike');
+                    await wait(2500);
+                    textElement.classList.remove('strike');
+                    for (var d = text.length; d &gt;= 0; d--) {
+                        textElement.textContent = text.substring(0, d);
+                        await wait(20);
+                    }
+                    await wait(500);
+                    i = (i + 1) % cliches.length;
+                }
+            })();
+        }
+
+        /* ============================================================
+           HERO TRUST SLIDER (mobile) — interval only runs on mobile
+           ============================================================ */
+        function initTrustSlider() {
+            var items = document.querySelectorAll('.trust-item');
+            if (!items.length) return;
+            var current = 0;
+            setInterval(function () {
+                if (document.hidden) return;
+                if (window.innerWidth &lt;= 768) {
+                    items[current].classList.remove('active-mobile');
+                    current = (current + 1) % items.length;
+                    items[current].classList.add('active-mobile');
+                } else if (current !== 0) {
+                    items.forEach(function (item) { item.classList.remove('active-mobile'); });
+                    items[0].classList.add('active-mobile');
+                    current = 0;
+                }
+            }, 3000);
+        }
+
+        /* ============================================================
+           YOUTUBE FACADE
+           ============================================================ */
+        function initVideoFacade() {
+            var facade = document.getElementById('heroVideoFacade');
+            var wrapper = document.getElementById('heroVideoWrapper');
+            if (!facade || !wrapper) return;
+
+            facade.addEventListener('click', function () {
+                var iframe = document.createElement('iframe');
+                iframe.title = 'סרטון Relax - עסקאות הנדל״ן';
+                iframe.src = 'https://www.youtube-nocookie.com/embed/' + YT_ID +
+                    '?rel=0&amp;modestbranding=1&amp;playsinline=1&amp;controls=1&amp;autoplay=1';
+                iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+                iframe.allowFullscreen = true;
+                iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+                wrapper.appendChild(iframe);
+                facade.remove();
+            }, { once: true });
+        }
+
+        /* ============================================================
+           STAT COUNTERS
+           Runs once, then every listener it installed is torn down.
+           ============================================================ */
+        function formatNumber(num) {
+            return String(num).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        var countersStarted = false;
+
+        function startCounters() {
+            if (countersStarted) return;
+            countersStarted = true;
+
+            document.querySelectorAll('.stat-val').forEach(function (counter) {
+                var target = parseFloat(counter.getAttribute('data-target'));
+                if (!isFinite(target)) return;
+                var isFloat = counter.hasAttribute('data-float');
+                var duration = 900;
+                var start = null;
+
+                function render(value, isFinal) {
+                    if (isFloat) return value.toFixed(1);
+                    var v = isFinal ? target : Math.ceil(value);
+                    return target &gt;= 10000 ? formatNumber(v) : String(v);
+                }
+
+                function step(ts) {
+                    if (start === null) start = ts;
+                    var p = Math.min((ts - start) / duration, 1);
+                    // ease-out so the last digits settle instead of snapping
+                    var eased = 1 - Math.pow(1 - p, 3);
+                    counter.textContent = render(target * eased, p === 1);
+                    if (p &lt; 1) requestAnimationFrame(step);
+                }
+
+                counter.textContent = render(0, false);
+                requestAnimationFrame(step);
+            });
+        }
+
+        function initStatsCounters() {
+            var statsEl = document.getElementById('stats-section');
+            if (!statsEl) return;
+
+            if (prefersReducedMotion) { countersStarted = true; return; } // values already in the HTML
+
+            if ('IntersectionObserver' in window) {
+                var io = new IntersectionObserver(function (entries) {
+                    if (entries.some(function (e) { return e.isIntersecting; })) {
+                        startCounters();
+                        io.disconnect();
+                    }
+                }, { threshold: 0.05, rootMargin: '80px 0px' });
+                io.observe(statsEl);
+            }
+
+            // Embedded in an iframe the parent clips us, so IO may never fire.
+            if (window.self !== window.top) {
+                setTimeout(startCounters, 900);
+            }
+
+            // Last-resort scroll fallback, removed the moment it fires.
+            function onScroll() {
+                if (countersStarted) { window.removeEventListener('scroll', onScroll); return; }
+                var rect = statsEl.getBoundingClientRect();
+                if (rect.top &lt; window.innerHeight * 0.92 &amp;&amp; rect.bottom &gt; 0) {
+                    startCounters();
+                    window.removeEventListener('scroll', onScroll);
+                }
+            }
+            window.addEventListener('scroll', onScroll, { passive: true });
+            requestAnimationFrame(onScroll);
+        }
+
+        /* ============================================================
+           STATS ROTATION (mobile only)
+           ============================================================ */
+        function initStatsRotation() {
+            var stats = document.querySelectorAll('.stat-item');
+            if (!stats.length) return;
+            var current = 0;
+            setInterval(function () {
+                if (document.hidden || window.innerWidth &gt; 768) return;
+                stats[current].classList.remove('active');
+                current = (current + 1) % stats.length;
+                stats[current].classList.add('active');
+            }, 3000);
+        }
+
+        /* ============================================================
+           FEATURES DOTS
+           ============================================================ */
+        function initFeatureDots() {
+            var grid = document.getElementById('featuresGrid');
+            var dots = document.querySelectorAll('.dot');
+            if (!grid || !dots.length) return;
+            var ticking = false;
+            grid.addEventListener('scroll', function () {
+                if (ticking) return;
+                ticking = true;
+                requestAnimationFrame(function () {
+                    ticking = false;
+                    var index = Math.round(Math.abs(grid.scrollLeft) / grid.offsetWidth);
+                    dots.forEach(function (dot, i) { dot.classList.toggle('active', i === index); });
+                });
+            }, { passive: true });
+        }
+
+        /* ============================================================
+           PROCESS STEPS
+           ============================================================ */
+        function initProcessSteps() {
+            var steps = document.querySelectorAll('.process-step');
+            if (!steps.length) return;
+            var index = 0;
+            var timer = null;
+            var INTERVAL = 3500;
+
+            function activate(i) {
+                steps.forEach(function (s) { s.classList.remove('active'); });
+                steps[i].classList.add('active');
+            }
+            function start() {
+                stop();
+                if (prefersReducedMotion) return;
+                timer = setInterval(function () {
+                    if (document.hidden) return;
+                    index = (index + 1) % steps.length;
+                    activate(index);
+                }, INTERVAL);
+            }
+            function stop() {
+                if (timer) { clearInterval(timer); timer = null; }
+            }
+
+            steps.forEach(function (step, i) {
+                step.addEventListener('mouseenter', function () {
+                    stop(); index = i; activate(index);
+                });
+                step.addEventListener('mouseleave', start);
+                step.addEventListener('click', function () {
+                    stop(); index = i; activate(index);
+                    setTimeout(start, 5000);
+                });
+            });
+
+            activate(0);
+            start();
+        }
+
+        /* ============================================================
+           PROJECTS: mobile switcher + thumbnails
+           ============================================================ */
+        function initProjects() {
+            var cards = document.querySelectorAll('.project-card');
+            var btns = document.querySelectorAll('.nav-btn[data-project-index]');
+
+            btns.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var index = parseInt(btn.dataset.projectIndex, 10);
+                    btns.forEach(function (b, i) { b.classList.toggle('active', i === index); });
+                    cards.forEach(function (c, i) { c.classList.toggle('active-mobile', i === index); });
+                    notifyParentHeight();
+                });
+            });
+
+            var mobileNav = document.getElementById('mobileNav');
+            var scrollProgress = document.getElementById('scrollProgress');
+            if (mobileNav &amp;&amp; scrollProgress) {
+                var ticking = false;
+                mobileNav.addEventListener('scroll', function () {
+                    if (ticking) return;
+                    ticking = true;
+                    requestAnimationFrame(function () {
+                        ticking = false;
+                        var scrollWidth = mobileNav.scrollWidth - mobileNav.clientWidth;
+                        var scrollLeft = Math.abs(mobileNav.scrollLeft);
+                        var pct = scrollWidth &gt; 0 ? (scrollLeft / scrollWidth) * 70 : 0;
+                        scrollProgress.style.transform = 'translateX(-' + pct + '%)';
+                    });
+                }, { passive: true });
+            }
+
+            cards.forEach(function (card) {
+                var mainImg = card.querySelector('.project-main-img');
+                var thumbs = card.querySelectorAll('.project-thumbnails img');
+                if (!mainImg || thumbs.length &lt; 2) return;
+                thumbs.forEach(function (thumb) {
+                    thumb.addEventListener('click', function () {
+                        thumbs.forEach(function (t) { t.classList.remove('active-thumb'); });
+                        thumb.classList.add('active-thumb');
+                        mainImg.classList.remove('fade-in');
+                        void mainImg.offsetWidth;
+                        mainImg.classList.add('fade-in');
+                        mainImg.src = thumb.src;
+                    });
+                });
+            });
+        }
+
+        /* ============================================================
+           FAQ ACCORDION
+           ============================================================ */
+        function initFaq() {
+            var items = document.querySelectorAll('.faq-item');
+            if (!items.length) return;
+
+            function open(item) {
+                var answer = item.querySelector('.faq-answer');
+                var question = item.querySelector('.faq-question');
+                item.classList.add('active');
+                answer.style.maxHeight = (answer.scrollHeight + 10) + 'px';
+                if (question) question.setAttribute('aria-expanded', 'true');
+            }
+            function close(item) {
+                var question = item.querySelector('.faq-question');
+                item.classList.remove('active');
+                item.querySelector('.faq-answer').style.maxHeight = null;
+                if (question) question.setAttribute('aria-expanded', 'false');
+            }
+
+            items.forEach(function (item) {
+                item.querySelector('.faq-question').addEventListener('click', function () {
+                    var isOpen = item.classList.contains('active');
+                    items.forEach(close);
+                    if (!isOpen) open(item);
+                    setTimeout(notifyParentHeight, 450);
+                });
+            });
+
+            var firstActive = document.querySelector('.faq-item.active');
+            if (firstActive) open(firstActive);
+
+            // Keep the open answer's max-height correct after a resize/reflow
+            window.addEventListener('resize', function () {
+                var active = document.querySelector('.faq-item.active .faq-answer');
+                if (active) active.style.maxHeight = (active.scrollHeight + 10) + 'px';
+            }, { passive: true });
+        }
+
+        /* ============================================================
+           STICKY MOBILE CTA
+           The old version read `entries` for both targets on every callback,
+           so whichever element didn't change was treated as "not visible" and
+           the bar flickered. Now visibility is tracked in a Map.
+           ============================================================ */
+        function initStickyCta() {
+            var stickyEl = document.getElementById('stickyMobileCta');
+            var projectsSection = document.getElementById('projects-section');
+            var ctaForm = document.getElementById('ctaForm');
+            if (!stickyEl || !projectsSection || !('IntersectionObserver' in window)) return;
+
+            var visible = new Map();
+
+            function update() {
+                if (window.innerWidth &gt; 768) {
+                    stickyEl.classList.remove('visible');
+                    return;
+                }
+                var anyVisible = false;
+                visible.forEach(function (v) { if (v) anyVisible = true; });
+                stickyEl.classList.toggle('visible', !anyVisible);
+            }
+
+            var io = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    visible.set(entry.target, entry.isIntersecting);
+                });
+                update();
+            }, { threshold: 0.12 });
+
+            io.observe(projectsSection);
+            if (ctaForm) io.observe(ctaForm);
+            window.addEventListener('resize', update, { passive: true });
+            update();
+        }
+
+        /* ============================================================
+           REAL-TIME VALIDATION
+           ============================================================ */
+        function initRealtimeValidation() {
+            document.querySelectorAll('input[name="phone"]').forEach(function (el) {
+                el.addEventListener('blur', function () {
+                    var raw = normalizePhone(el.value);
+                    if (!raw) return;
+                    if (isValidPhone(raw)) {
+                        clearFieldError(el);
+                        el.style.borderBottomColor = '#10B981';
+                    } else {
+                        setFieldError(el, 'מספר טלפון לא תקין. לדוגמה: 0501234567');
+                    }
+                });
+                el.addEventListener('input', function () { clearFieldError(el); });
+            });
+
+            document.querySelectorAll('input[name="full_name"]').forEach(function (el) {
+                el.addEventListener('blur', function () {
+                    var name = el.value.trim();
+                    if (!name) return;
+                    if (NAME_RE.test(name)) {
+                        clearFieldError(el);
+                        el.style.borderBottomColor = '#10B981';
+                    } else {
+                        setFieldError(el, 'יש להזין שם פרטי ושם משפחה');
+                    }
+                });
+                el.addEventListener('input', function () { clearFieldError(el); });
+            });
+        }
+
+        /* ============================================================
+           EXIT-INTENT POPUP
+           ============================================================ */
+        var exitPopupShown = false;
+
+        function showExitPopup() {
+            var popup = document.getElementById('exitPopup');
+            if (!popup || exitPopupShown) return;
+            if (modal &amp;&amp; modal.classList.contains('show')) return; // don't stack dialogs
+            exitPopupShown = true;
+            popup.hidden = false;
+            popup.classList.add('show');
+            fillUTMFields();
+            var input = popup.querySelector('input[name="phone"]');
+            if (input) setTimeout(function () { input.focus(); }, 40);
+        }
+
+        function closeExitPopup() {
+            var popup = document.getElementById('exitPopup');
+            if (!popup) return;
+            popup.classList.remove('show');
+            popup.hidden = true;
+        }
+
+        function initExitIntent() {
+            // Pointer-based exit intent is meaningless on touch devices
+            if (!window.matchMedia || !window.matchMedia('(hover: hover)').matches) return;
+
+            document.addEventListener('mouseout', function (e) {
+                if (exitPopupShown) return;
+                if (e.clientY &lt;= 5 &amp;&amp; e.relatedTarget == null) showExitPopup();
+            });
+
+            var closeBtn = document.getElementById('exitPopupClose');
+            if (closeBtn) closeBtn.addEventListener('click', closeExitPopup);
+
+            var popup = document.getElementById('exitPopup');
+            if (popup) {
+                popup.addEventListener('click', function (e) {
+                    if (e.target === popup) closeExitPopup();
+                });
+            }
+
+            var form = document.getElementById('exitForm');
+            if (form) form.addEventListener('submit', handleExitSubmit);
+        }
+
+        function handleExitSubmit(e) {
+            e.preventDefault();
+            var form = e.currentTarget;
+            var phoneEl = form.querySelector('input[name="phone"]');
+            var raw = normalizePhone(phoneEl.value);
+
+            if (!isValidPhone(raw)) {
+                phoneEl.style.borderBottomColor = '#e05555';
+                phoneEl.focus();
+                return;
+            }
+            phoneEl.value = raw;
+            phoneEl.style.borderBottomColor = '#10B981';
+
+            var btn = form.querySelector('.exit-popup-btn');
+            if (btn) btn.disabled = true;
+
+            function showSuccess() {
+                phoneEl.style.display = 'none';
+                if (btn) btn.style.display = 'none';
+                form.querySelector('.exit-success').style.display = 'block';
+                setTimeout(closeExitPopup, 2500);
+            }
+
+            sendLead(collectLead(form)).then(showSuccess).catch(showSuccess);
+        }
+
+        /* ============================================================
+           GLOBAL ESC HANDLER (both dialogs)
+           ============================================================ */
+        function initEscape() {
+            document.addEventListener('keydown', function (e) {
+                if (e.key !== 'Escape') return;
+                closeProjectModal();
+                closeExitPopup();
+                closeMobileNav();
+            });
+        }
+
+        /* ============================================================
+           INIT
+           ============================================================ */
+        function init() {
+            fillUTMFields();
+            initMobileNav();
+            initScrollLinks();
+            initLeadForms();
+            initProjectModal();
+            initProjects();
+            initTypewriter();
+            initTrustSlider();
+            initVideoFacade();
+            initStatsCounters();
+            initStatsRotation();
+            initFeatureDots();
+            initProcessSteps();
+            initFaq();
+            initStickyCta();
+            initRealtimeValidation();
+            initExitIntent();
+            initEscape();
+            initHeightSync();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+    &lt;/script&gt;
+
+&lt;/body&gt;&lt;/html&gt;
+</pre>
+      </div>
+    </div>
+  </div>
+
+  <footer class="foot">
+    להדבקה: החליפו את כל תוכן הבלוק הקיים ב-CMS בקוד הזה. הלידים ממשיכים להישלח לאותו webhook של Zapier עם אותם שדות.
+  </footer>
+</div>
+
+<script>
+(function () {
+  var MARKS = [{"label": "מבנה ומשתני עיצוב", "line": 40}, {"label": "הדר וניווט", "line": 163}, {"label": "הירו + פאסאד וידאו", "line": 277}, {"label": "מודאל הפרויקטים (CSS)", "line": 1109}, {"label": "סרגל CTA דביק", "line": 2237}, {"label": "HTML — פרויקטים", "line": 2450}, {"label": "HTML — מודאל הפרויקטים", "line": 2920}, {"label": "JS — סנכרון גובה iframe", "line": 3003}, {"label": "JS — ולידציה", "line": 3075}, {"label": "JS — שליחת ליד", "line": 3161}, {"label": "JS — מודאל הפרויקטים", "line": 3235}, {"label": "JS — מכונת כתיבה", "line": 3350}, {"label": "JS — פאסאד יוטיוב", "line": 3435}, {"label": "JS — מוני סטטיסטיקות", "line": 3456}, {"label": "JS — אתחול", "line": 3853}];
+  var LINES = 3886;
+  var src = document.getElementById('src');
+  var gutter = document.getElementById('gutter');
+  var status = document.getElementById('status');
+
+  var hit = {};
+  MARKS.forEach(function (m) { hit[m.line] = true; });
+
+  var frag = document.createDocumentFragment();
+  for (var i = 1; i <= LINES; i++) {
+    var el = document.createElement('span');
+    el.id = 'L' + i;
+    el.textContent = i;
+    if (hit[i]) el.className = 'hit';
+    frag.appendChild(el);
+    frag.appendChild(document.createTextNode('\n'));
+  }
+  gutter.appendChild(frag);
+
+  var list = document.getElementById('jumpList');
+  MARKS.forEach(function (m) {
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.href = '#L' + m.line;
+    a.innerHTML = '<span>' + m.label + '</span><span class="ln">' + m.line + '</span>';
+    li.appendChild(a);
+    list.appendChild(li);
+  });
+
+  function flash(msg) {
+    status.textContent = msg;
+    setTimeout(function () { status.textContent = ''; }, 2200);
+  }
+
+  document.getElementById('copyBtn').addEventListener('click', function () {
+    var text = src.textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text)
+        .then(function () { flash('הועתק ✓'); })
+        .catch(function () { flash('ההעתקה נכשלה'); });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); flash('הועתק ✓'); }
+      catch (e) { flash('ההעתקה נכשלה'); }
+      ta.remove();
+    }
+  });
+
+  document.getElementById('dlBtn').addEventListener('click', function () {
+    var blob = new Blob([src.textContent], { type: 'text/html;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'relax-lp.html';
+    a.click();
+    URL.revokeObjectURL(url);
+    flash('ירד ✓');
+  });
+})();
+</script>

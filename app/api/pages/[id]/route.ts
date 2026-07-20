@@ -7,6 +7,8 @@ import { captureException } from '@/lib/logger'
 import { slugifyPath } from '@/lib/slug'
 import { parseJson } from '@/lib/http'
 
+const RESERVED_SHORT_URLS = new Set(['null', 'undefined', 'false', 'true'])
+
 interface Ctx { params: Promise<{ id: string }> }
 
 export async function GET(req: NextRequest, { params }: Ctx) {
@@ -43,7 +45,11 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
   const client = rawClient !== undefined ? slugifyPath(rawClient, '') : undefined
   const slug = body.slug !== undefined ? slugifyPath(String(body.slug).replace(/\.html$/i, ''), '') : undefined
   const shortUrl = body.shortUrl !== undefined
-    ? (String(body.shortUrl).trim().toLowerCase().replace(/[^a-z0-9-]/g, '') || null)
+    ? (() => {
+        const v = String(body.shortUrl).trim().toLowerCase().replace(/[^a-z0-9-]/g, '')
+        // "null"/"undefined" survive the character filter and would publish /r/null.
+        return v && !RESERVED_SHORT_URLS.has(v) ? v : null
+      })()
     : undefined
 
   // Moving the page to another workspace requires permission there too

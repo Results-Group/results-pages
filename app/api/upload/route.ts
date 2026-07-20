@@ -7,6 +7,8 @@ import { minifyHtml } from '@/lib/minify'
 import { slugifyPath } from '@/lib/slug'
 import { parseForm } from '@/lib/http'
 
+const RESERVED_SHORT_URLS = new Set(['null', 'undefined', 'false', 'true'])
+
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
@@ -33,7 +35,9 @@ export async function POST(req: NextRequest) {
   const slug = slugifyPath((formData.get('slug') as string)?.replace(/\.html$/i, ''), '')
   const expiresAt = formData.get('expiresAt') as string | null
   const password = (formData.get('password') as string)?.trim() || null
-  const shortUrl = (formData.get('shortUrl') as string)?.trim().toLowerCase().replace(/[^a-z0-9-]/g, '') || null
+  const rawShortUrl = (formData.get('shortUrl') as string)?.trim().toLowerCase().replace(/[^a-z0-9-]/g, '') || ''
+  // "null"/"undefined" pass the character filter and would publish /r/null.
+  const shortUrl = rawShortUrl && !RESERVED_SHORT_URLS.has(rawShortUrl) ? rawShortUrl : null
   let clientId = ((formData.get('client_id') as string) || (formData.get('clientId') as string))?.trim() || null
 
   if (!file || !client || !title || !slug) {

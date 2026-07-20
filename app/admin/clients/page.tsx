@@ -50,6 +50,8 @@ export default function ClientsPage() {
   const [syncing, setSyncing] = useState(false)
   const [syncMessage, setSyncMessage] = useState<{ text: string; ok: boolean } | null>(null)
   const [showMerge, setShowMerge] = useState(false)
+  // Distinguishes a real outage from a genuinely empty list.
+  const [loadFailed, setLoadFailed] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -58,12 +60,14 @@ export default function ClientsPage() {
         fetch('/api/clients'),
         fetch('/api/clients/sync'),
       ])
+      setLoadFailed(!clientsRes.ok)
       setClients(clientsRes.ok ? await clientsRes.json() : [])
       if (syncRes.ok) {
         const syncData = await syncRes.json() as { available: boolean }
         setMondayAvailable(syncData.available ?? false)
       }
     } catch {
+      setLoadFailed(true)
       setClients([])
     } finally {
       setLoading(false)
@@ -167,8 +171,12 @@ export default function ClientsPage() {
       ) : filtered.length === 0 ? (
         <div className="text-center py-20" style={{ color: 'var(--admin-text-muted)' }}>
           <Contact className="w-10 h-10 mx-auto mb-3 opacity-40" />
-          <p className="text-base font-medium mb-1" style={{ color: 'var(--admin-text-primary)' }}>{t('clients.noClients')}</p>
-          <p className="text-sm">{search ? t('clients.noResults') : t('clients.noClientsHint')}</p>
+          <p className="text-base font-medium mb-1" style={{ color: loadFailed ? 'var(--admin-danger)' : 'var(--admin-text-primary)' }}>
+            {loadFailed ? t('clients.loadError') : t('clients.noClients')}
+          </p>
+          <p className="text-sm">
+            {loadFailed ? t('clients.loadErrorHint') : (search ? t('clients.noResults') : t('clients.noClientsHint'))}
+          </p>
         </div>
       ) : (
         <div className="rounded-xl overflow-x-auto" style={{ border: '1px solid var(--admin-border)' }}>

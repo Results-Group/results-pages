@@ -264,7 +264,9 @@ export default function EditPage() {
   }
 
   async function handleDelete() {
-    if (!confirm(`למחוק את "${page?.title}"? פעולה זו בלתי הפיכה.`)) return
+    // This is a soft-delete — the API only purges with ?purge=1. Claiming it was
+    // irreversible made people hesitate over a safe, undoable action.
+    if (!confirm(`למחוק את "${page?.title}"? הדף יעבור לסל המיחזור וניתן לשחזר אותו.`)) return
     try {
       const res = await fetch(`/api/pages/${id}`, { method: 'DELETE' })
       if (!res.ok) { setError('שגיאה במחיקת הדף'); return }

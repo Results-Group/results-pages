@@ -406,9 +406,12 @@ export async function fetchDeadItems(r: DateRange) {
      FROM items i
      LEFT JOIN \`groups\` g ON i.grp = g.id
      WHERE i.sale_price > 0
-       AND i.name NOT IN (
-         SELECT DISTINCT name FROM paymentitm
-         WHERE date >= ? AND date < ? AND sum > 0
+       -- NOT EXISTS rather than NOT IN: if the subquery returns even one NULL
+       -- name, NOT IN is never true and the whole "items that did not sell"
+       -- panel silently renders empty instead of listing anything.
+       AND NOT EXISTS (
+         SELECT 1 FROM paymentitm p
+         WHERE p.name = i.name AND p.date >= ? AND p.date < ? AND p.sum > 0
        )
      ORDER BY i.sale_price DESC
      LIMIT 20`,

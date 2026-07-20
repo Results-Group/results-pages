@@ -116,6 +116,8 @@ const he = {
   'clients.syncMonday': 'סנכרן מ-Monday',
   'clients.syncing': 'מסנכרן...',
   'clients.newClient': 'לקוח חדש',
+  'clients.loadError': 'שגיאה בטעינת הלקוחות',
+  'clients.loadErrorHint': 'לא הצלחנו להתחבר לשרת. רעננו את הדף ונסו שוב.',
   'clients.noClients': 'אין לקוחות עדיין',
   'clients.noResults': 'לא נמצאו לקוחות תואמים',
   'clients.noClientsHint': 'לחץ "לקוח חדש" כדי להתחיל',
