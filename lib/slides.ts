@@ -53,6 +53,6 @@ export function buildCampaignSlides(opts: {
     }
   }
 
-  slides.push({ type: 'closing', title: 'תודה רבה!', subtitle: client })
+  slides.push({ type: 'closing', title: 'בהצלחה!', subtitle: client })
   return slides
 }

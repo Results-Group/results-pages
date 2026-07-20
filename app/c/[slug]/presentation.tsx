@@ -261,7 +261,9 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
 
         {/* Header */}
         <header className="pres-header">
-          <div className="brand">Results Digital</div>
+          {/* The campaign takes the prominent slot — it's what the client came
+              to review; the agency name sits on the opposite side. */}
+          <div className="brand">{clientName} — {campaignName}</div>
           <div className="header-right">
             {/* Global copy switcher — shown only when campaign has copies */}
             {globalCopies.length > 1 && (
@@ -291,7 +293,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
                 )}
               </div>
             )}
-            <div className="campaign-badge">{clientName} — {campaignName}</div>
+            <div className="campaign-badge">Results Digital</div>
           </div>
         </header>
 
@@ -360,10 +362,14 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
           </button>
         </div>
 
-        <footer className="pres-footer">
-          <a href="https://www.resultsgroup.co.il" target="_blank" rel="noopener noreferrer">www.resultsgroup.co.il</a>
-          <p>By Results Group</p>
-        </footer>
+        {/* The closing slide carries its own sign-off, so the global footer
+            would just repeat the same contact line underneath it. */}
+        {slides[activeSlide].type !== 'closing' && (
+          <footer className="pres-footer">
+            <a href="https://www.resultsgroup.co.il" target="_blank" rel="noopener noreferrer">www.resultsgroup.co.il</a>
+            <p>By Results Group</p>
+          </footer>
+        )}
 
         {/* Lightbox with pin annotations */}
         <AnimatePresence>
