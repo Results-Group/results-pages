@@ -400,7 +400,10 @@
   /* Everything centres on a phone — the narrow column reads far better stacked
      and symmetrical. The Results mark stays where it is in the top bar. */
   .campaign-pres .cover-body{flex:1;flex-direction:column-reverse;align-items:center;justify-content:center;gap:22px;padding:8px 0}
-  .campaign-pres .cover-left{align-items:center;text-align:center;width:100%}
+  /* flex:1 is inherited from the desktop two-column layout; stacked it made the
+     text block stretch to fill the slide, so its content sat at the top with a
+     large void beneath. Size it to its content and let the body centre it. */
+  .campaign-pres .cover-left{flex:0 0 auto;align-items:center;text-align:center;width:100%}
   /* Client logo is a supporting mark here, not the hero — keep it modest */
   .campaign-pres .cover-right{width:150px;height:118px;margin:0 auto;border-radius:12px}
   .campaign-pres .cover-client-logo{max-width:62%;max-height:62%}
