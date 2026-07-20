@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import sharp from 'sharp'
 import { getAssetPublicUrl } from '@/lib/campaigns'
 import { rateLimit } from '@/lib/rate-limit'
+import { getSessionFromRequest } from '@/lib/auth'
 
 export const runtime = 'nodejs'
 
@@ -23,6 +24,16 @@ export async function GET(
   const hasAllowedPrefix = filePath.startsWith('campaigns/') || filePath.startsWith('clients/')
   if (!filePath || !hasAllowedPrefix || filePath.includes('..')) {
     return new NextResponse('Not found', { status: 404 })
+  }
+
+  // Client logos live under clients/ and must stay public — the client-facing
+  // deck renders them. The positioning PDF sits under the same prefix at a
+  // guessable path (clients/<uuid>/positioning.pdf) but is a confidential brand
+  // document, so it requires a staff session. 404 rather than 401 so the
+  // response doesn't confirm the file exists.
+  if (/(^|\/)positioning\.[a-z0-9]+$/i.test(filePath)) {
+    const session = await getSessionFromRequest(request)
+    if (!session) return new NextResponse('Not found', { status: 404 })
   }
 
   const forceJpeg = request.nextUrl.searchParams.get('format') === 'jpeg'

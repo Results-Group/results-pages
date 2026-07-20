@@ -12,6 +12,14 @@ export interface SessionUser {
   role: UserRole
   name: string
   isOwner?: boolean
+  /**
+   * Restricts a token to one surface. The Pizza House dashboard mints sessions
+   * with the same HMAC payload as platform logins, so without this a client
+   * holding the shared restaurant password could present it as `rp_session` and
+   * pass the /admin gate, and any platform user could present `rp_session` as
+   * `ph_session` to bypass the admin-only rule on that client's financial data.
+   */
+  scope?: 'pizza-house'
   /** Unix seconds. Tokens without a valid, unexpired `exp` are rejected. */
   exp?: number
 }
@@ -94,7 +102,12 @@ export async function getSession(): Promise<SessionUser | null> {
   const cookieStore = await cookies()
   const token = cookieStore.get(SESSION_COOKIE)?.value
   if (!token) return null
-  return decodeSession(token)
+  return platformSession(await decodeSession(token))
+}
+
+/** A surface-scoped token is never a valid platform session. */
+function platformSession(session: SessionUser | null): SessionUser | null {
+  return session && !session.scope ? session : null
 }
 
 export async function isAuthenticated(): Promise<boolean> {
@@ -109,7 +122,7 @@ export async function destroySession(): Promise<void> {
 export async function getSessionFromRequest(request: NextRequest): Promise<SessionUser | null> {
   const token = request.cookies.get(SESSION_COOKIE)?.value
   if (!token) return null
-  return decodeSession(token)
+  return platformSession(await decodeSession(token))
 }
 
 export async function requireAuth(request: NextRequest): Promise<NextResponse | null> {

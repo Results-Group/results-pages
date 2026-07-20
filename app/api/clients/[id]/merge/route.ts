@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionFromRequest, requireWorkspacePermission } from '@/lib/auth'
+import { getSessionFromRequest, requireResourcePermission } from '@/lib/auth'
 import { getClientById, deleteClient } from '@/lib/clients'
 import { supabase } from '@/lib/supabase'
 import { logAudit } from '@/lib/audit'
@@ -31,12 +31,13 @@ export async function POST(req: NextRequest, { params }: Ctx) {
   if (!source) return NextResponse.json({ error: 'לקוח מקור לא נמצא' }, { status: 404 })
   if (!target) return NextResponse.json({ error: 'לקוח יעד לא נמצא' }, { status: 404 })
 
-  // Require edit permission on both clients' workspaces
+  // Require edit permission on both clients. requireResourcePermission (not
+  // requireWorkspacePermission) so that clients with no workspace are covered
+  // too — the previous `if (wsId)` guard skipped the check entirely for orphan
+  // clients, letting any signed-in user, including a viewer, delete one.
   for (const wsId of [source.workspace_id, target.workspace_id]) {
-    if (wsId) {
-      const permErr = await requireWorkspacePermission(req, wsId, 'edit')
-      if (permErr) return permErr
-    }
+    const permErr = await requireResourcePermission(req, wsId, 'edit')
+    if (permErr) return permErr
   }
 
   try {

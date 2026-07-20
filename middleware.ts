@@ -10,7 +10,9 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL('/admin/login', req.url))
     }
     const session = await verifySessionToken(token)
-    if (!session) {
+    // A surface-scoped token (e.g. the Pizza House dashboard password) is not a
+    // platform login and must never open the admin panel.
+    if (!session || session.scope) {
       const res = NextResponse.redirect(new URL('/admin/login', req.url))
       res.cookies.delete('rp_session')
       return res

@@ -24,6 +24,9 @@ export async function POST(req: NextRequest) {
     email: 'pizza-house@client',
     role: 'viewer',
     name: 'Pizza House',
+    // Marks the token as valid only for this dashboard. Without it the shared
+    // restaurant password mints a token that also passes the /admin gate.
+    scope: 'pizza-house',
   }
 
   const cookie = await createSessionCookie(phUser, MAX_AGE)

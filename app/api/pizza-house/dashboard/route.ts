@@ -28,8 +28,14 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
 async function isAuthorized(req: NextRequest): Promise<boolean> {
   // The dedicated Pizza House session (from the shared dashboard password).
+  // Must actually be a Pizza House token: both cookies share a payload format,
+  // so without the scope check any platform user could paste their own session
+  // in as ph_session and skip the admin-only rule below.
   const ph = req.cookies.get('ph_session')?.value
-  if (ph && (await verifySessionToken(ph))) return true
+  if (ph) {
+    const phSession = await verifySessionToken(ph)
+    if (phSession?.scope === 'pizza-house') return true
+  }
   // Platform users may view it too, but only global admins/owners — a viewer
   // or editor from an unrelated workspace must not reach this client's
   // financial + customer PII.
