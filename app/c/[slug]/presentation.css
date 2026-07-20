@@ -131,17 +131,18 @@
 @keyframes rp-fade-scale{from{opacity:0;transform:scale(0.93)}to{opacity:1;transform:none}}
 @keyframes rp-wipe{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
 
-.campaign-pres .rp-anim{animation-duration:0.6s;animation-timing-function:cubic-bezier(0.22,1,0.36,1);animation-fill-mode:both}
+/* Deliberately NO animation-fill-mode and NO delay. `both` holds the element at
+   the keyframe's opacity:0 until the animation actually starts, so on a phone
+   with animations paused (backgrounded tab, battery saver) content stayed
+   invisible — measured 4/4 mockups at opacity 0. Without fill-mode the resting
+   style (visible) applies whenever the animation isn't running, which is the
+   whole point. Staggered delays are gone for the same reason: during a delay,
+   fill-mode-less elements would flash visible then restart from transparent. */
+.campaign-pres .rp-anim{animation-duration:0.6s;animation-timing-function:cubic-bezier(0.22,1,0.36,1)}
 .campaign-pres .rp-up{animation-name:rp-fade-up}
 .campaign-pres .rp-in{animation-name:rp-fade-in}
 .campaign-pres .rp-scale{animation-name:rp-fade-scale}
 .campaign-pres .rp-wipe{animation-name:rp-wipe;transform-origin:left}
-.campaign-pres .rp-d1{animation-delay:0.05s}
-.campaign-pres .rp-d2{animation-delay:0.15s}
-.campaign-pres .rp-d3{animation-delay:0.25s}
-.campaign-pres .rp-d4{animation-delay:0.38s}
-.campaign-pres .rp-d5{animation-delay:0.5s}
-.campaign-pres .rp-d6{animation-delay:0.62s}
 
 @media (prefers-reduced-motion: reduce){
   .campaign-pres .rp-anim{animation:none}
