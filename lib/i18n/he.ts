@@ -373,6 +373,7 @@ const he = {
   'public.errorTryAgain': 'שגיאה, נסו שוב',
   'public.checking': 'בודק...',
   'public.enter': 'כניסה',
+  'public.partOf': 'מתוך',
   'public.allSlides': 'כל השקפים',
   'public.copyVersion': 'נוסח',
   'public.copyLabel': 'בחרו נוסח לתצוגה',

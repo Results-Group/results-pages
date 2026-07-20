@@ -14,6 +14,9 @@ export interface SlideData {
   assets?: CampaignAsset[]
   clientLogoUrl?: string | null
   clientName?: string
+  /** Set only when a section spans several screens: which part this is, of how many. */
+  part?: number
+  partsTotal?: number
 }
 
 /** Creatives shown on one screen before the section pages onto the next. */
@@ -47,11 +50,15 @@ export function buildCampaignSlides(opts: {
       // or four on one screen forced the reader to scroll past the fold, so the
       // section is paged into consecutive screens instead.
       const perScreen = section.mockup_type === 'carousel' ? assets.length : CREATIVES_PER_SCREEN
+      const partsTotal = Math.ceil(assets.length / perScreen)
       for (let i = 0; i < assets.length; i += perScreen) {
         slides.push({
           type: 'creatives',
           key: section.id,
           title: section.title,
+          // Numbered only when the section actually spans several screens, so a
+          // one-screen section stays clean.
+          ...(partsTotal > 1 ? { part: i / perScreen + 1, partsTotal } : {}),
           content: section.description,
           // Only forward copies to slides where the editor enabled them
           copies: section.useCopies && copies?.length ? copies : [],

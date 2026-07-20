@@ -129,6 +129,16 @@
   .campaign-pres .slide-enter{animation:none}
 }
 
+/* Part badge on a section that spans several screens */
+.campaign-pres .slide-part{
+  margin-inline-start:12px;padding:3px 11px;border-radius:99px;
+  font-size:0.62em;font-weight:800;letter-spacing:0.04em;
+  font-variant-numeric:tabular-nums;
+  background:rgba(var(--brand-rgb),0.12);
+  border:1px solid rgba(var(--brand-rgb),0.28);
+  color:var(--brand-cyan);
+}
+
 /* ── Slide index ──
    Opened from the counter. Jumping to a specific slide by hitting a 15px sliver
    isn't practical at any screen size; this is the real navigation. */

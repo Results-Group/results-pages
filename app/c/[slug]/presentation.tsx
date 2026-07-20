@@ -249,7 +249,12 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
     if (slide.type === 'concept') return t('public.concept')
     if (slide.type === 'closing') return t('public.closing')
     if (slide.type === 'divider') return slide.title || `${t('public.divider')} ${i}`
-    return slide.title || `${t('public.section')} ${i}`
+    const base = slide.title || `${t('public.section')} ${i}`
+    // A section spanning several screens repeats its name, so say which part
+    // this is — otherwise the index lists the same title six times over.
+    return slide.partsTotal
+      ? `${base} · ${slide.part} ${t('public.partOf')} ${slide.partsTotal}`
+      : base
   }
 
   const parallaxX = (mousePos.x - 0.5) * -20
@@ -790,6 +795,9 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
       {slide.title && (
         <h2 className="slide-title rp-anim rp-in rp-d1">
           {slide.title}
+          {slide.partsTotal && (
+            <span className="slide-part">{slide.part}/{slide.partsTotal}</span>
+          )}
         </h2>
       )}
       {slide.content && (

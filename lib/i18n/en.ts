@@ -375,6 +375,7 @@ const en: Record<TranslationKey, string> = {
   'public.errorTryAgain': 'Error, please try again',
   'public.checking': 'Checking...',
   'public.enter': 'Enter',
+  'public.partOf': 'of',
   'public.allSlides': 'All slides',
   'public.copyVersion': 'Version',
   'public.copyLabel': 'Choose a version',
