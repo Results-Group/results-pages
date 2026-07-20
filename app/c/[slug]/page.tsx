@@ -130,7 +130,10 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
       campaignName={campaign.campaign_name}
       brandColor={brandColor}
       campaignId={campaign.id}
-      feedbackEnabled
+      // Client-facing approval/commenting is intentionally off: the deck is a
+      // presentation, and feedback is collected outside it. Flip to `true` to
+      // bring back the approval bar, progress counter and pinned comments.
+      feedbackEnabled={false}
     />
   )
 }

@@ -30,7 +30,9 @@ export function getVideoThumbnail(url: string): string | null {
   const { platform, videoId } = parseVideoUrl(url)
   if (!videoId) return null
   if (platform === 'youtube') return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
-  if (/drive\.google\.com/.test(url)) return `https://drive.google.com/thumbnail?id=${videoId}&sz=w1280`
+  // Proxied through our own origin: mobile browsers block the direct Drive
+  // request (tracking prevention), which left the card blank on phones.
+  if (/drive\.google\.com/.test(url)) return `/api/video-thumb?id=${videoId}`
   return null
 }
 
