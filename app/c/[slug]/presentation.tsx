@@ -669,7 +669,7 @@ function CoverSlide({ slide }: { slide: SlideData }) {
           </motion.h1>
           <motion.div className="cover-meta-line" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5, duration: 0.5 }}>
             <span className="cover-client-name">{slide.title}</span>
-            <span className="cover-meta-sep">·</span>
+            <span className="cover-meta-sep" aria-hidden />
             <span className="cover-by">By Results Group</span>
           </motion.div>
           <motion.div className="cover-h-rule" initial={{ scaleX: 0, originX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.65, duration: 0.5 }} />
