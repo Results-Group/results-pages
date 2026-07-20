@@ -8,7 +8,10 @@ interface Props {
   onChange: (patch: Partial<ReportBlock>) => void
 }
 
-const fieldStyle = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', color: '#fff' }
+// colorScheme: this panel is dark regardless of the admin theme, so native
+// dropdowns must be dark too — otherwise the OS paints a white popup under the
+// inherited white text and the options are invisible.
+const fieldStyle = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', color: '#fff', colorScheme: 'dark' as const }
 const labelStyle = { color: 'rgba(255,255,255,0.35)', fontSize: '10px', fontWeight: 700 as const, marginBottom: 4 }
 
 function SmallInput({ value, onChange, placeholder, className }: { value: string; onChange: (v: string) => void; placeholder?: string; className?: string }) {

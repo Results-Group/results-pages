@@ -10,6 +10,10 @@ const fieldStyle: React.CSSProperties = {
   background: 'rgba(255,255,255,0.04)',
   border: '1px solid rgba(255,255,255,0.08)',
   color: '#fff',
+  // This panel is dark regardless of the admin theme, so the native dropdown
+  // (and date picker) must be dark too — otherwise the OS paints a white popup
+  // under the inherited white text.
+  colorScheme: 'dark',
 }
 
 function SectionDivider({ label }: { label?: string }) {

@@ -188,6 +188,17 @@ select {
   color-scheme: var(--color-scheme);
 }
 
+/* The dropdown list is painted by the OS and inherits the control's colour.
+   Several surfaces (the campaign editor, report blocks) are always dark and set
+   an inline color:#fff, so in the light theme the options rendered white-on-white
+   and were invisible. Pin both colours explicitly so options are always legible,
+   whichever theme is active. */
+select option,
+select optgroup {
+  background-color: var(--admin-bg-elevated);
+  color: var(--admin-text-primary);
+}
+
 input[type="date"] {
   color-scheme: var(--color-scheme);
 }
