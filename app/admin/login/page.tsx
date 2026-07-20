@@ -50,10 +50,10 @@ export default function LoginPage() {
           </div>
 
           <h1 className="text-lg font-semibold text-center mb-1" style={{ color: 'var(--admin-text-primary)' }}>
-            Results Pages
+            Results Creative
           </h1>
           <p className="text-center text-xs mb-6" style={{ color: 'var(--admin-text-muted)' }}>
-            ניהול דפים
+            ניהול קמפיינים ודפים
           </p>
 
           <div className="relative mb-4">

@@ -47,13 +47,13 @@ function shell(title: string, body: string): string {
   <div style="max-width:480px;margin:0 auto;background:#14181a;border:1px solid #23292c;border-radius:16px;padding:32px;color:#e8eaed">
     <h1 style="font-size:18px;margin:0 0 16px;color:#fff">${title}</h1>
     ${body}
-    <p style="font-size:12px;color:#7a8288;margin-top:28px">Results Pages</p>
+    <p style="font-size:12px;color:#7a8288;margin-top:28px">Results Creative</p>
   </div></body></html>`
 }
 
 export function passwordResetEmail(link: string): { subject: string; html: string } {
   return {
-    subject: 'איפוס סיסמה — Results Pages',
+    subject: 'איפוס סיסמה — Results Creative',
     html: shell('איפוס סיסמה', `
       <p style="font-size:14px;line-height:1.6;color:#c4c9cd">קיבלנו בקשה לאיפוס הסיסמה שלך. לחצו על הכפתור כדי להגדיר סיסמה חדשה. הקישור תקף לשעה אחת.</p>
       <p style="margin:24px 0"><a href="${link}" style="display:inline-block;background:#40e1d3;color:#062024;text-decoration:none;font-weight:600;font-size:14px;padding:12px 20px;border-radius:10px">איפוס סיסמה</a></p>

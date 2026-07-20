@@ -204,7 +204,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="Results" className="h-7 w-auto" />
           <div className="flex-1 min-w-0">
-            <h1 className="text-sm font-semibold tracking-tight" style={{ color: 'var(--sidebar-text)' }}>Results Pages</h1>
+            <h1 className="text-sm font-semibold tracking-tight" style={{ color: 'var(--sidebar-text)' }}>Results Creative</h1>
             <p className="text-[11px]" style={{ color: 'var(--sidebar-text-muted)' }}>{t('layout.managePages')}</p>
           </div>
           <button

@@ -3,22 +3,22 @@ import './globals.css'
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'),
-  title: 'Results Pages',
-  description: 'ניהול דפים - Results Group',
+  title: 'Results Creative',
+  description: 'ניהול קמפיינים ודפי נחיתה - Results Group',
   icons: {
     icon: '/favicon.ico',
     apple: '/apple-touch-icon.png',
   },
   openGraph: {
-    title: 'Results Pages',
-    description: 'ניהול דפים - Results Group',
+    title: 'Results Creative',
+    description: 'ניהול קמפיינים ודפי נחיתה - Results Group',
     images: [{ url: '/og-image.png', width: 1024, height: 858 }],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Results Pages',
-    description: 'ניהול דפים - Results Group',
+    title: 'Results Creative',
+    description: 'ניהול קמפיינים ודפי נחיתה - Results Group',
     images: ['/og-image.png'],
   },
 }
