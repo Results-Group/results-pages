@@ -483,8 +483,8 @@ export default function PizzaHouseDashboard() {
                         <YAxis yAxisId="o" orientation="left" tick={{ fill: pal.textMuted, fontSize: 10, ...FONT }} axisLine={false} tickLine={false} />
                         <Tooltip contentStyle={tooltipStyle} itemStyle={tipItem} labelStyle={tipLabel} cursor={{ fill: pal.bgElevated }} formatter={(v, name) => name === 'הזמנות' ? num(v as number) : (v as number) + ' דקות'} />
                         <Legend wrapperStyle={FONT} formatter={legendFmt(pal)} />
-                        <Bar yAxisId="o" dataKey="orders" name="הזמנות" fill={pal.bgElevated} radius={[6, 6, 0, 0]} />
-                        <Area yAxisId="m" dataKey="avg_minutes" name="דקות טיפול" type="monotone" stroke={pal.cyan} strokeWidth={2} fill="url(#gradCyanArea2)" dot={{ fill: pal.cyan, r: 3, strokeWidth: 0 }} />
+                        <Bar isAnimationActive={false} yAxisId="o" dataKey="orders" name="הזמנות" fill={pal.bgElevated} radius={[6, 6, 0, 0]} />
+                        <Area isAnimationActive={false} yAxisId="m" dataKey="avg_minutes" name="דקות טיפול" type="monotone" stroke={pal.cyan} strokeWidth={2} fill="url(#gradCyanArea2)" dot={{ fill: pal.cyan, r: 3, strokeWidth: 0 }} />
                       </ComposedChart>
                     </ResponsiveContainer></div>
                   </Card>
@@ -574,8 +574,8 @@ export default function PizzaHouseDashboard() {
                   <YAxis yAxisId="ord" orientation="left" tick={{ fill: pal.cyan, fontSize: 11, ...FONT }} axisLine={false} tickLine={false} width={32} />
                   <Tooltip contentStyle={tooltipStyle} itemStyle={tipItem} labelStyle={tipLabel} cursor={{ fill: pal.bgElevated }} formatter={(v, name) => (name === 'הכנסות' ? money(v as number) : num(v as number))} />
                   <Legend wrapperStyle={FONT} formatter={legendFmt(pal)} />
-                  <Bar yAxisId="rev" dataKey="revenue" name="הכנסות" fill="url(#gradYellow)" radius={[6, 6, 0, 0]} />
-                  <Area yAxisId="ord" dataKey="orders" name="הזמנות" type="monotone" stroke={pal.cyan} strokeWidth={2.5} fill="url(#gradCyanArea)" dot={false} activeDot={{ r: 5, fill: pal.cyan, strokeWidth: 0 }} />
+                  <Bar isAnimationActive={false} yAxisId="rev" dataKey="revenue" name="הכנסות" fill="url(#gradYellow)" radius={[6, 6, 0, 0]} />
+                  <Area isAnimationActive={false} yAxisId="ord" dataKey="orders" name="הזמנות" type="monotone" stroke={pal.cyan} strokeWidth={2.5} fill="url(#gradCyanArea)" dot={false} activeDot={{ r: 5, fill: pal.cyan, strokeWidth: 0 }} />
                 </ComposedChart>
               </ResponsiveContainer></div>
             </Card>
@@ -637,8 +637,8 @@ export default function PizzaHouseDashboard() {
                     <YAxis yAxisId="a" orientation="left" tick={{ fill: pal.cyan, fontSize: 11, ...FONT }} tickFormatter={(v: number) => '₪' + v} axisLine={false} tickLine={false} width={40} />
                     <Tooltip contentStyle={tooltipStyle} itemStyle={tipItem} labelStyle={tipLabel} cursor={{ fill: pal.bgElevated }} formatter={(v, name) => (name === 'סל ממוצע' ? money(v as number) : num(v as number))} />
                     <Legend wrapperStyle={FONT} formatter={legendFmt(pal)} />
-                    <Bar yAxisId="o" dataKey="orders" name="הזמנות" fill="url(#gradYellowWk)" radius={[6, 6, 0, 0]} />
-                    <Area yAxisId="a" dataKey="avg_order" name="סל ממוצע" type="monotone" stroke={pal.cyan} strokeWidth={2.5} fill="url(#gradCyanWk)" dot={false} activeDot={{ r: 5, fill: pal.cyan, strokeWidth: 0 }} />
+                    <Bar isAnimationActive={false} yAxisId="o" dataKey="orders" name="הזמנות" fill="url(#gradYellowWk)" radius={[6, 6, 0, 0]} />
+                    <Area isAnimationActive={false} yAxisId="a" dataKey="avg_order" name="סל ממוצע" type="monotone" stroke={pal.cyan} strokeWidth={2.5} fill="url(#gradCyanWk)" dot={false} activeDot={{ r: 5, fill: pal.cyan, strokeWidth: 0 }} />
                   </ComposedChart>
                 </ResponsiveContainer></div>
               </Card>
@@ -654,7 +654,7 @@ export default function PizzaHouseDashboard() {
                 <CardTitle pal={pal} hint="מס׳ לקוחות">חדשים מול חוזרים</CardTitle>
                 <div className="h-[180px] sm:h-[220px]"><ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={data.customers.newVsReturning.map(x => ({ name: x.kind === 'new' ? 'חדשים' : 'חוזרים', value: x.customers }))} dataKey="value" innerRadius={40} outerRadius={65} paddingAngle={3}>
+                    <Pie isAnimationActive={false} data={data.customers.newVsReturning.map(x => ({ name: x.kind === 'new' ? 'חדשים' : 'חוזרים', value: x.customers }))} dataKey="value" innerRadius={40} outerRadius={65} paddingAngle={3}>
                       {data.customers.newVsReturning.map((_, i) => <Cell key={i} fill={pal.chartColors[i % 2]} stroke="none" />)}
                     </Pie>
                     <Tooltip contentStyle={tooltipStyle} itemStyle={tipItem} labelStyle={tipLabel} />
@@ -676,7 +676,7 @@ export default function PizzaHouseDashboard() {
                     <XAxis dataKey="name" tick={{ fill: pal.textSecondary, fontSize: 11, ...FONT }} axisLine={false} tickLine={false} reversed />
                     <YAxis tick={{ fill: pal.textSecondary, fontSize: 11, ...FONT }} orientation="right" axisLine={false} tickLine={false} width={28} />
                     <Tooltip contentStyle={tooltipStyle} itemStyle={tipItem} labelStyle={tipLabel} cursor={{ fill: pal.bgElevated }} />
-                    <Bar dataKey="customers" name="לקוחות" fill="url(#gradInfo)" radius={[6, 6, 0, 0]} />
+                    <Bar isAnimationActive={false} dataKey="customers" name="לקוחות" fill="url(#gradInfo)" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer></div>
               </Card>
@@ -791,7 +791,7 @@ export default function PizzaHouseDashboard() {
                   <CardTitle pal={pal} hint="₪ הכנסות">הכנסות לפי קטגוריה</CardTitle>
                   <div className="h-[190px] sm:h-[230px]"><ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={data.products.categories.map(c => ({ name: c.category, value: Number(c.revenue) }))} dataKey="value" innerRadius={38} outerRadius={62} paddingAngle={2}>
+                      <Pie isAnimationActive={false} data={data.products.categories.map(c => ({ name: c.category, value: Number(c.revenue) }))} dataKey="value" innerRadius={38} outerRadius={62} paddingAngle={2}>
                         {data.products.categories.map((_, i) => <Cell key={i} fill={pal.chartColors[i % pal.chartColors.length]} stroke="none" />)}
                       </Pie>
                       <Tooltip contentStyle={tooltipStyle} itemStyle={tipItem} labelStyle={tipLabel} formatter={v => money(v as number)} />
@@ -873,7 +873,7 @@ export default function PizzaHouseDashboard() {
                 <CardTitle pal={pal} hint="₪ סכום">אמצעי תשלום</CardTitle>
                 <div className="h-[190px] sm:h-[230px]"><ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={data.payments.methods.map(m => ({ name: m.label, value: Number(m.total) }))} dataKey="value" innerRadius={38} outerRadius={62} paddingAngle={2}>
+                    <Pie isAnimationActive={false} data={data.payments.methods.map(m => ({ name: m.label, value: Number(m.total) }))} dataKey="value" innerRadius={38} outerRadius={62} paddingAngle={2}>
                       {data.payments.methods.map((_, i) => <Cell key={i} fill={pal.chartColors[i % pal.chartColors.length]} stroke="none" />)}
                     </Pie>
                     <Tooltip contentStyle={tooltipStyle} itemStyle={tipItem} labelStyle={tipLabel} formatter={v => money(v as number)} />

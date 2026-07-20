@@ -32,7 +32,9 @@ export default function CarouselFeed({
   function goTo(i: number) {
     const next = Math.max(0, Math.min(count - 1, i))
     setIndex(next)
-    trackRef.current?.children[next]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+    // 'auto', not 'smooth': smooth scrolling is animation-frame driven, so with
+    // frames paused the dots and arrows advanced while the track never moved.
+    trackRef.current?.children[next]?.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' })
   }
 
   // Keep the dots in sync when the user swipes natively.

@@ -429,19 +429,14 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
         {/* Lightbox with pin annotations */}
         <AnimatePresence>
           {lightboxAsset && (
-            <motion.div
+            <div
               className="lightbox-overlay"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
               onClick={() => setLightboxAsset(null)}
             >
               <motion.div
                 className="lightbox-content"
-                initial={{ scale: 0.85, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.85, opacity: 0 }}
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 onClick={e => e.stopPropagation()}
               >
@@ -458,7 +453,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
                 {lightboxAsset.caption && <p className="lightbox-caption">{lightboxAsset.caption}</p>}
                 <button className="lightbox-close" onClick={() => setLightboxAsset(null)}>✕</button>
               </motion.div>
-            </motion.div>
+            </div>
           )}
         </AnimatePresence>
       </div>

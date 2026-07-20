@@ -303,7 +303,7 @@ function Chart({ block }: { block: ReportBlock }) {
         {block.title && <div className="rpt-chart-title">{block.title}</div>}
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
-            <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={110}>
+            <Pie isAnimationActive={false} data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={110}>
               {pieData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
             </Pie>
             <Tooltip contentStyle={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#fff' }} />
@@ -334,8 +334,8 @@ function Chart({ block }: { block: ReportBlock }) {
           <Legend wrapperStyle={{ color: '#aaa', fontSize: 12 }} />
           {datasets.map((ds, i) => (
             block.chartType === 'bar'
-              ? <Bar key={ds.label} dataKey={ds.label} fill={ds.color || CHART_COLORS[i % CHART_COLORS.length]} radius={[4, 4, 0, 0]} />
-              : <Line key={ds.label} type="monotone" dataKey={ds.label} stroke={ds.color || CHART_COLORS[i % CHART_COLORS.length]} strokeWidth={2} dot={false} />
+              ? <Bar isAnimationActive={false} key={ds.label} dataKey={ds.label} fill={ds.color || CHART_COLORS[i % CHART_COLORS.length]} radius={[4, 4, 0, 0]} />
+              : <Line isAnimationActive={false} key={ds.label} type="monotone" dataKey={ds.label} stroke={ds.color || CHART_COLORS[i % CHART_COLORS.length]} strokeWidth={2} dot={false} />
           ))}
         </ChartComponent>
       </ResponsiveContainer>

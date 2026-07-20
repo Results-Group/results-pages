@@ -133,8 +133,13 @@
 .report-slide-num { color: var(--text-muted); font-size: 0.95rem; font-weight: 600; margin: 0 12px; }
 
 /* Tab content */
-.report-tab { animation: rptSlideIn 0.5s ease forwards; }
-@keyframes rptSlideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+/* Transform only — never opacity. This wraps the ENTIRE tab (title, subtitle and
+   every block) and remounts on each tab/language change. Animating from
+   opacity:0 meant a frozen animation frame — a backgrounded tab, battery saver —
+   left the whole report blank. */
+.report-tab { animation: rptSlideIn 0.5s ease; }
+@keyframes rptSlideIn { from { transform: translateX(-20px); } to { transform: translateX(0); } }
+@media (prefers-reduced-motion: reduce) { .report-tab { animation: none; } }
 .report-tab-title { font-size: 2.4rem; font-weight: 900; margin-bottom: 12px; line-height: 1.2; }
 .report-tab-title span { color: var(--brand-accent); }
 .report-tab-subtitle { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 36px; line-height: 1.6; }
