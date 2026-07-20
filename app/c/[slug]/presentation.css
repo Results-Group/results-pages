@@ -196,26 +196,44 @@
 }
 .campaign-pres .cover-url:hover{color:rgba(255,255,255,0.6)}
 
-/* ── Closing Slide v2 ── */
+/* ── Closing Slide ──
+   Shares the cover's language (dark ground, gold, inset frame) but resolves it
+   as a centred sign-off, so it reads as a conclusion rather than a repeat. */
 .campaign-pres .closing-slide-v2{
-  position:relative;min-height:75vh;display:flex;flex-direction:column;
-  padding:28px 40px 24px;background:transparent;overflow:hidden;
-  direction:ltr;text-align:left;
+  --cover-gold:#E8C15A;
+  position:relative;min-height:78vh;display:flex;align-items:center;justify-content:center;
+  padding:56px;overflow:hidden;border-radius:18px;
+  background:
+    radial-gradient(60% 70% at 50% 42%, rgba(232,193,90,0.09) 0%, rgba(232,193,90,0) 60%),
+    linear-gradient(180deg,#101116 0%,#0A0B0D 78%);
+  box-shadow:0 40px 120px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.03);
 }
-.campaign-pres .closing-client{font-size:1.1rem;color:rgba(255,255,255,0.5);margin-bottom:20px;margin-top:-8px}
-.campaign-pres .closing-contact a{
-  font-size:0.85rem;color:rgba(64,225,211,0.7);text-decoration:none;letter-spacing:0.02em;
-  margin-bottom:20px;display:inline-block;transition:color 0.2s;
+.campaign-pres .closing-glow-center{
+  position:absolute;top:44%;left:50%;transform:translate(-50%,-50%);
+  width:620px;height:620px;pointer-events:none;
+  background:radial-gradient(circle, rgba(232,193,90,0.07) 0%, transparent 62%);
 }
-.campaign-pres .closing-contact a:hover{color:#40e1d3}
-.campaign-pres .closing-brand-right{
-  flex-direction:column;align-items:center;justify-content:center;
-  background:rgba(243,213,109,0.03);border-color:rgba(243,213,109,0.08) !important;
-  gap:12px;
+.campaign-pres .closing-stack{
+  position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;
 }
-.campaign-pres .closing-brand-icon{opacity:0.85}
-.campaign-pres .closing-brand-name{font-size:1.8rem;font-weight:900;color:#fff;letter-spacing:-0.02em}
-.campaign-pres .closing-brand-tagline{font-size:0.75rem;color:rgba(255,255,255,0.35);letter-spacing:0.05em;text-transform:uppercase;font-weight:600}
+.campaign-pres .closing-logo{height:64px;width:auto;object-fit:contain;margin-bottom:36px}
+.campaign-pres .closing-headline{
+  font-size:clamp(2.6rem,5.6vw,4.6rem);font-weight:900;line-height:1.02;
+  color:#fff;letter-spacing:-0.025em;margin:0;text-wrap:balance;
+}
+.campaign-pres .closing-client{
+  font-size:1.15rem;color:rgba(255,255,255,0.55);font-weight:400;margin:18px 0 0;letter-spacing:0.01em;
+}
+/* Centred + short, versus the cover's full-width left-anchored rule */
+.campaign-pres .closing-rule{
+  width:120px;height:1px;margin:34px 0 26px;
+  background:linear-gradient(90deg,transparent,var(--cover-gold),transparent);
+}
+.campaign-pres .closing-url{
+  font-size:0.9rem;color:rgba(255,255,255,0.45);text-decoration:none;
+  letter-spacing:0.14em;transition:color 0.2s;
+}
+.campaign-pres .closing-url:hover{color:var(--cover-gold)}
 
 /* Legacy cover slide — keep for safety (old data may reference it) */
 .campaign-pres .cover-slide{text-align:center;padding:80px 20px 60px;position:relative;min-height:75vh;display:flex;flex-direction:column;align-items:center;justify-content:center}

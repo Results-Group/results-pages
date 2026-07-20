@@ -195,7 +195,7 @@ export default function SlideCanvas({
         {hasCopies && activeCopy !== undefined && (
           <div className="rounded-xl px-4 py-3 mb-6" style={{ background: 'rgba(64,225,211,0.04)', border: '1px solid rgba(64,225,211,0.12)' }}>
             <div className="flex items-center gap-3 mb-2">
-              <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'rgba(64,225,211,0.6)' }}>קופי פעיל</span>
+              <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'rgba(64,225,211,0.6)' }}>טקסט פעיל</span>
               <div className="flex gap-1">
                 {copies.map((_, i) => (
                   <button

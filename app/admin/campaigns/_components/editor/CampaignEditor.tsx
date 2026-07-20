@@ -444,7 +444,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
   /** Generate AI copy suggestions for a slide, grounded in the client's positioning. */
   const generateCopy = useCallback(async (section: EditorSection): Promise<{ captions: string[]; titles: string[]; grounded: boolean } | null> => {
     const id = await ensureCampaignExists()
-    if (!id) { toast('יש למלא שם לקוח ושם קמפיין לפני יצירת קופי', 'error'); return null }
+    if (!id) { toast('יש למלא שם לקוח ושם קמפיין לפני יצירת טקסט', 'error'); return null }
     try {
       const res = await fetch(`/api/campaigns/${id}/generate-copy`, {
         method: 'POST',
@@ -453,10 +453,10 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
       })
       if (!res.ok) { const b = await res.json().catch(() => ({})); throw new Error(b?.error || `HTTP ${res.status}`) }
       const data = await res.json()
-      if (!data.grounded) toast('ללקוח אין מסמך מיצוב — הקופי נוצר ללא ביסוס. הוסף PDF מיצוב בעמוד הלקוח.', 'info')
+      if (!data.grounded) toast('ללקוח אין מסמך מיצוב — הטקסט נוצר ללא ביסוס. הוסף PDF מיצוב בעמוד הלקוח.', 'info')
       return { captions: Array.isArray(data.captions) ? data.captions : [], titles: Array.isArray(data.titles) ? data.titles : [], grounded: !!data.grounded }
     } catch (err) {
-      toast(`שגיאה ביצירת קופי${err instanceof Error && err.message ? ` — ${err.message}` : ''}`, 'error')
+      toast(`שגיאה ביצירת טקסט${err instanceof Error && err.message ? ` — ${err.message}` : ''}`, 'error')
       return null
     }
   }, [ensureCampaignExists, toast])

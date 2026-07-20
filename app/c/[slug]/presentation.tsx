@@ -778,65 +778,67 @@ function CreativesSlide({ slide, activeCopyIdx, onAssetClick, lang = 'he' }: {
   )
 }
 
+/**
+ * Closing slide — same brand language as the cover (dark ground, gold accents,
+ * inset frame, Ping) but a deliberately different composition: a centred
+ * sign-off instead of the cover's asymmetric two-column. It doesn't repeat the
+ * cover's badge pill, corner brackets, partner row or client-logo panel.
+ */
 function ClosingSlide({ slide }: { slide: SlideData }) {
   return (
     <div className="closing-slide-v2">
-      {/* Corner decorations */}
-      <div className="cover-corner tl" />
-      <div className="cover-corner tr" />
-      <div className="cover-corner bl" />
-      <div className="cover-corner br" />
+      <div className="cover-frame" aria-hidden />
+      <div className="closing-glow-center" aria-hidden />
 
-      {/* Top bar */}
-      <motion.div className="cover-top-bar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05, duration: 0.5 }}>
-        <ResultsLogo />
-        <div className="cover-badge-pill">Thank You</div>
-      </motion.div>
+      <div className="closing-stack">
+        <motion.img
+          src="/logo.png"
+          alt="Results"
+          className="closing-logo"
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.6 }}
+        />
 
-      {/* Main content */}
-      <div className="cover-body">
-        {/* Left */}
-        <div className="cover-left">
-          <motion.div className="cover-eyebrow" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15, duration: 0.5 }}>
-            Results Digital
-          </motion.div>
-          <motion.h1 className="cover-headline" initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25, duration: 0.6 }}>
-            {slide.title}
-          </motion.h1>
-          <motion.p className="closing-client" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.5 }}>
+        <motion.h1
+          className="closing-headline"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.6 }}
+        >
+          {slide.title}
+        </motion.h1>
+
+        {slide.subtitle && (
+          <motion.p
+            className="closing-client"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
             {slide.subtitle}
           </motion.p>
-          <motion.div className="cover-h-rule" initial={{ scaleX: 0, originX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.55, duration: 0.5 }} />
-          <motion.div className="closing-contact" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65, duration: 0.5 }}>
-            <a href="https://www.resultsdigital.org" target="_blank" rel="noopener noreferrer">www.resultsdigital.org</a>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75, duration: 0.5 }}>
-            <PartnerLogos />
-          </motion.div>
-        </div>
+        )}
 
-        {/* Right: large Results branding */}
-        <motion.div className="cover-right closing-brand-right" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 0.7 }}>
-          <div className="closing-brand-icon">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
-              <rect x="2" y="14" width="4" height="8" rx="1" fill="#F3D56D"/>
-              <rect x="8" y="9" width="4" height="13" rx="1" fill="#F3D56D" opacity="0.85"/>
-              <rect x="14" y="5" width="4" height="17" rx="1" fill="#F3D56D" opacity="0.7"/>
-              <rect x="20" y="1" width="4" height="21" rx="1" fill="#F3D56D" opacity="0.55"/>
-            </svg>
-          </div>
-          <div className="closing-brand-name">Results Group</div>
-          <div className="closing-brand-tagline">Digital Marketing Excellence</div>
-        </motion.div>
-      </div>
+        <motion.div
+          className="closing-rule"
+          initial={{ opacity: 0, scaleX: 0 }}
+          animate={{ opacity: 1, scaleX: 1 }}
+          transition={{ delay: 0.55, duration: 0.5 }}
+        />
 
-      {/* Bottom */}
-      <motion.div className="cover-bottom-bar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9, duration: 0.5 }}>
-        <span />
-        <a href="https://www.resultsdigital.org" target="_blank" rel="noopener noreferrer" className="cover-url">
+        <motion.a
+          className="closing-url"
+          href="https://www.resultsdigital.org"
+          target="_blank"
+          rel="noopener noreferrer"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7, duration: 0.5 }}
+        >
           www.resultsdigital.org
-        </a>
-      </motion.div>
+        </motion.a>
+      </div>
     </div>
   )
 }

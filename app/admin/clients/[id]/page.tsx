@@ -252,7 +252,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
           </label>
         </div>
         <p className="text-xs mb-3" style={{ color: 'var(--admin-text-muted)' }}>
-          העלה את מסמך המיצוב (PDF) — ה-AI ינתח ויזקק את עיקרי המותג. הטקסט המזוקק משמש ליצירת קופי אוטומטי בקמפיינים.
+          העלה את מסמך המיצוב (PDF) — ה-AI ינתח ויזקק את עיקרי המותג. הטקסט המזוקק משמש ליצירת טקסט אוטומטי בקמפיינים.
         </p>
         {client.positioning_pdf_path && !distilling && (
           <div className="inline-flex items-center gap-1.5 text-xs mb-3 px-2.5 py-1 rounded-md" style={{ background: 'var(--admin-bg)', color: 'var(--admin-text-secondary)', border: '1px solid var(--admin-border)' }}>

@@ -69,6 +69,6 @@ ${campaign.concept ? `קונספט הקמפיין: ${campaign.concept}` : ''}
     })
   } catch (err) {
     captureException(err, { route: 'POST /api/campaigns/[id]/generate-copy', id })
-    return NextResponse.json({ error: 'שגיאה ביצירת קופי' }, { status: 500 })
+    return NextResponse.json({ error: 'שגיאה ביצירת טקסט' }, { status: 500 })
   }
 }
