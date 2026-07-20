@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { Metadata } from 'next'
-import { getCampaignBySlug, enrichCampaignUrls, getAssetPublicUrl } from '@/lib/campaigns'
+import { getCampaignBySlug, enrichCampaignUrls } from '@/lib/campaigns'
 import type { CampaignSection } from '@/lib/campaigns'
 import { getClientById } from '@/lib/clients'
 import { getSession } from '@/lib/auth'
@@ -22,35 +22,39 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!campaign) return { title: 'Campaign Not Found' }
 
+  // Link previews always carry our own branded card. Using the client's logo
+  // meant a client without one shared as a bare link with no image at all, and
+  // a transparent logo rendered unpredictably across WhatsApp/Slack/Facebook.
+  const shareImage = { url: '/og-image.png', width: 1200, height: 630, alt: 'Results Creative' }
+
   const isScheduled = campaign.publish_at && new Date(campaign.publish_at) > new Date()
   if (campaign.status === 'draft' || campaign.password || isScheduled) {
-    return { title: 'Results Digital', robots: { index: false, follow: false } }
+    return {
+      title: 'Results Creative',
+      robots: { index: false, follow: false },
+      openGraph: { title: 'Results Creative', images: [shareImage] },
+      twitter: { card: 'summary_large_image', title: 'Results Creative', images: [shareImage.url] },
+    }
   }
 
   const title = `${campaign.client} – ${campaign.campaign_name}`
   const description = campaign.concept || `מצגת קריאייטיב עבור ${campaign.client}`
-  let logoPath = campaign.logo_path
-  if (!logoPath && campaign.client_id) {
-    const client = await getClientById(campaign.client_id)
-    logoPath = client?.logo_path || null
-  }
-  const image = logoPath ? getAssetPublicUrl(logoPath) : undefined
 
   return {
-    title: `${title} | Results Digital`,
+    title: `${title} | Results Creative`,
     description,
     openGraph: {
       title,
       description,
       type: 'website',
-      siteName: 'Results Digital',
-      ...(image ? { images: [{ url: image }] } : {}),
+      siteName: 'Results Creative',
+      images: [shareImage],
     },
     twitter: {
-      card: image ? 'summary_large_image' : 'summary',
+      card: 'summary_large_image',
       title,
       description,
-      ...(image ? { images: [image] } : {}),
+      images: [shareImage.url],
     },
   }
 }

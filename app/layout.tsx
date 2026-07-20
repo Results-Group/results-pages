@@ -1,8 +1,24 @@
 import type { Metadata } from 'next'
 import './globals.css'
 
+/**
+ * Base URL that relative OG/Twitter image paths resolve against.
+ * VERCEL_URL is the per-deployment hostname (results-pages-<hash>.vercel.app),
+ * which can sit behind deployment protection — link previews pointing there
+ * fail to fetch the image, so shares render without one. Production pins the
+ * real domain instead.
+ */
+function resolveSiteUrl(): string {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL
+  if (process.env.VERCEL_ENV === 'production') return 'https://reports.resultsdigital.org'
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  return 'http://localhost:3000'
+}
+
+const SHARE_IMAGE = { url: '/og-image.png', width: 1200, height: 630, alt: 'Results Creative' }
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'),
+  metadataBase: new URL(resolveSiteUrl()),
   title: 'Results Creative',
   description: 'ניהול קמפיינים ודפי נחיתה - Results Group',
   icons: {
@@ -12,14 +28,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Results Creative',
     description: 'ניהול קמפיינים ודפי נחיתה - Results Group',
-    images: [{ url: '/og-image.png', width: 1024, height: 858 }],
+    images: [SHARE_IMAGE],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Results Creative',
     description: 'ניהול קמפיינים ודפי נחיתה - Results Group',
-    images: ['/og-image.png'],
+    images: [SHARE_IMAGE.url],
   },
 }
 

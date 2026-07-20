@@ -88,6 +88,8 @@ export async function GET(req: NextRequest, { params }: Ctx) {
     <meta property="og:title" content="${escapeHtml(page.title)}" />
     <meta property="og:description" content="${ogDescription}" />
     <meta property="og:image" content="${escapeHtml(ogImageUrl)}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:url" content="${escapeHtml(pageUrl)}" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Results Digital" />
