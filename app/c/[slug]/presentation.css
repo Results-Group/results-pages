@@ -50,7 +50,10 @@
 .campaign-pres .story-bar:focus-visible{outline:2px solid var(--brand-cyan);outline-offset:3px}
 /* With 20 equal slivers you can't tell at a glance where you are. The current
    one grows and thickens so position reads instantly. */
-.campaign-pres .story-bar.current{flex-grow:4;height:7px;transition:flex-grow 0.35s ease,height 0.2s ease}
+/* No transition here on purpose: a transitioned property is frozen at its start
+   value when animation frames are paused, so the emphasis simply wouldn't
+   appear — the same failure that left slides blank. Applied instantly instead. */
+.campaign-pres .story-bar.current{flex-grow:4;height:7px}
 .campaign-pres .story-bar-fill{height:100%;border-radius:3px;width:0;transition:width 0.4s ease}
 .campaign-pres .story-bar-fill.done{width:100%;background:var(--brand-cyan)}
 .campaign-pres .story-bar-fill.active{width:100%;background:linear-gradient(90deg,var(--brand-cyan),var(--brand-yellow));animation:progressGlow 2s ease-in-out infinite}
