@@ -11,6 +11,7 @@ export type MockupType =
   | 'instagram_feed'
   | 'instagram_story'
   | 'facebook_feed'
+  | 'carousel'
   | 'video'
   | 'general'
   | 'divider'
@@ -49,6 +50,7 @@ export const MOCKUP_TYPES: Record<MockupType, string> = {
   instagram_feed: 'פיד אינסטגרם',
   instagram_story: 'סטוריז אינסטגרם',
   facebook_feed: 'פיד פייסבוק',
+  carousel: 'קרוסלה',
   video: 'סרטונים',
   general: 'כללי',
   divider: 'חוצץ / שקף ביניים',

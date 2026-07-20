@@ -75,6 +75,7 @@ export default function Inspector({
     instagram_feed: t('campaigns.mockup.instagram_feed'),
     instagram_story: t('campaigns.mockup.instagram_story'),
     facebook_feed: t('campaigns.mockup.facebook_feed'),
+    carousel: t('campaigns.mockup.carousel'),
     video: t('campaigns.mockup.video'),
     general: t('campaigns.mockup.general'),
     divider: t('campaigns.mockup.divider'),

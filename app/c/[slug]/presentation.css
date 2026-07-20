@@ -108,6 +108,11 @@
 .campaign-pres .slide-title::before{content:'';display:block;width:4px;height:32px;background:linear-gradient(to bottom,var(--brand-cyan),var(--brand-yellow));border-radius:2px;flex-shrink:0}
 .campaign-pres .slide-intro{font-size:1.1rem;line-height:1.85;color:var(--text-secondary);margin:-16px 0 32px;max-width:760px;white-space:pre-wrap}
 
+/* Carousel renders as one post, centred like a single mockup */
+.campaign-pres .carousel-slide-wrap{display:flex;justify-content:center;margin-top:8px}
+/* Hide the native scrollbar on the swipe track (Chrome/Safari) */
+.campaign-pres .carousel-slide-wrap ::-webkit-scrollbar{display:none}
+
 /* ── Entrance animations ──
    These run in CSS, not JS. The previous Framer Motion entrances were driven by
    requestAnimationFrame, which browsers pause in a backgrounded tab — a link

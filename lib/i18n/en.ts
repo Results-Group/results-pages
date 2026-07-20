@@ -345,6 +345,7 @@ const en: Record<TranslationKey, string> = {
   'campaigns.mockup.instagram_feed': 'Instagram Feed',
   'campaigns.mockup.instagram_story': 'Instagram Story',
   'campaigns.mockup.facebook_feed': 'Facebook Feed',
+  'campaigns.mockup.carousel': 'Carousel',
   'campaigns.mockup.video': 'Videos',
   'campaigns.mockup.general': 'General',
   'campaigns.mockup.divider': 'Divider / Separator',

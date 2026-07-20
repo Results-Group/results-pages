@@ -14,6 +14,7 @@ const SMART_TYPES: { value: MockupType; label: string; icon: React.ReactNode }[]
   { value: 'instagram_feed', label: 'פיד אינסטגרם', icon: <ImageIcon className="w-4 h-4" /> },
   { value: 'instagram_story', label: 'סטוריז אינסטגרם', icon: <ImageIcon className="w-4 h-4" /> },
   { value: 'facebook_feed', label: 'פיד פייסבוק', icon: <ImageIcon className="w-4 h-4" /> },
+  { value: 'carousel', label: 'קרוסלה', icon: <ImageIcon className="w-4 h-4" /> },
   { value: 'general', label: 'כללי', icon: <ImageIcon className="w-4 h-4" /> },
 ]
 

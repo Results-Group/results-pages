@@ -8,7 +8,8 @@ import type { CampaignAsset } from '@/lib/campaigns'
 import InstagramFeedMockup from './mockups/instagram-feed'
 import InstagramStoryMockup from './mockups/instagram-story'
 import FacebookFeedMockup from './mockups/facebook-feed'
-import VideoCard from './mockups/video-card'
+import VideoPlayer from './mockups/VideoPlayer'
+import CarouselFeed from './mockups/carousel-feed'
 import GeneralCard from './mockups/general-card'
 import { parseVideoUrl } from '@/lib/video-utils'
 import { assetProxyUrl } from '@/lib/asset-url'
@@ -736,6 +737,7 @@ function CreativesSlide({ slide, activeCopyIdx, onAssetClick, lang = 'he' }: {
   const t = (key: keyof typeof he) => dict[key] ?? he[key] ?? key
   const assets = slide.assets || []
   const isStory = slide.mockupType === 'instagram_story'
+  const isCarousel = slide.mockupType === 'carousel'
   const copies = slide.copies || []
   // activeCopy is set only when this slide has copies enabled
   const activeCopy = copies.length > 0 ? (copies[activeCopyIdx] ?? copies[0] ?? '') : undefined
@@ -753,7 +755,22 @@ function CreativesSlide({ slide, activeCopyIdx, onAssetClick, lang = 'he' }: {
         </motion.p>
       )}
 
-      {assets.length > 0 && (
+      {/* A carousel is one post containing every creative, so it renders as a
+          single mockup rather than the per-asset grid. */}
+      {assets.length > 0 && isCarousel && (
+        <div className="carousel-slide-wrap rp-anim rp-up rp-d1">
+          <CarouselFeed
+            images={assets
+              .map(a => (a.file_path ? assetProxyUrl(a.file_path) : (a.public_url || '')))
+              .filter(Boolean)}
+            clientName={slide.clientName || ''}
+            logoUrl={slide.clientLogoUrl || undefined}
+            caption={activeCopy !== undefined ? activeCopy : (assets[0]?.caption || '')}
+          />
+        </div>
+      )}
+
+      {assets.length > 0 && !isCarousel && (
         <div className={`assets-grid ${isStory ? 'story-grid' : 'standard-grid'}`}>
           {assets.map((asset, i) => (
             <motion.div
@@ -836,7 +853,23 @@ function AssetRenderer({ asset, mockupType, clientLogoUrl, clientName, captionOv
     case 'facebook_feed':
       return <FacebookFeedMockup imageUrl={imageUrl} clientName={clientName} logoUrl={clientLogoUrl ?? undefined} caption={caption} />
     case 'video':
-      return <VideoCard url={asset.url || ''} embedUrl={videoInfo?.embedUrl} platform={videoInfo?.platform || 'other'} caption={caption} />
+      // Video ads run in the feed like any other placement, so present them in
+      // the Facebook feed chrome with the player in the media slot.
+      return (
+        <FacebookFeedMockup
+          imageUrl=""
+          clientName={clientName}
+          logoUrl={clientLogoUrl ?? undefined}
+          caption={caption}
+          media={
+            <VideoPlayer
+              url={asset.url || ''}
+              embedUrl={videoInfo?.embedUrl}
+              platform={videoInfo?.platform || 'other'}
+            />
+          }
+        />
+      )
     case 'general':
     default:
       return <GeneralCard imageUrl={imageUrl} caption={caption} />

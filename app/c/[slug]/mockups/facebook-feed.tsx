@@ -8,9 +8,11 @@ interface FacebookFeedProps {
   clientName: string
   logoUrl?: string
   caption?: string
+  /** Replaces the still image in the media slot — used to show a video ad. */
+  media?: React.ReactNode
 }
 
-export default function FacebookFeed({ imageUrl, clientName, logoUrl, caption }: FacebookFeedProps) {
+export default function FacebookFeed({ imageUrl, clientName, logoUrl, caption, media }: FacebookFeedProps) {
   const logoNeedsDark = useLogoNeedsDarkBackdrop(logoUrl)
   return (
     <div dir="rtl" className="w-full max-w-[500px] mx-auto" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
@@ -66,9 +68,9 @@ export default function FacebookFeed({ imageUrl, clientName, logoUrl, caption }:
             </div>
           )}
 
-          {/* Image */}
+          {/* Media — a still by default, or whatever the caller supplies (video) */}
           <div className="w-full bg-gray-100">
-            <img src={imageUrl} alt="Post" className="w-full h-auto object-cover" loading="lazy" />
+            {media ?? <img src={imageUrl} alt="Post" className="w-full h-auto object-cover" loading="lazy" />}
           </div>
 
           {/* Reactions */}
