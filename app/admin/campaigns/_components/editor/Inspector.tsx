@@ -7,13 +7,12 @@ import { MOCKUP_TYPES, type CampaignMeta, type EditorSection, type MockupType } 
 import { useT, useDir } from '@/lib/i18n'
 
 const fieldStyle: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  color: '#fff',
-  // This panel is dark regardless of the admin theme, so the native dropdown
-  // (and date picker) must be dark too — otherwise the OS paints a white popup
-  // under the inherited white text.
-  colorScheme: 'dark',
+  background: 'var(--admin-hover-bg)',
+  border: '1px solid var(--admin-border)',
+  color: 'var(--admin-text-primary)',
+  // Keep native controls (dropdown, date picker) on the same scheme as the
+  // admin theme, so the OS never paints e.g. a white popup under light text.
+  colorScheme: 'var(--color-scheme)',
 }
 
 function SectionDivider({ label }: { label?: string }) {
@@ -86,13 +85,13 @@ export default function Inspector({
   return (
     <div className="flex flex-col h-full">
       {/* Tabs */}
-      <div className="flex gap-0.5 p-0.5 rounded-lg mb-5" style={{ background: 'rgba(255,255,255,0.04)' }}>
+      <div className="flex gap-0.5 p-0.5 rounded-lg mb-5" style={{ background: 'var(--admin-hover-bg)' }}>
         <button
           onClick={() => setTab('slide')}
           className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-bold transition-all duration-200"
           style={tab === 'slide'
             ? { background: 'rgba(64,225,211,0.12)', color: '#40e1d3' }
-            : { color: 'rgba(255,255,255,0.35)' }
+            : { color: 'var(--admin-text-muted)' }
           }
         >
           <Settings2 className="w-3.5 h-3.5" /> {t('campaigns.tabSlide')}
@@ -102,7 +101,7 @@ export default function Inspector({
           className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-bold transition-all duration-200"
           style={tab === 'campaign'
             ? { background: 'rgba(64,225,211,0.12)', color: '#40e1d3' }
-            : { color: 'rgba(255,255,255,0.35)' }
+            : { color: 'var(--admin-text-muted)' }
           }
         >
           <LayoutGrid className="w-3.5 h-3.5" /> {t('campaigns.tabCampaign')}
@@ -115,7 +114,7 @@ export default function Inspector({
             <>
               <SectionDivider label={t('campaigns.displaySection')} />
               <div>
-                <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('campaigns.displayType')}</label>
+                <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('campaigns.displayType')}</label>
                 <select
                   value={section.mockup_type}
                   onChange={e => onUpdateSection({ mockup_type: e.target.value as MockupType })}
@@ -126,38 +125,38 @@ export default function Inspector({
                     <option key={val} value={val}>{mockupLabels[val]}</option>
                   ))}
                 </select>
-                <p className="text-[10px] mt-2 leading-relaxed" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                <p className="text-[10px] mt-2 leading-relaxed" style={{ color: 'var(--admin-text-muted)' }}>
                   {t('campaigns.displayHint')}
                 </p>
               </div>
 
               <SectionDivider label={t('campaigns.contentSection')} />
               <div>
-                <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('campaigns.slideTitle')}</label>
+                <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('campaigns.slideTitle')}</label>
                 <input
                   type="text" value={section.title} onChange={e => onUpdateSection({ title: e.target.value })}
                   placeholder={t('campaigns.slideTitlePlaceholder')} dir="auto"
                   className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={fieldStyle}
                   onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
-                  onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
+                  onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('campaigns.slideDescription')}</label>
+                <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('campaigns.slideDescription')}</label>
                 <textarea
                   value={section.description} onChange={e => onUpdateSection({ description: e.target.value })}
                   rows={3} placeholder={t('campaigns.slideDescriptionPlaceholder')} dir="auto"
                   className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none resize-none transition-all duration-200" style={fieldStyle}
                   onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
-                  onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
+                  onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
                 />
                 {onApplyContentToAll && (section.title.trim() || section.description.trim()) && (
                   <button
                     type="button"
                     onClick={onApplyContentToAll}
                     className="flex items-center gap-1.5 mt-2 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-colors"
-                    style={{ color: 'rgba(255,255,255,0.6)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+                    style={{ color: 'var(--admin-text-secondary)', background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)' }}
                     title={t('campaigns.applyContentToAllHint')}
                   >
                     <CopyPlus className="w-3.5 h-3.5" />
@@ -184,23 +183,23 @@ export default function Inspector({
                     <div className="mt-3 rounded-lg p-3 space-y-3" style={{ background: 'rgba(64,225,211,0.04)', border: '1px solid rgba(64,225,211,0.15)' }}>
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'rgba(64,225,211,0.7)' }}>{t('campaigns.aiSuggestions')}</span>
-                        <button type="button" onClick={() => setSuggestions(null)} className="p-0.5 rounded" style={{ color: 'rgba(255,255,255,0.3)' }} aria-label={t('campaigns.dismissSuggestions')}>
+                        <button type="button" onClick={() => setSuggestions(null)} className="p-0.5 rounded" style={{ color: 'var(--admin-text-muted)' }} aria-label={t('campaigns.dismissSuggestions')}>
                           <X className="w-3 h-3" />
                         </button>
                       </div>
 
                       {suggestions.titles.length > 0 && (
                         <div className="space-y-1.5">
-                          <span className="text-[10px] font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('campaigns.suggestedTitles')}</span>
+                          <span className="text-[10px] font-bold" style={{ color: 'var(--admin-text-muted)' }}>{t('campaigns.suggestedTitles')}</span>
                           {suggestions.titles.map((s, i) => (
                             <button
                               key={i} type="button" dir="auto"
                               onClick={() => onUpdateSection({ title: s })}
                               title={t('campaigns.applyTitle')}
                               className="flex items-center gap-2 w-full text-right px-2.5 py-1.5 rounded-md text-xs transition-colors"
-                              style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.8)' }}
+                              style={{ background: 'var(--admin-hover-bg)', color: 'var(--admin-text-secondary)' }}
                               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.1)' }}
-                              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'var(--admin-hover-bg)' }}
                             >
                               <Check className="w-3 h-3 shrink-0" style={{ color: '#40e1d3' }} />
                               <span className="flex-1 min-w-0">{s}</span>
@@ -211,16 +210,16 @@ export default function Inspector({
 
                       {suggestions.captions.length > 0 && (
                         <div className="space-y-1.5">
-                          <span className="text-[10px] font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('campaigns.suggestedCaptions')}</span>
+                          <span className="text-[10px] font-bold" style={{ color: 'var(--admin-text-muted)' }}>{t('campaigns.suggestedCaptions')}</span>
                           {suggestions.captions.map((s, i) => (
                             <button
                               key={i} type="button" dir="auto"
                               onClick={() => onUpdateSection({ description: s })}
                               title={t('campaigns.applyCaption')}
                               className="flex items-start gap-2 w-full text-right px-2.5 py-1.5 rounded-md text-xs leading-relaxed transition-colors"
-                              style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.8)' }}
+                              style={{ background: 'var(--admin-hover-bg)', color: 'var(--admin-text-secondary)' }}
                               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.1)' }}
-                              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'var(--admin-hover-bg)' }}
                             >
                               <Check className="w-3 h-3 shrink-0 mt-0.5" style={{ color: '#40e1d3' }} />
                               <span className="flex-1 min-w-0">{s}</span>
@@ -241,21 +240,21 @@ export default function Inspector({
                     onClick={() => onUpdateSection({ useCopies: !section.useCopies })}
                     className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg transition-all duration-200"
                     style={{
-                      background: section.useCopies ? 'rgba(64,225,211,0.08)' : 'rgba(255,255,255,0.03)',
-                      border: `1px solid ${section.useCopies ? 'rgba(64,225,211,0.3)' : 'rgba(255,255,255,0.07)'}`,
+                      background: section.useCopies ? 'rgba(64,225,211,0.08)' : 'var(--admin-hover-bg)',
+                      border: `1px solid ${section.useCopies ? 'rgba(64,225,211,0.3)' : 'var(--admin-border)'}`,
                     }}
                   >
                     {/* Toggle pill */}
                     <div className="relative w-8 h-4 rounded-full transition-all duration-200 shrink-0"
-                      style={{ background: section.useCopies ? '#40e1d3' : 'rgba(255,255,255,0.1)' }}>
+                      style={{ background: section.useCopies ? '#40e1d3' : 'var(--admin-bg-elevated)' }}>
                       <div className="absolute top-0.5 rounded-full w-3 h-3 bg-white shadow transition-all duration-200"
                         style={{ left: section.useCopies ? '18px' : '2px' }} />
                     </div>
                     <div className={`flex-1 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
-                      <p className="text-xs font-bold" style={{ color: section.useCopies ? '#40e1d3' : 'rgba(255,255,255,0.55)' }}>
+                      <p className="text-xs font-bold" style={{ color: section.useCopies ? '#40e1d3' : 'var(--admin-text-secondary)' }}>
                         {section.useCopies ? t('campaigns.copyEnabled') : t('campaigns.copyDisabled')}
                       </p>
-                      <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                      <p className="text-[10px]" style={{ color: 'var(--admin-text-muted)' }}>
                         {meta.copies.length} {t('campaigns.copyVersionsCount')}
                       </p>
                     </div>
@@ -264,21 +263,21 @@ export default function Inspector({
               )}
 
               {meta.copies.length === 0 && (
-                <p className="text-[10px] leading-relaxed px-1" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                <p className="text-[10px] leading-relaxed px-1" style={{ color: 'var(--admin-text-muted)' }}>
                   {t('campaigns.copyHintEmpty')}
                 </p>
               )}
             </>
           ) : (
             <div className="flex items-center justify-center h-32">
-              <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.25)' }}>{t('campaigns.noSlideSelected')}</p>
+              <p className="text-xs font-semibold" style={{ color: 'var(--admin-text-muted)' }}>{t('campaigns.noSlideSelected')}</p>
             </div>
           )
         ) : (
           <>
             <SectionDivider label={t('campaigns.campaignDetails')} />
             <div>
-              <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('campaigns.client')}</label>
+              <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('campaigns.client')}</label>
               <ClientAutocomplete
                 value={meta.client}
                 workspaceId={meta.workspaceId}
@@ -288,30 +287,30 @@ export default function Inspector({
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('campaigns.campaignName')}</label>
+              <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('campaigns.campaignName')}</label>
               <input
                 type="text" value={meta.campaignName} onChange={e => onUpdateMeta({ campaignName: e.target.value })}
                 placeholder={t('campaigns.campaignNamePlaceholder')} dir="auto"
                 className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={fieldStyle}
                 onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
-                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('campaigns.concept')}</label>
+              <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('campaigns.concept')}</label>
               <textarea
                 value={meta.concept} onChange={e => onUpdateMeta({ concept: e.target.value })}
                 rows={3} placeholder={t('campaigns.conceptPlaceholder')} dir="auto"
                 className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none resize-none transition-all duration-200" style={fieldStyle}
                 onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
-                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
               />
             </div>
 
             <SectionDivider label={t('campaigns.copyVariationsSection')} />
             <div className="space-y-2.5">
-              <p className="text-[10px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.25)' }}>
+              <p className="text-[10px] leading-relaxed" style={{ color: 'var(--admin-text-muted)' }}>
                 {t('campaigns.copyVariationsHint')}
               </p>
               {meta.copies.map((copy, idx) => (
@@ -322,9 +321,9 @@ export default function Inspector({
                       type="button"
                       onClick={() => onUpdateMeta({ copies: meta.copies.filter((_, i) => i !== idx) })}
                       className="p-0.5 rounded transition-colors ml-auto"
-                      style={{ color: 'rgba(255,255,255,0.2)' }}
+                      style={{ color: 'var(--admin-text-muted)' }}
                       onMouseEnter={e => { e.currentTarget.style.color = '#ef4444' }}
-                      onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.2)' }}
+                      onMouseLeave={e => { e.currentTarget.style.color = 'var(--admin-text-muted)' }}
                       aria-label={`${t('campaigns.versionLabel')} ${idx + 1} — הסר`}
                     >
                       <X className="w-3 h-3" />
@@ -339,7 +338,7 @@ export default function Inspector({
                     className="w-full px-3 py-2.5 rounded-lg text-sm outline-none resize-none transition-all duration-200"
                     style={fieldStyle}
                     onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
-                    onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
+                    onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
                   />
                 </div>
               ))}
@@ -357,30 +356,30 @@ export default function Inspector({
 
             <SectionDivider label={t('campaigns.brandingSection')} />
             <div>
-              <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('campaigns.clientLogo')}</label>
+              <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('campaigns.clientLogo')}</label>
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center shrink-0"
-                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)' }}>
                   {meta.logoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={meta.logoUrl} alt="" className="w-full h-full object-contain" />
                   ) : (
-                    <Upload className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.2)' }} />
+                    <Upload className="w-4 h-4" style={{ color: 'var(--admin-text-muted)' }} />
                   )}
                 </div>
                 <button
                   onClick={() => logoRef.current?.click()}
                   disabled={uploadingLogo}
                   className="flex-1 px-3 py-2.5 rounded-lg text-xs font-bold disabled:opacity-30 transition-all duration-200"
-                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}
+                  style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-secondary)' }}
                 >
                   {uploadingLogo ? t('campaigns.uploading') : meta.logoUrl ? t('campaigns.replaceLogo') : t('campaigns.uploadLogo')}
                 </button>
                 {meta.logoUrl && (
                   <button onClick={() => onUpdateMeta({ logoPath: null, logoUrl: null })} className="p-2 rounded-lg transition-colors"
-                    style={{ color: 'rgba(255,255,255,0.3)' }}
+                    style={{ color: 'var(--admin-text-muted)' }}
                     onMouseEnter={e => { e.currentTarget.style.color = '#ef4444' }}
-                    onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)' }}
+                    onMouseLeave={e => { e.currentTarget.style.color = 'var(--admin-text-muted)' }}
                     aria-label={t('campaigns.deleteLogo')}>
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -398,14 +397,14 @@ export default function Inspector({
                   {t('campaigns.useClientLogo')}
                 </button>
               )}
-              <p className="text-[10px] mt-2" style={{ color: 'rgba(255,255,255,0.2)' }}>
+              <p className="text-[10px] mt-2" style={{ color: 'var(--admin-text-muted)' }}>
                 {t('campaigns.logoFallbackHint')}
               </p>
             </div>
 
             <SectionDivider label={t('campaigns.securitySection')} />
             <div>
-              <label className="block text-[11px] font-bold mb-1.5 flex items-center gap-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              <label className="block text-[11px] font-bold mb-1.5 flex items-center gap-1.5 uppercase tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>
                 <Lock className="w-3.5 h-3.5" /> {t('common.password')}
               </label>
               <input
@@ -414,7 +413,7 @@ export default function Inspector({
                 placeholder={meta.hasPassword && !passwordDirty ? '••••••••' : t('campaigns.passwordPlaceholderEmpty')} dir="ltr"
                 className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={fieldStyle}
                 onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
-                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
               />
               {meta.hasPassword && !passwordDirty && (
                 <div className="flex items-center justify-between mt-2">
@@ -437,7 +436,7 @@ export default function Inspector({
               <>
                 <SectionDivider label={t('campaigns.urlSection')} />
                 <div>
-                  <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                  <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>
                     {t('campaigns.urlLabel')}
                   </label>
                   <input
@@ -451,14 +450,14 @@ export default function Inspector({
                     dir="ltr"
                     className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={fieldStyle}
                     onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
-                    onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
+                    onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
                   />
                   {slug && (
                     <p className="text-[10px] mt-2 break-all" dir="ltr" style={{ color: 'rgba(64,225,211,0.65)' }}>
                       /c/{slug}
                     </p>
                   )}
-                  <p className="text-[10px] mt-1.5" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                  <p className="text-[10px] mt-1.5" style={{ color: 'var(--admin-text-muted)' }}>
                     {t('campaigns.urlHint')}
                   </p>
                 </div>
@@ -467,7 +466,7 @@ export default function Inspector({
 
             <SectionDivider label={t('campaigns.schedulingSection')} />
             <div>
-              <label className="block text-[11px] font-bold mb-1.5 flex items-center gap-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              <label className="block text-[11px] font-bold mb-1.5 flex items-center gap-1.5 uppercase tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>
                 <Clock className="w-3.5 h-3.5" /> {t('campaigns.publishSchedule')}
               </label>
               <input
@@ -477,15 +476,15 @@ export default function Inspector({
                 dir="ltr"
                 className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={fieldStyle}
                 onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
-                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
               />
-              <p className="text-[10px] mt-2" style={{ color: 'rgba(255,255,255,0.2)' }}>
+              <p className="text-[10px] mt-2" style={{ color: 'var(--admin-text-muted)' }}>
                 {t('campaigns.publishScheduleHint')}
               </p>
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold mb-1.5 flex items-center gap-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              <label className="block text-[11px] font-bold mb-1.5 flex items-center gap-1.5 uppercase tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>
                 <Clock className="w-3.5 h-3.5" /> {t('campaigns.expirySchedule')}
               </label>
               <input
@@ -495,9 +494,9 @@ export default function Inspector({
                 dir="ltr"
                 className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={fieldStyle}
                 onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
-                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
               />
-              <p className="text-[10px] mt-2" style={{ color: 'rgba(255,255,255,0.2)' }}>
+              <p className="text-[10px] mt-2" style={{ color: 'var(--admin-text-muted)' }}>
                 {t('campaigns.expiryScheduleHint')}
               </p>
             </div>

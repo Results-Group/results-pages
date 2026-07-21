@@ -35,25 +35,25 @@ function SystemSlideChip({ label, icon, dim, onDelete }: { label: string; icon: 
     <div
       className="flex items-center gap-2 rounded-xl px-2 py-2"
       style={{
-        background: 'rgba(255,255,255,0.02)',
-        border: '1px solid rgba(255,255,255,0.05)',
+        background: 'var(--admin-hover-bg)',
+        border: '1px solid var(--admin-border)',
         opacity: dim ? 0.5 : 0.7,
       }}
     >
       {/* spacer to align with drag handle */}
       <span className="w-3.5 h-3.5 shrink-0" />
 
-      <div className="w-5 h-5 rounded flex items-center justify-center shrink-0" style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.3)' }}>
+      <div className="w-5 h-5 rounded flex items-center justify-center shrink-0" style={{ background: 'var(--admin-hover-bg)', color: 'var(--admin-text-muted)' }}>
         {icon}
       </div>
 
-      <div className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.04)' }}>
-        <span style={{ color: 'rgba(255,255,255,0.15)' }}>{icon}</span>
+      <div className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center" style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)' }}>
+        <span style={{ color: 'var(--admin-text-muted)' }}>{icon}</span>
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</p>
-        <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.2)' }}>אוטומטי</p>
+        <p className="text-xs font-semibold truncate" style={{ color: 'var(--admin-text-muted)' }}>{label}</p>
+        <p className="text-[10px]" style={{ color: 'var(--admin-text-muted)' }}>אוטומטי</p>
       </div>
 
       {onDelete && (
@@ -95,8 +95,8 @@ function SortableItem({ section, index, active, status, onSelect, onDuplicate, o
         onClick={onSelect}
         className="group rounded-xl p-2 cursor-pointer transition-all duration-200"
         style={{
-          background: active ? 'rgba(64,225,211,0.08)' : 'rgba(255,255,255,0.03)',
-          border: `1px solid ${active ? 'rgba(64,225,211,0.35)' : 'rgba(255,255,255,0.06)'}`,
+          background: active ? 'rgba(64,225,211,0.08)' : 'var(--admin-hover-bg)',
+          border: `1px solid ${active ? 'rgba(64,225,211,0.35)' : 'var(--admin-border)'}`,
           boxShadow: active ? '0 0 0 1px rgba(64,225,211,0.1)' : 'none',
         }}
       >
@@ -107,32 +107,32 @@ function SortableItem({ section, index, active, status, onSelect, onDuplicate, o
             {...listeners}
             onClick={e => e.stopPropagation()}
             className="cursor-grab active:cursor-grabbing touch-none p-0.5 transition-colors"
-            style={{ color: 'rgba(255,255,255,0.2)' }}
+            style={{ color: 'var(--admin-text-muted)' }}
             aria-label="גרור לשינוי סדר"
           >
             <GripVertical className="w-3.5 h-3.5" />
           </button>
 
           <span className="flex items-center justify-center w-5 h-5 rounded text-[10px] font-bold shrink-0"
-            style={{ background: active ? 'rgba(64,225,211,0.15)' : 'rgba(255,255,255,0.06)', color: active ? '#40e1d3' : 'rgba(255,255,255,0.4)' }}>
+            style={{ background: active ? 'rgba(64,225,211,0.15)' : 'var(--admin-bg-elevated)', color: active ? '#40e1d3' : 'var(--admin-text-muted)' }}>
             {index + 1}
           </span>
 
-          <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0 flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0 flex items-center justify-center" style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)' }}>
             {firstImage ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={assetProxyUrl(firstImage.file_path)} alt="" className="w-full h-full object-cover" />
             ) : (
-              <span style={{ color: 'rgba(255,255,255,0.2)' }}>{typeIcon(section.mockup_type)}</span>
+              <span style={{ color: 'var(--admin-text-muted)' }}>{typeIcon(section.mockup_type)}</span>
             )}
           </div>
 
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold truncate flex items-center gap-1.5" style={{ color: active ? '#fff' : 'rgba(255,255,255,0.7)' }}>
+            <p className="text-xs font-bold truncate flex items-center gap-1.5" style={{ color: active ? '#fff' : 'var(--admin-text-secondary)' }}>
               {status && <span className="w-2 h-2 rounded-full shrink-0" style={{ background: STATUS_DOT[status], boxShadow: `0 0 5px ${STATUS_DOT[status]}50` }} title={status} />}
               {section.title || 'שקף ללא כותרת'}
             </p>
-            <span className="inline-flex items-center gap-1 text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            <span className="inline-flex items-center gap-1 text-[10px]" style={{ color: 'var(--admin-text-muted)' }}>
               {typeIcon(section.mockup_type)}
               {section.mockup_type === 'divider' ? 'חוצץ' : `${section.assets.length} פריטים`}
             </span>
@@ -141,7 +141,7 @@ function SortableItem({ section, index, active, status, onSelect, onDuplicate, o
           {/* Actions — inline (reserved space) so they never cover the title, and visible without hover */}
           <div className="flex items-center gap-0.5 shrink-0">
             <button type="button" onClick={e => { e.stopPropagation(); onDuplicate() }} className="p-1 rounded-md transition-opacity opacity-60 hover:opacity-100"
-              style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)' }} aria-label="שכפל" title="שכפל">
+              style={{ background: 'var(--admin-bg-elevated)', color: 'var(--admin-text-secondary)' }} aria-label="שכפל" title="שכפל">
               <Copy className="w-3 h-3" />
             </button>
             <button type="button" onClick={e => { e.stopPropagation(); onRemove() }} className="p-1 rounded-md transition-opacity opacity-70 hover:opacity-100"
@@ -190,7 +190,7 @@ export default function SlideFilmstrip({ sections, activeId, feedback, meta, onS
       <div className="flex items-center justify-between px-1 mb-2">
         <div className="flex items-center gap-2">
           <div className="w-1 h-1 rounded-full" style={{ background: '#40e1d3' }} />
-          <span className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>שקפים</span>
+          <span className="text-xs font-bold" style={{ color: 'var(--admin-text-secondary)' }}>שקפים</span>
         </div>
         <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ color: '#40e1d3', background: 'rgba(64,225,211,0.1)' }}>{total}</span>
       </div>
@@ -204,7 +204,7 @@ export default function SlideFilmstrip({ sections, activeId, feedback, meta, onS
       )}
 
       {/* Thin divider */}
-      <div className="mx-2 my-0.5" style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />
+      <div className="mx-2 my-0.5" style={{ height: 1, background: 'var(--admin-hover-bg)' }} />
 
       {/* Sortable user sections */}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -249,7 +249,7 @@ export default function SlideFilmstrip({ sections, activeId, feedback, meta, onS
       )}
 
       {/* Thin divider */}
-      <div className="mx-2 mt-0.5" style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />
+      <div className="mx-2 mt-0.5" style={{ height: 1, background: 'var(--admin-hover-bg)' }} />
 
       {/* Closing — always last */}
       <SystemSlideChip label="שקף סיום" icon={<CheckCircle2 className="w-3 h-3" />} />

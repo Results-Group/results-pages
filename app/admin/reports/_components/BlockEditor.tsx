@@ -8,11 +8,10 @@ interface Props {
   onChange: (patch: Partial<ReportBlock>) => void
 }
 
-// colorScheme: this panel is dark regardless of the admin theme, so native
-// dropdowns must be dark too — otherwise the OS paints a white popup under the
-// inherited white text and the options are invisible.
-const fieldStyle = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', color: '#fff', colorScheme: 'dark' as const }
-const labelStyle = { color: 'rgba(255,255,255,0.35)', fontSize: '10px', fontWeight: 700 as const, marginBottom: 4 }
+// colorScheme follows the admin theme so native dropdowns match it — otherwise
+// the OS can paint e.g. a white popup under light text and hide the options.
+const fieldStyle = { background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)', colorScheme: 'var(--color-scheme)' }
+const labelStyle = { color: 'var(--admin-text-muted)', fontSize: '10px', fontWeight: 700 as const, marginBottom: 4 }
 
 function SmallInput({ value, onChange, placeholder, className }: { value: string; onChange: (v: string) => void; placeholder?: string; className?: string }) {
   return (
@@ -24,9 +23,9 @@ function SmallInput({ value, onChange, placeholder, className }: { value: string
 function RemoveBtn({ onClick }: { onClick: () => void }) {
   return (
     <button onClick={onClick} className="p-1 rounded transition-colors shrink-0"
-      style={{ color: 'rgba(255,255,255,0.2)' }}
+      style={{ color: 'var(--admin-text-muted)' }}
       onMouseEnter={e => { e.currentTarget.style.color = '#ef4444' }}
-      onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.2)' }}
+      onMouseLeave={e => { e.currentTarget.style.color = 'var(--admin-text-muted)' }}
       aria-label="מחק">
       <Trash2 className="w-3 h-3" />
     </button>
@@ -59,7 +58,7 @@ function KpiGridEditor({ block, onChange }: Props) {
           <SmallInput value={kpi.value} onChange={v => update(idx, { value: v })} placeholder="ערך" className="w-28" />
           <SmallInput value={kpi.subtitle || ''} onChange={v => update(idx, { subtitle: v })} placeholder="תת-כותרת" className="flex-1" />
           <SmallInput value={kpi.trend || ''} onChange={v => update(idx, { trend: v })} placeholder="מגמה" className="w-24" />
-          <label className="flex items-center gap-1 text-[10px] shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }}>
+          <label className="flex items-center gap-1 text-[10px] shrink-0" style={{ color: 'var(--admin-text-muted)' }}>
             <input type="checkbox" checked={!!kpi.highlight} onChange={e => update(idx, { highlight: e.target.checked })} />
             הדגש
           </label>
@@ -134,7 +133,7 @@ function DataRowsEditor({ block, onChange }: Props) {
     <div className="space-y-3">
       <SmallInput value={block.title || ''} onChange={v => onChange({ title: v })} placeholder="כותרת" className="w-full" />
       {rows.map((row, idx) => (
-        <div key={idx} className="rounded p-3 space-y-2" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
+        <div key={idx} className="rounded p-3 space-y-2" style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)' }}>
           <div className="flex items-center gap-2">
             <SmallInput value={row.title} onChange={v => updateRow(idx, { title: v })} placeholder="כותרת שורה" className="flex-1" />
             <RemoveBtn onClick={() => onChange({ rows: rows.filter((_, i) => i !== idx) })} />
@@ -173,7 +172,7 @@ function SourceGridEditor({ block, onChange }: Props) {
           <SmallInput value={src.value} onChange={v => update(idx, { value: v })} placeholder="ערך/מספר" className="w-24" />
           <SmallInput value={src.budget || ''} onChange={v => update(idx, { budget: v })} placeholder="תקציב" className="w-24" />
           <SmallInput value={String(src.budgetPercent || '')} onChange={v => update(idx, { budgetPercent: Number(v) || 0 })} placeholder="%" className="w-16" />
-          <label className="flex items-center gap-1 text-[10px] shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }}>
+          <label className="flex items-center gap-1 text-[10px] shrink-0" style={{ color: 'var(--admin-text-muted)' }}>
             <input type="checkbox" checked={!!src.highlight} onChange={e => update(idx, { highlight: e.target.checked })} /> הדגש
           </label>
           <RemoveBtn onClick={() => onChange({ sources: sources.filter((_, i) => i !== idx) })} />
@@ -196,7 +195,7 @@ function TableEditor({ block, onChange }: Props) {
         {columns.map((col, idx) => (
           <div key={idx} className="flex items-center gap-1">
             <SmallInput value={col.label} onChange={v => onChange({ columns: columns.map((c, i) => i === idx ? { ...c, label: v, key: v.toLowerCase().replace(/\s+/g, '_') } : c) })} placeholder="שם עמודה" className="w-28" />
-            <label className="flex items-center gap-1 text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            <label className="flex items-center gap-1 text-[10px]" style={{ color: 'var(--admin-text-muted)' }}>
               <input type="checkbox" checked={!!col.highlight} onChange={e => onChange({ columns: columns.map((c, i) => i === idx ? { ...c, highlight: e.target.checked } : c) })} /> הדגש
             </label>
             <RemoveBtn onClick={() => onChange({ columns: columns.filter((_, i) => i !== idx) })} />
@@ -213,7 +212,7 @@ function TableEditor({ block, onChange }: Props) {
               <thead>
                 <tr>
                   {columns.map(col => (
-                    <th key={col.key} className="text-right px-2 py-1 font-bold" style={{ color: col.highlight ? '#40e1d3' : 'rgba(255,255,255,0.4)' }}>{col.label}</th>
+                    <th key={col.key} className="text-right px-2 py-1 font-bold" style={{ color: col.highlight ? '#40e1d3' : 'var(--admin-text-muted)' }}>{col.label}</th>
                   ))}
                   <th className="w-8" />
                 </tr>
@@ -331,10 +330,10 @@ function IdeaCardsEditor({ block, onChange }: Props) {
   return (
     <div className="space-y-2">
       {ideas.map((idea, idx) => (
-        <div key={idx} className="rounded p-3 space-y-1" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
+        <div key={idx} className="rounded p-3 space-y-1" style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)' }}>
           <div className="flex items-center gap-2">
             <SmallInput value={idea.title} onChange={v => update(idx, { title: v })} placeholder="כותרת" className="flex-1" />
-            <label className="flex items-center gap-1 text-[10px] shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            <label className="flex items-center gap-1 text-[10px] shrink-0" style={{ color: 'var(--admin-text-muted)' }}>
               <input type="checkbox" checked={!!idea.fullWidth} onChange={e => update(idx, { fullWidth: e.target.checked })} /> רוחב מלא
             </label>
             <RemoveBtn onClick={() => onChange({ ideas: ideas.filter((_, i) => i !== idx) })} />
@@ -363,6 +362,6 @@ export default function BlockEditor({ block, onChange }: Props) {
     case 'action_list': return <ActionListEditor block={block} onChange={onChange} />
     case 'idea_cards': return <IdeaCardsEditor block={block} onChange={onChange} />
     default:
-      return <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>סוג בלוק לא מוכר: {block.type}</p>
+      return <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>סוג בלוק לא מוכר: {block.type}</p>
   }
 }

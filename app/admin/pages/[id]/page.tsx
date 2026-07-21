@@ -483,10 +483,10 @@ export default function EditPage() {
                 <div className="relative rounded-xl overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
                   <div
                     className="flex items-center justify-between px-4 py-2"
-                    style={{ background: '#1a1a2e', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+                    style={{ background: '#1a1a2e', borderBottom: '1px solid var(--admin-border)' }}
                   >
-                    <span className="text-xs font-mono" style={{ color: 'rgba(255,255,255,0.35)' }}>HTML</span>
-                    <span className="text-xs font-mono" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                    <span className="text-xs font-mono" style={{ color: 'var(--admin-text-muted)' }}>HTML</span>
+                    <span className="text-xs font-mono" style={{ color: 'var(--admin-text-muted)' }}>
                       {htmlContent.length.toLocaleString()} תווים
                     </span>
                   </div>

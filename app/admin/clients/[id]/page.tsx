@@ -177,15 +177,15 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
       <div className="rounded-xl p-5 mb-5" style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}>
         <div className="flex items-start gap-4 flex-wrap">
           <label className="relative w-20 h-20 rounded-xl overflow-hidden cursor-pointer flex-shrink-0 flex items-center justify-center"
-            style={{ background: client.brand_color || 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}>
+            style={{ background: client.brand_color || '#64748b', border: '1px solid var(--admin-border)' }}>
             {displayLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={displayLogo} alt="" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-2xl font-semibold" style={{ color: '#fff' }}>{client.name.charAt(0).toUpperCase()}</span>
+              <span className="text-2xl font-semibold" style={{ color: 'var(--admin-text-primary)' }}>{client.name.charAt(0).toUpperCase()}</span>
             )}
             <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity" style={{ background: 'rgba(0,0,0,0.5)' }}>
-              <Upload className="w-5 h-5" style={{ color: '#fff' }} />
+              <Upload className="w-5 h-5" style={{ color: 'var(--admin-text-primary)' }} />
             </div>
             <input type="file" accept="image/*" className="hidden" onChange={e => { if (e.target.files?.[0]) handleLogoSelect(e.target.files[0]) }} />
           </label>

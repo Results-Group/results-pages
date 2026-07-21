@@ -97,6 +97,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const saved = localStorage.getItem('theme') as 'dark' | 'light' | null
     if (saved === 'light' || saved === 'dark') {
       setTheme(saved)
+      // Keep the DOM in step with the restored state. The inline script in the
+      // root layout already paints the right theme before hydration; re-applying
+      // here stops React state and the attribute drifting apart afterwards.
+      if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light')
+      else document.documentElement.removeAttribute('data-theme')
     }
     setLocale(getStoredLocale())
     setActiveWorkspace(getActiveWorkspaceFromCookie())

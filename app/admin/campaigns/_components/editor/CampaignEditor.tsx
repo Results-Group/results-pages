@@ -599,40 +599,40 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
       {/* Toolbar */}
       <div
         className="flex items-center gap-2 px-4 py-2.5 flex-wrap shrink-0"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'rgba(5,5,5,0.92)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
+        style={{ borderBottom: '1px solid var(--admin-border)', background: 'var(--admin-bg-card)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
       >
-        <Link href="/admin/campaigns" className="inline-flex items-center gap-1.5 text-sm font-bold transition-colors duration-200" style={{ color: 'rgba(255,255,255,0.4)' }}
+        <Link href="/admin/campaigns" className="inline-flex items-center gap-1.5 text-sm font-bold transition-colors duration-200" style={{ color: 'var(--admin-text-muted)' }}
           onMouseEnter={e => { e.currentTarget.style.color = '#40e1d3' }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'var(--admin-text-muted)' }}
         >
           <ArrowRight className="w-4 h-4" /> חזרה
         </Link>
 
-        <div className="h-5 w-px mx-1" style={{ background: 'rgba(255,255,255,0.07)' }} />
+        <div className="h-5 w-px mx-1" style={{ background: 'var(--admin-bg-elevated)' }} />
 
-        <button onClick={undo} disabled={!canUndo} className="p-2 rounded-lg disabled:opacity-20 transition-colors duration-200" style={{ color: 'rgba(255,255,255,0.5)' }}
+        <button onClick={undo} disabled={!canUndo} className="p-2 rounded-lg disabled:opacity-20 transition-colors duration-200" style={{ color: 'var(--admin-text-secondary)' }}
           onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.color = '#40e1d3' }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'var(--admin-text-secondary)' }}
           title="בטל (Cmd+Z)">
           <Undo2 className="w-4 h-4" />
         </button>
-        <button onClick={redo} disabled={!canRedo} className="p-2 rounded-lg disabled:opacity-20 transition-colors duration-200" style={{ color: 'rgba(255,255,255,0.5)' }}
+        <button onClick={redo} disabled={!canRedo} className="p-2 rounded-lg disabled:opacity-20 transition-colors duration-200" style={{ color: 'var(--admin-text-secondary)' }}
           onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.color = '#40e1d3' }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'var(--admin-text-secondary)' }}
           title="בצע שוב (Cmd+Shift+Z)">
           <Redo2 className="w-4 h-4" />
         </button>
 
-        <div className="h-5 w-px mx-1" style={{ background: 'rgba(255,255,255,0.07)' }} />
+        <div className="h-5 w-px mx-1" style={{ background: 'var(--admin-bg-elevated)' }} />
 
         {/* Device toggle */}
-        <div className="flex gap-0.5 p-0.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.04)' }}>
+        <div className="flex gap-0.5 p-0.5 rounded-lg" style={{ background: 'var(--admin-hover-bg)' }}>
           <button onClick={() => setDevice('desktop')} className="p-1.5 rounded-md transition-all duration-200"
-            style={device === 'desktop' ? { background: 'rgba(64,225,211,0.12)', color: '#40e1d3' } : { color: 'rgba(255,255,255,0.35)' }} title="דסקטופ">
+            style={device === 'desktop' ? { background: 'rgba(64,225,211,0.12)', color: '#40e1d3' } : { color: 'var(--admin-text-muted)' }} title="דסקטופ">
             <Monitor className="w-4 h-4" />
           </button>
           <button onClick={() => setDevice('mobile')} className="p-1.5 rounded-md transition-all duration-200"
-            style={device === 'mobile' ? { background: 'rgba(64,225,211,0.12)', color: '#40e1d3' } : { color: 'rgba(255,255,255,0.35)' }} title="מובייל">
+            style={device === 'mobile' ? { background: 'rgba(64,225,211,0.12)', color: '#40e1d3' } : { color: 'var(--admin-text-muted)' }} title="מובייל">
             <Smartphone className="w-4 h-4" />
           </button>
         </div>
@@ -640,7 +640,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
         <button onClick={() => setShowFullPreview(p => !p)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
           style={showFullPreview
             ? { color: '#40e1d3', background: 'rgba(64,225,211,0.1)', border: '1px solid rgba(64,225,211,0.3)' }
-            : { color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.08)' }
+            : { color: 'var(--admin-text-secondary)', border: '1px solid var(--admin-border)' }
           }>
           {showFullPreview ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
           תצוגת מצגת מלאה
@@ -664,7 +664,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
         )}
 
         {/* Save state */}
-        <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>
+        <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: 'var(--admin-text-muted)' }}>
           {saveState === 'saving' && <><Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: '#40e1d3' }} /> שומר...</>}
           {saveState === 'saved' && <><CheckCircle2 className="w-3.5 h-3.5" style={{ color: '#40e1d3' }} /> נשמר</>}
           {saveState === 'error' && !conflict && <span style={{ color: '#ef4444' }}>שגיאת שמירה</span>}
@@ -672,22 +672,22 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
 
         {slug && (
           <button onClick={copyLink} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
-            style={{ background: copied ? 'rgba(64,225,211,0.1)' : 'rgba(255,255,255,0.04)', border: `1px solid ${copied ? 'rgba(64,225,211,0.3)' : 'rgba(255,255,255,0.08)'}`, color: copied ? '#40e1d3' : 'rgba(255,255,255,0.5)' }}>
+            style={{ background: copied ? 'rgba(64,225,211,0.1)' : 'var(--admin-hover-bg)', border: `1px solid ${copied ? 'rgba(64,225,211,0.3)' : 'var(--admin-border)'}`, color: copied ? '#40e1d3' : 'var(--admin-text-secondary)' }}>
             {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
             {copied ? 'הועתק' : 'העתק לינק'}
           </button>
         )}
         {slug && (
-          <a href={`/c/${slug}?preview=1`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg transition-colors duration-200" style={{ color: 'rgba(255,255,255,0.4)' }}
+          <a href={`/c/${slug}?preview=1`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg transition-colors duration-200" style={{ color: 'var(--admin-text-muted)' }}
             onMouseEnter={e => { e.currentTarget.style.color = '#40e1d3' }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--admin-text-muted)' }}
             title="פתח בטאב חדש">
             <ExternalLink className="w-4 h-4" />
           </a>
         )}
 
         <button onClick={() => save('draft')} disabled={saveState === 'saving'} className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold disabled:opacity-30 transition-all duration-200"
-          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}>
+          style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)' }}>
           <Save className="w-3.5 h-3.5" /> טיוטה
         </button>
         <button onClick={() => save('published', { redirect: true })} disabled={saveState === 'saving'} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold disabled:opacity-30 transition-all duration-200"
@@ -698,7 +698,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
 
       {/* Body: filmstrip | canvas | inspector */}
       <div className="flex flex-1 min-h-0">
-        <aside className="w-56 shrink-0 overflow-y-auto p-3 hidden md:block" style={{ borderLeft: '1px solid rgba(255,255,255,0.06)', background: '#050505' }}>
+        <aside className="w-56 shrink-0 overflow-y-auto p-3 hidden md:block" style={{ borderLeft: '1px solid var(--admin-border)', background: 'var(--admin-bg-card)' }}>
           <SlideFilmstrip
             sections={doc.sections}
             activeId={activeId}
@@ -720,23 +720,23 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
           {!showFullPreview && activeSection && doc.sections.length > 1 && (() => {
             const idx = doc.sections.findIndex(s => s.id === activeId)
             return (
-              <div className="flex items-center justify-between gap-2 px-4 py-2 shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(10,10,10,0.6)' }}>
+              <div className="flex items-center justify-between gap-2 px-4 py-2 shrink-0" style={{ borderBottom: '1px solid var(--admin-border)', background: 'var(--admin-bg-card)' }}>
                 <button
                   type="button"
                   disabled={idx <= 0}
                   onClick={() => idx > 0 && setActiveId(doc.sections[idx - 1].id)}
                   className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors disabled:opacity-30"
-                  style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.7)' }}
+                  style={{ background: 'var(--admin-hover-bg)', color: 'var(--admin-text-secondary)' }}
                 >
                   <ChevronRight className="w-3.5 h-3.5" /> הקודם
                 </button>
-                <span className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>שקף {idx + 1} מתוך {doc.sections.length}</span>
+                <span className="text-xs font-bold" style={{ color: 'var(--admin-text-secondary)' }}>שקף {idx + 1} מתוך {doc.sections.length}</span>
                 <button
                   type="button"
                   disabled={idx >= doc.sections.length - 1}
                   onClick={() => idx < doc.sections.length - 1 && setActiveId(doc.sections[idx + 1].id)}
                   className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors disabled:opacity-30"
-                  style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.7)' }}
+                  style={{ background: 'var(--admin-hover-bg)', color: 'var(--admin-text-secondary)' }}
                 >
                   הבא <ChevronLeft className="w-3.5 h-3.5" />
                 </button>
@@ -749,7 +749,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
               <button
                 onClick={() => setShowFullPreview(false)}
                 className="fixed top-4 left-4 z-[61] flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-colors"
-                style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', backdropFilter: 'blur(8px)' }}
+                style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid var(--admin-border-input)', color: '#fff', backdropFilter: 'blur(8px)' }}
               >
                 <X className="w-4 h-4" /> סגור תצוגה
               </button>
@@ -778,7 +778,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
           </div>
         </main>
 
-        <aside className="w-72 shrink-0 overflow-y-auto p-4 hidden lg:block" style={{ borderRight: '1px solid rgba(255,255,255,0.06)', background: 'rgba(10,10,10,0.95)' }}>
+        <aside className="w-72 shrink-0 overflow-y-auto p-4 hidden lg:block" style={{ borderRight: '1px solid var(--admin-border)', background: 'var(--admin-bg-card)' }}>
           <Inspector
             section={activeSection}
             meta={doc.meta}
@@ -799,15 +799,15 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
       {/* Approvals panel */}
       {showApprovals && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }} onClick={() => setShowApprovals(false)}>
-          <div className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-2xl p-6" style={{ background: 'rgba(10,10,10,0.95)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }} onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-2xl p-6" style={{ background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full" style={{ background: '#40e1d3', boxShadow: '0 0 8px rgba(64,225,211,0.5)' }} />
-                <h3 className="text-base font-bold" style={{ color: '#fff' }}>אישורי לקוח ({approvedCount}/{feedbackCount})</h3>
+                <h3 className="text-base font-bold" style={{ color: 'var(--admin-text-primary)' }}>אישורי לקוח ({approvedCount}/{feedbackCount})</h3>
               </div>
-              <button onClick={() => setShowApprovals(false)} className="p-1.5 rounded-lg transition-colors" style={{ color: 'rgba(255,255,255,0.3)' }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#fff' }}
-                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)' }}
+              <button onClick={() => setShowApprovals(false)} className="p-1.5 rounded-lg transition-colors" style={{ color: 'var(--admin-text-muted)' }}
+                onMouseEnter={e => { e.currentTarget.style.color = 'var(--admin-text-primary)' }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'var(--admin-text-muted)' }}
                 aria-label="סגור">
                 <X className="w-4 h-4" />
               </button>
@@ -818,14 +818,14 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
                 const color = fb.status === 'approved' ? '#40e1d3' : fb.status === 'rejected' ? '#ef4444' : '#64748b'
                 const label = fb.status === 'approved' ? 'אושר' : fb.status === 'rejected' ? 'נדרש שינוי' : 'ממתין'
                 return (
-                  <div key={s.id} className="rounded-xl p-3.5 transition-all duration-200" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div key={s.id} className="rounded-xl p-3.5 transition-all duration-200" style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)' }}>
                     <div className="flex items-center gap-2.5 mb-1">
                       <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color, boxShadow: `0 0 6px ${color}50` }} />
-                      <span className="text-sm font-bold flex-1 truncate" style={{ color: '#fff' }}>{s.title || 'שקף ללא כותרת'}</span>
+                      <span className="text-sm font-bold flex-1 truncate" style={{ color: 'var(--admin-text-primary)' }}>{s.title || 'שקף ללא כותרת'}</span>
                       <span className="text-[11px] font-bold px-2 py-0.5 rounded" style={{ color, background: `${color}15` }}>{label}</span>
                     </div>
-                    {fb.comment && <p className="text-xs mt-1.5" style={{ color: 'rgba(255,255,255,0.6)' }}>{fb.comment}</p>}
-                    {fb.author && <p className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>— {fb.author}</p>}
+                    {fb.comment && <p className="text-xs mt-1.5" style={{ color: 'var(--admin-text-secondary)' }}>{fb.comment}</p>}
+                    {fb.author && <p className="text-[11px] mt-1" style={{ color: 'var(--admin-text-muted)' }}>— {fb.author}</p>}
                   </div>
                 )
               })}
@@ -842,9 +842,9 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
         {toasts.map(t => (
           <div key={t.id} className="px-5 py-2.5 rounded-xl text-sm font-bold shadow-2xl"
             style={{
-              background: t.kind === 'error' ? 'rgba(239,68,68,0.9)' : t.kind === 'success' ? 'rgba(64,225,211,0.15)' : 'rgba(10,10,10,0.95)',
+              background: t.kind === 'error' ? 'rgba(239,68,68,0.9)' : t.kind === 'success' ? 'rgba(64,225,211,0.15)' : 'var(--admin-bg-card)',
               color: t.kind === 'error' ? '#fff' : t.kind === 'success' ? '#40e1d3' : '#fff',
-              border: `1px solid ${t.kind === 'error' ? 'rgba(239,68,68,0.5)' : t.kind === 'success' ? 'rgba(64,225,211,0.3)' : 'rgba(255,255,255,0.1)'}`,
+              border: `1px solid ${t.kind === 'error' ? 'rgba(239,68,68,0.5)' : t.kind === 'success' ? 'rgba(64,225,211,0.3)' : 'var(--admin-border)'}`,
               backdropFilter: 'blur(12px)',
             }}>
             {t.message}
