@@ -116,7 +116,7 @@ export default function ReportsListPage() {
             { label: t('common.published'), value: reports.filter(r => r.status === 'published').length },
             { label: t('nav.clients'), value: groupedByClient.length },
           ].map(kpi => (
-            <div key={kpi.label} className="rounded-xl p-4" style={{ background: 'rgba(10,10,10,0.8)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div key={kpi.label} className="rounded-xl p-4" style={{ background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)' }}>
               <div className="text-xs font-semibold mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>{kpi.label}</div>
               <div className="text-2xl font-black" style={{ color: '#40e1d3' }}>{kpi.value}</div>
             </div>
@@ -125,14 +125,14 @@ export default function ReportsListPage() {
       )}
 
       <div className="relative mb-8">
-        <Search className="absolute start-4 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'rgba(255,255,255,0.3)' }} />
+        <Search className="absolute start-4 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--admin-text-muted)' }} />
         <input
           type="text" value={search} onChange={e => setSearch(e.target.value)}
           placeholder={t('reports.searchPlaceholder')}
           className="w-full ps-11 pe-4 py-3 rounded-xl text-sm outline-none transition-all duration-200"
-          style={{ background: 'rgba(10,10,10,0.8)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--admin-text-primary)' }}
+          style={{ background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)' }}
           onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.4)' }}
-          onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
+          onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
         />
       </div>
 
@@ -142,8 +142,8 @@ export default function ReportsListPage() {
           <span className="text-sm">{t('common.loading')}</span>
         </div>
       ) : reports.length === 0 ? (
-        <div className="relative text-center py-24 px-8 rounded-2xl" style={{ background: 'rgba(10,10,10,0.6)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          <BarChart3 className="w-12 h-12 mx-auto mb-4" style={{ color: 'rgba(255,255,255,0.15)' }} />
+        <div className="relative text-center py-24 px-8 rounded-2xl" style={{ background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)' }}>
+          <BarChart3 className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--admin-text-muted)' }} />
           <p className="text-lg font-bold mb-3" style={{ color: 'var(--admin-text-secondary)' }}>
             {search ? t('common.noResults') : t('reports.empty')}
           </p>
@@ -160,7 +160,7 @@ export default function ReportsListPage() {
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#40e1d3', boxShadow: '0 0 8px rgba(64,225,211,0.5)' }} />
                 <h3 className="text-sm font-bold tracking-wide" style={{ color: '#40e1d3' }}>{clientName}</h3>
-                <span className="text-[10px] px-2.5 py-0.5 rounded font-semibold" style={{ color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.04)' }}>{clientReports.length}</span>
+                <span className="text-[10px] px-2.5 py-0.5 rounded font-semibold" style={{ color: 'var(--admin-text-muted)', background: 'var(--admin-hover-bg)' }}>{clientReports.length}</span>
                 <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, rgba(64,225,211,0.15), transparent)' }} />
               </div>
 
@@ -169,20 +169,20 @@ export default function ReportsListPage() {
                   const dotColor = STATUS_DOT[r.status] || STATUS_DOT.draft
                   return (
                     <div key={r.id} className="group relative rounded-xl p-4 transition-all duration-300"
-                      style={{ background: 'rgba(10,10,10,0.8)', border: '1px solid rgba(255,255,255,0.08)' }}
+                      style={{ background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)' }}
                       onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.25)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'translateY(0)' }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--admin-border)'; e.currentTarget.style.transform = 'translateY(0)' }}
                     >
                       <div className="flex items-center gap-4">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2.5 mb-2">
                             <span className="w-2 h-2 rounded-full shrink-0" style={{ background: dotColor, boxShadow: `0 0 8px ${dotColor}60` }} />
-                            <h3 className="text-sm font-bold truncate" style={{ color: '#fff' }}>{r.report_name}</h3>
+                            <h3 className="text-sm font-bold truncate" style={{ color: 'var(--admin-text-primary)' }}>{r.report_name}</h3>
                             <span className="text-[10px] px-2 py-0.5 rounded font-semibold shrink-0" style={{ color: dotColor, background: `${dotColor}18` }}>
                               {STATUS_LABELS[r.status]}
                             </span>
                           </div>
-                          <div className="flex items-center gap-4 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          <div className="flex items-center gap-4 text-xs" style={{ color: 'var(--admin-text-muted)' }}>
                             {r.period_label && <span className="font-medium">{r.period_label}</span>}
                             <span className="flex items-center gap-1.5">
                               <Calendar className="w-3 h-3" />
@@ -195,15 +195,15 @@ export default function ReportsListPage() {
                           {r.status === 'published' && (
                             <>
                               <a href={getReportUrl(r.slug)} target="_blank" rel="noopener noreferrer"
-                                className="p-2 rounded-lg transition-all duration-200" style={{ color: 'rgba(255,255,255,0.4)' }}
+                                className="p-2 rounded-lg transition-all duration-200" style={{ color: 'var(--admin-text-muted)' }}
                                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.1)'; e.currentTarget.style.color = '#40e1d3' }}
-                                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
                                 title="פתיחה">
                                 <ExternalLink className="w-4 h-4" />
                               </a>
                               <button onClick={() => handleCopy(r.slug)}
                                 className="p-2 rounded-lg transition-all duration-200"
-                                style={{ color: copied === r.slug ? '#40e1d3' : 'rgba(255,255,255,0.4)' }}
+                                style={{ color: copied === r.slug ? '#40e1d3' : 'var(--admin-text-muted)' }}
                                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.1)' }}
                                 onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
                                 title="העתקת לינק">
@@ -212,17 +212,17 @@ export default function ReportsListPage() {
                             </>
                           )}
                           <Link href={`/admin/reports/${r.id}`}
-                            className="p-2 rounded-lg transition-all duration-200" style={{ color: 'rgba(255,255,255,0.4)' }}
+                            className="p-2 rounded-lg transition-all duration-200" style={{ color: 'var(--admin-text-muted)' }}
                             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.1)'; e.currentTarget.style.color = '#40e1d3' }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
                             title="עריכה">
                             <Edit3 className="w-4 h-4" />
                           </Link>
                           {userRole === 'admin' && (
                             <button onClick={() => handleDelete(r.id, r.report_name)}
-                              className="p-2 rounded-lg transition-all duration-200" style={{ color: 'rgba(255,255,255,0.4)' }}
+                              className="p-2 rounded-lg transition-all duration-200" style={{ color: 'var(--admin-text-muted)' }}
                               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; e.currentTarget.style.color = '#ef4444' }}
-                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-muted)' }}
                               title="מחיקה">
                               <Trash2 className="w-4 h-4" />
                             </button>

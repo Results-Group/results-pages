@@ -144,6 +144,13 @@
   --font-sans: 'Ping', sans-serif;
 }
 
+/* Tell the browser which scheme is active so native UI it paints itself —
+   scrollbars, form controls, autofill, the canvas behind the page — follows
+   the theme instead of always rendering light. */
+html {
+  color-scheme: var(--color-scheme);
+}
+
 body {
   font-family: 'Ping', sans-serif;
   min-height: 100vh;

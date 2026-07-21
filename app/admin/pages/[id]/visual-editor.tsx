@@ -153,7 +153,7 @@ const VisualEditor = forwardRef<VisualEditorRef, Props>(function VisualEditor(
       className={btnBase}
       style={{ width: 32, height: 32, color: 'var(--admin-text-secondary)' }}
       onMouseEnter={e => {
-        e.currentTarget.style.background = 'rgba(255,255,255,0.1)'
+        e.currentTarget.style.background = 'var(--admin-bg-elevated)'
         e.currentTarget.style.color = 'var(--admin-text-primary)'
       }}
       onMouseLeave={e => {

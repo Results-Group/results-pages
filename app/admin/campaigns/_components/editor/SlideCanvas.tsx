@@ -65,12 +65,12 @@ function SortableAssetCard({ asset, section, clientName, clientLogoUrl, captionO
       <div className="absolute top-2 left-2 z-20 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
         <button type="button" {...attributes} {...listeners}
           className="p-1.5 rounded-lg cursor-grab active:cursor-grabbing touch-none backdrop-blur-sm"
-          style={{ background: 'rgba(0,0,0,0.75)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }} aria-label="גרור">
+          style={{ background: 'rgba(0,0,0,0.75)', color: '#fff', border: '1px solid var(--admin-border)' }} aria-label="גרור">
           <GripVertical className="w-3.5 h-3.5" />
         </button>
         <button type="button" onClick={() => replaceRef.current?.click()}
           className="p-1.5 rounded-lg backdrop-blur-sm transition-colors"
-          style={{ background: 'rgba(0,0,0,0.75)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }} aria-label="החלף תמונה">
+          style={{ background: 'rgba(0,0,0,0.75)', color: '#fff', border: '1px solid var(--admin-border)' }} aria-label="החלף תמונה">
           <RefreshCw className="w-3.5 h-3.5" />
         </button>
         <button type="button" onClick={() => onRemoveAsset(asset.id)}
@@ -83,7 +83,7 @@ function SortableAssetCard({ asset, section, clientName, clientLogoUrl, captionO
       </div>
 
       {/* Asset card wrapper */}
-      <div className="rounded-xl overflow-hidden transition-all duration-300" style={{ border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>
+      <div className="rounded-xl overflow-hidden transition-all duration-300" style={{ border: '1px solid var(--admin-border)', boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>
         <CanvasAsset asset={asset} mockupType={section.mockup_type} clientName={clientName} clientLogoUrl={clientLogoUrl} captionOverride={captionOverride} />
       </div>
 
@@ -95,9 +95,9 @@ function SortableAssetCard({ asset, section, clientName, clientLogoUrl, captionO
           placeholder="הוסף כיתוב..."
           dir="auto"
           className="w-full mt-2.5 px-3 py-2 rounded-lg text-xs outline-none transition-all duration-200"
-          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.8)' }}
+          style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-secondary)' }}
           onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
-          onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)' }}
+          onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
         />
       )}
     </div>
@@ -118,11 +118,11 @@ export default function SlideCanvas({
 
   if (!section) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-4" style={{ background: '#050505' }}>
-        <div className="relative p-10 rounded-2xl" style={{ border: '1px dashed rgba(255,255,255,0.08)' }}>
+      <div className="flex flex-col items-center justify-center h-full gap-4" style={{ background: 'var(--admin-bg-card)' }}>
+        <div className="relative p-10 rounded-2xl" style={{ border: '1px dashed var(--admin-border)' }}>
           <div className="absolute top-0 right-0 w-8 h-8" style={{ borderTop: '2px solid rgba(64,225,211,0.2)', borderRight: '2px solid rgba(64,225,211,0.2)' }} />
           <div className="absolute bottom-0 left-0 w-8 h-8" style={{ borderBottom: '2px solid rgba(64,225,211,0.1)', borderLeft: '2px solid rgba(64,225,211,0.1)' }} />
-          <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.3)' }}>בחר שקף מהרשימה או הוסף שקף חדש</p>
+          <p className="text-sm font-semibold" style={{ color: 'var(--admin-text-muted)' }}>בחר שקף מהרשימה או הוסף שקף חדש</p>
         </div>
       </div>
     )
@@ -164,7 +164,7 @@ export default function SlideCanvas({
   const atLimit = section.assets.length >= MAX_ASSETS
 
   return (
-    <div className="h-full overflow-auto" style={{ background: '#050505' }}>
+    <div className="h-full overflow-auto" style={{ background: 'var(--admin-bg-card)' }}>
       <div className="mx-auto px-6 py-8 transition-all duration-300" style={{ maxWidth }}>
         {/* Inline-editable title */}
         <input
@@ -174,9 +174,9 @@ export default function SlideCanvas({
           placeholder="כותרת השקף"
           dir="auto"
           className="w-full bg-transparent outline-none text-2xl font-black mb-2 transition-colors"
-          style={{ color: '#fff' }}
+          style={{ color: 'var(--admin-text-primary)' }}
           onFocus={e => { e.currentTarget.style.color = '#40e1d3' }}
-          onBlur={e => { e.currentTarget.style.color = '#fff' }}
+          onBlur={e => { e.currentTarget.style.color = 'var(--admin-text-primary)' }}
         />
 
         {/* Accent underline */}
@@ -190,7 +190,7 @@ export default function SlideCanvas({
           rows={2}
           dir="auto"
           className="w-full bg-transparent outline-none text-sm mb-8 resize-none leading-relaxed"
-          style={{ color: 'rgba(255,255,255,0.5)' }}
+          style={{ color: 'var(--admin-text-secondary)' }}
         />
 
         {/* Copy version switcher + preview */}
@@ -205,8 +205,8 @@ export default function SlideCanvas({
                     onClick={() => onActiveCopyChange(i)}
                     className="w-6 h-6 rounded-md text-[11px] font-bold transition-all duration-200"
                     style={activeCopyIdx === i
-                      ? { background: '#40e1d3', color: '#050505' }
-                      : { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.08)' }
+                      ? { background: '#40e1d3', color: 'var(--admin-text-primary)' }
+                      : { background: 'var(--admin-bg-elevated)', color: 'var(--admin-text-muted)', border: '1px solid var(--admin-border)' }
                     }
                   >
                     {i + 1}
@@ -214,7 +214,7 @@ export default function SlideCanvas({
                 ))}
               </div>
             </div>
-            <p className="text-sm leading-relaxed whitespace-pre-line" dir="auto" style={{ color: 'rgba(255,255,255,0.7)' }}>{activeCopy}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-line" dir="auto" style={{ color: 'var(--admin-text-secondary)' }}>{activeCopy}</p>
           </div>
         )}
 
@@ -223,25 +223,25 @@ export default function SlideCanvas({
             <div className="absolute top-0 right-0 w-12 h-12" style={{ borderTop: '2px solid rgba(64,225,211,0.2)', borderRight: '2px solid rgba(64,225,211,0.2)' }} />
             <div className="absolute bottom-0 left-0 w-12 h-12" style={{ borderBottom: '2px solid rgba(64,225,211,0.1)', borderLeft: '2px solid rgba(64,225,211,0.1)' }} />
             <LayoutTemplate className="w-8 h-8 mx-auto mb-3" style={{ color: '#40e1d3' }} />
-            <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.4)' }}>שקף ביניים — מציג כותרת וטקסט בלבד</p>
+            <p className="text-sm font-semibold" style={{ color: 'var(--admin-text-muted)' }}>שקף ביניים — מציג כותרת וטקסט בלבד</p>
           </div>
         ) : isVideo ? (
           <div className="space-y-4">
             {section.assets.map(asset => (
-              <div key={asset.id} className="rounded-xl p-4 transition-all duration-200" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div key={asset.id} className="rounded-xl p-4 transition-all duration-200" style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)' }}>
                 <div className="flex items-start gap-3">
                   <div className="flex-1 space-y-2">
                     <input type="url" value={asset.url} onChange={e => onUpdateAsset(asset.id, { url: e.target.value })}
                       placeholder="קישור לסרטון (YouTube, Vimeo, Google Drive...)" dir="ltr"
                       className="w-full px-3 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={videoFieldStyle}
                       onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
-                      onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
+                      onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
                     />
                     <input type="text" value={asset.caption} onChange={e => onUpdateAsset(asset.id, { caption: e.target.value })}
                       placeholder="כיתוב" dir="auto"
                       className="w-full px-3 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={videoFieldStyle}
                       onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
-                      onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
+                      onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
                     />
                   </div>
                   <button onClick={() => onRemoveAsset(asset.id)} className="p-2 rounded-lg transition-colors"
@@ -253,7 +253,7 @@ export default function SlideCanvas({
                   </button>
                 </div>
                 {asset.url && (
-                  <div className="mt-4 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="mt-4 rounded-xl overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
                     <CanvasAsset asset={asset} mockupType="video" clientName={clientName} clientLogoUrl={clientLogoUrl} captionOverride={activeCopy} />
                   </div>
                 )}
@@ -304,7 +304,7 @@ export default function SlideCanvas({
                     ) : null}
                   </div>
                   {/* Progress bar */}
-                  <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                  <div className="h-1 rounded-full overflow-hidden" style={{ background: 'var(--admin-bg-elevated)' }}>
                     <div
                       className="h-full rounded-full transition-all duration-300"
                       style={{ width: `${progressPct}%`, background: 'linear-gradient(90deg, #40e1d3, #22c55e)' }}
@@ -316,13 +316,13 @@ export default function SlideCanvas({
 
             {/* Drop zone / at-limit indicator */}
             {atLimit ? (
-              <div className="rounded-2xl px-5 py-4 flex items-center gap-3" style={{ border: '2px dashed rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.01)' }}>
+              <div className="rounded-2xl px-5 py-4 flex items-center gap-3" style={{ border: '2px dashed var(--admin-border)', background: 'var(--admin-hover-bg)' }}>
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)' }}>
                   <span className="text-sm font-black" style={{ color: '#ef4444' }}>{MAX_ASSETS}</span>
                 </div>
                 <div>
-                  <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>הגעת למגבלת {MAX_ASSETS} תמונות לשקף</p>
-                  <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.18)' }}>הוסף שקף חדש כדי להוסיף תמונות נוספות</p>
+                  <p className="text-xs font-bold" style={{ color: 'var(--admin-text-muted)' }}>הגעת למגבלת {MAX_ASSETS} תמונות לשקף</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: 'var(--admin-text-muted)' }}>הוסף שקף חדש כדי להוסיף תמונות נוספות</p>
                 </div>
               </div>
             ) : (
@@ -332,8 +332,8 @@ export default function SlideCanvas({
                   padding: section.assets.length === 0 ? '3rem 2rem' : '1.25rem 1.5rem',
                   border: isDragOver
                     ? '2px dashed rgba(64,225,211,0.6)'
-                    : '2px dashed rgba(255,255,255,0.07)',
-                  background: isDragOver ? 'rgba(64,225,211,0.06)' : 'rgba(255,255,255,0.01)',
+                    : '2px dashed var(--admin-border)',
+                  background: isDragOver ? 'rgba(64,225,211,0.06)' : 'var(--admin-hover-bg)',
                 }}
                 onDragOver={e => { e.preventDefault(); setIsDragOver(true) }}
                 onDragLeave={() => setIsDragOver(false)}
@@ -344,33 +344,33 @@ export default function SlideCanvas({
 
                 {/* Asset count badge */}
                 {section.assets.length > 0 && (
-                  <div className="absolute top-2 right-10 text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)' }}>
+                  <div className="absolute top-2 right-10 text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'var(--admin-bg-elevated)', color: 'var(--admin-text-muted)' }}>
                     {section.assets.length}/{MAX_ASSETS}
                   </div>
                 )}
 
                 {section.assets.length === 0 ? (
                   <div className="text-center">
-                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                      <Upload className="w-5 h-5" style={{ color: isDragOver ? '#40e1d3' : 'rgba(255,255,255,0.25)' }} />
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)' }}>
+                      <Upload className="w-5 h-5" style={{ color: isDragOver ? '#40e1d3' : 'var(--admin-text-muted)' }} />
                     </div>
-                    <p className="text-sm font-semibold mb-1" style={{ color: isDragOver ? '#40e1d3' : 'rgba(255,255,255,0.35)' }}>
+                    <p className="text-sm font-semibold mb-1" style={{ color: isDragOver ? '#40e1d3' : 'var(--admin-text-muted)' }}>
                       {isDragOver ? 'שחרר להעלאה' : 'גררו תמונות לכאן או לחצו לבחירה'}
                     </p>
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.18)' }}>
+                    <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>
                       PNG, JPG, WebP, HEIC — עד {MAX_FILE_MB} MB לקובץ · עד {MAX_ASSETS} תמונות לשקף
                     </p>
                   </div>
                 ) : (
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                      <ImageIcon className="w-4 h-4" style={{ color: isDragOver ? '#40e1d3' : 'rgba(255,255,255,0.25)' }} />
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)' }}>
+                      <ImageIcon className="w-4 h-4" style={{ color: isDragOver ? '#40e1d3' : 'var(--admin-text-muted)' }} />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold" style={{ color: isDragOver ? '#40e1d3' : 'rgba(255,255,255,0.35)' }}>
+                      <p className="text-xs font-semibold" style={{ color: isDragOver ? '#40e1d3' : 'var(--admin-text-muted)' }}>
                         {isDragOver ? 'שחרר להוסיף' : `הוסף עוד תמונות (${MAX_ASSETS - section.assets.length} נותרו)`}
                       </p>
-                      <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.18)' }}>גרור או לחץ לבחירה</p>
+                      <p className="text-[11px]" style={{ color: 'var(--admin-text-muted)' }}>גרור או לחץ לבחירה</p>
                     </div>
                   </div>
                 )}
@@ -393,7 +393,7 @@ export default function SlideCanvas({
 }
 
 const videoFieldStyle: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  color: 'rgba(255,255,255,0.85)',
+  background: 'var(--admin-hover-bg)',
+  border: '1px solid var(--admin-border)',
+  color: 'var(--admin-text-secondary)',
 }

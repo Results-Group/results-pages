@@ -286,7 +286,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
     }
   }, [mode, reportId, save])
 
-  const fieldStyle = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#fff' }
+  const fieldStyle = { background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)' }
 
   // Block type picker
   const [showBlockPicker, setShowBlockPicker] = useState(false)
@@ -300,41 +300,41 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
         </h2>
         <div className="flex items-center gap-2">
           {mode === 'edit' && (
-            <div className="flex items-center gap-1 rounded-lg p-0.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="flex items-center gap-1 rounded-lg p-0.5" style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)' }}>
               <button onClick={() => translate('he-to-en')} disabled={translating}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-bold transition-all"
-                style={{ color: 'rgba(255,255,255,0.5)' }}
+                style={{ color: 'var(--admin-text-secondary)' }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.08)'; e.currentTarget.style.color = '#40e1d3' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)' }}>
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-secondary)' }}>
                 <Languages className="w-3.5 h-3.5" /> {translating ? '...' : 'HE → EN'}
               </button>
               <button onClick={() => translate('en-to-he')} disabled={translating}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-bold transition-all"
-                style={{ color: 'rgba(255,255,255,0.5)' }}
+                style={{ color: 'var(--admin-text-secondary)' }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.08)'; e.currentTarget.style.color = '#40e1d3' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)' }}>
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--admin-text-secondary)' }}>
                 <Languages className="w-3.5 h-3.5" /> {translating ? '...' : 'EN → HE'}
               </button>
             </div>
           )}
           <button onClick={loadTemplate} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}
+            style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-secondary)' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)'; e.currentTarget.style.color = '#40e1d3' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}>
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--admin-border)'; e.currentTarget.style.color = 'var(--admin-text-secondary)' }}>
             <FileText className="w-3.5 h-3.5" /> {t('reports.loadTemplate')}
           </button>
           <button onClick={() => excelInputRef.current?.click()} disabled={importing}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}
+            style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-secondary)' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)'; e.currentTarget.style.color = '#40e1d3' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}>
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--admin-border)'; e.currentTarget.style.color = 'var(--admin-text-secondary)' }}>
             <Upload className="w-3.5 h-3.5" /> {importing ? t('reports.importing') : t('reports.importExcel')}
           </button>
           <input ref={excelInputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden"
             onChange={e => { const f = e.target.files?.[0]; if (f) importExcel(f) }} />
           <button onClick={() => save()} disabled={saving}
             className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all"
-            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff' }}>
+            style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)' }}>
             <Save className="w-4 h-4" /> {saving ? t('reports.saving') : t('reports.saveDraft')}
           </button>
           <button onClick={() => save('published')} disabled={saving}
@@ -346,20 +346,20 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
       </div>
 
       {/* Meta fields */}
-      <div className="rounded-xl p-5 mb-6 space-y-4" style={{ background: 'rgba(10,10,10,0.8)', border: '1px solid rgba(255,255,255,0.08)' }}>
+      <div className="rounded-xl p-5 mb-6 space-y-4" style={{ background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)' }}>
         <div className="grid grid-cols-2 gap-4">
           <div ref={clientDropdownRef} className="relative">
-            <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('common.client')}</label>
+            <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('common.client')}</label>
             <input value={client}
               onChange={e => { setClient(e.target.value); setClientId(null); setClientSearch(e.target.value); setShowClientDropdown(true) }}
               onFocus={() => setShowClientDropdown(true)}
               placeholder={locale === 'en' ? 'Client name...' : 'שם לקוח...'} className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle} />
             {showClientDropdown && filteredClients.length > 0 && (
               <div className="absolute z-20 top-full mt-1 w-full max-h-48 overflow-y-auto rounded-lg shadow-xl"
-                style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)' }}>
+                style={{ background: '#111', border: '1px solid var(--admin-border)' }}>
                 {filteredClients.slice(0, 20).map(c => (
                   <button key={c.id} onClick={() => selectClient(c)}
-                    className="block w-full text-right px-3 py-2 text-sm transition-colors hover:bg-white/5" style={{ color: '#fff' }}>
+                    className="block w-full text-right px-3 py-2 text-sm transition-colors hover:bg-white/5" style={{ color: 'var(--admin-text-primary)' }}>
                     {c.name}
                   </button>
                 ))}
@@ -367,19 +367,19 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
             )}
           </div>
           <div>
-            <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('reports.reportName')}</label>
+            <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('reports.reportName')}</label>
             <input value={reportName} onChange={e => setReportName(e.target.value)}
               placeholder={t('reports.reportNamePlaceholder')} className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('reports.period')}</label>
+            <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('reports.period')}</label>
             <input value={periodLabel} onChange={e => setPeriodLabel(e.target.value)}
               placeholder={t('reports.periodPlaceholder')} className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle} />
           </div>
           <div>
-            <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('common.password')} ({locale === 'en' ? 'optional' : 'לא חובה'})</label>
+            <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('common.password')} ({locale === 'en' ? 'optional' : 'לא חובה'})</label>
             <input type="password" value={password} onChange={e => setPassword(e.target.value)} autoComplete="off"
               placeholder={locale === 'en' ? 'Protect report...' : 'להגנת הדוח...'} className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none" style={fieldStyle} />
           </div>
@@ -394,10 +394,10 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
               onClick={() => setActiveTabIdx(idx)}
               className="px-4 py-2 rounded-t-lg text-xs font-bold transition-all relative"
               style={{
-                background: activeTabIdx === idx ? 'rgba(64,225,211,0.1)' : 'rgba(255,255,255,0.03)',
-                border: `1px solid ${activeTabIdx === idx ? 'rgba(64,225,211,0.3)' : 'rgba(255,255,255,0.06)'}`,
-                borderBottom: activeTabIdx === idx ? '2px solid #40e1d3' : '1px solid rgba(255,255,255,0.06)',
-                color: activeTabIdx === idx ? '#40e1d3' : 'rgba(255,255,255,0.5)',
+                background: activeTabIdx === idx ? 'rgba(64,225,211,0.1)' : 'var(--admin-hover-bg)',
+                border: `1px solid ${activeTabIdx === idx ? 'rgba(64,225,211,0.3)' : 'var(--admin-border)'}`,
+                borderBottom: activeTabIdx === idx ? '2px solid #40e1d3' : '1px solid var(--admin-border)',
+                color: activeTabIdx === idx ? '#40e1d3' : 'var(--admin-text-secondary)',
               }}
             >
               {tab.title || (locale === 'en' ? `Tab ${idx + 1}` : `טאב ${idx + 1}`)}
@@ -414,7 +414,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
 
       {/* Active tab editor */}
       {activeTab && (
-        <div className="rounded-xl p-5 mb-6" style={{ background: 'rgba(10,10,10,0.8)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="rounded-xl p-5 mb-6" style={{ background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)' }}>
           {/* Tab meta */}
           <div className="flex items-center gap-3 mb-4">
             <div className="flex-1 grid grid-cols-2 gap-3">
@@ -424,14 +424,14 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
                 placeholder={t('reports.tabSubtitle')} className="px-3 py-2 rounded-lg text-sm outline-none" style={fieldStyle} />
             </div>
             <button onClick={() => moveTab(activeTabIdx, -1)} disabled={activeTabIdx === 0}
-              className="p-1.5 rounded disabled:opacity-20" style={{ color: 'rgba(255,255,255,0.4)' }} aria-label="הזז למעלה"><ChevronUp className="w-4 h-4" /></button>
+              className="p-1.5 rounded disabled:opacity-20" style={{ color: 'var(--admin-text-muted)' }} aria-label="הזז למעלה"><ChevronUp className="w-4 h-4" /></button>
             <button onClick={() => moveTab(activeTabIdx, 1)} disabled={activeTabIdx === tabs.length - 1}
-              className="p-1.5 rounded disabled:opacity-20" style={{ color: 'rgba(255,255,255,0.4)' }} aria-label="הזז למטה"><ChevronDown className="w-4 h-4" /></button>
+              className="p-1.5 rounded disabled:opacity-20" style={{ color: 'var(--admin-text-muted)' }} aria-label="הזז למטה"><ChevronDown className="w-4 h-4" /></button>
             {tabs.length > 1 && (
               <button onClick={() => removeTab(activeTabIdx)} className="p-1.5 rounded transition-colors"
-                style={{ color: 'rgba(255,255,255,0.3)' }}
+                style={{ color: 'var(--admin-text-muted)' }}
                 onMouseEnter={e => { e.currentTarget.style.color = '#ef4444' }}
-                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)' }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'var(--admin-text-muted)' }}
                 aria-label="מחק לשונית">
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -441,19 +441,19 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
           {/* Blocks */}
           <div className="space-y-4">
             {activeTab.blocks.map((block, bIdx) => (
-              <div key={block.id} className="rounded-lg relative" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                <div className="flex items-center gap-2 px-4 py-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                  <GripVertical className="w-3.5 h-3.5" style={{ color: 'rgba(255,255,255,0.2)' }} />
+              <div key={block.id} className="rounded-lg relative" style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)' }}>
+                <div className="flex items-center gap-2 px-4 py-2" style={{ borderBottom: '1px solid var(--admin-border)' }}>
+                  <GripVertical className="w-3.5 h-3.5" style={{ color: 'var(--admin-text-muted)' }} />
                   <span className="text-[10px] font-bold uppercase" style={{ color: 'rgba(64,225,211,0.5)' }}>{t(BLOCK_TYPE_KEYS[block.type] as any)}</span>
                   <div className="flex-1" />
                   <button onClick={() => moveBlock(block.id, -1)} disabled={bIdx === 0}
-                    className="p-1 rounded disabled:opacity-20" style={{ color: 'rgba(255,255,255,0.3)' }} aria-label="הזז למעלה"><ChevronUp className="w-3.5 h-3.5" /></button>
+                    className="p-1 rounded disabled:opacity-20" style={{ color: 'var(--admin-text-muted)' }} aria-label="הזז למעלה"><ChevronUp className="w-3.5 h-3.5" /></button>
                   <button onClick={() => moveBlock(block.id, 1)} disabled={bIdx === activeTab.blocks.length - 1}
-                    className="p-1 rounded disabled:opacity-20" style={{ color: 'rgba(255,255,255,0.3)' }} aria-label="הזז למטה"><ChevronDown className="w-3.5 h-3.5" /></button>
+                    className="p-1 rounded disabled:opacity-20" style={{ color: 'var(--admin-text-muted)' }} aria-label="הזז למטה"><ChevronDown className="w-3.5 h-3.5" /></button>
                   <button onClick={() => removeBlock(block.id)} className="p-1 rounded transition-colors"
-                    style={{ color: 'rgba(255,255,255,0.2)' }}
+                    style={{ color: 'var(--admin-text-muted)' }}
                     onMouseEnter={e => { e.currentTarget.style.color = '#ef4444' }}
-                    onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.2)' }}
+                    onMouseLeave={e => { e.currentTarget.style.color = 'var(--admin-text-muted)' }}
                     aria-label="מחק בלוק">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -476,11 +476,11 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
             </button>
             {showBlockPicker && (
               <div className="absolute z-20 bottom-full mb-1 w-full rounded-lg shadow-xl p-2 grid grid-cols-3 gap-1"
-                style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)' }}>
+                style={{ background: '#111', border: '1px solid var(--admin-border)' }}>
                 {(Object.keys(BLOCK_TYPE_KEYS) as ReportBlockType[]).map(type => (
                   <button key={type} onClick={() => { addBlock(type); setShowBlockPicker(false) }}
                     className="text-right px-3 py-2 rounded text-xs font-semibold transition-colors hover:bg-white/5"
-                    style={{ color: 'rgba(255,255,255,0.7)' }}>
+                    style={{ color: 'var(--admin-text-secondary)' }}>
                     {t(BLOCK_TYPE_KEYS[type] as any)}
                   </button>
                 ))}
