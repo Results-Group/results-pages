@@ -286,63 +286,6 @@ export async function purgeReport(id: string) {
 }
 
 // ── Standard report template ──
-
-function newBlockId(): string {
-  return crypto.randomUUID().slice(0, 8)
-}
-
-export function createStandardTemplate(): ReportTab[] {
-  return [
-    {
-      id: crypto.randomUUID(),
-      title: 'סיכום ביצועים',
-      subtitle: '',
-      blocks: [
-        { id: newBlockId(), type: 'kpi_grid', title: 'מדדים ראשיים', kpis: [] },
-        { id: newBlockId(), type: 'strategic_note', content: '', variant: 'cyan' },
-      ],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'המשפך השיווקי',
-      subtitle: '',
-      blocks: [
-        { id: newBlockId(), type: 'funnel', title: 'מפנייה לעסקה', stages: [], summaryCards: [] },
-      ],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'מקורות עסקאות',
-      subtitle: '',
-      blocks: [
-        { id: newBlockId(), type: 'source_grid', title: 'חלוקה לפי מקור', sources: [] },
-        { id: newBlockId(), type: 'table', title: 'פילוח מפורט', columns: [], tableData: [] },
-      ],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'קמפיינים',
-      subtitle: '',
-      blocks: [
-        { id: newBlockId(), type: 'table', title: 'קמפיין × קהל', columns: [], tableData: [] },
-      ],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'מגמות',
-      subtitle: '',
-      blocks: [
-        { id: newBlockId(), type: 'chart', title: 'מגמות חודשיות', chartType: 'line', labels: [], datasets: [] },
-      ],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'תובנות והמלצות',
-      subtitle: '',
-      blocks: [
-        { id: newBlockId(), type: 'insight_box', insightTitle: '', insightText: '', insightStats: [] },
-        { id: newBlockId(), type: 'action_list', title: 'המלצות', actions: [] },
-      ],
-    },
-  ]
-}
+// Moved to lib/report-template.ts so client components can import it
+// without dragging the server-only Supabase client into the browser bundle.
+export { createStandardTemplate } from './report-template'
