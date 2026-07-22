@@ -21,8 +21,17 @@ export interface EditorSection {
   title: string
   mockup_type: MockupType
   description: string
-  useCopies: boolean
+  /** IDs of campaign copies to show on this slide. Empty array = show none. */
+  copyIds: string[]
   assets: EditorAsset[]
+}
+
+/** A single ad-text variation on the campaign. `label` is optional
+ *  ("לגברים", "לנשים"); empty means the presentation labels the tab "גרסה N". */
+export interface Copy {
+  id: string
+  label: string
+  body: string
 }
 
 export interface CampaignMeta {
@@ -30,7 +39,7 @@ export interface CampaignMeta {
   clientId: string | null
   campaignName: string
   concept: string
-  copies: string[]
+  copies: Copy[]
   password: string
   /** Whether the campaign currently has a password stored server-side (hash never leaves the server). */
   hasPassword: boolean
@@ -71,7 +80,11 @@ export function newSection(): EditorSection {
     title: '',
     mockup_type: 'general',
     description: '',
-    useCopies: false,
+    copyIds: [],
     assets: [],
   }
+}
+
+export function newCopy(): Copy {
+  return { id: crypto.randomUUID(), label: '', body: '' }
 }

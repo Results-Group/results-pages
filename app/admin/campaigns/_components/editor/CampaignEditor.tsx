@@ -144,7 +144,7 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
       title: s.title,
       mockup_type: s.mockup_type,
       description: s.description,
-      useCopies: s.useCopies ?? false,
+      copyIds: s.copyIds ?? [],
       assets: s.assets.map(a => ({ id: a.id, type: a.type, file_path: a.file_path, url: a.url, caption: a.caption })),
     })),
   }), [doc, status, passwordDirty, slug, slugDirty])
@@ -385,7 +385,7 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
     const groups: File[][] = []
     for (let i = 0; i < valid.length; i += perSlide) groups.push(valid.slice(i, i + perSlide))
     const sections: EditorSection[] = groups.map(() => ({
-      id: crypto.randomUUID(), title: '', mockup_type: mockupType, description: '', useCopies: false, assets: [],
+      id: crypto.randomUUID(), title: '', mockup_type: mockupType, description: '', copyIds: [], assets: [],
     }))
     addSections(sections)
     setActiveId(sections[0].id)

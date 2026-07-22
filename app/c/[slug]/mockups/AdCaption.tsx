@@ -34,7 +34,13 @@ export default function AdCaption({
       {isLong && (
         <button
           type="button"
-          onClick={() => setExpanded(e => !e)}
+          onClick={e => {
+            // Stop the click from bubbling to the mockup wrapper, whose
+            // onClick opens the fullscreen lightbox — we want inline expansion,
+            // not a modal.
+            e.stopPropagation()
+            setExpanded(v => !v)
+          }}
           className="text-gray-500 font-medium hover:text-gray-700 transition-colors"
         >
           {expanded ? 'הצג פחות' : 'עוד'}

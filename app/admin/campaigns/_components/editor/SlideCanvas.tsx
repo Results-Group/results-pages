@@ -11,8 +11,8 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { Upload, Trash2, GripVertical, Link2, RefreshCw, LayoutTemplate, ImageIcon } from 'lucide-react'
 import CanvasAsset from './CanvasAsset'
-import type { EditorAsset, EditorSection } from './types'
-import { isImageFile, MAX_FILE_BYTES, MAX_FILE_MB } from '@/lib/image-compress'
+import type { EditorAsset, EditorSection, Copy } from './types'
+import { isImageFile, MAX_FILE_MB } from '@/lib/image-compress'
 import { maxAssetsFor } from './types'
 
 interface UploadProgress {
@@ -28,7 +28,7 @@ interface CanvasProps {
   device: 'desktop' | 'mobile'
   uploading: number
   uploadProgress?: UploadProgress
-  copies: string[]
+  copies: Copy[]
   activeCopyIdx: number
   onActiveCopyChange: (idx: number) => void
   onUpdateSection: (patch: Partial<EditorSection>) => void
@@ -132,8 +132,12 @@ export default function SlideCanvas({
   const isVideo = section.mockup_type === 'video'
   const isStory = section.mockup_type === 'instagram_story'
   const maxWidth = device === 'mobile' ? 420 : 960
-  const hasCopies = section.useCopies && copies.length > 0
-  const activeCopy = hasCopies ? (copies[activeCopyIdx] ?? copies[0] ?? '') : undefined
+  // Per-slide filter: only campaign copies whose IDs the editor picked here.
+  const selectedIds = new Set(section.copyIds ?? [])
+  const slideCopies = copies.filter(c => selectedIds.has(c.id))
+  const hasCopies = slideCopies.length > 0
+  const activeCopy = hasCopies ? (slideCopies[activeCopyIdx] ?? slideCopies[0]) : undefined
+  const activeCopyBody = activeCopy?.body
 
   function handleDragEnd(e: DragEndEvent) {
     const { active, over } = e
@@ -194,27 +198,27 @@ export default function SlideCanvas({
         />
 
         {/* Copy version switcher + preview */}
-        {hasCopies && activeCopy !== undefined && (
+        {hasCopies && activeCopy && (
           <div className="rounded-xl px-4 py-3 mb-6" style={{ background: 'rgba(64,225,211,0.04)', border: '1px solid rgba(64,225,211,0.12)' }}>
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-2 flex-wrap">
               <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'rgba(64,225,211,0.6)' }}>טקסט פעיל</span>
-              <div className="flex gap-1">
-                {copies.map((_, i) => (
+              <div className="flex gap-1 flex-wrap">
+                {slideCopies.map((c, i) => (
                   <button
-                    key={i}
+                    key={c.id}
                     onClick={() => onActiveCopyChange(i)}
-                    className="w-6 h-6 rounded-md text-[11px] font-bold transition-all duration-200"
+                    className="px-2 h-6 rounded-md text-[11px] font-bold transition-all duration-200"
                     style={activeCopyIdx === i
                       ? { background: '#40e1d3', color: 'var(--admin-text-primary)' }
                       : { background: 'var(--admin-bg-elevated)', color: 'var(--admin-text-muted)', border: '1px solid var(--admin-border)' }
                     }
                   >
-                    {i + 1}
+                    {c.label.trim() || `${i + 1}`}
                   </button>
                 ))}
               </div>
             </div>
-            <p className="text-sm leading-relaxed whitespace-pre-line" dir="auto" style={{ color: 'var(--admin-text-secondary)' }}>{activeCopy}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-line" dir="auto" style={{ color: 'var(--admin-text-secondary)' }}>{activeCopyBody}</p>
           </div>
         )}
 
@@ -254,7 +258,7 @@ export default function SlideCanvas({
                 </div>
                 {asset.url && (
                   <div className="mt-4 rounded-xl overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
-                    <CanvasAsset asset={asset} mockupType="video" clientName={clientName} clientLogoUrl={clientLogoUrl} captionOverride={activeCopy} />
+                    <CanvasAsset asset={asset} mockupType="video" clientName={clientName} clientLogoUrl={clientLogoUrl} captionOverride={activeCopyBody} />
                   </div>
                 )}
               </div>
@@ -279,7 +283,7 @@ export default function SlideCanvas({
                         section={section}
                         clientName={clientName}
                         clientLogoUrl={clientLogoUrl}
-                        captionOverride={activeCopy}
+                        captionOverride={activeCopyBody}
                         onUpdateAsset={onUpdateAsset}
                         onRemoveAsset={onRemoveAsset}
                         onReplaceAsset={onReplaceAsset}

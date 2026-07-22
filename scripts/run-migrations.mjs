@@ -31,6 +31,7 @@ const MIGRATIONS = [
   'migration-slide-pins.sql',
   'migration-campaign-templates.sql',
   'migration-campaign-copies.sql',
+  'migration-campaign-copies-objects.sql',
   'migration-campaign-expiry.sql',
   'migration-monday-feedback.sql',
   'migration-ops.sql',

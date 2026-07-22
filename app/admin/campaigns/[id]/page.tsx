@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import CampaignEditor, { type EditorInitial } from '../_components/editor/CampaignEditor'
-import type { CampaignDocument, EditorSection, EditorAsset, MockupType } from '../_components/editor/types'
+import type { CampaignDocument, EditorSection, EditorAsset, MockupType, Copy } from '../_components/editor/types'
 
 /** Format a UTC ISO string as a LOCAL 'YYYY-MM-DDTHH:mm' value for datetime-local inputs. */
 function isoToLocalDatetimeInput(iso: string): string {
@@ -30,22 +30,42 @@ export default function EditCampaignPage() {
       })
       .then(data => {
         if (!data) return
+        // Normalize copies: legacy string entries become {id,label,body}.
+        // We need stable IDs before mapping the legacy useCopies flag onto
+        // copyIds below.
+        const copies: Copy[] = Array.isArray(data.copies)
+          ? data.copies.map((c: unknown) => {
+              if (typeof c === 'string') return { id: crypto.randomUUID(), label: '', body: c }
+              const obj = (c || {}) as Partial<Copy>
+              return { id: obj.id || crypto.randomUUID(), label: obj.label || '', body: obj.body || '' }
+            })
+          : []
+        const allCopyIds = copies.map(c => c.id)
+
         const rawSections = typeof data.sections === 'string' ? JSON.parse(data.sections) : (data.sections || [])
-        const sections: EditorSection[] = rawSections.map((s: Partial<EditorSection>) => ({
-          id: s.id || crypto.randomUUID(),
-          title: s.title || '',
-          mockup_type: (s.mockup_type || 'general') as MockupType,
-          description: s.description || '',
-          useCopies: !!(s as { useCopies?: boolean }).useCopies,
-          assets: (s.assets || []).map((a: Partial<EditorAsset>) => ({
-            id: a.id || crypto.randomUUID(),
-            type: (a.type || 'image') as 'image' | 'video',
-            file_path: a.file_path || '',
-            public_url: a.public_url || '',
-            url: a.url || '',
-            caption: a.caption || '',
-          })),
-        }))
+        const sections: EditorSection[] = rawSections.map((s: Partial<EditorSection> & { useCopies?: boolean }) => {
+          // Legacy sections have `useCopies: boolean` and no `copyIds` — map
+          // the boolean onto the array (true → every id, false → none) so the
+          // editor state stays single-source-of-truth going forward.
+          const copyIds = Array.isArray(s.copyIds)
+            ? s.copyIds
+            : (s.useCopies ? allCopyIds : [])
+          return {
+            id: s.id || crypto.randomUUID(),
+            title: s.title || '',
+            mockup_type: (s.mockup_type || 'general') as MockupType,
+            description: s.description || '',
+            copyIds,
+            assets: (s.assets || []).map((a: Partial<EditorAsset>) => ({
+              id: a.id || crypto.randomUUID(),
+              type: (a.type || 'image') as 'image' | 'video',
+              file_path: a.file_path || '',
+              public_url: a.public_url || '',
+              url: a.url || '',
+              caption: a.caption || '',
+            })),
+          }
+        })
 
         const doc: CampaignDocument = {
           meta: {
@@ -53,7 +73,7 @@ export default function EditCampaignPage() {
             clientId: data.client_id || null,
             campaignName: data.campaign_name || '',
             concept: data.concept || '',
-            copies: Array.isArray(data.copies) ? data.copies : [],
+            copies,
             password: '',
             hasPassword: !!data.has_password,
             logoPath: data.logo_path || null,
