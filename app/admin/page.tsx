@@ -56,6 +56,9 @@ export default function AdminDashboard() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [moveTarget, setMoveTarget] = useState('')
   const [moving, setMoving] = useState(false)
+  const [bulkDeleting, setBulkDeleting] = useState(false)
+  const [pageIdx, setPageIdx] = useState(0)
+  const PAGE_SIZE = 20
 
   useEffect(() => {
     fetchUserRole().then(r => setUserRole(r))
@@ -133,13 +136,31 @@ export default function AdminDashboard() {
     })
   }, [])
 
+  // Derive filtered / paged here so the toggleAll callback below can reference
+  // `paged` without a TDZ error, and the JSX below reuses the same values.
+  const filtered = pages.filter(p =>
+    !search || p.title.includes(search) || p.slug.includes(search) || p.client.includes(search)
+  )
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  // Clamp pageIdx so a filter change that shrinks the list past the current
+  // page doesn't leave us stranded on an empty page.
+  const currentPage = Math.min(pageIdx, totalPages - 1)
+  const paged = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE)
+
+  // "Select all" toggles the *currently visible page* — matches how every
+  // major list UI works (Gmail, Linear) and avoids the mid-search surprise of
+  // selecting hundreds of hidden rows.
   const toggleAll = useCallback(() => {
     setSelectedIds(prev => {
-      if (prev.size === filtered.length) return new Set()
-      return new Set(filtered.map(p => p.id))
+      const pageIds = paged.map(p => p.id)
+      const allSelected = pageIds.every(id => prev.has(id))
+      const next = new Set(prev)
+      if (allSelected) pageIds.forEach(id => next.delete(id))
+      else pageIds.forEach(id => next.add(id))
+      return next
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pages, search])
+  }, [pages, search, currentPage])
 
   async function handleBulkMove() {
     if (!moveTarget || selectedIds.size === 0) return
@@ -161,10 +182,31 @@ export default function AdminDashboard() {
     fetchPages()
   }
 
+  async function handleBulkDelete() {
+    const n = selectedIds.size
+    if (n === 0) return
+    const msg = locale === 'en'
+      ? `Move ${n} page${n > 1 ? 's' : ''} to trash?`
+      : `להעביר ${n} דפים לסל המחזור?`
+    if (!confirm(msg)) return
+    setBulkDeleting(true)
+    // Soft-delete each in parallel — the DELETE route moves the row to the
+    // recycle bin, so the action is fully reversible from /admin/trash.
+    const results = await Promise.all([...selectedIds].map(id =>
+      fetch(`/api/pages/${id}`, { method: 'DELETE' }).then(r => r.ok).catch(() => false)
+    ))
+    const failed = results.filter(ok => !ok).length
+    if (failed > 0) {
+      showToast(locale === 'en' ? `${failed} item(s) failed to delete` : `${failed} פריטים נכשלו במחיקה`)
+    } else {
+      showToast(locale === 'en' ? `${n} page${n > 1 ? 's' : ''} moved to trash` : `${n} דפים הועברו לסל המחזור`)
+    }
+    setSelectedIds(new Set())
+    setBulkDeleting(false)
+    fetchPages()
+  }
+
   const clients = [...new Set(pages.map(p => p.client))].sort()
-  const filtered = pages.filter(p =>
-    !search || p.title.includes(search) || p.slug.includes(search) || p.client.includes(search)
-  )
 
   function getStatus(page: PageItem): { label: string; colorVar: string; bgVar: string } {
     if (!page.active) return { label: t('pages.statusDisabled'), colorVar: 'var(--admin-disabled-text)', bgVar: 'var(--admin-disabled-bg)' }
@@ -198,7 +240,7 @@ export default function AdminDashboard() {
             type="text"
             placeholder={t('pages.searchPlaceholder')}
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => { setSearch(e.target.value); setPageIdx(0) }}
             className="w-full ps-10 pe-3.5 py-2 rounded-lg text-sm outline-none transition-colors"
             style={{
               background: 'var(--admin-bg-elevated)',
@@ -224,39 +266,56 @@ export default function AdminDashboard() {
         </select>
       </div>
 
-      {/* Bulk actions */}
-      {selectedIds.size > 0 && workspaces.length > 1 && (
+      {/* Bulk actions — visible whenever anything is selected. Move-to-workspace
+          only makes sense when there's more than one workspace to move between. */}
+      {selectedIds.size > 0 && (
         <div
-          className="mb-4 flex items-center gap-3 p-3 rounded-xl"
+          className="mb-4 flex items-center gap-3 p-3 rounded-xl flex-wrap"
           style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}
         >
-          <Building className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--admin-accent)' }} />
+          <CheckSquare className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--admin-accent)' }} />
           <span className="text-sm font-medium" style={{ color: 'var(--admin-text-primary)' }}>
             {selectedIds.size} {t('pages.selectedPages')}
           </span>
-          <select
-            value={moveTarget}
-            onChange={e => setMoveTarget(e.target.value)}
-            className="px-3 py-1.5 rounded-lg text-sm outline-none"
-            style={{
-              background: 'var(--admin-bg)',
-              border: '1px solid var(--admin-border)',
-              color: 'var(--admin-text-primary)',
-            }}
-          >
-            <option value="">{t('pages.moveToWorkspace')}</option>
-            {workspaces.map(ws => (
-              <option key={ws.id} value={ws.id}>{ws.name}</option>
-            ))}
-          </select>
+
+          {workspaces.length > 1 && (
+            <>
+              <select
+                value={moveTarget}
+                onChange={e => setMoveTarget(e.target.value)}
+                className="px-3 py-1.5 rounded-lg text-sm outline-none"
+                style={{
+                  background: 'var(--admin-bg)',
+                  border: '1px solid var(--admin-border)',
+                  color: 'var(--admin-text-primary)',
+                }}
+              >
+                <option value="">{t('pages.moveToWorkspace')}</option>
+                {workspaces.map(ws => (
+                  <option key={ws.id} value={ws.id}>{ws.name}</option>
+                ))}
+              </select>
+              <button
+                onClick={handleBulkMove}
+                disabled={!moveTarget || moving}
+                className="px-4 py-1.5 rounded-lg text-sm font-medium disabled:opacity-40"
+                style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
+              >
+                {moving ? t('pages.moving') : t('pages.move')}
+              </button>
+            </>
+          )}
+
           <button
-            onClick={handleBulkMove}
-            disabled={!moveTarget || moving}
-            className="px-4 py-1.5 rounded-lg text-sm font-medium disabled:opacity-40"
-            style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
+            onClick={handleBulkDelete}
+            disabled={bulkDeleting || moving}
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium disabled:opacity-40 transition-colors"
+            style={{ background: 'var(--admin-danger-bg)', color: 'var(--admin-danger)', border: '1px solid var(--admin-danger)' }}
           >
-            {moving ? t('pages.moving') : t('pages.move')}
+            <Trash2 className="w-3.5 h-3.5" />
+            {bulkDeleting ? t('pages.bulkDeleting') : t('pages.bulkDelete')}
           </button>
+
           <button
             onClick={() => setSelectedIds(new Set())}
             className="p-1.5 rounded-lg mr-auto"
@@ -280,15 +339,13 @@ export default function AdminDashboard() {
           <table className="w-full text-sm min-w-[720px]">
             <thead>
               <tr style={{ background: 'var(--admin-bg-elevated)', borderBottom: '1px solid var(--admin-border)' }}>
-                {workspaces.length > 1 && (
-                  <th className="px-3 py-2.5 w-10">
-                    <button type="button" onClick={toggleAll} style={{ color: 'var(--admin-text-muted)' }} aria-label={t('pages.selectAll')}>
-                      {selectedIds.size === filtered.length && filtered.length > 0
-                        ? <CheckSquare className="w-4 h-4" />
-                        : <Square className="w-4 h-4" />}
-                    </button>
-                  </th>
-                )}
+                <th className="px-3 py-2.5 w-10">
+                  <button type="button" onClick={toggleAll} style={{ color: 'var(--admin-text-muted)' }} aria-label={t('pages.selectAll')}>
+                    {paged.length > 0 && paged.every(p => selectedIds.has(p.id))
+                      ? <CheckSquare className="w-4 h-4" />
+                      : <Square className="w-4 h-4" />}
+                  </button>
+                </th>
                 <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('pages.thClient')}</th>
                 <th className="text-start px-4 py-2.5 font-medium text-xs tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>{t('pages.thTitle')}</th>
                 {workspaces.length > 0 && (
@@ -301,7 +358,7 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map(page => {
+              {paged.map(page => {
                 const status = getStatus(page)
                 return (
                   <tr
@@ -311,15 +368,13 @@ export default function AdminDashboard() {
                     onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   >
-                    {workspaces.length > 1 && (
-                      <td className="px-3 py-4 w-10">
-                        <button type="button" onClick={() => toggleSelect(page.id)} style={{ color: 'var(--admin-text-muted)' }} aria-label={t('pages.selectRow')}>
-                          {selectedIds.has(page.id)
-                            ? <CheckSquare className="w-4 h-4" style={{ color: 'var(--admin-accent)' }} />
-                            : <Square className="w-4 h-4" />}
-                        </button>
-                      </td>
-                    )}
+                    <td className="px-3 py-4 w-10">
+                      <button type="button" onClick={() => toggleSelect(page.id)} style={{ color: 'var(--admin-text-muted)' }} aria-label={t('pages.selectRow')}>
+                        {selectedIds.has(page.id)
+                          ? <CheckSquare className="w-4 h-4" style={{ color: 'var(--admin-accent)' }} />
+                          : <Square className="w-4 h-4" />}
+                      </button>
+                    </td>
                     <td className="px-4 py-3 font-medium" style={{ color: 'var(--admin-text-primary)' }}>{page.client}</td>
                     <td className="px-4 py-3" style={{ color: 'var(--admin-text-secondary)' }}>
                       <span className="flex items-center gap-1.5">
@@ -471,6 +526,46 @@ export default function AdminDashboard() {
               })}
             </tbody>
           </table>
+
+          {totalPages > 1 && (
+            <div
+              className="flex items-center justify-between gap-3 px-4 py-3"
+              style={{ borderTop: '1px solid var(--admin-border)', background: 'var(--admin-bg-elevated)' }}
+            >
+              <span className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>
+                {(() => {
+                  const from = currentPage * PAGE_SIZE + 1
+                  const to = Math.min((currentPage + 1) * PAGE_SIZE, filtered.length)
+                  return locale === 'en'
+                    ? `Showing ${from}–${to} of ${filtered.length}`
+                    : `מציג ${from}–${to} מתוך ${filtered.length}`
+                })()}
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setPageIdx(i => Math.max(0, i - 1))}
+                  disabled={currentPage === 0}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium disabled:opacity-30 transition-colors"
+                  style={{ background: 'var(--admin-bg)', color: 'var(--admin-text-secondary)', border: '1px solid var(--admin-border)' }}
+                >
+                  {t('pages.prev')}
+                </button>
+                <span className="px-3 text-xs" style={{ color: 'var(--admin-text-muted)' }}>
+                  {currentPage + 1} / {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPageIdx(i => Math.min(totalPages - 1, i + 1))}
+                  disabled={currentPage >= totalPages - 1}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium disabled:opacity-30 transition-colors"
+                  style={{ background: 'var(--admin-bg)', color: 'var(--admin-text-secondary)', border: '1px solid var(--admin-border)' }}
+                >
+                  {t('pages.next')}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

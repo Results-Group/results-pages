@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, MessageCircle, Files, Image as ImageIcon, Calendar, LayoutTemplate, Bookmark, X, Loader2 } from 'lucide-react'
+import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, MessageCircle, Files, Image as ImageIcon, Calendar, LayoutTemplate, Bookmark, X, Loader2, Archive, CheckSquare, Square } from 'lucide-react'
 import { whatsappShareUrl } from '@/lib/share'
 import { useT, useLocale } from '@/lib/i18n'
 import { useToast } from '../_components/toast'
@@ -59,6 +59,8 @@ export default function CampaignsListPage() {
   const [templatesOpen, setTemplatesOpen] = useState(false)
   const [templates, setTemplates] = useState<Campaign[] | null>(null)
   const [creatingFrom, setCreatingFrom] = useState<string | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkBusy, setBulkBusy] = useState<'delete' | 'archive' | null>(null)
   const router = useRouter()
 
   const STATUS_LABELS: Record<string, string> = { draft: t('common.draft'), published: t('common.published'), archived: t('common.archived') }
@@ -134,6 +136,63 @@ export default function CampaignsListPage() {
     } catch {
       showToast('שגיאה במחיקת הקמפיין', 'error')
     }
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }
+
+  async function handleBulkDelete() {
+    const n = selectedIds.size
+    if (n === 0) return
+    if (!confirm(`להעביר ${n} קמפיינים לסל המחזור?`)) return
+    setBulkBusy('delete')
+    const ids = [...selectedIds]
+    const results = await Promise.all(ids.map(id =>
+      fetch(`/api/campaigns/${id}`, { method: 'DELETE' }).then(r => r.ok).catch(() => false)
+    ))
+    const failed = results.filter(ok => !ok).length
+    if (failed > 0) {
+      showToast(`${failed} קמפיינים נכשלו במחיקה`, 'error')
+    } else {
+      showToast(`${n} קמפיינים הועברו לסל המחזור`, 'success')
+    }
+    // Optimistic: drop the ones that actually succeeded from local state so
+    // the list feels instant. A failed row stays visible.
+    const succeededIds = new Set(ids.filter((_, i) => results[i]))
+    setCampaigns(prev => prev.filter(c => !succeededIds.has(c.id)))
+    setSelectedIds(new Set())
+    setBulkBusy(null)
+  }
+
+  async function handleBulkArchive() {
+    const n = selectedIds.size
+    if (n === 0) return
+    if (!confirm(`להעביר ${n} קמפיינים לארכיון?`)) return
+    setBulkBusy('archive')
+    const ids = [...selectedIds]
+    const results = await Promise.all(ids.map(id =>
+      fetch(`/api/campaigns/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'archived' }),
+      }).then(r => r.ok).catch(() => false)
+    ))
+    const failed = results.filter(ok => !ok).length
+    if (failed > 0) {
+      showToast(`${failed} קמפיינים נכשלו בארכוב`, 'error')
+    } else {
+      showToast(`${n} קמפיינים הועברו לארכיון`, 'success')
+    }
+    // Reflect the new status locally instead of a full refetch.
+    const succeededIds = new Set(ids.filter((_, i) => results[i]))
+    setCampaigns(prev => prev.map(c => succeededIds.has(c.id) ? { ...c, status: 'archived' } : c))
+    setSelectedIds(new Set())
+    setBulkBusy(null)
   }
 
   async function handleSaveAsTemplate(campaign: Campaign) {
@@ -307,6 +366,45 @@ export default function CampaignsListPage() {
         </button>
       </div>
 
+      {/* Bulk action bar — only appears when at least one card is selected. */}
+      {selectedIds.size > 0 && (
+        <div
+          className="mb-6 flex items-center gap-3 p-3 rounded-xl flex-wrap"
+          style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)' }}
+        >
+          <CheckSquare className="w-4 h-4 flex-shrink-0" style={{ color: '#40e1d3' }} />
+          <span className="text-sm font-medium" style={{ color: 'var(--admin-text-primary)' }}>
+            {selectedIds.size} {t('campaigns.selectedCount')}
+          </span>
+          <button
+            onClick={handleBulkArchive}
+            disabled={bulkBusy !== null}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-40 transition-colors"
+            style={{ background: 'var(--admin-bg)', color: 'var(--admin-text-secondary)', border: '1px solid var(--admin-border)' }}
+          >
+            <Archive className="w-3.5 h-3.5" />
+            {bulkBusy === 'archive' ? t('campaigns.bulkArchiving') : t('campaigns.bulkArchive')}
+          </button>
+          <button
+            onClick={handleBulkDelete}
+            disabled={bulkBusy !== null}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-40 transition-colors"
+            style={{ background: 'var(--admin-danger-bg)', color: 'var(--admin-danger)', border: '1px solid var(--admin-danger)' }}
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            {bulkBusy === 'delete' ? t('campaigns.bulkDeleting') : t('campaigns.bulkDelete')}
+          </button>
+          <button
+            onClick={() => setSelectedIds(new Set())}
+            className="p-1.5 rounded-lg mr-auto"
+            style={{ color: 'var(--admin-text-muted)' }}
+            title={t('pages.cancelSelection')}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24" style={{ color: 'var(--admin-text-muted)' }}>
           <div className="w-8 h-8 border-2 rounded-full animate-spin mb-4" style={{ borderColor: 'rgba(64,225,211,0.3)', borderTopColor: '#40e1d3' }} />
@@ -369,6 +467,16 @@ export default function CampaignsListPage() {
                       }}
                     >
                       <div className="flex items-center gap-4">
+                        <button
+                          type="button"
+                          onClick={e => { e.stopPropagation(); toggleSelect(c.id) }}
+                          className={`shrink-0 p-1 rounded transition-opacity ${selectedIds.has(c.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus:opacity-100'}`}
+                          style={{ color: selectedIds.has(c.id) ? '#40e1d3' : 'var(--admin-text-muted)' }}
+                          aria-label={selectedIds.has(c.id) ? t('campaigns.deselect') : t('campaigns.select')}
+                          title={selectedIds.has(c.id) ? t('campaigns.deselect') : t('campaigns.select')}
+                        >
+                          {selectedIds.has(c.id) ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
+                        </button>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2.5 mb-2">
                             <span className="w-2 h-2 rounded-full shrink-0" style={{ background: dotColor, boxShadow: `0 0 8px ${dotColor}60` }} />
