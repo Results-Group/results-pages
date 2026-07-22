@@ -19,7 +19,7 @@ import SlideCanvas from './SlideCanvas'
 import Inspector from './Inspector'
 import SmartUploadModal from './SmartUploadModal'
 import { maxAssetsFor } from './types'
-import type { CampaignDocument, EditorAsset, EditorSection, MockupType } from './types'
+import type { CampaignDocument, EditorSection, MockupType } from './types'
 
 const CampaignPresentation = dynamic(() => import('@/app/c/[slug]/presentation'), { ssr: false })
 
@@ -43,7 +43,7 @@ export interface EditorInitial {
 
 type Toast = { id: number; message: string; kind: 'success' | 'error' | 'info' }
 
-export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'; initial: EditorInitial }) {
+export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; initial: EditorInitial }) {
   const router = useRouter()
   const { doc, canUndo, canRedo, setMeta, addSection, addSections, duplicateSection, removeSection, updateSection, moveSection, addAsset, updateAsset, removeAsset, moveAsset, undo, redo } = useCampaignDocument(initial.doc)
 
@@ -91,7 +91,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
         setFeedback(map)
       })
       .catch(() => {})
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [campaignId])
 
   const feedbackStatusMap = useMemo(() => {
@@ -232,6 +232,12 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
         return null
       }
     }
+    // Snapshot what we're about to send for the password field. Once the save
+    // succeeds, the password is persisted, so passwordDirty must reset — else
+    // the editor keeps re-submitting the same password on every later autosave,
+    // silently resurrecting a password that was cleared elsewhere in the DB.
+    const sentPasswordDirty = passwordDirty
+    const sentPassword = doc.meta.password
     const run = async () => {
       setSaveState('saving')
       try {
@@ -259,6 +265,13 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
         if (data.id) setCampaignId(data.id)
         if (data.updated_at) updatedAtRef.current = data.updated_at
         syncFromServer(data)
+        // Clear the dirty flag now the password is stored, mirroring slugDirty.
+        // Only if the user hasn't edited the field since we sent (same guard the
+        // clientId sync uses), so an in-flight keystroke is never dropped.
+        if (sentPasswordDirty && docRef.current.meta.password === sentPassword) {
+          setPasswordDirty(false)
+          setMeta({ password: '', hasPassword: !!data.has_password })
+        }
         if (newStatus) setStatus(newStatus)
         setSaveState('saved')
         if (!opts.silent) toast(newStatus === 'published' ? 'הקמפיין פורסם' : 'נשמר בהצלחה', 'success')
@@ -273,7 +286,7 @@ export default function CampaignEditor({ mode, initial }: { mode: 'new' | 'edit'
     const result = saveQueue.current.then(run, run)
     saveQueue.current = result
     return result
-  }, [doc.meta, campaignId, buildBody, ensureCampaignExists, syncFromServer, router, toast])
+  }, [doc.meta, passwordDirty, campaignId, buildBody, ensureCampaignExists, syncFromServer, setMeta, router, toast])
 
   // Latest save in a ref so the debounced autosave never fires a stale closure
   const saveRef = useRef(save)
