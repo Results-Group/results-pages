@@ -1,3 +1,4 @@
+import { resolveSectionCopies, type Copy } from './copies'
 import type { CampaignSection, CampaignAsset } from './campaigns'
 
 export interface SlideData {
@@ -6,8 +7,8 @@ export interface SlideData {
   title: string
   subtitle?: string
   content?: string
-  /** Campaign-level copy variations to show on this slide (only when section.useCopies is true) */
-  copies?: string[]
+  /** Copy variations selected for this slide (may be a subset of the campaign's copies). */
+  copies?: Copy[]
   logoUrl?: string | null
   date?: string
   mockupType?: string
@@ -26,12 +27,13 @@ export function buildCampaignSlides(opts: {
   client: string
   campaignName: string
   concept: string | null
-  copies?: string[]
+  copies?: Copy[]
   clientLogoUrl: string | null
   date: string
   sections: CampaignSection[]
 }): SlideData[] {
   const { client, campaignName, concept, copies, clientLogoUrl, date, sections } = opts
+  const allCopies = copies || []
   const slides: SlideData[] = []
 
   slides.push({ type: 'cover', title: client, subtitle: campaignName, logoUrl: clientLogoUrl, date })
@@ -60,8 +62,8 @@ export function buildCampaignSlides(opts: {
           // one-screen section stays clean.
           ...(partsTotal > 1 ? { part: i / perScreen + 1, partsTotal } : {}),
           content: section.description,
-          // Only forward copies to slides where the editor enabled them
-          copies: section.useCopies && copies?.length ? copies : [],
+          // Per-slide targeting: only copies whose IDs the editor chose here.
+          copies: resolveSectionCopies(section, allCopies),
           mockupType: section.mockup_type,
           assets: assets.slice(i, i + perScreen),
           clientLogoUrl,

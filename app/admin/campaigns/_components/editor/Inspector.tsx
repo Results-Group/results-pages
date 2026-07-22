@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 import { LayoutGrid, Settings2, Upload, Lock, Trash2, Clock, Plus, X, Sparkles, Loader2, Check, Image as ImageIcon, CopyPlus } from 'lucide-react'
 import ClientAutocomplete from '../../../_components/client-autocomplete'
-import { MOCKUP_TYPES, type CampaignMeta, type EditorSection, type MockupType } from './types'
+import { MOCKUP_TYPES, newCopy, type CampaignMeta, type EditorSection, type MockupType } from './types'
 import { useT, useDir } from '@/lib/i18n'
 
 const fieldStyle: React.CSSProperties = {
@@ -232,37 +232,73 @@ export default function Inspector({
                 </div>
               )}
 
-              {meta.copies.length > 0 && (
+              {meta.copies.length > 0 ? (
                 <>
                   <SectionDivider label={t('campaigns.copySection')} />
-                  <button
-                    type="button"
-                    onClick={() => onUpdateSection({ useCopies: !section.useCopies })}
-                    className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg transition-all duration-200"
-                    style={{
-                      background: section.useCopies ? 'rgba(64,225,211,0.08)' : 'var(--admin-hover-bg)',
-                      border: `1px solid ${section.useCopies ? 'rgba(64,225,211,0.3)' : 'var(--admin-border)'}`,
-                    }}
-                  >
-                    {/* Toggle pill */}
-                    <div className="relative w-8 h-4 rounded-full transition-all duration-200 shrink-0"
-                      style={{ background: section.useCopies ? '#40e1d3' : 'var(--admin-bg-elevated)' }}>
-                      <div className="absolute top-0.5 rounded-full w-3 h-3 bg-white shadow transition-all duration-200"
-                        style={{ left: section.useCopies ? '18px' : '2px' }} />
-                    </div>
-                    <div className={`flex-1 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
-                      <p className="text-xs font-bold" style={{ color: section.useCopies ? '#40e1d3' : 'var(--admin-text-secondary)' }}>
-                        {section.useCopies ? t('campaigns.copyEnabled') : t('campaigns.copyDisabled')}
-                      </p>
-                      <p className="text-[10px]" style={{ color: 'var(--admin-text-muted)' }}>
-                        {meta.copies.length} {t('campaigns.copyVersionsCount')}
-                      </p>
-                    </div>
-                  </button>
+                  {(() => {
+                    const selected = new Set(section.copyIds ?? [])
+                    const allSelected = meta.copies.every(c => selected.has(c.id))
+                    return (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between px-1">
+                          <p className="text-[10px]" style={{ color: 'var(--admin-text-muted)' }}>
+                            {selected.size} / {meta.copies.length} {t('campaigns.copyVersionsCount')}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => onUpdateSection({
+                              copyIds: allSelected ? [] : meta.copies.map(c => c.id),
+                            })}
+                            className="text-[10px] font-bold transition-colors"
+                            style={{ color: '#40e1d3' }}
+                          >
+                            {allSelected ? t('campaigns.copySelectNone') : t('campaigns.copySelectAll')}
+                          </button>
+                        </div>
+                        {meta.copies.map((copy, idx) => {
+                          const checked = selected.has(copy.id)
+                          const preview = copy.body.trim().slice(0, 60)
+                          const heading = copy.label.trim() || `${t('campaigns.versionLabel')} ${idx + 1}`
+                          return (
+                            <button
+                              key={copy.id}
+                              type="button"
+                              onClick={() => {
+                                const next = new Set(selected)
+                                if (checked) next.delete(copy.id); else next.add(copy.id)
+                                // Preserve the campaign-copies order so tab
+                                // order in the presentation stays stable.
+                                onUpdateSection({ copyIds: meta.copies.filter(c => next.has(c.id)).map(c => c.id) })
+                              }}
+                              className={`flex items-start gap-3 w-full px-3 py-2.5 rounded-lg transition-all duration-200 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
+                              style={{
+                                background: checked ? 'rgba(64,225,211,0.08)' : 'var(--admin-hover-bg)',
+                                border: `1px solid ${checked ? 'rgba(64,225,211,0.3)' : 'var(--admin-border)'}`,
+                              }}
+                            >
+                              <span
+                                className="mt-0.5 w-4 h-4 rounded shrink-0 flex items-center justify-center transition-all duration-200"
+                                style={{
+                                  background: checked ? '#40e1d3' : 'transparent',
+                                  border: `1.5px solid ${checked ? '#40e1d3' : 'var(--admin-border)'}`,
+                                }}
+                              >
+                                {checked && <Check className="w-3 h-3" style={{ color: '#04211d' }} strokeWidth={3} />}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-bold" style={{ color: checked ? '#40e1d3' : 'var(--admin-text-secondary)' }}>{heading}</p>
+                                {preview && (
+                                  <p className="text-[10px] truncate mt-0.5" style={{ color: 'var(--admin-text-muted)' }} dir="auto">{preview}{copy.body.trim().length > 60 && '…'}</p>
+                                )}
+                              </div>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )
+                  })()}
                 </>
-              )}
-
-              {meta.copies.length === 0 && (
+              ) : (
                 <p className="text-[10px] leading-relaxed px-1" style={{ color: 'var(--admin-text-muted)' }}>
                   {t('campaigns.copyHintEmpty')}
                 </p>
@@ -314,12 +350,14 @@ export default function Inspector({
                 {t('campaigns.copyVariationsHint')}
               </p>
               {meta.copies.map((copy, idx) => (
-                <div key={idx}>
+                <div key={copy.id}>
                   <div className="flex items-center gap-1.5 mb-1">
                     <span className="text-[10px] font-bold" style={{ color: 'rgba(64,225,211,0.6)' }}>{t('campaigns.versionLabel')} {idx + 1}</span>
                     <button
                       type="button"
-                      onClick={() => onUpdateMeta({ copies: meta.copies.filter((_, i) => i !== idx) })}
+                      onClick={() => onUpdateMeta({
+                        copies: meta.copies.filter((_, i) => i !== idx),
+                      })}
                       className="p-0.5 rounded transition-colors ml-auto"
                       style={{ color: 'var(--admin-text-muted)' }}
                       onMouseEnter={e => { e.currentTarget.style.color = '#ef4444' }}
@@ -329,9 +367,24 @@ export default function Inspector({
                       <X className="w-3 h-3" />
                     </button>
                   </div>
+                  <input
+                    type="text"
+                    value={copy.label}
+                    onChange={e => onUpdateMeta({
+                      copies: meta.copies.map((c, i) => i === idx ? { ...c, label: e.target.value } : c),
+                    })}
+                    placeholder={t('campaigns.copyLabelPlaceholder')}
+                    dir="auto"
+                    className="w-full px-3 py-2 rounded-lg text-xs outline-none mb-1.5 transition-all duration-200"
+                    style={fieldStyle}
+                    onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
+                    onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
+                  />
                   <textarea
-                    value={copy}
-                    onChange={e => onUpdateMeta({ copies: meta.copies.map((c, i) => i === idx ? e.target.value : c) })}
+                    value={copy.body}
+                    onChange={e => onUpdateMeta({
+                      copies: meta.copies.map((c, i) => i === idx ? { ...c, body: e.target.value } : c),
+                    })}
                     rows={3}
                     placeholder={`${t('campaigns.versionPlaceholder')} ${idx + 1}...`}
                     dir="auto"
@@ -344,7 +397,7 @@ export default function Inspector({
               ))}
               <button
                 type="button"
-                onClick={() => onUpdateMeta({ copies: [...meta.copies, ''] })}
+                onClick={() => onUpdateMeta({ copies: [...meta.copies, newCopy()] })}
                 className="flex items-center gap-1.5 w-full px-3 py-2.5 rounded-lg text-xs font-bold transition-all duration-200"
                 style={{ color: '#40e1d3', border: '1px dashed rgba(64,225,211,0.2)', background: 'rgba(64,225,211,0.03)' }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.08)' }}

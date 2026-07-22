@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { Metadata } from 'next'
-import { getCampaignBySlug, enrichCampaignUrls } from '@/lib/campaigns'
+import { getCampaignBySlug, enrichCampaignUrls, normalizeCopies } from '@/lib/campaigns'
 import type { CampaignSection } from '@/lib/campaigns'
 import { getClientById } from '@/lib/clients'
 import { getSession } from '@/lib/auth'
@@ -55,6 +55,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${title} | Results Creative`,
     description,
+    // A published deck is a private pitch for one client. The og/twitter cards
+    // below still populate link previews; noindex only keeps it out of search
+    // results, where the slug alone would otherwise expose it.
+    robots: { index: false, follow: false },
     openGraph: {
       title,
       description,
@@ -133,7 +137,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     client: campaign.client,
     campaignName: campaign.campaign_name,
     concept: campaign.concept,
-    copies: campaign.copies || [],
+    copies: normalizeCopies(campaign.copies),
     clientLogoUrl,
     date: formattedDate,
     sections: (campaign.sections || []) as CampaignSection[],

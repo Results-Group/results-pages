@@ -789,8 +789,9 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
   const isStory = slide.mockupType === 'instagram_story'
   const isCarousel = slide.mockupType === 'carousel'
   const copies = slide.copies || []
-  // activeCopy is set only when this slide has copies enabled
-  const activeCopy = copies.length > 0 ? (copies[activeCopyIdx] ?? copies[0] ?? '') : undefined
+  // activeCopy is set only when this slide has at least one copy targeted.
+  const activeCopy = copies.length > 0 ? (copies[activeCopyIdx] ?? copies[0]) : undefined
+  const activeCopyBody = activeCopy?.body
 
   return (
     <div>
@@ -814,15 +815,15 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
         <div className="copy-switch rp-anim rp-up">
           <span className="copy-switch-label">{t('public.copyLabel')}</span>
           <div className="copy-switch-options" role="tablist">
-            {copies.map((_, i) => (
+            {copies.map((c, i) => (
               <button
-                key={i}
+                key={c.id}
                 role="tab"
                 aria-selected={activeCopyIdx === i}
                 className={`copy-switch-btn${activeCopyIdx === i ? ' active' : ''}`}
                 onClick={() => onActiveCopyChange(i)}
               >
-                {t('public.copyVersion')} {i + 1}
+                {c.label.trim() || `${t('public.copyVersion')} ${i + 1}`}
               </button>
             ))}
           </div>
@@ -839,7 +840,7 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
               .filter(Boolean)}
             clientName={slide.clientName || ''}
             logoUrl={slide.clientLogoUrl || undefined}
-            caption={activeCopy !== undefined ? activeCopy : (assets[0]?.caption || '')}
+            caption={activeCopyBody !== undefined ? activeCopyBody : (assets[0]?.caption || '')}
           />
         </div>
       )}
@@ -852,7 +853,7 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
               className="mockup-wrapper rp-anim rp-up"
               onClick={() => {
                 const url = asset.file_path ? assetProxyUrl(asset.file_path) : (asset.public_url || '')
-                if (url && asset.type !== 'video') onAssetClick({ url, caption: activeCopy || asset.caption, slideKey: slide.key, assetId: asset.id })
+                if (url && asset.type !== 'video') onAssetClick({ url, caption: activeCopyBody || asset.caption, slideKey: slide.key, assetId: asset.id })
               }}
               style={{
                 cursor: asset.type !== 'video' ? 'pointer' : 'default',
@@ -866,7 +867,7 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
                 mockupType={slide.mockupType || 'general'}
                 clientLogoUrl={slide.clientLogoUrl || null}
                 clientName={slide.clientName || ''}
-                captionOverride={activeCopy}
+                captionOverride={activeCopyBody}
               />
             </div>
           ))}

@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "migrate": "node scripts/run-migrations.mjs"
+    "migrate": "node scripts/run-migrations.mjs",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -25,6 +28,7 @@
     "react-dom": "19.2.7",
     "recharts": "^3.9.2",
     "resend": "^6.17.2",
+    "server-only": "^0.0.1",
     "sharp": "^0.35.2",
     "tailwindcss": "^4.3.1",
     "xlsx": "^0.18.5",
@@ -34,7 +38,10 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "latest",
     "@types/react": "latest",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.2.11",
     "pg": "^8.22.0",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "^4.1.10"
   }
 }

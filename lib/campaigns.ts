@@ -18,12 +18,21 @@ export interface CampaignSection {
   title: string
   mockup_type: 'instagram_feed' | 'instagram_story' | 'facebook_feed' | 'carousel' | 'video' | 'general' | 'divider'
   description?: string
+  /** Legacy boolean toggle — replaced by copyIds. Kept so old rows still load. */
   useCopies?: boolean
+  /** IDs of the campaign copies to show on this slide. undefined = fall back to
+   *  useCopies (true → all, false → none). Empty array = show none. */
+  copyIds?: string[]
   assets: CampaignAsset[]
 }
 
+// Copy type + helpers live in lib/copies.ts so client bundles (editor,
+// presentation) can import them without pulling sharp/bcrypt/supabase-service.
+export { normalizeCopies, resolveSectionCopies, type Copy } from './copies'
+import type { Copy } from './copies'
+
 export interface CampaignCopies {
-  copies?: string[]
+  copies?: Copy[]
 }
 
 export interface Campaign {
@@ -33,7 +42,7 @@ export interface Campaign {
   campaign_name: string
   slug: string
   concept: string | null
-  copies?: string[]
+  copies?: Copy[]
   logo_path: string | null
   logo_url?: string
   sections: CampaignSection[]

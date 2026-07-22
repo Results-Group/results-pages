@@ -8,7 +8,6 @@ import VisualEditor, { type VisualEditorRef } from './visual-editor'
 import ClientAutocomplete from '../../_components/client-autocomplete'
 import WorkspaceSelector from '../../_components/workspace-selector'
 import { useUnsavedChanges } from '@/lib/use-unsaved-changes'
-import { useToast } from '../../_components/toast'
 
 type UserRole = 'admin' | 'editor' | 'viewer'
 
@@ -91,7 +90,6 @@ export default function EditPage() {
 
   const [userRole, setUserRole] = useState<UserRole>('admin')
   const [dirty, setDirty] = useState(false)
-  const { showToast } = useToast()
 
   useUnsavedChanges(dirty)
 

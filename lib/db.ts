@@ -58,7 +58,7 @@ export async function getPages(filters?: { client?: string; search?: string; wor
   if (error) throw error
 
   const pageIds = pages.map((p: LandingPage) => p.id)
-  let viewCounts: Record<string, number> = {}
+  const viewCounts: Record<string, number> = {}
 
   if (pageIds.length > 0) {
     const { data: views, error: viewErr } = await supabase
