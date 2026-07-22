@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, FileUp } from 'lucide-react'
 import ClientAutocomplete from '../_components/client-autocomplete'
-import { useT, useLocale } from '@/lib/i18n'
+import { useT } from '@/lib/i18n'
 import { slugifyPath } from '@/lib/slug'
 
 function getWorkspaceCookie(): string | null {
@@ -17,7 +17,6 @@ function getWorkspaceCookie(): string | null {
 
 export default function UploadPage() {
   const t = useT()
-  const locale = useLocale()
   const [file, setFile] = useState<File | null>(null)
   const [mode, setMode] = useState<'file' | 'code'>('file')
   const [code, setCode] = useState('')

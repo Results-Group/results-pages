@@ -1,7 +1,7 @@
 'use client'
 
 import { Plus, Trash2 } from 'lucide-react'
-import type { ReportBlock, KpiItem, FunnelStage, DataRowItem, SourceGridItem, TableColumn, InsightStat, ActionItem, IdeaCard, ChartDataset } from '@/lib/performance-reports'
+import type { ReportBlock, KpiItem, FunnelStage, DataRowItem, SourceGridItem, ActionItem, IdeaCard } from '@/lib/performance-reports'
 
 interface Props {
   block: ReportBlock

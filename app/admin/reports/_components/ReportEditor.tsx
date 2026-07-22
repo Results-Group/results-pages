@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Save, Eye, Send, Trash2, ChevronDown, ChevronUp, GripVertical, FileText, Languages, Upload } from 'lucide-react'
+import { Plus, Save, Send, Trash2, ChevronDown, ChevronUp, GripVertical, FileText, Languages, Upload } from 'lucide-react'
 import type { ReportTab, ReportBlock, ReportBlockType, PerformanceReport } from '@/lib/performance-reports'
 import { createStandardTemplate } from '@/lib/report-template'
 import BlockEditor from './BlockEditor'

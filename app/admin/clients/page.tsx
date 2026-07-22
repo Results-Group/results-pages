@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { useT, useLocale } from '@/lib/i18n'
+import { useT } from '@/lib/i18n'
 import { useToast } from '../_components/toast'
 import { Plus, Search, Contact, Trash2, X, RefreshCw, GitMerge, ArrowRight, CheckCircle, Megaphone, FileText, Pencil } from 'lucide-react'
 
@@ -40,7 +40,6 @@ interface DuplicatePair { a: Client; b: Client; score: number }
 
 export default function ClientsPage() {
   const t = useT()
-  const locale = useLocale()
   const { showToast } = useToast()
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
@@ -303,7 +302,6 @@ function ClientAvatar({ client }: { client: Client }) {
 
 function MergeModal({ clients, onClose, onMerged }: { clients: Client[]; onClose: () => void; onMerged: () => void }) {
   const t = useT()
-  const locale = useLocale()
   const [merging, setMerging] = useState<string | null>(null)
   const [done, setDone] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
@@ -418,7 +416,6 @@ function MergeModal({ clients, onClose, onMerged }: { clients: Client[]; onClose
 
 function CreateClientModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
   const t = useT()
-  const locale = useLocale()
   const [name, setName] = useState('')
   const [brandColor, setBrandColor] = useState('#40e1d3')
   const [saving, setSaving] = useState(false)

@@ -27,12 +27,6 @@ interface TrashedReport {
 
 export default function TrashPage() {
   const t = useT()
-  const locale = useLocale()
-
-  function formatDate(iso: string | null) {
-    if (!iso) return ''
-    return new Date(iso).toLocaleDateString(locale === 'en' ? 'en-US' : 'he-IL', { year: 'numeric', month: 'short', day: 'numeric' })
-  }
 
   const [pages, setPages] = useState<TrashedPage[]>([])
   const [campaigns, setCampaigns] = useState<TrashedCampaign[]>([])

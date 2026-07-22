@@ -26,6 +26,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${title} | Results Digital`,
     description: `דוח ביצועים עבור ${report.client}`,
+    // Performance reports carry client budgets and ROI. Even a published,
+    // unprotected report is meant for the recipient of the link only, never
+    // for search indexes — the slug is not a secret.
+    robots: { index: false, follow: false },
     openGraph: { title, type: 'website', siteName: 'Results Digital' },
   }
 }

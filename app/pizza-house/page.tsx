@@ -6,7 +6,6 @@ import {
   ResponsiveContainer,
   ComposedChart,
   Bar,
-  Line,
   Area,
   XAxis,
   YAxis,

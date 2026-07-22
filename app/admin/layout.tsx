@@ -44,12 +44,6 @@ interface Workspace {
   icon: string
 }
 
-const ROLE_LABELS: Record<string, string> = {
-  admin: 'אדמין',
-  editor: 'עורך',
-  viewer: 'צופה',
-}
-
 const ROLE_COLORS: Record<string, { color: string; bg: string }> = {
   admin: { color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.12)' },
   editor: { color: '#22d3ee', bg: 'rgba(34, 211, 238, 0.12)' },
