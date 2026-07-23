@@ -66,6 +66,7 @@ const en: Record<TranslationKey, string> = {
   'pages.bulkDeleting': 'Deleting...',
   'pages.prev': 'Prev',
   'pages.next': 'Next',
+  'pages.exportPdf': 'Export PDF',
   'pages.selectAll': 'Select all',
   'pages.selectRow': 'Select row',
   'pages.noPages': 'No pages',

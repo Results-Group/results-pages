@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Eye, Trash2, ArrowRight, Code2, Upload, ChevronDown, ChevronUp, Check, FileCode2, RotateCcw, History, Paintbrush } from 'lucide-react'
+import { Eye, Trash2, ArrowRight, Code2, Upload, ChevronDown, ChevronUp, Check, FileCode2, RotateCcw, History, Paintbrush, FileDown, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import VisualEditor, { type VisualEditorRef } from './visual-editor'
 import ClientAutocomplete from '../../_components/client-autocomplete'
@@ -274,6 +274,34 @@ export default function EditPage() {
     }
   }
 
+  const [exportingPdf, setExportingPdf] = useState(false)
+  async function handleExportPdf() {
+    if (exportingPdf) return
+    setExportingPdf(true)
+    setError('')
+    try {
+      const res = await fetch(`/api/pages/${id}/pdf`)
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        setError(err.error || 'שגיאה בייצוא PDF')
+        return
+      }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${title || slug}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch {
+      setError('שגיאה בייצוא PDF')
+    } finally {
+      setExportingPdf(false)
+    }
+  }
+
   async function handleResetStats() {
     if (!confirm('לאפס את כל הסטטיסטיקות של דף זה? פעולה זו בלתי הפיכה.')) return
     setResettingStats(true)
@@ -392,6 +420,23 @@ export default function EditPage() {
         <span className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>
           נוצר {new Date(page.createdAt).toLocaleDateString('he-IL')}
         </span>
+        <button
+          type="button"
+          onClick={handleExportPdf}
+          disabled={exportingPdf}
+          className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-40"
+          style={{
+            color: 'var(--admin-text-secondary)',
+            border: '1px solid var(--admin-border)',
+            background: 'transparent',
+          }}
+          title="הורדת הדף כקובץ PDF"
+          onMouseEnter={e => { if (!exportingPdf) e.currentTarget.style.background = 'var(--admin-hover-bg)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+        >
+          {exportingPdf ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileDown className="w-3 h-3" />}
+          {exportingPdf ? 'מייצא...' : 'ייצוא ל-PDF'}
+        </button>
       </div>
 
       <div

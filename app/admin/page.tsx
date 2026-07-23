@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { Plus, Search, Eye, ExternalLink, Pencil, ToggleLeft, ToggleRight, Trash2, Monitor, Smartphone, X, Copy, MessageCircle, Lock, Building, CheckSquare, Square } from 'lucide-react'
+import { Plus, Search, Eye, ExternalLink, Pencil, ToggleLeft, ToggleRight, Trash2, Monitor, Smartphone, X, Copy, MessageCircle, Lock, Building, CheckSquare, Square, FileDown, Loader2 } from 'lucide-react'
 import { whatsappShareUrl } from '@/lib/share'
 import { useT, useLocale } from '@/lib/i18n'
 import { useToast } from './_components/toast'
@@ -57,6 +57,7 @@ export default function AdminDashboard() {
   const [moveTarget, setMoveTarget] = useState('')
   const [moving, setMoving] = useState(false)
   const [bulkDeleting, setBulkDeleting] = useState(false)
+  const [exportingPdfId, setExportingPdfId] = useState<string | null>(null)
   const [pageIdx, setPageIdx] = useState(0)
   const PAGE_SIZE = 20
 
@@ -113,6 +114,33 @@ export default function AdminDashboard() {
       ? `${base}/r/${page.short_url}`
       : `${base}/pages/${page.client}/${page.slug}`
     window.open(whatsappShareUrl({ title: page.title, client: page.client, url }), '_blank')
+  }
+
+  async function handleExportPdf(page: PageItem) {
+    setExportingPdfId(page.id)
+    try {
+      const res = await fetch(`/api/pages/${page.id}/pdf`)
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        showToast(err.error || (locale === 'en' ? 'PDF export failed' : 'שגיאה בייצוא PDF'))
+        return
+      }
+      const blob = await res.blob()
+      // Trigger a normal browser download so the file lands in the user's
+      // Downloads folder without opening a new tab.
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${page.title || page.slug}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch {
+      showToast(locale === 'en' ? 'PDF export failed' : 'שגיאה בייצוא PDF')
+    } finally {
+      setExportingPdfId(null)
+    }
   }
 
   async function handleToggle(id: string, currentActive: boolean) {
@@ -506,6 +534,19 @@ export default function AdminDashboard() {
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         >
                           <MessageCircle className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleExportPdf(page)}
+                          disabled={exportingPdfId === page.id}
+                          className="p-1.5 rounded-lg transition-colors disabled:opacity-40"
+                          style={{ color: 'var(--admin-text-secondary)' }}
+                          title={t('pages.exportPdf')}
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          {exportingPdfId === page.id
+                            ? <Loader2 className="w-4 h-4 animate-spin" />
+                            : <FileDown className="w-4 h-4" />}
                         </button>
                         {userRole === 'admin' && (
                           <button

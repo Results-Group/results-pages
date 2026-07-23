@@ -64,6 +64,7 @@ const he = {
   'pages.bulkDeleting': 'מוחק...',
   'pages.prev': 'הקודם',
   'pages.next': 'הבא',
+  'pages.exportPdf': 'ייצוא ל-PDF',
   'pages.selectAll': 'בחר הכל',
   'pages.selectRow': 'בחר שורה',
   'pages.noPages': 'אין דפים',
