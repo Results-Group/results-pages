@@ -132,6 +132,7 @@ export default function SlideCanvas({
   const isDivider = section.mockup_type === 'divider'
   const isVideo = section.mockup_type === 'video'
   const isStory = section.mockup_type === 'instagram_story'
+  const isCarousel = section.mockup_type === 'carousel'
   const maxWidth = device === 'mobile' ? 420 : 960
   // Per-slide filter: only campaign copies whose IDs the editor picked here.
   const selectedIds = new Set(section.copyIds ?? [])
@@ -279,7 +280,11 @@ export default function SlideCanvas({
               // of 2 for the viewer. The editor used to show all 4 in one grid,
               // which made operators think the client would see a 2×2 layout.
               // Rendering the same page breaks removes the mismatch.
-              const perScreen = CREATIVES_PER_SCREEN
+              //
+              // Carousel is exempt because the client renders it as a single
+              // post containing every frame — paging it in the editor would
+              // now diverge in the OTHER direction.
+              const perScreen = isCarousel ? section.assets.length : CREATIVES_PER_SCREEN
               const pages: EditorAsset[][] = []
               for (let i = 0; i < section.assets.length; i += perScreen) {
                 pages.push(section.assets.slice(i, i + perScreen))
