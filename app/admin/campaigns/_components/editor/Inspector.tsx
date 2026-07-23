@@ -83,7 +83,17 @@ export default function Inspector({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    // A <form autoComplete="off"> around the whole inspector tells the browser
+    // "these fields are not for saved credentials". Chrome/Safari respect this
+    // for text inputs (they only ignore autocomplete="off" on password fields,
+    // which is why the password field also has decoys + autoComplete="new-password").
+    // onSubmit={preventDefault} keeps Enter inside a text field from posting
+    // the "form" since we have no server target — the editor autosaves.
+    <form
+      autoComplete="off"
+      onSubmit={e => e.preventDefault()}
+      className="flex flex-col h-full"
+    >
       {/* Tabs */}
       <div className="flex gap-0.5 p-0.5 rounded-lg mb-5" style={{ background: 'var(--admin-hover-bg)' }}>
         <button
@@ -460,8 +470,19 @@ export default function Inspector({
               <label className="block text-[11px] font-bold mb-1.5 flex items-center gap-1.5 uppercase tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>
                 <Lock className="w-3.5 h-3.5" /> {t('common.password')}
               </label>
+              {/* Trap Chrome/Safari's "this looks like a login form" heuristic.
+                  The browser fills the FIRST username-shaped field it finds and
+                  offers to save the password once you type; hidden decoys
+                  before the real password absorb the autofill and the prompt. */}
+              <input type="text" name="fake-username" autoComplete="username" tabIndex={-1} aria-hidden="true" style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' }} />
+              <input type="password" name="fake-password" autoComplete="new-password" tabIndex={-1} aria-hidden="true" style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' }} />
               <input
-                type="password" value={meta.password} autoComplete="off"
+                type="password" value={meta.password}
+                // "new-password" tells Chrome this is a set-password field, so
+                // it stops autofilling saved credentials and stops prompting
+                // to save on every keystroke. Plain "off" is ignored on
+                // password inputs.
+                autoComplete="new-password"
                 onChange={e => { onPasswordDirty(true); onUpdateMeta({ password: e.target.value }) }}
                 placeholder={meta.hasPassword && !passwordDirty ? '••••••••' : t('campaigns.passwordPlaceholderEmpty')} dir="ltr"
                 className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={fieldStyle}
@@ -556,6 +577,6 @@ export default function Inspector({
           </>
         )}
       </div>
-    </div>
+    </form>
   )
 }

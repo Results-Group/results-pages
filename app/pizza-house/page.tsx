@@ -916,7 +916,7 @@ export default function PizzaHouseDashboard() {
             className="text-[10px] sm:text-xs transition-opacity hover:opacity-100" style={{ color: pal.textMuted, opacity: 0.6, textDecoration: 'none' }}>
             www.resultsdigital.org
           </a>
-          <p className="text-[10px] sm:text-xs" style={{ color: pal.textMuted, opacity: 0.6, margin: 0 }}>By Results Group</p>
+          <p className="text-[10px] sm:text-xs" style={{ color: pal.textMuted, opacity: 0.6, margin: 0 }}>By Results Digital</p>
         </div>
       </footer>
     </div>

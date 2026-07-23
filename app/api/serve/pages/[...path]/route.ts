@@ -83,7 +83,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
   const pageUrl = `${baseUrl}/pages/${client}/${slug}`
   const ogImageUrl = `${baseUrl}/og-image.png`
 
-  const ogDescription = escapeHtml(page.client || 'Results Group')
+  const ogDescription = escapeHtml(page.client || 'Results Digital')
   const ogTags = `
     <meta property="og:title" content="${escapeHtml(page.title)}" />
     <meta property="og:description" content="${ogDescription}" />
@@ -231,11 +231,11 @@ const PING_FONT_FACE = `<style>
 function expiredPage(message: string): string {
   return `<!DOCTYPE html>
 <html lang="he" dir="rtl">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Results Group</title>${PING_FONT_FACE}</head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Results Digital</title>${PING_FONT_FACE}</head>
 <body style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Ping',sans-serif;background:#f9f9f9;margin:0">
 <div style="text-align:center;padding:40px">
 <h1 style="font-size:1.3rem;color:#333;margin-bottom:8px">${message}</h1>
-<p style="color:#888;font-size:0.9rem">Results Group</p>
+<p style="color:#888;font-size:0.9rem">Results Digital</p>
 </div>
 </body></html>`
 }
@@ -246,7 +246,7 @@ function passwordPage(client: string, slug: string, hasError: boolean): string {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Results Group - דף מוגן</title>
+<title>Results Digital - דף מוגן</title>
 ${PING_FONT_FACE}
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }

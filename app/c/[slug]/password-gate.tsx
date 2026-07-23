@@ -61,7 +61,7 @@ export default function PasswordGate({ slug, clientName, lang = 'he' }: { slug: 
             {loading ? t('public.checking') : t('public.enter')}
           </button>
         </form>
-        <div className="pw-footer">By Results Group</div>
+        <div className="pw-footer">By Results Digital</div>
       </div>
     </>
   )

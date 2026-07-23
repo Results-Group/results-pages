@@ -696,7 +696,9 @@ export default function EditPage() {
       </div>
 
       {/* ─── Page Settings Form ─── */}
-      <form onSubmit={handleSave} className="space-y-6">
+      {/* autoComplete="off" stops Chrome/Safari from autofilling saved emails
+          and usernames into the title/slug/password fields. */}
+      <form onSubmit={handleSave} className="space-y-6" autoComplete="off">
         <div>
           <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>כותרת</label>
           <input
@@ -765,6 +767,10 @@ export default function EditPage() {
           <input
             type="text"
             value={password}
+            // Chrome sees a "password"-named field and offers to save credentials
+            // even when the type is text; "new-password" signals set-password
+            // intent so no save-prompt appears and no saved email autofills.
+            autoComplete="new-password"
             onChange={e => { setPassword(e.target.value); setPasswordTouched(true); setDirty(true) }}
             placeholder={hasPassword && !passwordTouched ? '••••••••' : 'השאר ריק ללא הגנה'}
             dir="ltr"

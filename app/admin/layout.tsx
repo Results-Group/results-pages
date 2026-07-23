@@ -426,7 +426,7 @@ function AdminFooter() {
         {/* Left — copyright + website */}
         <div className="flex flex-col gap-1.5">
           <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>
-            © {new Date().getFullYear()} by Results Group
+            © {new Date().getFullYear()} by Results Digital
           </p>
           <a
             href="https://www.resultsdigital.org"

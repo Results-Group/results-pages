@@ -178,6 +178,29 @@ const VisualEditor = forwardRef<VisualEditorRef, Props>(function VisualEditor(
         border: fullscreen ? 'none' : '1px solid var(--admin-border)',
       }}
     >
+      {/* Floating exit — the toolbar's own minimize button lives at the end
+          of a flex-wrap row and slips off-screen once the toolbar breaks onto
+          a second line, so users get trapped in fullscreen with no visible way
+          out. This corner button is always on top and always reachable. */}
+      {fullscreen && (
+        <button
+          type="button"
+          onClick={() => setFullscreen(false)}
+          className="fixed top-4 z-[10000] flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold shadow-lg transition-all"
+          style={{
+            // RTL layout: pin to the left (Hebrew reads right-to-left, so the
+            // top-left corner is the "trailing" corner that stays clear of the
+            // content the user is reading).
+            insetInlineStart: '1rem',
+            background: 'var(--admin-danger)',
+            color: '#fff',
+          }}
+          title="יציאה ממסך מלא (Esc)"
+        >
+          <Minimize2 className="w-4 h-4" />
+          יציאה ממסך מלא
+        </button>
+      )}
       {/* Toolbar */}
       <div
         className="flex flex-wrap items-center gap-0.5 px-3 py-2"

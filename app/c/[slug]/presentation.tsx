@@ -421,8 +421,8 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
             would just repeat the same contact line underneath it. */}
         {slides[activeSlide].type !== 'closing' && (
           <footer className="pres-footer">
-            <a href="https://www.resultsgroup.co.il" target="_blank" rel="noopener noreferrer">www.resultsgroup.co.il</a>
-            <p>By Results Group</p>
+            <a href="https://www.resultsdigital.org" target="_blank" rel="noopener noreferrer">www.resultsdigital.org</a>
+            <p>By Results Digital</p>
           </footer>
         )}
 
@@ -720,7 +720,7 @@ function CoverSlide({ slide }: { slide: SlideData }) {
           <div className="cover-meta-line rp-anim rp-up rp-d4">
             <span className="cover-client-name">{slide.title}</span>
             <span className="cover-meta-sep" aria-hidden />
-            <span className="cover-by">By Results Group</span>
+            <span className="cover-by">By Results Digital</span>
           </div>
           <div className="cover-h-rule rp-anim rp-wipe rp-d5" />
           <div className="rp-anim rp-up rp-d6">

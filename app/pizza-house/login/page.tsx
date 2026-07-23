@@ -88,7 +88,7 @@ export default function PizzaHouseLoginPage() {
           >
             www.resultsdigital.org
           </a>
-          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)', opacity: 0.6, margin: 0 }}>By Results Group</p>
+          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)', opacity: 0.6, margin: 0 }}>By Results Digital</p>
         </div>
       </div>
     </div>

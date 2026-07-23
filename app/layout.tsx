@@ -20,21 +20,21 @@ const SHARE_IMAGE = { url: '/og-image.png', width: 1200, height: 630, alt: 'Resu
 export const metadata: Metadata = {
   metadataBase: new URL(resolveSiteUrl()),
   title: 'Results Creative',
-  description: 'ניהול קמפיינים ודפי נחיתה - Results Group',
+  description: 'ניהול קמפיינים ודפי נחיתה - Results Digital',
   icons: {
     icon: '/favicon.ico',
     apple: '/apple-touch-icon.png',
   },
   openGraph: {
     title: 'Results Creative',
-    description: 'ניהול קמפיינים ודפי נחיתה - Results Group',
+    description: 'ניהול קמפיינים ודפי נחיתה - Results Digital',
     images: [SHARE_IMAGE],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Results Creative',
-    description: 'ניהול קמפיינים ודפי נחיתה - Results Group',
+    description: 'ניהול קמפיינים ודפי נחיתה - Results Digital',
     images: [SHARE_IMAGE.url],
   },
 }
