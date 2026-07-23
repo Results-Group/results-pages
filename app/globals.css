@@ -169,6 +169,13 @@ h4, h5, h6 {
   font-family: 'Ping', sans-serif;
 }
 
+/* Native form controls (input/button/select/textarea) don't inherit the body
+   font by default — the browser paints them in a system font (Arial etc.).
+   Force inherit so every text field and button across the admin picks up Ping. */
+input, button, select, textarea, optgroup {
+  font-family: inherit;
+}
+
 .admin-content h1,
 .admin-content h2,
 .admin-content h3 {

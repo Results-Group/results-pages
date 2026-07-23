@@ -220,11 +220,19 @@ function injectOgTags(html: string, ogTags: string, title: string): string {
   return `<head><meta charset="UTF-8"><title>${escapeHtml(title)}</title>${ogTags}</head>` + html
 }
 
+// These pages are served as standalone HTML (not through the React app), so
+// they don't get Ping unless we load @font-face here too.
+const PING_FONT_FACE = `<style>
+@font-face{font-family:'Ping';src:url('/fonts/ping-regular.woff2') format('woff2'),url('/fonts/ping-regular.otf') format('opentype');font-weight:400;font-display:swap}
+@font-face{font-family:'Ping';src:url('/fonts/ping-bold.woff2') format('woff2'),url('/fonts/ping-bold.otf') format('opentype');font-weight:700;font-display:swap}
+@font-face{font-family:'Ping';src:url('/fonts/ping-heavy.woff2') format('woff2'),url('/fonts/ping-heavy.otf') format('opentype');font-weight:900;font-display:swap}
+</style>`
+
 function expiredPage(message: string): string {
   return `<!DOCTYPE html>
 <html lang="he" dir="rtl">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Results Group</title></head>
-<body style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui,sans-serif;background:#f9f9f9;margin:0">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Results Group</title>${PING_FONT_FACE}</head>
+<body style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Ping',sans-serif;background:#f9f9f9;margin:0">
 <div style="text-align:center;padding:40px">
 <h1 style="font-size:1.3rem;color:#333;margin-bottom:8px">${message}</h1>
 <p style="color:#888;font-size:0.9rem">Results Group</p>
@@ -239,14 +247,16 @@ function passwordPage(client: string, slug: string, hasError: boolean): string {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Results Group - דף מוגן</title>
+${PING_FONT_FACE}
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
+input, button, select, textarea { font-family: inherit; }
 body {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Ping', sans-serif;
   background: #0a0a0f;
   color: #fff;
   padding: 20px;
