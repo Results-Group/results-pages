@@ -81,35 +81,31 @@ export async function fetchSummary(r: DateRange) {
     [r.from, r.to]
   )
 
-  // Customer identity = phone when the cashier recorded one, otherwise the
-  // card fingerprint. A real person keeps their number across card renewals,
-  // second cards, and family hand-offs — so phone-based dedup is the ideal.
-  // But we don't want to lose transactions where no phone was captured (a
-  // real customer paying quickly at the counter), so those still get grouped
-  // by CONCAT(id_card, validto) — the same identity we used before the phone
-  // switch — which at least dedupes repeat visits by the same card.
-  const CUSTOMER_ID = `COALESCE(NULLIF(phone, ''), CONCAT(id_card, '|', validto))`
+  // Customer identity = card fingerprint (id_card + validto).
+  //
+  // Ideally this would be phone-based, since a real person keeps their number
+  // across card renewals and multi-card use. Aviv POS on this deployment does
+  // populate `creditcard.phone` — but every row is the literal placeholder
+  // "---" (verified 2026-07-23: 2180/2180 rows). The cashier flow never
+  // captures a phone into the card payment record. Falling back to the card
+  // fingerprint is the best identity this DB actually holds.
+  //
+  // Known limitation: a card renewal (new validto) counts as a new customer.
   const [customers] = await pizzaHouseQuery<{ unique_customers: number }>(
-    `SELECT COUNT(DISTINCT ${CUSTOMER_ID}) as unique_customers
+    `SELECT COUNT(DISTINCT CONCAT(id_card, '|', validto)) as unique_customers
      FROM creditcard
-     WHERE date >= ? AND date < ? AND sum > 0
-       AND (phone != '' OR id_card != '')`,
+     WHERE date >= ? AND date < ? AND id_card != '' AND sum > 0`,
     [r.from, r.to]
   )
 
-  // Same fallback for the returning query. The correlated subquery has its
-  // own alias (c/p) so we re-express the identity comparison in terms of the
-  // columns rather than reusing the CUSTOMER_ID snippet.
+  // Cards seen in range that were also seen before the range = returning
   const [returning] = await pizzaHouseQuery<{ returning_customers: number }>(
-    `SELECT COUNT(DISTINCT COALESCE(NULLIF(c.phone, ''), CONCAT(c.id_card, '|', c.validto))) as returning_customers
+    `SELECT COUNT(DISTINCT CONCAT(c.id_card, '|', c.validto)) as returning_customers
      FROM creditcard c
-     WHERE c.date >= ? AND c.date < ? AND c.sum > 0
-       AND (c.phone != '' OR c.id_card != '')
+     WHERE c.date >= ? AND c.date < ? AND c.id_card != '' AND c.sum > 0
        AND EXISTS (
          SELECT 1 FROM creditcard p
-         WHERE p.date < ?
-           AND COALESCE(NULLIF(p.phone, ''), CONCAT(p.id_card, '|', p.validto))
-             = COALESCE(NULLIF(c.phone, ''), CONCAT(c.id_card, '|', c.validto))
+         WHERE p.id_card = c.id_card AND p.validto = c.validto AND p.date < ?
        )`,
     [r.from, r.to, r.from]
   )
@@ -194,22 +190,20 @@ export async function fetchWeekdays(r: DateRange) {
 // ── Customers ──
 
 export async function fetchCustomers(r: DateRange) {
-  // New vs returning within range — same identity rule as unique customers:
-  // phone when present, card fingerprint otherwise. Prevents renewed cards
-  // from masquerading as new customers, while keeping anonymous purchases
-  // in the picture.
+  // New vs returning within range — identity = card fingerprint (see the
+  // long note on `customers` above for why phone-based dedup isn't possible).
   const newVsReturning = await pizzaHouseQuery<{ kind: string; customers: number; revenue: number }>(
     `SELECT
        CASE WHEN first_seen >= ? THEN 'new' ELSE 'returning' END as kind,
        COUNT(*) as customers,
        ROUND(SUM(range_spend), 2) as revenue
      FROM (
-       SELECT COALESCE(NULLIF(phone, ''), CONCAT(id_card, '|', validto)) as customer_id,
+       SELECT CONCAT(id_card, '|', validto) as card,
               MIN(date) as first_seen,
               SUM(CASE WHEN date >= ? AND date < ? THEN sum ELSE 0 END) as range_spend
        FROM creditcard
-       WHERE sum > 0 AND (phone != '' OR id_card != '')
-       GROUP BY customer_id
+       WHERE id_card != '' AND sum > 0
+       GROUP BY card
        HAVING SUM(CASE WHEN date >= ? AND date < ? THEN 1 ELSE 0 END) > 0
      ) t
      GROUP BY kind`,
@@ -227,11 +221,10 @@ export async function fetchCustomers(r: DateRange) {
        END as bucket,
        COUNT(*) as customers
      FROM (
-       SELECT COALESCE(NULLIF(phone, ''), CONCAT(id_card, '|', validto)) as customer_id,
-              COUNT(DISTINCT id_docum) as visits
+       SELECT CONCAT(id_card, '|', validto) as card, COUNT(DISTINCT id_docum) as visits
        FROM creditcard
-       WHERE sum > 0 AND (phone != '' OR id_card != '')
-       GROUP BY customer_id
+       WHERE id_card != '' AND sum > 0
+       GROUP BY card
        HAVING SUM(CASE WHEN date >= ? AND date < ? THEN 1 ELSE 0 END) > 0
      ) t
      GROUP BY bucket
@@ -239,11 +232,8 @@ export async function fetchCustomers(r: DateRange) {
     [r.from, r.to]
   )
 
-  // VIP customers active in range: total all-time spend, grouped by the same
-  // "phone-or-card" identity so a customer's spend across card renewals/changes
-  // accumulates into one entry. `last4` becomes the phone's last 4 digits when
-  // we have a phone (typical), otherwise the card's last 4 — the UI keeps its
-  // "•••• 1234" masked-identifier shape either way.
+  // VIP customers active in range: total all-time spend. `last4` = card tail;
+  // UI renders it as "•••• 1234".
   const vip = await pizzaHouseQuery<{
     last4: string
     nm_card: string
@@ -253,15 +243,15 @@ export async function fetchCustomers(r: DateRange) {
     last_visit: string
   }>(
     `SELECT
-       COALESCE(NULLIF(RIGHT(MAX(phone), 4), ''), MAX(id_card)) as last4,
+       id_card as last4,
        MAX(nm_card) as nm_card,
        COUNT(DISTINCT id_docum) as visits,
        ROUND(SUM(sum), 2) as total_spend,
        ROUND(SUM(CASE WHEN date >= ? AND date < ? THEN sum ELSE 0 END), 2) as range_spend,
        MAX(date) as last_visit
      FROM creditcard
-     WHERE sum > 0 AND (phone != '' OR id_card != '')
-     GROUP BY COALESCE(NULLIF(phone, ''), CONCAT(id_card, '|', validto))
+     WHERE id_card != '' AND sum > 0
+     GROUP BY id_card, validto
      HAVING range_spend > 0
      ORDER BY total_spend DESC
      LIMIT 10`,
