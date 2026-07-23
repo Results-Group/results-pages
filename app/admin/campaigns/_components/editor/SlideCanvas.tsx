@@ -13,6 +13,7 @@ import { Upload, Trash2, GripVertical, Link2, RefreshCw, LayoutTemplate, ImageIc
 import CanvasAsset from './CanvasAsset'
 import type { EditorAsset, EditorSection, Copy } from './types'
 import { isImageFile, MAX_FILE_MB } from '@/lib/image-compress'
+import { CREATIVES_PER_SCREEN } from '@/lib/slides'
 import { maxAssetsFor } from './types'
 
 interface UploadProgress {
@@ -272,27 +273,57 @@ export default function SlideCanvas({
           </div>
         ) : (
           <>
-            {section.assets.length > 0 && (
-              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={section.assets.map(a => a.id)} strategy={rectSortingStrategy}>
-                  <div className={isStory ? 'grid grid-cols-2 sm:grid-cols-3 gap-5 mb-6' : 'grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6'}>
-                    {section.assets.map(asset => (
-                      <SortableAssetCard
-                        key={asset.id}
-                        asset={asset}
-                        section={section}
-                        clientName={clientName}
-                        clientLogoUrl={clientLogoUrl}
-                        captionOverride={activeCopyBody}
-                        onUpdateAsset={onUpdateAsset}
-                        onRemoveAsset={onRemoveAsset}
-                        onReplaceAsset={onReplaceAsset}
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
-            )}
+            {section.assets.length > 0 && (() => {
+              // Mirror the client's paging: it splits the section into groups
+              // of CREATIVES_PER_SCREEN so 4 uploaded images become 2 slides
+              // of 2 for the viewer. The editor used to show all 4 in one grid,
+              // which made operators think the client would see a 2×2 layout.
+              // Rendering the same page breaks removes the mismatch.
+              const perScreen = CREATIVES_PER_SCREEN
+              const pages: EditorAsset[][] = []
+              for (let i = 0; i < section.assets.length; i += perScreen) {
+                pages.push(section.assets.slice(i, i + perScreen))
+              }
+              const gridClass = isStory
+                ? 'grid grid-cols-2 sm:grid-cols-3 gap-5'
+                : 'grid grid-cols-1 sm:grid-cols-2 gap-5'
+              return (
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                  <SortableContext items={section.assets.map(a => a.id)} strategy={rectSortingStrategy}>
+                    <div className="mb-6 space-y-6">
+                      {pages.map((page, pageIdx) => (
+                        <div key={pageIdx}>
+                          {pages.length > 1 && (
+                            <div className="flex items-center gap-3 mb-3">
+                              <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--admin-border) 20%, var(--admin-border) 80%, transparent)' }} />
+                              <span className="text-[10px] font-bold uppercase tracking-wide shrink-0" style={{ color: 'rgba(64,225,211,0.7)' }}>
+                                שקף {pageIdx + 1} מתוך {pages.length}
+                              </span>
+                              <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--admin-border) 20%, var(--admin-border) 80%, transparent)' }} />
+                            </div>
+                          )}
+                          <div className={gridClass}>
+                            {page.map(asset => (
+                              <SortableAssetCard
+                                key={asset.id}
+                                asset={asset}
+                                section={section}
+                                clientName={clientName}
+                                clientLogoUrl={clientLogoUrl}
+                                captionOverride={activeCopyBody}
+                                onUpdateAsset={onUpdateAsset}
+                                onRemoveAsset={onRemoveAsset}
+                                onReplaceAsset={onReplaceAsset}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
+              )
+            })()}
 
             {/* Upload progress banner — shown while uploading, above the drop zone */}
             {isUploading && (

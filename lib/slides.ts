@@ -20,8 +20,11 @@ export interface SlideData {
   partsTotal?: number
 }
 
-/** Creatives shown on one screen before the section pages onto the next. */
-const CREATIVES_PER_SCREEN = 2
+/** Creatives shown on one screen before the section pages onto the next.
+ *  Exported so the admin editor can preview the same split — otherwise the
+ *  operator uploads 4 images, sees a 2×2 grid in the editor, and gets
+ *  confused when the client view splits it into two screens of 2. */
+export const CREATIVES_PER_SCREEN = 2
 
 export function buildCampaignSlides(opts: {
   client: string

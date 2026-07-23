@@ -54,6 +54,14 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
   const [activeId, setActiveId] = useState<string | null>(initial.doc.sections[0]?.id ?? null)
   const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop')
   const [showFullPreview, setShowFullPreview] = useState(false)
+  // Esc exits fullscreen preview — the visible red button is the primary
+  // affordance, but a keyboard escape is the muscle-memory for any modal.
+  useEffect(() => {
+    if (!showFullPreview) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowFullPreview(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [showFullPreview])
   const [uploadingLogo, setUploadingLogo] = useState(false)
   // Per-section upload tracking: { sectionId: { total, done, failed } }
   const [uploadProgress, setUploadProgress] = useState<Record<string, { total: number; done: number; failed: number }>>({})
@@ -759,10 +767,16 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
           <div className="flex-1 min-h-0 relative">
           {showFullPreview ? (
             <div className="fixed inset-0 z-[60] overflow-auto" style={{ background: '#090c0e' }}>
+              {/* Bright pill in the top-left corner — the old translucent
+                  black-on-black button was invisible against the dark preview
+                  backdrop, so operators had no obvious way out. Now it's a
+                  proper red exit button with a shadow that pops. Esc also
+                  works, but a visible affordance matters. */}
               <button
                 onClick={() => setShowFullPreview(false)}
-                className="fixed top-4 left-4 z-[61] flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-colors"
-                style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid var(--admin-border-input)', color: '#fff', backdropFilter: 'blur(8px)' }}
+                className="fixed top-4 left-4 z-[61] flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold shadow-2xl transition-all hover:scale-105"
+                style={{ background: '#ef4444', color: '#fff', boxShadow: '0 8px 24px rgba(239,68,68,0.4)' }}
+                title="סגור תצוגה מלאה (Esc)"
               >
                 <X className="w-4 h-4" /> סגור תצוגה
               </button>
