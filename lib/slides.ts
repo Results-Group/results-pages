@@ -26,6 +26,37 @@ export interface SlideData {
  *  confused when the client view splits it into two screens of 2. */
 export const CREATIVES_PER_SCREEN = 2
 
+/** How many client-facing slides a section will produce. Mirrors the paging
+ *  logic in buildCampaignSlides — carousel = one slide, landing_page = one
+ *  slide per URL, everything else = ceil(assets / CREATIVES_PER_SCREEN).
+ *  Divider always renders as one slide; empty sections render zero. */
+// Accept either the CampaignSection shape (from lib) or the EditorSection
+// shape (from the admin editor) — both have mockup_type + assets, which is
+// all this helper reads. Loose typing here beats a Pick<> that both callers
+// have to maintain in lockstep.
+type SectionLike = { mockup_type: string; assets?: unknown[] }
+
+export function slidesPerSection(section: SectionLike): number {
+  if (section.mockup_type === 'divider') return 1
+  const assets = section.assets || []
+  if (!assets.length) return 0
+  if (section.mockup_type === 'carousel') return 1
+  if (section.mockup_type === 'landing_page') return assets.length
+  return Math.ceil(assets.length / CREATIVES_PER_SCREEN)
+}
+
+/** Total client-facing slide count — cover + optional concept + sum over
+ *  sections + closing. Used by the editor's sidebar total badge so the
+ *  number the operator sees matches the number of screens the client will
+ *  scroll through. */
+export function countClientSlides(sections: SectionLike[], opts: { hasConcept: boolean }): number {
+  let n = 1 // cover
+  if (opts.hasConcept) n += 1 // concept
+  for (const s of sections) n += slidesPerSection(s)
+  n += 1 // closing
+  return n
+}
+
 export function buildCampaignSlides(opts: {
   client: string
   campaignName: string

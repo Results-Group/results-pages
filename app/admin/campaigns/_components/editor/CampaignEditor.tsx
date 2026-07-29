@@ -751,7 +751,7 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
                 >
                   <ChevronRight className="w-3.5 h-3.5" /> הקודם
                 </button>
-                <span className="text-xs font-bold" style={{ color: 'var(--admin-text-secondary)' }}>שקף {idx + 1} מתוך {doc.sections.length}</span>
+                <span className="text-xs font-bold" style={{ color: 'var(--admin-text-secondary)' }}>סקשן {idx + 1} מתוך {doc.sections.length}</span>
                 <button
                   type="button"
                   disabled={idx >= doc.sections.length - 1}

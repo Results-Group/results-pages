@@ -14,6 +14,7 @@ import {
   Star, BookOpen, CheckCircle2, Sparkles,
 } from 'lucide-react'
 import { assetProxyUrl } from '@/lib/asset-url'
+import { countClientSlides } from '@/lib/slides'
 import type { EditorSection, MockupType, CampaignMeta } from './types'
 
 function typeIcon(type: MockupType) {
@@ -182,8 +183,11 @@ export default function SlideFilmstrip({ sections, activeId, feedback, meta, onS
   }
 
   // Total slides in the final deck for the counter
-  const systemCount = 2 + (meta.concept ? 1 : 0) // cover + optional concept + closing
-  const total = systemCount + sections.length
+  // Total = real number of client-facing slides, matching the deck the client
+  // scrolls through. A section with 4 creatives counts as 2 (the split), a
+  // carousel counts as 1, an empty section counts as 0. This keeps the badge
+  // consistent with the "שקף X מתוך Y" divider inside the editor preview.
+  const total = countClientSlides(sections, { hasConcept: !!meta.concept })
 
   return (
     <div className="flex flex-col gap-1.5">
