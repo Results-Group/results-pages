@@ -130,7 +130,10 @@ export default function SlideCanvas({
   }
 
   const isDivider = section.mockup_type === 'divider'
-  const isVideo = section.mockup_type === 'video'
+  const isReels = section.mockup_type === 'instagram_reels'
+  // Reels are video-based like the plain video mockup, so they share the
+  // same URL-input flow instead of the image drop zone.
+  const isVideo = section.mockup_type === 'video' || isReels
   const isStory = section.mockup_type === 'instagram_story'
   const isCarousel = section.mockup_type === 'carousel'
   const maxWidth = device === 'mobile' ? 420 : 960
@@ -260,7 +263,7 @@ export default function SlideCanvas({
                 </div>
                 {asset.url && (
                   <div className="mt-4 rounded-xl overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
-                    <CanvasAsset asset={asset} mockupType="video" clientName={clientName} clientLogoUrl={clientLogoUrl} captionOverride={activeCopyBody} />
+                    <CanvasAsset asset={asset} mockupType={section.mockup_type} clientName={clientName} clientLogoUrl={clientLogoUrl} captionOverride={activeCopyBody} />
                   </div>
                 )}
               </div>

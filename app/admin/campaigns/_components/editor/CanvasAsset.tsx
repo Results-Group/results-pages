@@ -2,6 +2,7 @@
 
 import InstagramFeedMockup from '@/app/c/[slug]/mockups/instagram-feed'
 import InstagramStoryMockup from '@/app/c/[slug]/mockups/instagram-story'
+import InstagramReelsMockup from '@/app/c/[slug]/mockups/instagram-reels'
 import FacebookFeedMockup from '@/app/c/[slug]/mockups/facebook-feed'
 import VideoPlayer from '@/app/c/[slug]/mockups/VideoPlayer'
 import GeneralCard from '@/app/c/[slug]/mockups/general-card'
@@ -31,6 +32,20 @@ export default function CanvasAsset({ asset, mockupType, clientName, clientLogoU
       return <InstagramFeedMockup imageUrl={imageUrl} clientName={clientName} logoUrl={clientLogoUrl ?? undefined} caption={caption} />
     case 'instagram_story':
       return <InstagramStoryMockup imageUrl={imageUrl} clientName={clientName} logoUrl={clientLogoUrl ?? undefined} />
+    case 'instagram_reels':
+      // Same URL-driven flow as `video`: asset.url is the pasted video link.
+      // posterUrl only used when no video URL is set yet (still-image fallback).
+      return (
+        <InstagramReelsMockup
+          videoUrl={asset.url || undefined}
+          embedUrl={videoInfo?.embedUrl}
+          platform={videoInfo?.platform}
+          posterUrl={imageUrl || undefined}
+          clientName={clientName}
+          logoUrl={clientLogoUrl ?? undefined}
+          caption={caption}
+        />
+      )
     case 'facebook_feed':
       return <FacebookFeedMockup imageUrl={imageUrl} clientName={clientName} logoUrl={clientLogoUrl ?? undefined} caption={caption} />
     case 'video':

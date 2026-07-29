@@ -10,6 +10,7 @@ export interface EditorAsset {
 export type MockupType =
   | 'instagram_feed'
   | 'instagram_story'
+  | 'instagram_reels'
   | 'facebook_feed'
   | 'carousel'
   | 'video'
@@ -58,6 +59,7 @@ export interface CampaignDocument {
 export const MOCKUP_TYPES: Record<MockupType, string> = {
   instagram_feed: 'פיד אינסטגרם',
   instagram_story: 'סטוריז אינסטגרם',
+  instagram_reels: 'רילס אינסטגרם',
   facebook_feed: 'פיד פייסבוק',
   carousel: 'קרוסלה',
   video: 'סרטונים',

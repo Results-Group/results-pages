@@ -13,12 +13,16 @@ export default function VideoPlayer({
   embedUrl,
   platform,
   rounded = false,
+  aspectRatio,
 }: {
   url: string
   embedUrl?: string
   platform: 'youtube' | 'vimeo' | 'other'
   /** Rounded corners when standalone; square when filling a feed media slot. */
   rounded?: boolean
+  /** Force a fixed CSS aspect-ratio (e.g. '9 / 16' for Reels). Overrides the
+   *  poster-derived ratio and the default 16:9 for the embed. */
+  aspectRatio?: string
 }) {
   const [showEmbed, setShowEmbed] = useState(false)
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(() => getVideoThumbnail(url))
@@ -42,8 +46,9 @@ export default function VideoPlayer({
       className={`relative w-full overflow-hidden ${rounded ? 'rounded-lg' : ''}`}
       style={{
         background: 'linear-gradient(135deg, #141e20, #0d1112)',
-        // Once playing, the embed is always 16:9; before that, match the poster.
-        aspectRatio: showEmbed ? '16 / 9' : (posterRatio ?? 16 / 9),
+        // An explicit aspectRatio prop (Reels = 9/16) wins over both the
+        // poster-derived ratio and the default 16:9 embed frame.
+        aspectRatio: aspectRatio ?? (showEmbed ? '16 / 9' : (posterRatio ?? 16 / 9)),
       }}
     >
       {showEmbed && embedUrl ? (

@@ -75,6 +75,7 @@ export default function Inspector({
   const mockupLabels: Record<MockupType, string> = {
     instagram_feed: t('campaigns.mockup.instagram_feed'),
     instagram_story: t('campaigns.mockup.instagram_story'),
+    instagram_reels: t('campaigns.mockup.instagram_reels'),
     facebook_feed: t('campaigns.mockup.facebook_feed'),
     carousel: t('campaigns.mockup.carousel'),
     video: t('campaigns.mockup.video'),

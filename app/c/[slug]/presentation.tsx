@@ -7,6 +7,7 @@ import type { SlideData } from '@/lib/slides'
 import type { CampaignAsset } from '@/lib/campaigns'
 import InstagramFeedMockup from './mockups/instagram-feed'
 import InstagramStoryMockup from './mockups/instagram-story'
+import InstagramReelsMockup from './mockups/instagram-reels'
 import FacebookFeedMockup from './mockups/facebook-feed'
 import VideoPlayer from './mockups/VideoPlayer'
 import CarouselFeed from './mockups/carousel-feed'
@@ -926,6 +927,18 @@ function AssetRenderer({ asset, mockupType, clientLogoUrl, clientName, captionOv
       return <InstagramFeedMockup imageUrl={imageUrl} clientName={clientName} logoUrl={clientLogoUrl ?? undefined} caption={caption} />
     case 'instagram_story':
       return <InstagramStoryMockup imageUrl={imageUrl} clientName={clientName} logoUrl={clientLogoUrl ?? undefined} />
+    case 'instagram_reels':
+      return (
+        <InstagramReelsMockup
+          videoUrl={asset.url || undefined}
+          embedUrl={videoInfo?.embedUrl}
+          platform={videoInfo?.platform}
+          posterUrl={imageUrl || undefined}
+          clientName={clientName}
+          logoUrl={clientLogoUrl ?? undefined}
+          caption={caption}
+        />
+      )
     case 'facebook_feed':
       return <FacebookFeedMockup imageUrl={imageUrl} clientName={clientName} logoUrl={clientLogoUrl ?? undefined} caption={caption} />
     case 'video':
