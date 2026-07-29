@@ -363,6 +363,7 @@ const he = {
   'campaigns.mockup.instagram_feed': 'פיד אינסטגרם',
   'campaigns.mockup.instagram_story': 'סטוריז אינסטגרם',
   'campaigns.mockup.instagram_reels': 'רילס אינסטגרם',
+  'campaigns.mockup.landing_page': 'הטמעת דף נחיתה',
   'campaigns.mockup.facebook_feed': 'פיד פייסבוק',
   'campaigns.mockup.carousel': 'קרוסלה',
   'campaigns.mockup.video': 'סרטונים',

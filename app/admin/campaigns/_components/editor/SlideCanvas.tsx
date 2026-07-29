@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   DndContext, closestCenter, PointerSensor, KeyboardSensor,
   useSensor, useSensors, type DragEndEvent,
@@ -117,6 +117,18 @@ export default function SlideCanvas({
   const [isDragOver, setIsDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Landing-page picker: the operator can choose an already-uploaded page
+  // from the workspace or paste any URL. Fetched once on mount; the list
+  // is tiny so a single request beats caching complexity.
+  interface InternalPage { id: string; client: string; slug: string; title: string }
+  const [internalPages, setInternalPages] = useState<InternalPage[]>([])
+  useEffect(() => {
+    fetch('/api/pages')
+      .then(r => (r.ok ? r.json() : []))
+      .then(data => { if (Array.isArray(data)) setInternalPages(data) })
+      .catch(() => { /* non-fatal — user can still paste URLs manually */ })
+  }, [])
+
   if (!section) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4" style={{ background: 'var(--admin-bg-card)' }}>
@@ -131,6 +143,7 @@ export default function SlideCanvas({
 
   const isDivider = section.mockup_type === 'divider'
   const isReels = section.mockup_type === 'instagram_reels'
+  const isLandingPage = section.mockup_type === 'landing_page'
   // Reels are video-based like the plain video mockup, so they share the
   // same URL-input flow instead of the image drop zone.
   const isVideo = section.mockup_type === 'video' || isReels
@@ -233,6 +246,64 @@ export default function SlideCanvas({
             <div className="absolute bottom-0 left-0 w-12 h-12" style={{ borderBottom: '2px solid rgba(64,225,211,0.1)', borderLeft: '2px solid rgba(64,225,211,0.1)' }} />
             <LayoutTemplate className="w-8 h-8 mx-auto mb-3" style={{ color: '#40e1d3' }} />
             <p className="text-sm font-semibold" style={{ color: 'var(--admin-text-muted)' }}>שקף ביניים — מציג כותרת וטקסט בלבד</p>
+          </div>
+        ) : isLandingPage ? (
+          <div className="space-y-4">
+            {section.assets.map(asset => {
+              const url = asset.url || ''
+              const isInternal = url.startsWith('/pages/')
+              return (
+                <div key={asset.id} className="rounded-xl p-4 transition-all duration-200" style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)' }}>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1 space-y-2">
+                      <select
+                        value={isInternal ? url : ''}
+                        onChange={e => { if (e.target.value) onUpdateAsset(asset.id, { url: e.target.value }) }}
+                        className="w-full px-3 py-2.5 rounded-lg text-sm outline-none cursor-pointer transition-all duration-200"
+                        style={videoFieldStyle}
+                      >
+                        <option value="">— בחר דף מהמערכת —</option>
+                        {internalPages.map(p => (
+                          <option key={p.id} value={`/pages/${p.client}/${p.slug}`}>
+                            {p.title} · {p.client}
+                          </option>
+                        ))}
+                      </select>
+                      <input type="url" value={url} onChange={e => onUpdateAsset(asset.id, { url: e.target.value })}
+                        placeholder="או הדבק URL מלא (https://...)" dir="ltr"
+                        className="w-full px-3 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={videoFieldStyle}
+                        onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
+                        onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
+                      />
+                      <input type="text" value={asset.caption} onChange={e => onUpdateAsset(asset.id, { caption: e.target.value })}
+                        placeholder="כיתוב" dir="auto"
+                        className="w-full px-3 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={videoFieldStyle}
+                        onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
+                        onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
+                      />
+                    </div>
+                    <button onClick={() => onRemoveAsset(asset.id)} className="p-2 rounded-lg transition-colors"
+                      style={{ color: 'rgba(239,68,68,0.6)' }}
+                      onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = 'rgba(239,68,68,0.1)' }}
+                      onMouseLeave={e => { e.currentTarget.style.color = 'rgba(239,68,68,0.6)'; e.currentTarget.style.background = 'transparent' }}
+                      aria-label="הסר נכס">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {url && (
+                    <div className="mt-4 rounded-xl overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
+                      <CanvasAsset asset={asset} mockupType="landing_page" clientName={clientName} clientLogoUrl={clientLogoUrl} captionOverride={activeCopyBody} />
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+            <button onClick={onAddVideo} className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200"
+              style={{ color: '#40e1d3', border: '1px dashed rgba(64,225,211,0.25)', background: 'rgba(64,225,211,0.03)' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.08)' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.03)' }}>
+              <Link2 className="w-4 h-4" /> הוסף דף נחיתה
+            </button>
           </div>
         ) : isVideo ? (
           <div className="space-y-4">

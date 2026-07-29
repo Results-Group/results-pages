@@ -8,6 +8,7 @@ import type { CampaignAsset } from '@/lib/campaigns'
 import InstagramFeedMockup from './mockups/instagram-feed'
 import InstagramStoryMockup from './mockups/instagram-story'
 import InstagramReelsMockup from './mockups/instagram-reels'
+import LandingPageMockup from './mockups/landing-page-mockup'
 import FacebookFeedMockup from './mockups/facebook-feed'
 import VideoPlayer from './mockups/VideoPlayer'
 import CarouselFeed from './mockups/carousel-feed'
@@ -939,6 +940,8 @@ function AssetRenderer({ asset, mockupType, clientLogoUrl, clientName, captionOv
           caption={caption}
         />
       )
+    case 'landing_page':
+      return <LandingPageMockup url={asset.url || undefined} caption={caption} />
     case 'facebook_feed':
       return <FacebookFeedMockup imageUrl={imageUrl} clientName={clientName} logoUrl={clientLogoUrl ?? undefined} caption={caption} />
     case 'video':

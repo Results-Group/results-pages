@@ -3,6 +3,7 @@
 import InstagramFeedMockup from '@/app/c/[slug]/mockups/instagram-feed'
 import InstagramStoryMockup from '@/app/c/[slug]/mockups/instagram-story'
 import InstagramReelsMockup from '@/app/c/[slug]/mockups/instagram-reels'
+import LandingPageMockup from '@/app/c/[slug]/mockups/landing-page-mockup'
 import FacebookFeedMockup from '@/app/c/[slug]/mockups/facebook-feed'
 import VideoPlayer from '@/app/c/[slug]/mockups/VideoPlayer'
 import GeneralCard from '@/app/c/[slug]/mockups/general-card'
@@ -59,6 +60,10 @@ export default function CanvasAsset({ asset, mockupType, clientName, clientLogoU
           media={<VideoPlayer url={asset.url || ''} embedUrl={videoInfo?.embedUrl} platform={videoInfo?.platform || 'other'} />}
         />
       )
+    case 'landing_page':
+      // MacBook + iPhone frames wrapping live iframes of the pasted URL.
+      // `asset.url` may be an external URL or a same-origin path.
+      return <LandingPageMockup url={asset.url || undefined} caption={caption} />
     case 'carousel':
       // Each frame stays individually editable here (reorder = carousel order);
       // the assembled carousel is what the deck and full preview render.

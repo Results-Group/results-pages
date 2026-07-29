@@ -14,6 +14,7 @@ export type MockupType =
   | 'facebook_feed'
   | 'carousel'
   | 'video'
+  | 'landing_page'
   | 'general'
   | 'divider'
 
@@ -63,6 +64,7 @@ export const MOCKUP_TYPES: Record<MockupType, string> = {
   facebook_feed: 'פיד פייסבוק',
   carousel: 'קרוסלה',
   video: 'סרטונים',
+  landing_page: 'הטמעת דף נחיתה',
   general: 'כללי',
   divider: 'חוצץ / שקף ביניים',
 }

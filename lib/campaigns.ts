@@ -16,7 +16,7 @@ export interface CampaignAsset {
 export interface CampaignSection {
   id: string
   title: string
-  mockup_type: 'instagram_feed' | 'instagram_story' | 'instagram_reels' | 'facebook_feed' | 'carousel' | 'video' | 'general' | 'divider'
+  mockup_type: 'instagram_feed' | 'instagram_story' | 'instagram_reels' | 'facebook_feed' | 'carousel' | 'video' | 'landing_page' | 'general' | 'divider'
   description?: string
   /** Legacy boolean toggle — replaced by copyIds. Kept so old rows still load. */
   useCopies?: boolean
