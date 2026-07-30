@@ -219,14 +219,19 @@ export function percentWarning(channels: DistributionChannel[]): string | null {
 // ── Free-text block ──
 
 export type PlanTextNode =
-  | { kind: 'heading'; text: string }
-  | { kind: 'paragraph'; text: string }
+  | { kind: 'heading'; text: string; level: 1 | 2 | 3 }
+  | { kind: 'paragraph'; text: string; small?: boolean }
   | { kind: 'list'; items: { text: string; depth: number }[] }
 
 const BULLET_RE = /^(\s*)(?:[*\-•]|\d+[.)])\s+(.*)$/
 const HASH_RE = /^(#{1,3})\s+(.*)$/
+const SMALL_RE = /^>\s+(.*)$/
 /** A line ending in one of these is prose, never a heading. */
-const SENTENCE_END = /[.:,;!?]$/
+const SENTENCE_END = /[.:,;!?%₪)]$/
+/** Auto-heading only applies below this length. */
+const AUTO_HEADING_MAX = 32
+/** How many non-empty lines to scan for the bullet list that confirms a heading. */
+const AUTO_HEADING_LOOKAHEAD = 2
 
 /**
  * Parses a pasted media plan into headings, lists and paragraphs.
@@ -237,12 +242,16 @@ const SENTENCE_END = /[.:,;!?]$/
  * a full markdown parser would also mean sanitising raw HTML — this renders
  * text only, so nothing pasted can inject markup.
  *
- * "## Meta" is always a heading. Without the hashes, a short standalone line
- * with no sentence-ending punctuation ("Meta", "יעדי רבעון ראשון") is treated
- * as one, which is what pasted plans actually look like.
+ * "# / ## / ###" always force a heading and "> " marks small print — the editor
+ * has buttons for both, so the operator has the final say.
+ *
+ * Auto-detection is deliberately narrow: a short line becomes a heading ONLY
+ * when a bullet follows it. An earlier version promoted any short line without
+ * sentence-ending punctuation, which turned a plain list of KPIs ("עלות לליד",
+ * "מעל 3.2%") into a wall of bold headings.
  */
 export function parsePlanText(src: string): PlanTextNode[] {
-  const lines = (src || '').replace(/\r\n?/g, '\n').split('\n')
+  const lines = (src || '').replace(/\r\n?/g, '\n').split('\n').map(l => l.replace(/\t/g, '   '))
   const nodes: PlanTextNode[] = []
   let list: { text: string; depth: number }[] = []
   let para: string[] = []
@@ -251,9 +260,24 @@ export function parsePlanText(src: string): PlanTextNode[] {
   const flushPara = () => { if (para.length) { nodes.push({ kind: 'paragraph', text: para.join('\n') }); para = [] } }
   const flush = () => { flushList(); flushPara() }
 
-  for (const raw of lines) {
-    const line = raw.replace(/\t/g, '   ')
-    if (!line.trim()) { flush(); continue }
+  /**
+   * Does a bullet list open just below this line? That's what marks a short
+   * line as a section heading. The lookahead spans a few lines because a
+   * heading is often followed by a lead-in ("חלוקה ל-3 סגמנטים:") before the
+   * bullets start.
+   */
+  const bulletFollows = (from: number): boolean => {
+    let seen = 0
+    for (let i = from + 1; i < lines.length && seen < AUTO_HEADING_LOOKAHEAD; i++) {
+      if (!lines[i].trim()) continue
+      if (BULLET_RE.test(lines[i])) return true
+      seen++
+    }
+    return false
+  }
+
+  lines.forEach((line, idx) => {
+    if (!line.trim()) { flush(); return }
 
     const bullet = line.match(BULLET_RE)
     if (bullet) {
@@ -261,22 +285,29 @@ export function parsePlanText(src: string): PlanTextNode[] {
       // One level of nesting is enough for a media plan, and guessing deeper
       // from ragged pasted indentation produces noise.
       list.push({ text: bullet[2].trim(), depth: bullet[1].length >= 2 ? 1 : 0 })
-      continue
+      return
     }
 
     const hash = line.match(HASH_RE)
-    if (hash) { flush(); nodes.push({ kind: 'heading', text: hash[2].trim() }); continue }
+    if (hash) {
+      flush()
+      nodes.push({ kind: 'heading', text: hash[2].trim(), level: hash[1].length as 1 | 2 | 3 })
+      return
+    }
+
+    const small = line.trim().match(SMALL_RE)
+    if (small) { flush(); nodes.push({ kind: 'paragraph', text: small[1].trim(), small: true }); return }
 
     const trimmed = line.trim()
-    if (trimmed.length <= 48 && !SENTENCE_END.test(trimmed)) {
+    if (trimmed.length <= AUTO_HEADING_MAX && !SENTENCE_END.test(trimmed) && bulletFollows(idx)) {
       flush()
-      nodes.push({ kind: 'heading', text: trimmed })
-      continue
+      nodes.push({ kind: 'heading', text: trimmed, level: 2 })
+      return
     }
 
     flushList()
     para.push(trimmed)
-  }
+  })
 
   flush()
   return nodes

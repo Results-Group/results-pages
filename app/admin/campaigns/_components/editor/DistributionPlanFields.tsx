@@ -1,6 +1,7 @@
 'use client'
 
-import { Plus, X, GripVertical, AlertTriangle } from 'lucide-react'
+import { useRef } from 'react'
+import { Plus, X, GripVertical, AlertTriangle, Bold, Heading1, Heading2, Heading3, List, ListTree, Pilcrow, Type } from 'lucide-react'
 import {
   normalizePlan,
   newDistributionChannel,
@@ -52,6 +53,7 @@ export default function DistributionPlanFields({
   plan?: DistributionPlan | null
   onChange: (plan: DistributionPlan) => void
 }) {
+  const textRef = useRef<HTMLTextAreaElement>(null)
   const p = normalizePlan(plan)
   const warning = percentWarning(p.channels)
 
@@ -260,18 +262,23 @@ export default function DistributionPlanFields({
 
       <div>
         <Label>טקסט חופשי</Label>
+        <TextStyleToolbar
+          textareaRef={textRef}
+          value={p.paragraph ?? ''}
+          onChange={next => patch({ paragraph: next })}
+        />
         <textarea
+          ref={textRef}
           value={p.paragraph ?? ''}
           dir="auto"
-          rows={12}
-          placeholder={'הדבק כאן תוכנית שלמה.\n\nMeta\n* קהל חדש: פנייה לאנשים שלא מכירים את המותג.\n   * החרגות: מי שכבר ביצע מעורבות.\n\nחלוקת תקציב\nבשבועיים הראשונים 50% Meta ו-50% Google.'}
+          rows={14}
+          placeholder={'הדבק כאן תוכנית שלמה, ואז סמן שורות והחל סגנון מהכפתורים למעלה.'}
           onChange={e => patch({ paragraph: e.target.value })}
-          className="w-full px-3 py-2.5 rounded-lg text-sm outline-none resize-y leading-relaxed"
-          style={fieldStyle}
+          className="w-full px-3 py-2.5 rounded-b-lg text-sm outline-none resize-y leading-relaxed"
+          style={{ ...fieldStyle, borderTopLeftRadius: 0, borderTopRightRadius: 0, borderTop: 'none' }}
         />
         <p className="text-[10px] mt-1.5 leading-relaxed" style={{ color: 'var(--admin-text-muted)' }}>
-          שורה שמתחילה ב-* היא בולט, והזחה של רווחים לפניה יוצרת תת-בולט.
-          שורה קצרה בלי נקודה בסוף הופכת לכותרת (אפשר גם ## לכפות). **טקסט** = מודגש.
+          הכפתורים פועלים על השורה שהסמן עליה, או על כל השורות שסימנת.
         </p>
       </div>
 
@@ -296,4 +303,113 @@ function reorder<T>(arr: T[], from: number, to: number): T[] {
   const [item] = next.splice(from, 1)
   next.splice(to, 0, item)
   return next
+}
+
+// ── Text style toolbar ──
+
+/** Every line-level prefix the parser understands, so a restyle replaces
+ *  cleanly instead of stacking "## * " on top of what was already there. */
+const LINE_PREFIX_RE = /^(\s*)(?:#{1,3}\s+|>\s+|(?:[*\-•]|\d+[.)])\s+)?/
+
+const LINE_STYLES: { label: string; title: string; icon: React.ReactNode; prefix: string }[] = [
+  { label: 'כותרת', title: 'כותרת גדולה', icon: <Heading1 className="w-3.5 h-3.5" />, prefix: '# ' },
+  { label: 'משנה', title: 'כותרת משנה', icon: <Heading2 className="w-3.5 h-3.5" />, prefix: '## ' },
+  { label: 'קטנה', title: 'כותרת קטנה', icon: <Heading3 className="w-3.5 h-3.5" />, prefix: '### ' },
+  { label: 'רגיל', title: 'טקסט רגיל', icon: <Pilcrow className="w-3.5 h-3.5" />, prefix: '' },
+  { label: 'קטן', title: 'טקסט קטן ומעומעם', icon: <Type className="w-3 h-3" />, prefix: '> ' },
+  { label: 'בולט', title: 'בולט', icon: <List className="w-3.5 h-3.5" />, prefix: '* ' },
+  { label: 'תת-בולט', title: 'תת-בולט', icon: <ListTree className="w-3.5 h-3.5" />, prefix: '   * ' },
+]
+
+function TextStyleToolbar({ textareaRef, value, onChange }: {
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>
+  value: string
+  onChange: (next: string) => void
+}) {
+  /** Applies a prefix to every line the selection touches. */
+  function applyPrefix(prefix: string) {
+    const el = textareaRef.current
+    if (!el) return
+    const start = el.selectionStart ?? 0
+    const end = el.selectionEnd ?? start
+    const lines = value.split('\n')
+
+    // Map the caret offsets onto line indexes.
+    let offset = 0
+    let firstLine = 0
+    let lastLine = 0
+    for (let i = 0; i < lines.length; i++) {
+      const lineEnd = offset + lines[i].length
+      if (offset <= start && start <= lineEnd) firstLine = i
+      if (offset <= end && end <= lineEnd) { lastLine = i; break }
+      lastLine = i
+      offset = lineEnd + 1
+    }
+
+    const next = lines.map((line, i) => {
+      if (i < firstLine || i > lastLine) return line
+      if (!line.trim()) return line
+      // Strip whatever prefix is there, then apply the new one. Without the
+      // strip, restyling a bullet as a heading produced "## * ...".
+      return line.replace(LINE_PREFIX_RE, '') === '' ? line : prefix + line.replace(LINE_PREFIX_RE, '')
+    }).join('\n')
+
+    onChange(next)
+    requestAnimationFrame(() => el.focus())
+  }
+
+  /** Wraps the selected words in ** **, or unwraps them if already bold. */
+  function toggleBold() {
+    const el = textareaRef.current
+    if (!el) return
+    const start = el.selectionStart ?? 0
+    const end = el.selectionEnd ?? start
+    if (start === end) { el.focus(); return }
+    const selected = value.slice(start, end)
+    const isBold = selected.startsWith('**') && selected.endsWith('**') && selected.length > 4
+    const replacement = isBold ? selected.slice(2, -2) : `**${selected}**`
+    onChange(value.slice(0, start) + replacement + value.slice(end))
+    requestAnimationFrame(() => {
+      el.focus()
+      el.setSelectionRange(start, start + replacement.length)
+    })
+  }
+
+  const btnStyle: React.CSSProperties = {
+    background: 'var(--admin-bg-elevated)',
+    border: '1px solid var(--admin-border)',
+    color: 'var(--admin-text-secondary)',
+  }
+
+  return (
+    <div
+      className="flex flex-wrap items-center gap-1 p-1.5 rounded-t-lg"
+      style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)', borderBottom: 'none' }}
+    >
+      {LINE_STYLES.map(s => (
+        <button
+          key={s.label}
+          type="button"
+          title={s.title}
+          onMouseDown={e => e.preventDefault()} // keep the textarea selection alive
+          onClick={() => applyPrefix(s.prefix)}
+          className="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-[11px] font-bold transition-colors"
+          style={btnStyle}
+        >
+          {s.icon}{s.label}
+        </button>
+      ))}
+      <span className="w-px h-5 mx-0.5" style={{ background: 'var(--admin-border)' }} />
+      <button
+        type="button"
+        title="מודגש — סמן מילים ולחץ"
+        onMouseDown={e => e.preventDefault()}
+        onClick={toggleBold}
+        className="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-[11px] font-bold transition-colors"
+        style={btnStyle}
+      >
+        <Bold className="w-3.5 h-3.5" />מודגש
+      </button>
+    </div>
+  )
 }

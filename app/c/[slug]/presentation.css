@@ -684,9 +684,13 @@
 
 /* Free-text block: centred column on the slide, text itself right-aligned. */
 .campaign-pres .dist-text{max-width:860px;margin:26px auto 0;padding:28px 34px;border-radius:18px;background:var(--card-bg);border:1px solid var(--border-color);text-align:right}
-.campaign-pres .dist-text-h{font-size:1.15rem;font-weight:900;color:var(--brand-cyan);margin:26px 0 10px;letter-spacing:-0.01em}
+.campaign-pres .dist-text-h{color:var(--brand-cyan);margin:26px 0 10px;letter-spacing:-0.01em}
 .campaign-pres .dist-text-h:first-child{margin-top:0}
+.campaign-pres .dist-text-h.lvl-1{font-size:1.5rem;font-weight:900}
+.campaign-pres .dist-text-h.lvl-2{font-size:1.15rem;font-weight:800}
+.campaign-pres .dist-text-h.lvl-3{font-size:1rem;font-weight:700;color:var(--text-primary)}
 .campaign-pres .dist-text-p{font-size:0.98rem;line-height:1.95;color:var(--text-secondary);margin:0 0 14px;white-space:pre-wrap}
+.campaign-pres .dist-text-p.is-small{font-size:0.85rem;line-height:1.8;opacity:0.72}
 .campaign-pres .dist-text-list{list-style:none;padding:0;margin:0 0 16px}
 /* The block is dir="rtl", so inline-start is the RIGHT edge — that's where the
    markers belong, beside the first word of each line. */

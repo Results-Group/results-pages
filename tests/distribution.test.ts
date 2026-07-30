@@ -135,7 +135,7 @@ describe('parsePlanText', () => {
 
 לכל סגמנט יוקצה תקציב נפרד ותתבצע מדידה ייעודית ברמת הקמפיין.`)
 
-    expect(nodes[0]).toEqual({ kind: 'heading', text: 'Meta' })
+    expect(nodes[0]).toEqual({ kind: 'heading', text: 'Meta', level: 2 })
     expect(nodes[1]).toEqual({ kind: 'paragraph', text: 'חלוקה ל-3 סגמנטים:' })
     expect(nodes[2].kind).toBe('list')
     const list = nodes[2] as { kind: 'list'; items: { text: string; depth: number }[] }
@@ -144,17 +144,29 @@ describe('parsePlanText', () => {
     expect(nodes[3].kind).toBe('paragraph')
   })
 
-  it('treats a short line with no sentence-ending punctuation as a heading', () => {
-    expect(parsePlanText('יעדי רבעון ראשון')).toEqual([{ kind: 'heading', text: 'יעדי רבעון ראשון' }])
+  it('promotes a short line to a heading only when a bullet list follows it', () => {
+    expect(parsePlanText('יעדי רבעון ראשון\n* עלות גיוס לקוח: מתחת ל-3,500 ₪')[0])
+      .toEqual({ kind: 'heading', text: 'יעדי רבעון ראשון', level: 2 })
     // Ends with a colon → prose, not a heading
-    expect(parsePlanText('הנה הנוסח המעודכן:')[0].kind).toBe('paragraph')
-    // Long enough to be a sentence even without a full stop
-    expect(parsePlanText('בשבועיים הראשונים התקציב יתחלק שווה בשווה בין שתי הפלטפורמות')[0].kind).toBe('paragraph')
+    expect(parsePlanText('הנה הנוסח המעודכן:\n* בולט')[0].kind).toBe('paragraph')
   })
 
-  it('honours explicit ## headings and numbered bullets', () => {
-    expect(parsePlanText('## חלוקת תקציב ואופטימיזציה שנתית מפורטת מאוד')[0])
-      .toEqual({ kind: 'heading', text: 'חלוקת תקציב ואופטימיזציה שנתית מפורטת מאוד' })
+  it('leaves a plain list of KPIs as prose — no bullets, no headings', () => {
+    // The regression that made a whole pasted block render bold.
+    const nodes = parsePlanText(`עלות לליד
+אחוז המרה מליד לעסקה
+עלות גיוס לקוח
+יעדי רבעון ראשון
+עלות גיוס לקוח: מתחת ל-3,500 ₪
+אחוז המרה (מליד לעסקה): מעל 3.2%`)
+    expect(nodes.every(n => n.kind === 'paragraph')).toBe(true)
+  })
+
+  it('honours explicit heading levels, small text and numbered bullets', () => {
+    expect(parsePlanText('# ראשי')[0]).toEqual({ kind: 'heading', text: 'ראשי', level: 1 })
+    expect(parsePlanText('## משנה')[0]).toEqual({ kind: 'heading', text: 'משנה', level: 2 })
+    expect(parsePlanText('### קטנה')[0]).toEqual({ kind: 'heading', text: 'קטנה', level: 3 })
+    expect(parsePlanText('> הערת שוליים')[0]).toEqual({ kind: 'paragraph', text: 'הערת שוליים', small: true })
     const list = parsePlanText('1. שלב ראשון\n2. שלב שני')[0] as { kind: 'list'; items: unknown[] }
     expect(list.kind).toBe('list')
     expect(list.items.length).toBe(2)

@@ -190,8 +190,12 @@ function PlanText({ source }: { source: string }) {
   return (
     <div className="dist-text rp-anim rp-up rp-d3" dir="rtl">
       {nodes.map((node, i) => {
-        if (node.kind === 'heading') return <h3 key={i} className="dist-text-h">{inline(node.text)}</h3>
-        if (node.kind === 'paragraph') return <p key={i} className="dist-text-p">{inline(node.text)}</p>
+        if (node.kind === 'heading') {
+          return <h3 key={i} className={`dist-text-h lvl-${node.level}`}>{inline(node.text)}</h3>
+        }
+        if (node.kind === 'paragraph') {
+          return <p key={i} className={`dist-text-p${node.small ? ' is-small' : ''}`}>{inline(node.text)}</p>
+        }
         return (
           <ul key={i} className="dist-text-list">
             {node.items.map((item, j) => (
