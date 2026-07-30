@@ -40,8 +40,13 @@ export interface DistributionBlocks {
 export interface DistributionPlan {
   bullets: string[]
   channels: DistributionChannel[]
-  /** Free text closing the slide — notes, caveats, what happens next. */
+  /**
+   * Legacy free text (the markup-prefix format). Still read so older slides
+   * keep rendering, and converted to `doc` the first time one is opened.
+   */
   paragraph?: string
+  /** Rich text as a structured document — see PlanDoc. */
+  doc?: PlanDoc
   budgetDisplay: BudgetDisplay
   /** Which blocks the client sees. Not every plan needs all four. */
   show: DistributionBlocks
@@ -73,6 +78,7 @@ export function normalizePlan(plan?: DistributionPlan | null): DistributionPlan 
     bullets: Array.isArray(plan.bullets) ? plan.bullets.filter(b => typeof b === 'string') : [],
     channels: Array.isArray(plan.channels) ? plan.channels.filter(c => c && typeof c.id === 'string') : [],
     paragraph: typeof plan.paragraph === 'string' ? plan.paragraph : '',
+    ...(plan.doc && plan.doc.type === 'doc' ? { doc: plan.doc } : {}),
     budgetDisplay: plan.budgetDisplay === 'amount' || plan.budgetDisplay === 'percent' ? plan.budgetDisplay : 'both',
     show: { ...base.show, ...(plan.show || {}) },
     totalLabel: typeof plan.totalLabel === 'string' ? plan.totalLabel : DEFAULT_TOTAL_LABEL,
@@ -186,7 +192,7 @@ export function visibleBlocks(plan: DistributionPlan): DistributionBlocks {
     channels: plan.show.channels && named.length > 0,
     budget: plan.show.budget && named.some(c => (percents.get(c.id) || 0) > 0),
     timeline: plan.show.timeline && named.some(hasTimelineDates),
-    paragraph: plan.show.paragraph && (plan.paragraph || '').trim().length > 0,
+    paragraph: plan.show.paragraph && resolvePlanDoc(plan) !== null,
   }
 }
 
@@ -214,6 +220,116 @@ export function percentWarning(channels: DistributionChannel[]): string | null {
   const rounded = Math.round(sum)
   if (rounded === 100) return null
   return `האחוזים מסתכמים ל-${rounded}%`
+}
+
+// ── Rich text document ──
+
+/**
+ * A ProseMirror/TipTap document, typed structurally so nothing outside the
+ * admin editor has to depend on TipTap — the client's deck renders this with a
+ * plain React function and never loads the library.
+ *
+ * The renderer walks these nodes and emits text only. Storing the document
+ * rather than HTML is what keeps that guarantee: there is no markup to inject,
+ * whatever gets pasted into the editor.
+ */
+export interface PlanDocNode {
+  type: string
+  attrs?: { level?: number }
+  content?: PlanDocNode[]
+  text?: string
+  marks?: { type: string }[]
+}
+
+export interface PlanDoc {
+  type: 'doc'
+  content?: PlanDocNode[]
+}
+
+const textNode = (text: string, bold = false): PlanDocNode => ({
+  type: 'text',
+  text,
+  ...(bold ? { marks: [{ type: 'bold' }] } : {}),
+})
+
+/** Splits `**bold**` runs out of a legacy line into marked text nodes. */
+function inlineNodes(text: string): PlanDocNode[] {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g).filter(Boolean)
+  if (parts.length === 0) return []
+  return parts.map(part =>
+    part.startsWith('**') && part.endsWith('**') && part.length > 4
+      ? textNode(part.slice(2, -2), true)
+      : textNode(part),
+  )
+}
+
+const listItem = (text: string): PlanDocNode => ({
+  type: 'listItem',
+  content: [{ type: 'paragraph', content: inlineNodes(text) }],
+})
+
+/**
+ * Converts the legacy prefix-markup text into a document. Runs once, the first
+ * time a slide written in the old format is opened in the editor, so nobody has
+ * to retype a plan.
+ */
+export function planTextToDoc(src: string): PlanDoc {
+  const content: PlanDocNode[] = []
+
+  for (const node of parsePlanText(src)) {
+    if (node.kind === 'heading') {
+      content.push({ type: 'heading', attrs: { level: node.level }, content: inlineNodes(node.text) })
+      continue
+    }
+    if (node.kind === 'paragraph') {
+      // One block per line. The legacy parser merged consecutive prose lines
+      // into a single paragraph, which in a WYSIWYG means styling one line
+      // silently restyles its neighbours — and the text ran together, since a
+      // document node has no notion of a newline inside it.
+      for (const line of node.text.split('\n')) {
+        if (line.trim()) content.push({ type: 'paragraph', content: inlineNodes(line) })
+      }
+      continue
+    }
+    // A depth-1 item belongs to a nested list inside the item above it.
+    const items: PlanDocNode[] = []
+    for (const item of node.items) {
+      if (item.depth > 0 && items.length > 0) {
+        const parent = items[items.length - 1]
+        const nested = parent.content?.find(c => c.type === 'bulletList')
+        if (nested) nested.content?.push(listItem(item.text))
+        else parent.content?.push({ type: 'bulletList', content: [listItem(item.text)] })
+      } else {
+        items.push(listItem(item.text))
+      }
+    }
+    content.push({ type: 'bulletList', content: items })
+  }
+
+  return { type: 'doc', content }
+}
+
+/** True when the document holds no visible text. */
+export function docIsEmpty(doc?: PlanDoc | null): boolean {
+  if (!doc || !Array.isArray(doc.content) || doc.content.length === 0) return true
+  const hasText = (nodes: PlanDocNode[]): boolean =>
+    nodes.some(n => (typeof n.text === 'string' && n.text.trim().length > 0) || (n.content ? hasText(n.content) : false))
+  return !hasText(doc.content)
+}
+
+/** Flattens a document to plain text — used for previews and summaries. */
+export function docPlainText(doc?: PlanDoc | null): string {
+  if (!doc?.content) return ''
+  const walk = (nodes: PlanDocNode[]): string =>
+    nodes.map(n => (typeof n.text === 'string' ? n.text : '') + (n.content ? ` ${walk(n.content)}` : '')).join(' ')
+  return walk(doc.content).replace(/\s+/g, ' ').trim()
+}
+
+/** The document to render: the rich one if present, else the legacy text. */
+export function resolvePlanDoc(plan: Pick<DistributionPlan, 'doc' | 'paragraph'>): PlanDoc | null {
+  if (!docIsEmpty(plan.doc)) return plan.doc as PlanDoc
+  const legacy = (plan.paragraph || '').trim()
+  return legacy ? planTextToDoc(legacy) : null
 }
 
 // ── Free-text block ──

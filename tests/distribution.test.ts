@@ -6,9 +6,14 @@ import {
   percentWarning,
   buildTimeline,
   parsePlanText,
+  planTextToDoc,
+  docIsEmpty,
+  docPlainText,
+  resolvePlanDoc,
   normalizePlan,
   newDistributionPlan,
   type DistributionPlan,
+  type PlanDoc,
 } from '@/lib/distribution'
 import { slidesPerSection, countClientSlides } from '@/lib/slides'
 
@@ -175,6 +180,64 @@ describe('parsePlanText', () => {
   it('returns nothing for empty input', () => {
     expect(parsePlanText('')).toEqual([])
     expect(parsePlanText('   \n\n  ')).toEqual([])
+  })
+})
+
+describe('planTextToDoc — migrating legacy slides', () => {
+  it('turns headings, bullets and prose into document nodes', () => {
+    const doc = planTextToDoc(`Meta
+חלוקה ל-3 סגמנטים:
+
+* קהל חדש
+   * החרגות
+* ריטרגטינג`)
+
+    expect(doc.type).toBe('doc')
+    expect(doc.content?.[0]).toMatchObject({ type: 'heading', attrs: { level: 2 } })
+    expect(doc.content?.[1]?.type).toBe('paragraph')
+    const list = doc.content?.[2]
+    expect(list?.type).toBe('bulletList')
+    // The indented line becomes a nested list inside the item above it
+    expect(list?.content?.length).toBe(2)
+    expect(list?.content?.[0].content?.some(c => c.type === 'bulletList')).toBe(true)
+  })
+
+  it('gives every prose line its own block, so styling one leaves the rest alone', () => {
+    const doc = planTextToDoc(`יעדי רבעון ראשון
+עלות גיוס לקוח: מתחת ל-3,500 ₪
+אחוז המרה: מעל 3.2%`)
+    expect(doc.content?.length).toBe(3)
+    expect(doc.content?.every(n => n.type === 'paragraph')).toBe(true)
+    expect(doc.content?.[0].content?.[0].text).toBe('יעדי רבעון ראשון')
+  })
+
+  it('carries **bold** through as a mark, not as asterisks', () => {
+    const doc = planTextToDoc('שיעור ההמרה **מעל 3.2%** ברבעון')
+    const text = doc.content?.[0].content || []
+    expect(text.some(n => n.marks?.some(m => m.type === 'bold') && n.text === 'מעל 3.2%')).toBe(true)
+    expect(docPlainText(doc)).not.toContain('**')
+  })
+})
+
+describe('docIsEmpty / resolvePlanDoc', () => {
+  it('treats a document with no text as empty', () => {
+    expect(docIsEmpty({ type: 'doc', content: [] })).toBe(true)
+    expect(docIsEmpty({ type: 'doc', content: [{ type: 'paragraph' }] })).toBe(true)
+    expect(docIsEmpty({ type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: '  ' }] }] })).toBe(true)
+    expect(docIsEmpty(null)).toBe(true)
+  })
+
+  it('prefers the document, and falls back to the legacy text', () => {
+    const rich: PlanDoc = { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'חדש' }] }] }
+    expect(resolvePlanDoc({ doc: rich, paragraph: 'ישן' })).toBe(rich)
+    expect(docPlainText(resolvePlanDoc({ paragraph: 'ישן' }))).toBe('ישן')
+    expect(resolvePlanDoc({})).toBeNull()
+  })
+
+  it('counts a document as visible content for the slide', () => {
+    expect(hasVisibleContent(plan({
+      doc: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'תוכנית' }] }] },
+    }))).toBe(true)
   })
 })
 

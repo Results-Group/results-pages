@@ -701,6 +701,37 @@
 .campaign-pres .dist-text strong{color:var(--text-primary);font-weight:700}
 @media(max-width:768px){.campaign-pres .dist-text{padding:20px 18px;margin-top:20px}}
 
+/* The admin's rich editor renders bare tags into a .dist-text surface. Mapping
+   them onto the slide's own styles is what makes the editor a true preview —
+   the operator types into something that already looks like the deliverable. */
+.campaign-pres .plan-editor-surface{outline:none;min-height:320px;margin:0;max-width:none;background:none;border:none;padding:0}
+.campaign-pres .plan-editor-surface h1,
+.campaign-pres .plan-editor-surface h2,
+.campaign-pres .plan-editor-surface h3{color:var(--brand-cyan);margin:26px 0 10px;letter-spacing:-0.01em}
+.campaign-pres .plan-editor-surface > :first-child{margin-top:0}
+.campaign-pres .plan-editor-surface h1{font-size:1.5rem;font-weight:900}
+.campaign-pres .plan-editor-surface h2{font-size:1.15rem;font-weight:800}
+.campaign-pres .plan-editor-surface h3{font-size:1rem;font-weight:700;color:var(--text-primary)}
+.campaign-pres .plan-editor-surface p{font-size:0.98rem;line-height:1.95;color:var(--text-secondary);margin:0 0 14px}
+.campaign-pres .plan-editor-surface strong{color:var(--text-primary);font-weight:700}
+.campaign-pres .plan-editor-surface ul,
+.campaign-pres .plan-editor-surface ol{list-style:none;padding:0;margin:0 0 16px}
+.campaign-pres .plan-editor-surface li{position:relative;padding-inline-start:22px;font-size:0.96rem;line-height:1.9;color:var(--text-secondary);margin-bottom:7px}
+.campaign-pres .plan-editor-surface li p{margin:0}
+.campaign-pres .plan-editor-surface li::before{content:'';position:absolute;inset-inline-start:6px;top:0.78em;width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,var(--brand-cyan),var(--brand-green))}
+/* Nested list: smaller, squared marker, same as the rendered slide */
+.campaign-pres .plan-editor-surface li ul{margin:7px 0 0}
+.campaign-pres .plan-editor-surface li li{padding-inline-start:22px;font-size:0.9rem;opacity:0.88}
+.campaign-pres .plan-editor-surface li li::before{width:5px;height:5px;border-radius:1px;background:rgba(var(--brand-rgb),0.5)}
+.campaign-pres .plan-editor-surface ol{counter-reset:plan-ol}
+.campaign-pres .plan-editor-surface ol > li{counter-increment:plan-ol}
+.campaign-pres .plan-editor-surface ol > li::before{content:counter(plan-ol) '.';background:none;border-radius:0;width:auto;height:auto;top:0;color:var(--brand-cyan);font-weight:700;font-size:0.85rem}
+/* Ordered lists on the rendered slide */
+.campaign-pres .dist-text-list.is-ordered{counter-reset:plan-ol}
+.campaign-pres .dist-text-list.is-ordered > li{counter-increment:plan-ol}
+.campaign-pres .dist-text-list.is-ordered > li::before{content:counter(plan-ol) '.';background:none;border-radius:0;width:auto;height:auto;top:0;color:var(--brand-cyan);font-weight:700;font-size:0.85rem}
+.campaign-pres .plan-editor-surface .ProseMirror-selectednode{outline:2px solid rgba(var(--brand-rgb),0.4)}
+
 .campaign-pres .dist-timeline{background:var(--card-bg);border:1px solid var(--border-color);border-radius:18px;padding:22px}
 /* The lane track is an LTR time axis inside an RTL slide: `direction:ltr` on the
    track makes left/width offsets mean what buildTimeline computed, regardless of

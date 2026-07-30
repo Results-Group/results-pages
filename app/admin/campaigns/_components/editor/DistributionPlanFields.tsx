@@ -1,16 +1,19 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { Plus, X, GripVertical, AlertTriangle, Bold, Heading1, Heading2, Heading3, List, ListTree, Pilcrow, Type, Maximize2 } from 'lucide-react'
-import DistributionSlide from '@/app/c/[slug]/distribution-slide'
+import { useEffect, useState } from 'react'
+import { Plus, X, GripVertical, AlertTriangle, Maximize2 } from 'lucide-react'
+import PlanRichEditor from './PlanRichEditor'
 import {
   normalizePlan,
   newDistributionChannel,
   percentWarning,
+  resolvePlanDoc,
+  docPlainText,
   DEFAULT_TOTAL_LABEL,
   type DistributionPlan,
   type DistributionChannel,
   type BudgetDisplay,
+  type PlanDoc,
 } from '@/lib/distribution'
 
 const fieldStyle: React.CSSProperties = {
@@ -54,10 +57,13 @@ export default function DistributionPlanFields({
   plan?: DistributionPlan | null
   onChange: (plan: DistributionPlan) => void
 }) {
-  const textRef = useRef<HTMLTextAreaElement>(null)
   const [editorOpen, setEditorOpen] = useState(false)
   const p = normalizePlan(plan)
   const warning = percentWarning(p.channels)
+  // Legacy prefix-markup text is converted on read, so opening an older slide
+  // in the new editor just works and the first save stores it as a document.
+  const planDoc = resolvePlanDoc(p)
+  const planPreview = planDoc ? docPlainText(planDoc).slice(0, 140) : ''
 
   const patch = (next: Partial<DistributionPlan>) => onChange({ ...p, ...next })
 
@@ -274,25 +280,24 @@ export default function DistributionPlanFields({
           style={{ color: '#04211d', background: '#40e1d3' }}
         >
           <Maximize2 className="w-3.5 h-3.5" />
-          {(p.paragraph || '').trim() ? 'עריכת הטקסט' : 'כתיבת טקסט'}
+          {planPreview ? 'עריכת הטקסט' : 'כתיבת טקסט'}
         </button>
-        {(p.paragraph || '').trim() && (
+        {planPreview && (
           <p
             className="mt-2 px-3 py-2 rounded-lg text-[11px] leading-relaxed line-clamp-3"
             dir="auto"
             style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-muted)' }}
           >
-            {(p.paragraph || '').replace(/[#>*]/g, '').trim().slice(0, 140)}…
+            {planPreview}
           </p>
         )}
       </div>
 
       {editorOpen && (
         <PlanTextEditor
-          value={p.paragraph ?? ''}
-          onChange={next => patch({ paragraph: next })}
+          doc={planDoc}
+          onChange={doc => patch({ doc })}
           onClose={() => setEditorOpen(false)}
-          textareaRef={textRef}
         />
       )}
 
@@ -319,128 +324,17 @@ function reorder<T>(arr: T[], from: number, to: number): T[] {
   return next
 }
 
-// ── Text style toolbar ──
-
-/** Every line-level prefix the parser understands, so a restyle replaces
- *  cleanly instead of stacking "## * " on top of what was already there. */
-const LINE_PREFIX_RE = /^(\s*)(?:#{1,3}\s+|>\s+|(?:[*\-•]|\d+[.)])\s+)?/
-
-const LINE_STYLES: { label: string; title: string; icon: React.ReactNode; prefix: string }[] = [
-  { label: 'כותרת', title: 'כותרת גדולה', icon: <Heading1 className="w-3.5 h-3.5" />, prefix: '# ' },
-  { label: 'משנה', title: 'כותרת משנה', icon: <Heading2 className="w-3.5 h-3.5" />, prefix: '## ' },
-  { label: 'קטנה', title: 'כותרת קטנה', icon: <Heading3 className="w-3.5 h-3.5" />, prefix: '### ' },
-  { label: 'רגיל', title: 'טקסט רגיל', icon: <Pilcrow className="w-3.5 h-3.5" />, prefix: '' },
-  { label: 'קטן', title: 'טקסט קטן ומעומעם', icon: <Type className="w-3 h-3" />, prefix: '> ' },
-  { label: 'בולט', title: 'בולט', icon: <List className="w-3.5 h-3.5" />, prefix: '* ' },
-  { label: 'תת-בולט', title: 'תת-בולט', icon: <ListTree className="w-3.5 h-3.5" />, prefix: '   * ' },
-]
-
-function TextStyleToolbar({ textareaRef, value, onChange }: {
-  textareaRef: React.RefObject<HTMLTextAreaElement | null>
-  value: string
-  onChange: (next: string) => void
-}) {
-  /** Applies a prefix to every line the selection touches. */
-  function applyPrefix(prefix: string) {
-    const el = textareaRef.current
-    if (!el) return
-    const start = el.selectionStart ?? 0
-    const end = el.selectionEnd ?? start
-    const lines = value.split('\n')
-
-    // Map the caret offsets onto line indexes.
-    let offset = 0
-    let firstLine = 0
-    let lastLine = 0
-    for (let i = 0; i < lines.length; i++) {
-      const lineEnd = offset + lines[i].length
-      if (offset <= start && start <= lineEnd) firstLine = i
-      if (offset <= end && end <= lineEnd) { lastLine = i; break }
-      lastLine = i
-      offset = lineEnd + 1
-    }
-
-    const next = lines.map((line, i) => {
-      if (i < firstLine || i > lastLine) return line
-      if (!line.trim()) return line
-      // Strip whatever prefix is there, then apply the new one. Without the
-      // strip, restyling a bullet as a heading produced "## * ...".
-      return line.replace(LINE_PREFIX_RE, '') === '' ? line : prefix + line.replace(LINE_PREFIX_RE, '')
-    }).join('\n')
-
-    onChange(next)
-    requestAnimationFrame(() => el.focus())
-  }
-
-  /** Wraps the selected words in ** **, or unwraps them if already bold. */
-  function toggleBold() {
-    const el = textareaRef.current
-    if (!el) return
-    const start = el.selectionStart ?? 0
-    const end = el.selectionEnd ?? start
-    if (start === end) { el.focus(); return }
-    const selected = value.slice(start, end)
-    const isBold = selected.startsWith('**') && selected.endsWith('**') && selected.length > 4
-    const replacement = isBold ? selected.slice(2, -2) : `**${selected}**`
-    onChange(value.slice(0, start) + replacement + value.slice(end))
-    requestAnimationFrame(() => {
-      el.focus()
-      el.setSelectionRange(start, start + replacement.length)
-    })
-  }
-
-  const btnStyle: React.CSSProperties = {
-    background: 'var(--admin-bg-elevated)',
-    border: '1px solid var(--admin-border)',
-    color: 'var(--admin-text-secondary)',
-  }
-
-  return (
-    <div
-      className="flex flex-wrap items-center gap-1 p-1.5 rounded-t-lg"
-      style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)', borderBottom: 'none' }}
-    >
-      {LINE_STYLES.map(s => (
-        <button
-          key={s.label}
-          type="button"
-          title={s.title}
-          onMouseDown={e => e.preventDefault()} // keep the textarea selection alive
-          onClick={() => applyPrefix(s.prefix)}
-          className="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-[11px] font-bold transition-colors"
-          style={btnStyle}
-        >
-          {s.icon}{s.label}
-        </button>
-      ))}
-      <span className="w-px h-5 mx-0.5" style={{ background: 'var(--admin-border)' }} />
-      <button
-        type="button"
-        title="מודגש — סמן מילים ולחץ"
-        onMouseDown={e => e.preventDefault()}
-        onClick={toggleBold}
-        className="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-[11px] font-bold transition-colors"
-        style={btnStyle}
-      >
-        <Bold className="w-3.5 h-3.5" />מודגש
-      </button>
-    </div>
-  )
-}
-
 // ── Full-screen text workspace ──
 
 /**
- * Writing a media plan in a 288px inspector column doesn't work: the toolbar
- * wraps onto three rows and the textarea shows a handful of words per line.
- * This is the same editor given the whole screen, with the rendered slide
- * beside it so the operator sees what a style button actually did.
+ * Writing a media plan in a 288px inspector column doesn't work. This is the
+ * rich editor given the whole screen, styled with the deck's own CSS so the
+ * editing surface *is* the preview.
  */
-function PlanTextEditor({ value, onChange, onClose, textareaRef }: {
-  value: string
-  onChange: (next: string) => void
+function PlanTextEditor({ doc, onChange, onClose }: {
+  doc: PlanDoc | null
+  onChange: (doc: PlanDoc) => void
   onClose: () => void
-  textareaRef: React.RefObject<HTMLTextAreaElement | null>
 }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -457,7 +351,7 @@ function PlanTextEditor({ value, onChange, onClose, textareaRef }: {
   return (
     <div
       className="fixed inset-0 z-[100] flex flex-col"
-      style={{ background: 'rgba(6,9,11,0.92)', backdropFilter: 'blur(6px)' }}
+      style={{ background: 'rgba(6,9,11,0.94)', backdropFilter: 'blur(6px)' }}
     >
       <div
         className="flex items-center justify-between px-5 py-3 shrink-0"
@@ -476,41 +370,12 @@ function PlanTextEditor({ value, onChange, onClose, textareaRef }: {
         </button>
       </div>
 
-      <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-4 p-4">
-        {/* Write */}
-        <div className="flex flex-col min-h-0 lg:w-1/2">
-          <TextStyleToolbar textareaRef={textareaRef} value={value} onChange={onChange} />
-          <textarea
-            ref={textareaRef}
-            value={value}
-            dir="auto"
-            autoFocus
-            placeholder={'הדבק כאן תוכנית שלמה, ואז סמן שורות והחל סגנון מהכפתורים למעלה.'}
-            onChange={e => onChange(e.target.value)}
-            className="flex-1 min-h-0 w-full px-4 py-3 rounded-b-lg text-sm outline-none resize-none leading-loose"
-            style={{ ...fieldStyle, borderTopLeftRadius: 0, borderTopRightRadius: 0, borderTop: 'none' }}
-          />
+      <div className="flex-1 min-h-0 flex justify-center p-4">
+        <div className="flex flex-col min-h-0 w-full" style={{ maxWidth: 980 }}>
+          <PlanRichEditor doc={doc} onChange={onChange} />
           <p className="text-[11px] mt-2 leading-relaxed shrink-0" style={{ color: 'var(--admin-text-muted)' }}>
-            הכפתורים פועלים על השורה שהסמן עליה, או על כל השורות שסימנת. Esc לסגירה.
+            Esc לסגירה. הדבקה מ-Word או מ-Google Docs שומרת על הכותרות והרשימות.
           </p>
-        </div>
-
-        {/* See */}
-        <div
-          className="flex-1 min-h-0 overflow-auto rounded-xl lg:w-1/2"
-          style={{ background: '#090c0e', border: '1px solid var(--admin-border)' }}
-        >
-          <div className="campaign-pres" style={{ minHeight: 0, padding: '8px 20px 20px' }}>
-            <DistributionSlide
-              plan={{
-                bullets: [],
-                channels: [],
-                paragraph: value,
-                budgetDisplay: 'both',
-                show: { bullets: false, channels: false, budget: false, timeline: false, paragraph: true },
-              }}
-            />
-          </div>
         </div>
       </div>
     </div>

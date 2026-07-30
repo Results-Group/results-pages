@@ -12,10 +12,12 @@ import {
   buildTimeline,
   formatBudget,
   formatPercent,
-  parsePlanText,
+  resolvePlanDoc,
   DEFAULT_TOTAL_LABEL,
   type DistributionPlan,
   type DistributionChannel,
+  type PlanDoc,
+  type PlanDocNode,
 } from '@/lib/distribution'
 import he from '@/lib/i18n/he'
 import en from '@/lib/i18n/en'
@@ -45,6 +47,9 @@ export default function DistributionSlide({
   const channels = p.channels.filter(c => (c.name || '').trim().length > 0)
   const total = totalBudget(p.channels)
   const timeline = blocks.timeline ? buildTimeline(p.channels) : null
+  // Legacy slides still hold prefix-markup text; resolvePlanDoc converts on read
+  // so both formats render through the same path.
+  const planDoc = blocks.paragraph ? resolvePlanDoc(p) : null
 
   // When both blocks are on, the bar lives inside the table row — two separate
   // renderings of the same number stacked on one screen just read as noise.
@@ -163,47 +168,68 @@ export default function DistributionSlide({
         </div>
       )}
 
-      {/* Free text — a plan pasted in whole: headings, nested bullets, prose.
-          Closes the slide, since the section description sits above the table. */}
-      {blocks.paragraph && <PlanText source={p.paragraph || ''} />}
+      {/* Free text — a whole plan: headings, nested bullets, prose. Closes the
+          slide, since the section description sits above the table. */}
+      {blocks.paragraph && planDoc && <PlanText doc={planDoc} />}
     </div>
   )
 }
 
-/** Renders **bold** runs; everything else stays plain text. */
-function inline(text: string): React.ReactNode {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g)
-  return parts.map((part, i) =>
-    part.startsWith('**') && part.endsWith('**') && part.length > 4
-      ? <strong key={i}>{part.slice(2, -2)}</strong>
-      : part,
-  )
+/**
+ * Renders the stored document.
+ *
+ * A deliberate whitelist: any node type not handled here renders as nothing,
+ * and text is emitted as text. That is what makes it safe to show a document an
+ * operator pasted from anywhere into a page a client opens — there is no path
+ * from the stored data to markup.
+ */
+function renderNodes(nodes: PlanDocNode[], keyPrefix = ''): React.ReactNode {
+  return nodes.map((node, i) => {
+    const key = `${keyPrefix}${i}`
+    switch (node.type) {
+      case 'text': {
+        const bold = node.marks?.some(m => m.type === 'bold')
+        const italic = node.marks?.some(m => m.type === 'italic')
+        let out: React.ReactNode = node.text ?? ''
+        if (italic) out = <em key={key}>{out}</em>
+        if (bold) out = <strong key={key}>{out}</strong>
+        return <span key={key}>{out}</span>
+      }
+      case 'hardBreak':
+        return <br key={key} />
+      case 'heading': {
+        const level = Math.min(Math.max(node.attrs?.level ?? 2, 1), 3)
+        return (
+          <h3 key={key} className={`dist-text-h lvl-${level}`}>
+            {renderNodes(node.content || [], `${key}-`)}
+          </h3>
+        )
+      }
+      case 'paragraph':
+        return <p key={key} className="dist-text-p">{renderNodes(node.content || [], `${key}-`)}</p>
+      case 'bulletList':
+      case 'orderedList':
+        return (
+          <ul key={key} className={`dist-text-list${node.type === 'orderedList' ? ' is-ordered' : ''}`}>
+            {renderNodes(node.content || [], `${key}-`)}
+          </ul>
+        )
+      case 'listItem':
+        return <li key={key}>{renderNodes(node.content || [], `${key}-`)}</li>
+      default:
+        return null
+    }
+  })
 }
 
 /**
- * The free-text block: a whole plan pasted in, rendered as headings, nested
- * bullets and prose. Centred on the slide with the text itself right-aligned.
+ * The free-text block: a whole plan written or pasted in, rendered as headings,
+ * nested bullets and prose. Centred on the slide, text right-aligned.
  */
-function PlanText({ source }: { source: string }) {
-  const nodes = parsePlanText(source)
-  if (nodes.length === 0) return null
+function PlanText({ doc }: { doc: PlanDoc }) {
   return (
     <div className="dist-text rp-anim rp-up rp-d3" dir="rtl">
-      {nodes.map((node, i) => {
-        if (node.kind === 'heading') {
-          return <h3 key={i} className={`dist-text-h lvl-${node.level}`}>{inline(node.text)}</h3>
-        }
-        if (node.kind === 'paragraph') {
-          return <p key={i} className={`dist-text-p${node.small ? ' is-small' : ''}`}>{inline(node.text)}</p>
-        }
-        return (
-          <ul key={i} className="dist-text-list">
-            {node.items.map((item, j) => (
-              <li key={j} className={item.depth > 0 ? 'is-nested' : undefined}>{inline(item.text)}</li>
-            ))}
-          </ul>
-        )
-      })}
+      {renderNodes(doc.content || [])}
     </div>
   )
 }
