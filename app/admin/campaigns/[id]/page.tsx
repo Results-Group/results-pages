@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import CampaignEditor, { type EditorInitial } from '../_components/editor/CampaignEditor'
-import type { CampaignDocument, EditorSection, EditorAsset, MockupType, Copy } from '../_components/editor/types'
+import { sectionFromApi } from '../_components/editor/types'
+import type { CampaignDocument, EditorSection, Copy } from '../_components/editor/types'
 
 /** Format a UTC ISO string as a LOCAL 'YYYY-MM-DDTHH:mm' value for datetime-local inputs. */
 function isoToLocalDatetimeInput(iso: string): string {
@@ -43,29 +44,9 @@ export default function EditCampaignPage() {
         const allCopyIds = copies.map(c => c.id)
 
         const rawSections = typeof data.sections === 'string' ? JSON.parse(data.sections) : (data.sections || [])
-        const sections: EditorSection[] = rawSections.map((s: Partial<EditorSection> & { useCopies?: boolean }) => {
-          // Legacy sections have `useCopies: boolean` and no `copyIds` — map
-          // the boolean onto the array (true → every id, false → none) so the
-          // editor state stays single-source-of-truth going forward.
-          const copyIds = Array.isArray(s.copyIds)
-            ? s.copyIds
-            : (s.useCopies ? allCopyIds : [])
-          return {
-            id: s.id || crypto.randomUUID(),
-            title: s.title || '',
-            mockup_type: (s.mockup_type || 'general') as MockupType,
-            description: s.description || '',
-            copyIds,
-            assets: (s.assets || []).map((a: Partial<EditorAsset>) => ({
-              id: a.id || crypto.randomUUID(),
-              type: (a.type || 'image') as 'image' | 'video',
-              file_path: a.file_path || '',
-              public_url: a.public_url || '',
-              url: a.url || '',
-              caption: a.caption || '',
-            })),
-          }
-        })
+        const sections: EditorSection[] = rawSections.map(
+          (s: Partial<EditorSection> & { useCopies?: boolean }) => sectionFromApi(s, allCopyIds),
+        )
 
         const doc: CampaignDocument = {
           meta: {

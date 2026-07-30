@@ -84,6 +84,40 @@ export function maxAssetsFor(mockupType: MockupType): number {
   return mockupType === 'carousel' ? MAX_ASSETS_CAROUSEL : MAX_ASSETS_DEFAULT
 }
 
+/**
+ * Maps one raw section from the API into editor state.
+ *
+ * EVERY editable field must be carried here. A field missing from this mapper
+ * doesn't just fail to show up — the editor autosaves the document it loaded,
+ * so the next save writes the section back without it and the value is erased
+ * from the database. That is exactly how distribution plans were being lost:
+ * saved fine, dropped on reload, wiped on publish.
+ */
+export function sectionFromApi(
+  raw: Partial<EditorSection> & { useCopies?: boolean },
+  allCopyIds: string[],
+): EditorSection {
+  // Legacy sections have `useCopies: boolean` and no `copyIds` — map the
+  // boolean onto the array (true → every id, false → none).
+  const copyIds = Array.isArray(raw.copyIds) ? raw.copyIds : (raw.useCopies ? allCopyIds : [])
+  return {
+    id: raw.id || crypto.randomUUID(),
+    title: raw.title || '',
+    mockup_type: (raw.mockup_type || 'general') as MockupType,
+    description: raw.description || '',
+    copyIds,
+    ...(raw.plan ? { plan: raw.plan } : {}),
+    assets: (raw.assets || []).map(a => ({
+      id: a.id || crypto.randomUUID(),
+      type: (a.type || 'image') as 'image' | 'video',
+      file_path: a.file_path || '',
+      public_url: a.public_url || '',
+      url: a.url || '',
+      caption: a.caption || '',
+    })),
+  }
+}
+
 export function newSection(): EditorSection {
   return {
     id: crypto.randomUUID(),
