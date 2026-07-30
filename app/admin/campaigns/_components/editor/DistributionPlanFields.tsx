@@ -23,6 +23,7 @@ const BLOCK_LABELS: { key: keyof DistributionPlan['show']; label: string }[] = [
   { key: 'channels', label: 'טבלת ערוצים' },
   { key: 'budget', label: 'חלוקת תקציב' },
   { key: 'timeline', label: 'ציר זמן' },
+  { key: 'paragraph', label: 'פסקת טקסט' },
 ]
 
 const BUDGET_MODES: { value: BudgetDisplay; label: string }[] = [
@@ -255,6 +256,23 @@ export default function DistributionPlanFields({
         >
           {BUDGET_MODES.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
         </select>
+      </div>
+
+      <div>
+        <Label>טקסט חופשי</Label>
+        <textarea
+          value={p.paragraph ?? ''}
+          dir="auto"
+          rows={12}
+          placeholder={'הדבק כאן תוכנית שלמה.\n\nMeta\n* קהל חדש: פנייה לאנשים שלא מכירים את המותג.\n   * החרגות: מי שכבר ביצע מעורבות.\n\nחלוקת תקציב\nבשבועיים הראשונים 50% Meta ו-50% Google.'}
+          onChange={e => patch({ paragraph: e.target.value })}
+          className="w-full px-3 py-2.5 rounded-lg text-sm outline-none resize-y leading-relaxed"
+          style={fieldStyle}
+        />
+        <p className="text-[10px] mt-1.5 leading-relaxed" style={{ color: 'var(--admin-text-muted)' }}>
+          שורה שמתחילה ב-* היא בולט, והזחה של רווחים לפניה יוצרת תת-בולט.
+          שורה קצרה בלי נקודה בסוף הופכת לכותרת (אפשר גם ## לכפות). **טקסט** = מודגש.
+        </p>
       </div>
 
       <div>

@@ -682,6 +682,21 @@
 .campaign-pres .dist-total-line{margin:14px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,0.05);font-size:0.9rem;color:var(--text-secondary)}
 .campaign-pres .dist-total-line strong{color:var(--brand-yellow)}
 
+/* Free-text block: centred column on the slide, text itself right-aligned. */
+.campaign-pres .dist-text{max-width:860px;margin:26px auto 0;padding:28px 34px;border-radius:18px;background:var(--card-bg);border:1px solid var(--border-color);text-align:right}
+.campaign-pres .dist-text-h{font-size:1.15rem;font-weight:900;color:var(--brand-cyan);margin:26px 0 10px;letter-spacing:-0.01em}
+.campaign-pres .dist-text-h:first-child{margin-top:0}
+.campaign-pres .dist-text-p{font-size:0.98rem;line-height:1.95;color:var(--text-secondary);margin:0 0 14px;white-space:pre-wrap}
+.campaign-pres .dist-text-list{list-style:none;padding:0;margin:0 0 16px}
+/* The block is dir="rtl", so inline-start is the RIGHT edge — that's where the
+   markers belong, beside the first word of each line. */
+.campaign-pres .dist-text-list li{position:relative;padding-inline-start:22px;padding-inline-end:10px;font-size:0.96rem;line-height:1.9;color:var(--text-secondary);margin-bottom:7px}
+.campaign-pres .dist-text-list li::before{content:'';position:absolute;inset-inline-start:6px;top:0.78em;width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,var(--brand-cyan),var(--brand-green))}
+.campaign-pres .dist-text-list li.is-nested{padding-inline-start:44px;font-size:0.9rem;opacity:0.88}
+.campaign-pres .dist-text-list li.is-nested::before{inset-inline-start:28px;top:0.8em;width:5px;height:5px;border-radius:1px;background:rgba(var(--brand-rgb),0.5)}
+.campaign-pres .dist-text strong{color:var(--text-primary);font-weight:700}
+@media(max-width:768px){.campaign-pres .dist-text{padding:20px 18px;margin-top:20px}}
+
 .campaign-pres .dist-timeline{background:var(--card-bg);border:1px solid var(--border-color);border-radius:18px;padding:22px}
 /* The lane track is an LTR time axis inside an RTL slide: `direction:ltr` on the
    track makes left/width offsets mean what buildTimeline computed, regardless of

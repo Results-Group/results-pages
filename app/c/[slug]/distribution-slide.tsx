@@ -12,6 +12,7 @@ import {
   buildTimeline,
   formatBudget,
   formatPercent,
+  parsePlanText,
   DEFAULT_TOTAL_LABEL,
   type DistributionPlan,
   type DistributionChannel,
@@ -161,6 +162,44 @@ export default function DistributionSlide({
           ))}
         </div>
       )}
+
+      {/* Free text — a plan pasted in whole: headings, nested bullets, prose.
+          Closes the slide, since the section description sits above the table. */}
+      {blocks.paragraph && <PlanText source={p.paragraph || ''} />}
+    </div>
+  )
+}
+
+/** Renders **bold** runs; everything else stays plain text. */
+function inline(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g)
+  return parts.map((part, i) =>
+    part.startsWith('**') && part.endsWith('**') && part.length > 4
+      ? <strong key={i}>{part.slice(2, -2)}</strong>
+      : part,
+  )
+}
+
+/**
+ * The free-text block: a whole plan pasted in, rendered as headings, nested
+ * bullets and prose. Centred on the slide with the text itself right-aligned.
+ */
+function PlanText({ source }: { source: string }) {
+  const nodes = parsePlanText(source)
+  if (nodes.length === 0) return null
+  return (
+    <div className="dist-text rp-anim rp-up rp-d3" dir="rtl">
+      {nodes.map((node, i) => {
+        if (node.kind === 'heading') return <h3 key={i} className="dist-text-h">{inline(node.text)}</h3>
+        if (node.kind === 'paragraph') return <p key={i} className="dist-text-p">{inline(node.text)}</p>
+        return (
+          <ul key={i} className="dist-text-list">
+            {node.items.map((item, j) => (
+              <li key={j} className={item.depth > 0 ? 'is-nested' : undefined}>{inline(item.text)}</li>
+            ))}
+          </ul>
+        )
+      })}
     </div>
   )
 }

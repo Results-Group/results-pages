@@ -34,11 +34,14 @@ export interface DistributionBlocks {
   channels: boolean
   budget: boolean
   timeline: boolean
+  paragraph: boolean
 }
 
 export interface DistributionPlan {
   bullets: string[]
   channels: DistributionChannel[]
+  /** Free text closing the slide — notes, caveats, what happens next. */
+  paragraph?: string
   budgetDisplay: BudgetDisplay
   /** Which blocks the client sees. Not every plan needs all four. */
   show: DistributionBlocks
@@ -51,8 +54,9 @@ export function newDistributionPlan(): DistributionPlan {
   return {
     bullets: [],
     channels: [],
+    paragraph: '',
     budgetDisplay: 'both',
-    show: { bullets: true, channels: true, budget: true, timeline: false },
+    show: { bullets: true, channels: true, budget: true, timeline: false, paragraph: true },
     totalLabel: DEFAULT_TOTAL_LABEL,
   }
 }
@@ -68,6 +72,7 @@ export function normalizePlan(plan?: DistributionPlan | null): DistributionPlan 
   return {
     bullets: Array.isArray(plan.bullets) ? plan.bullets.filter(b => typeof b === 'string') : [],
     channels: Array.isArray(plan.channels) ? plan.channels.filter(c => c && typeof c.id === 'string') : [],
+    paragraph: typeof plan.paragraph === 'string' ? plan.paragraph : '',
     budgetDisplay: plan.budgetDisplay === 'amount' || plan.budgetDisplay === 'percent' ? plan.budgetDisplay : 'both',
     show: { ...base.show, ...(plan.show || {}) },
     totalLabel: typeof plan.totalLabel === 'string' ? plan.totalLabel : DEFAULT_TOTAL_LABEL,
@@ -181,6 +186,7 @@ export function visibleBlocks(plan: DistributionPlan): DistributionBlocks {
     channels: plan.show.channels && named.length > 0,
     budget: plan.show.budget && named.some(c => (percents.get(c.id) || 0) > 0),
     timeline: plan.show.timeline && named.some(hasTimelineDates),
+    paragraph: plan.show.paragraph && (plan.paragraph || '').trim().length > 0,
   }
 }
 
@@ -192,7 +198,7 @@ export function visibleBlocks(plan: DistributionPlan): DistributionBlocks {
 export function hasVisibleContent(plan?: DistributionPlan | null): boolean {
   if (!plan) return false
   const v = visibleBlocks(normalizePlan(plan))
-  return v.bullets || v.channels || v.budget || v.timeline
+  return v.bullets || v.channels || v.budget || v.timeline || v.paragraph
 }
 
 /**
@@ -208,6 +214,72 @@ export function percentWarning(channels: DistributionChannel[]): string | null {
   const rounded = Math.round(sum)
   if (rounded === 100) return null
   return `האחוזים מסתכמים ל-${rounded}%`
+}
+
+// ── Free-text block ──
+
+export type PlanTextNode =
+  | { kind: 'heading'; text: string }
+  | { kind: 'paragraph'; text: string }
+  | { kind: 'list'; items: { text: string; depth: number }[] }
+
+const BULLET_RE = /^(\s*)(?:[*\-•]|\d+[.)])\s+(.*)$/
+const HASH_RE = /^(#{1,3})\s+(.*)$/
+/** A line ending in one of these is prose, never a heading. */
+const SENTENCE_END = /[.:,;!?]$/
+
+/**
+ * Parses a pasted media plan into headings, lists and paragraphs.
+ *
+ * Deliberately a tiny subset, not a markdown library: operators paste plans out
+ * of a doc or a chat, where the only structure that survives is "* " bullets,
+ * indentation, and short standalone lines acting as section headings. Pulling in
+ * a full markdown parser would also mean sanitising raw HTML — this renders
+ * text only, so nothing pasted can inject markup.
+ *
+ * "## Meta" is always a heading. Without the hashes, a short standalone line
+ * with no sentence-ending punctuation ("Meta", "יעדי רבעון ראשון") is treated
+ * as one, which is what pasted plans actually look like.
+ */
+export function parsePlanText(src: string): PlanTextNode[] {
+  const lines = (src || '').replace(/\r\n?/g, '\n').split('\n')
+  const nodes: PlanTextNode[] = []
+  let list: { text: string; depth: number }[] = []
+  let para: string[] = []
+
+  const flushList = () => { if (list.length) { nodes.push({ kind: 'list', items: list }); list = [] } }
+  const flushPara = () => { if (para.length) { nodes.push({ kind: 'paragraph', text: para.join('\n') }); para = [] } }
+  const flush = () => { flushList(); flushPara() }
+
+  for (const raw of lines) {
+    const line = raw.replace(/\t/g, '   ')
+    if (!line.trim()) { flush(); continue }
+
+    const bullet = line.match(BULLET_RE)
+    if (bullet) {
+      flushPara()
+      // One level of nesting is enough for a media plan, and guessing deeper
+      // from ragged pasted indentation produces noise.
+      list.push({ text: bullet[2].trim(), depth: bullet[1].length >= 2 ? 1 : 0 })
+      continue
+    }
+
+    const hash = line.match(HASH_RE)
+    if (hash) { flush(); nodes.push({ kind: 'heading', text: hash[2].trim() }); continue }
+
+    const trimmed = line.trim()
+    if (trimmed.length <= 48 && !SENTENCE_END.test(trimmed)) {
+      flush()
+      nodes.push({ kind: 'heading', text: trimmed })
+      continue
+    }
+
+    flushList()
+    para.push(trimmed)
+  }
+
+  flush()
+  return nodes
 }
 
 /** ₪ with thousands separators, no decimals. */

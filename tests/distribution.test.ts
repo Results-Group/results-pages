@@ -5,6 +5,7 @@ import {
   hasVisibleContent,
   percentWarning,
   buildTimeline,
+  parsePlanText,
   normalizePlan,
   newDistributionPlan,
   type DistributionPlan,
@@ -52,7 +53,7 @@ describe('hasVisibleContent', () => {
   it('is false when the only filled block is switched off', () => {
     expect(hasVisibleContent(plan({
       bullets: ['אסטרטגיה'],
-      show: { bullets: false, channels: true, budget: true, timeline: false },
+      show: { bullets: false, channels: true, budget: true, timeline: false, paragraph: true },
     }))).toBe(false)
   })
 
@@ -63,6 +64,15 @@ describe('hasVisibleContent', () => {
 
   it('is true once a named channel exists', () => {
     expect(hasVisibleContent(plan({ channels: [{ id: 'a', name: 'Meta' }] }))).toBe(true)
+  })
+
+  it('counts a free paragraph on its own, and ignores a blank one', () => {
+    expect(hasVisibleContent(plan({ paragraph: 'התקציב ייבחן מחדש בתום החודש הראשון.' }))).toBe(true)
+    expect(hasVisibleContent(plan({ paragraph: '   ' }))).toBe(false)
+    expect(hasVisibleContent(plan({
+      paragraph: 'טקסט',
+      show: { bullets: true, channels: true, budget: true, timeline: false, paragraph: false },
+    }))).toBe(false)
   })
 })
 
@@ -111,6 +121,48 @@ describe('buildTimeline', () => {
       { id: 'a', name: 'Meta', start: '2026-08-01', end: '2026-08-01' },
     ])
     expect(tl!.lanes[0].width).toBe(100)
+  })
+})
+
+describe('parsePlanText', () => {
+  it('reads a pasted plan into headings, lists and prose', () => {
+    const nodes = parsePlanText(`Meta
+חלוקה ל-3 סגמנטים:
+
+* קהל חדש: פנייה לאנשים שלא מכירים את המותג.
+   * החרגות: מי שכבר ביצע מעורבות.
+* ריטרגטינג: פנייה חמה למי שיצר מגע.
+
+לכל סגמנט יוקצה תקציב נפרד ותתבצע מדידה ייעודית ברמת הקמפיין.`)
+
+    expect(nodes[0]).toEqual({ kind: 'heading', text: 'Meta' })
+    expect(nodes[1]).toEqual({ kind: 'paragraph', text: 'חלוקה ל-3 סגמנטים:' })
+    expect(nodes[2].kind).toBe('list')
+    const list = nodes[2] as { kind: 'list'; items: { text: string; depth: number }[] }
+    expect(list.items.map(i => i.depth)).toEqual([0, 1, 0])
+    expect(list.items[1].text).toBe('החרגות: מי שכבר ביצע מעורבות.')
+    expect(nodes[3].kind).toBe('paragraph')
+  })
+
+  it('treats a short line with no sentence-ending punctuation as a heading', () => {
+    expect(parsePlanText('יעדי רבעון ראשון')).toEqual([{ kind: 'heading', text: 'יעדי רבעון ראשון' }])
+    // Ends with a colon → prose, not a heading
+    expect(parsePlanText('הנה הנוסח המעודכן:')[0].kind).toBe('paragraph')
+    // Long enough to be a sentence even without a full stop
+    expect(parsePlanText('בשבועיים הראשונים התקציב יתחלק שווה בשווה בין שתי הפלטפורמות')[0].kind).toBe('paragraph')
+  })
+
+  it('honours explicit ## headings and numbered bullets', () => {
+    expect(parsePlanText('## חלוקת תקציב ואופטימיזציה שנתית מפורטת מאוד')[0])
+      .toEqual({ kind: 'heading', text: 'חלוקת תקציב ואופטימיזציה שנתית מפורטת מאוד' })
+    const list = parsePlanText('1. שלב ראשון\n2. שלב שני')[0] as { kind: 'list'; items: unknown[] }
+    expect(list.kind).toBe('list')
+    expect(list.items.length).toBe(2)
+  })
+
+  it('returns nothing for empty input', () => {
+    expect(parsePlanText('')).toEqual([])
+    expect(parsePlanText('   \n\n  ')).toEqual([])
   })
 })
 
