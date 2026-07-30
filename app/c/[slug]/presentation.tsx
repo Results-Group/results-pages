@@ -16,6 +16,7 @@ import GeneralCard from './mockups/general-card'
 import DistributionSlide from './distribution-slide'
 import { parseVideoUrl } from '@/lib/video-utils'
 import { assetProxyUrl } from '@/lib/asset-url'
+import { readableAccent } from '@/lib/brand-color'
 import he from '@/lib/i18n/he'
 import en from '@/lib/i18n/en'
 
@@ -58,6 +59,10 @@ function hexToRgbTriplet(hex: string): string | null {
 export default function CampaignPresentation({ slides, clientName, campaignName, brandColor, campaignId, feedbackEnabled, lang = 'he' }: Props) {
   const dict = lang === 'en' ? en : he
   const t = (key: keyof typeof he) => dict[key] ?? he[key] ?? key
+  // A brand colour drives 58 rules here, including the header title and the
+  // nav-button hover. Lifted to stay legible on the dark ground — a black brand
+  // colour otherwise painted both of them invisible.
+  const accent = readableAccent(brandColor)
   const [activeSlide, setActiveSlide] = useState(0)
   const [lightboxAsset, setLightboxAsset] = useState<{ url: string; caption?: string; slideKey?: string; assetId?: string } | null>(null)
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 })
@@ -268,11 +273,11 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
     <>
       <div
         className="campaign-pres"
-        style={brandColor ? ({
-          '--brand-cyan': brandColor,
-          '--brand-green': brandColor,
-          '--border-color': `${hexToRgba(brandColor, 0.14)}`,
-          ...(hexToRgbTriplet(brandColor) ? { '--brand-rgb': hexToRgbTriplet(brandColor) } : {}),
+        style={accent ? ({
+          '--brand-cyan': accent,
+          '--brand-green': accent,
+          '--border-color': `${hexToRgba(accent, 0.14)}`,
+          ...(hexToRgbTriplet(accent) ? { '--brand-rgb': hexToRgbTriplet(accent) } : {}),
         } as React.CSSProperties) : undefined}
       >
         {/* Parallax background layers */}

@@ -5,7 +5,11 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 import type { ReportTab, ReportBlock } from '@/lib/performance-reports'
 import he from '@/lib/i18n/he'
 import en from '@/lib/i18n/en'
+import { readableAccent } from '@/lib/brand-color'
 import './report.css'
+
+/** Matches --bg-dark in report.css. */
+const REPORT_BACKGROUND = '#050505'
 
 interface Props {
   report: {
@@ -19,6 +23,9 @@ interface Props {
 }
 
 export default function ReportPresentation({ report, brandColor }: Props) {
+  // Same guard as the campaign deck: a brand colour too dark for this
+  // background would take the accent, and everything drawn with it, out of view.
+  const accent = readableAccent(brandColor, REPORT_BACKGROUND)
   const [activeTab, setActiveTab] = useState(0)
   const [lang, setLang] = useState<'he' | 'en'>('he')
 
@@ -43,7 +50,7 @@ export default function ReportPresentation({ report, brandColor }: Props) {
 
   return (
     <div className="report-pres" dir={lang === 'en' ? 'ltr' : 'rtl'}
-      style={brandColor ? { '--brand-accent': brandColor, '--brand-accent-glow': `${brandColor}33` } as React.CSSProperties : undefined}>
+      style={accent ? { '--brand-accent': accent, '--brand-accent-glow': `${accent}33` } as React.CSSProperties : undefined}>
 
       {/* Header */}
       <header className="report-header">
