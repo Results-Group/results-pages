@@ -13,6 +13,7 @@ import FacebookFeedMockup from './mockups/facebook-feed'
 import VideoPlayer from './mockups/VideoPlayer'
 import CarouselFeed from './mockups/carousel-feed'
 import GeneralCard from './mockups/general-card'
+import DistributionSlide from './distribution-slide'
 import { parseVideoUrl } from '@/lib/video-utils'
 import { assetProxyUrl } from '@/lib/asset-url'
 import he from '@/lib/i18n/he'
@@ -251,6 +252,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
     if (slide.type === 'concept') return t('public.concept')
     if (slide.type === 'closing') return t('public.closing')
     if (slide.type === 'divider') return slide.title || `${t('public.divider')} ${i}`
+    if (slide.type === 'distribution') return slide.title || t('public.dist.title')
     const base = slide.title || `${t('public.section')} ${i}`
     // A section spanning several screens repeats its name, so say which part
     // this is — otherwise the index lists the same title six times over.
@@ -334,6 +336,14 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
             {slides[activeSlide].type === 'cover' && <CoverSlide slide={slides[activeSlide]} />}
             {slides[activeSlide].type === 'concept' && <ConceptSlide slide={slides[activeSlide]} />}
             {slides[activeSlide].type === 'divider' && <DividerSlide slide={slides[activeSlide]} index={activeSlide} />}
+            {slides[activeSlide].type === 'distribution' && (
+              <DistributionSlide
+                plan={slides[activeSlide].plan}
+                title={slides[activeSlide].title}
+                description={slides[activeSlide].content}
+                lang={lang}
+              />
+            )}
             {slides[activeSlide].type === 'creatives' && (
               <CreativesSlide slide={slides[activeSlide]} activeCopyIdx={activeCopyIdx} onActiveCopyChange={setActiveCopyIdx} onAssetClick={setLightboxAsset} lang={lang} />
             )}
@@ -790,6 +800,9 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
   const assets = slide.assets || []
   const isStory = slide.mockupType === 'instagram_story'
   const isCarousel = slide.mockupType === 'carousel'
+  // A laptop + phone pair needs the full slide width; the standard grid caps a
+  // single creative at 520px, which broke the pair onto two rows.
+  const isLanding = slide.mockupType === 'landing_page'
   const copies = slide.copies || []
   // activeCopy is set only when this slide has at least one copy targeted.
   const activeCopy = copies.length > 0 ? (copies[activeCopyIdx] ?? copies[0]) : undefined
@@ -848,7 +861,7 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
       )}
 
       {assets.length > 0 && !isCarousel && (
-        <div className={`assets-grid ${isStory ? 'story-grid' : 'standard-grid'} count-${Math.min(assets.length, 4)}`}>
+        <div className={`assets-grid ${isStory ? 'story-grid' : isLanding ? 'landing-grid' : 'standard-grid'} count-${Math.min(assets.length, 4)}`}>
           {assets.map((asset, i) => (
             <div
               key={asset.id}

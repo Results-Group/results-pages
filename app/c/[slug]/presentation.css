@@ -440,6 +440,20 @@
   .campaign-pres .assets-grid.standard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .campaign-pres .assets-grid.standard-grid.count-1{grid-template-columns:minmax(0,520px);justify-content:center}
 }
+/* The landing-page mockup sizes itself from the width it is given (laptop +
+   phone in one row), so it gets the whole slide instead of the standard grid's
+   520px single-creative column. */
+.campaign-pres .assets-grid.landing-grid{grid-template-columns:minmax(0,1fr);gap:40px}
+
+/* Desktop / mobile switch above the device frame */
+.campaign-pres .lp-toggle{display:flex;justify-content:center;gap:6px;margin:0 0 18px}
+.campaign-pres .lp-toggle-btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:0.78rem;font-weight:700;padding:7px 16px;border-radius:99px;cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--text-secondary);transition:background .2s,color .2s,border-color .2s}
+.campaign-pres .lp-toggle-btn:hover{color:var(--brand-cyan);border-color:rgba(var(--brand-rgb),0.3)}
+.campaign-pres .lp-toggle-btn.active{background:rgba(var(--brand-rgb),0.14);color:var(--brand-cyan);border-color:rgba(var(--brand-rgb),0.4)}
+/* Touch target on phones, where this sits directly above a swipe area */
+@media(max-width:768px){.campaign-pres .lp-toggle-btn{min-height:40px;padding:8px 18px}}
+.campaign-pres .assets-grid.landing-grid .mockup-wrapper:hover{transform:none}
+
 .campaign-pres .mockup-wrapper{position:relative;transition:transform 0.4s cubic-bezier(0.22,1,0.36,1)}
 .campaign-pres .mockup-wrapper:hover{transform:translateY(-4px)}
 
@@ -638,3 +652,58 @@
 .campaign-pres .approval-status-badge.approved{background:rgba(46,196,182,0.15);color:#5eead4}
 .campaign-pres .approval-status-badge.rejected{background:rgba(239,68,68,0.15);color:#fca5a5}
 .campaign-pres .approval-status-badge.pending{background:rgba(148,163,176,0.15);color:var(--text-secondary)}
+
+/* ── Distribution Plan Slide ── */
+.campaign-pres .dist-slide{padding:30px 0 20px}
+.campaign-pres .dist-intro{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;margin:-8px 0 26px;white-space:pre-wrap}
+.campaign-pres .dist-block-title{font-size:0.78rem;font-weight:700;color:rgba(var(--brand-rgb),0.75);text-transform:uppercase;letter-spacing:0.08em;margin:0 0 14px}
+
+.campaign-pres .dist-bullets{list-style:none;padding:0;margin:0 0 30px;display:grid;gap:10px}
+.campaign-pres .dist-bullets li{position:relative;padding-inline-start:26px;font-size:1rem;color:var(--text-secondary);line-height:1.8}
+.campaign-pres .dist-bullets li::before{content:'';position:absolute;inset-inline-start:6px;top:0.72em;width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,var(--brand-cyan),var(--brand-green))}
+
+.campaign-pres .dist-table{background:var(--card-bg);backdrop-filter:blur(16px);border:1px solid var(--border-color);border-radius:18px;overflow:hidden;margin-bottom:30px}
+.campaign-pres .dist-row{display:flex;align-items:center;gap:18px;padding:15px 22px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.campaign-pres .dist-row:last-child{border-bottom:none}
+.campaign-pres .dist-head{background:rgba(var(--brand-rgb),0.05);font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:rgba(var(--brand-rgb),0.75)}
+.campaign-pres .dist-cell{flex:1;min-width:0;font-size:0.92rem;color:var(--text-secondary)}
+.campaign-pres .dist-name{flex:1.25;font-weight:700;color:var(--text-primary)}
+.campaign-pres .dist-budget-col{flex:1.35;display:flex;align-items:center;gap:12px}
+.campaign-pres .dist-total{background:rgba(255,255,255,0.02);font-weight:700}
+.campaign-pres .dist-total .dist-budget-value{color:var(--brand-yellow)}
+
+.campaign-pres .dist-bar-track{flex:1;min-width:60px;height:8px;border-radius:99px;background:rgba(255,255,255,0.06);overflow:hidden}
+.campaign-pres .dist-bar-fill{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand-cyan),var(--brand-green))}
+.campaign-pres .dist-budget-value{font-weight:700;color:var(--text-primary);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:0.88rem}
+
+.campaign-pres .dist-bars{background:var(--card-bg);border:1px solid var(--border-color);border-radius:18px;padding:22px;margin-bottom:30px}
+.campaign-pres .dist-bar-row{display:flex;align-items:center;gap:14px;padding:9px 0}
+.campaign-pres .dist-bar-name{flex:0 0 120px;font-weight:700;color:var(--text-primary);font-size:0.92rem}
+.campaign-pres .dist-total-line{margin:14px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,0.05);font-size:0.9rem;color:var(--text-secondary)}
+.campaign-pres .dist-total-line strong{color:var(--brand-yellow)}
+
+.campaign-pres .dist-timeline{background:var(--card-bg);border:1px solid var(--border-color);border-radius:18px;padding:22px}
+/* The lane track is an LTR time axis inside an RTL slide: `direction:ltr` on the
+   track makes left/width offsets mean what buildTimeline computed, regardless of
+   the surrounding text direction. */
+.campaign-pres .dist-ticks{position:relative;height:18px;margin-inline-start:120px;direction:ltr}
+.campaign-pres .dist-tick{position:absolute;transform:translateX(-50%);font-size:0.68rem;color:var(--text-secondary);opacity:0.7;white-space:nowrap}
+.campaign-pres .dist-lane{display:flex;align-items:center;gap:14px;padding:7px 0}
+.campaign-pres .dist-lane-name{flex:0 0 106px;font-size:0.9rem;font-weight:700;color:var(--text-primary)}
+.campaign-pres .dist-lane-track{position:relative;flex:1;height:12px;border-radius:99px;background:rgba(255,255,255,0.05);direction:ltr}
+.campaign-pres .dist-lane-fill{position:absolute;top:0;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand-cyan),var(--brand-blue));min-width:6px}
+
+@media(max-width:768px){
+  /* A four-column table is unreadable at 375px — each channel becomes a card,
+     the header row is dropped, and every cell carries its own data-label. */
+  .campaign-pres .dist-head{display:none}
+  .campaign-pres .dist-row{flex-direction:column;align-items:stretch;gap:8px;padding:16px 18px}
+  .campaign-pres .dist-cell[data-label]::before{content:attr(data-label) ' · ';font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:rgba(var(--brand-rgb),0.7)}
+  .campaign-pres .dist-name{font-size:1.05rem}
+  /* The label is a flex item here (the cell is a flex row); give it the full
+     width so the bar and its value stay side by side on the line below. */
+  .campaign-pres .dist-budget-col{flex-wrap:wrap;gap:8px 12px}
+  .campaign-pres .dist-budget-col[data-label]::before{flex:0 0 100%}
+  .campaign-pres .dist-bar-name,.campaign-pres .dist-lane-name{flex-basis:78px;font-size:0.82rem}
+  .campaign-pres .dist-ticks{margin-inline-start:92px}
+}
