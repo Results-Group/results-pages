@@ -204,20 +204,34 @@ function escapeHtml(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
+const TITLE_TAG_RE = /<title[^>]*>[\s\S]*?<\/title>/i
+
+/**
+ * The page title stored in the admin panel wins over whatever `<title>` the
+ * uploaded HTML shipped with. Previously the file's own title survived, so
+ * renaming a page in the system changed the dashboard and the share card but
+ * never the browser tab — the one place the client actually looks.
+ */
 function injectOgTags(html: string, ogTags: string, title: string): string {
-  const headClose = html.indexOf('</head>')
+  const titleTag = `<title>${escapeHtml(title)}</title>`
+  const hasTitle = TITLE_TAG_RE.test(html)
+  const body = hasTitle ? html.replace(TITLE_TAG_RE, titleTag) : html
+
+  const headClose = body.indexOf('</head>')
   if (headClose !== -1) {
-    return html.slice(0, headClose) + ogTags + html.slice(headClose)
+    // A head with no title of its own still gets one.
+    const injected = hasTitle ? ogTags : `${titleTag}${ogTags}`
+    return body.slice(0, headClose) + injected + body.slice(headClose)
   }
-  const htmlTag = html.indexOf('<html')
+  const head = `<head><meta charset="UTF-8">${titleTag}${ogTags}</head>`
+  const htmlTag = body.indexOf('<html')
   if (htmlTag !== -1) {
-    const afterHtmlTag = html.indexOf('>', htmlTag)
+    const afterHtmlTag = body.indexOf('>', htmlTag)
     if (afterHtmlTag !== -1) {
-      const head = `<head><meta charset="UTF-8"><title>${escapeHtml(title)}</title>${ogTags}</head>`
-      return html.slice(0, afterHtmlTag + 1) + head + html.slice(afterHtmlTag + 1)
+      return body.slice(0, afterHtmlTag + 1) + head + body.slice(afterHtmlTag + 1)
     }
   }
-  return `<head><meta charset="UTF-8"><title>${escapeHtml(title)}</title>${ogTags}</head>` + html
+  return head + body
 }
 
 // These pages are served as standalone HTML (not through the React app), so
