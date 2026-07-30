@@ -7,6 +7,8 @@ export interface EditorAsset {
   caption: string
 }
 
+import type { DistributionPlan } from '@/lib/distribution'
+
 export type MockupType =
   | 'instagram_feed'
   | 'instagram_story'
@@ -16,6 +18,7 @@ export type MockupType =
   | 'video'
   | 'landing_page'
   | 'general'
+  | 'distribution'
   | 'divider'
 
 export interface EditorSection {
@@ -26,6 +29,8 @@ export interface EditorSection {
   /** IDs of campaign copies to show on this slide. Empty array = show none. */
   copyIds: string[]
   assets: EditorAsset[]
+  /** Only for mockup_type 'distribution'. */
+  plan?: DistributionPlan
 }
 
 /** A single ad-text variation on the campaign. `label` is optional
@@ -66,6 +71,7 @@ export const MOCKUP_TYPES: Record<MockupType, string> = {
   video: 'סרטונים',
   landing_page: 'הטמעת דף נחיתה',
   general: 'כללי',
+  distribution: 'תוכנית הפצה',
   divider: 'חוצץ / שקף ביניים',
 }
 

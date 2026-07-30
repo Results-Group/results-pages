@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { LayoutGrid, Settings2, Upload, Lock, Trash2, Clock, Plus, X, Sparkles, Loader2, Check, Image as ImageIcon, CopyPlus } from 'lucide-react'
 import ClientAutocomplete from '../../../_components/client-autocomplete'
+import DistributionPlanFields from './DistributionPlanFields'
 import { MOCKUP_TYPES, newCopy, type CampaignMeta, type EditorSection, type MockupType } from './types'
 import { useT, useDir } from '@/lib/i18n'
 
@@ -81,6 +82,7 @@ export default function Inspector({
     video: t('campaigns.mockup.video'),
     landing_page: t('campaigns.mockup.landing_page'),
     general: t('campaigns.mockup.general'),
+    distribution: t('campaigns.mockup.distribution'),
     divider: t('campaigns.mockup.divider'),
   }
 
@@ -176,6 +178,16 @@ export default function Inspector({
                   </button>
                 )}
               </div>
+
+              {section.mockup_type === 'distribution' && (
+                <>
+                  <SectionDivider label={t('campaigns.mockup.distribution')} />
+                  <DistributionPlanFields
+                    plan={section.plan}
+                    onChange={plan => onUpdateSection({ plan })}
+                  />
+                </>
+              )}
 
               {/* AI copy generation */}
               {onGenerateCopy && (

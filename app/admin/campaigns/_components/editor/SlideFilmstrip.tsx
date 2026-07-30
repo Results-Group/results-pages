@@ -11,7 +11,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import {
   GripVertical, Plus, Copy, Trash2, Image as ImageIcon, Film, LayoutTemplate,
-  Star, BookOpen, CheckCircle2, Sparkles,
+  Star, BookOpen, CheckCircle2, Sparkles, BarChart3,
 } from 'lucide-react'
 import { assetProxyUrl } from '@/lib/asset-url'
 import { countClientSlides } from '@/lib/slides'
@@ -20,6 +20,7 @@ import type { EditorSection, MockupType, CampaignMeta } from './types'
 function typeIcon(type: MockupType) {
   if (type === 'video') return <Film className="w-3 h-3" />
   if (type === 'divider') return <LayoutTemplate className="w-3 h-3" />
+  if (type === 'distribution') return <BarChart3 className="w-3 h-3" />
   return <ImageIcon className="w-3 h-3" />
 }
 
@@ -135,7 +136,11 @@ function SortableItem({ section, index, active, status, onSelect, onDuplicate, o
             </p>
             <span className="inline-flex items-center gap-1 text-[10px]" style={{ color: 'var(--admin-text-muted)' }}>
               {typeIcon(section.mockup_type)}
-              {section.mockup_type === 'divider' ? 'חוצץ' : `${section.assets.length} פריטים`}
+              {section.mockup_type === 'divider'
+                ? 'חוצץ'
+                : section.mockup_type === 'distribution'
+                  ? `${(section.plan?.channels ?? []).length} ערוצים`
+                  : `${section.assets.length} פריטים`}
             </span>
           </div>
 

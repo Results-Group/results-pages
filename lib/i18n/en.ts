@@ -370,6 +370,7 @@ const en: Record<TranslationKey, string> = {
   'campaigns.mockup.carousel': 'Carousel',
   'campaigns.mockup.video': 'Videos',
   'campaigns.mockup.general': 'General',
+  'campaigns.mockup.distribution': 'Distribution plan',
   'campaigns.mockup.divider': 'Divider / Separator',
 
   // Block types
@@ -432,6 +433,13 @@ const en: Record<TranslationKey, string> = {
   'public.closing': 'Closing',
   'public.divider': 'Divider',
   'public.section': 'Section',
+  'public.dist.title': 'Distribution plan',
+  'public.dist.channel': 'Channel',
+  'public.dist.formats': 'Formats',
+  'public.dist.audience': 'Audience',
+  'public.dist.budget': 'Budget',
+  'public.dist.budgetSplit': 'Budget split',
+  'public.dist.timeline': 'Timeline',
   'public.creativePresentationFor': 'Creative presentation for',
 
   // Public report presentation

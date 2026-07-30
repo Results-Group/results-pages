@@ -368,6 +368,7 @@ const he = {
   'campaigns.mockup.carousel': 'קרוסלה',
   'campaigns.mockup.video': 'סרטונים',
   'campaigns.mockup.general': 'כללי',
+  'campaigns.mockup.distribution': 'תוכנית הפצה',
   'campaigns.mockup.divider': 'חוצץ / שקף ביניים',
 
   // Block types
@@ -430,6 +431,13 @@ const he = {
   'public.closing': 'סיום',
   'public.divider': 'חוצץ',
   'public.section': 'סקציה',
+  'public.dist.title': 'תוכנית הפצה',
+  'public.dist.channel': 'ערוץ',
+  'public.dist.formats': 'פורמטים',
+  'public.dist.audience': 'קהל יעד',
+  'public.dist.budget': 'תקציב',
+  'public.dist.budgetSplit': 'חלוקת תקציב',
+  'public.dist.timeline': 'ציר זמן',
   'public.creativePresentationFor': 'מצגת קריאייטיב עבור',
 
   // Public report presentation

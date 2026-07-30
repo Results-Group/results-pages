@@ -11,6 +11,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { Upload, Trash2, GripVertical, Link2, RefreshCw, LayoutTemplate, ImageIcon } from 'lucide-react'
 import CanvasAsset from './CanvasAsset'
+import DistributionSlide from '@/app/c/[slug]/distribution-slide'
 import type { EditorAsset, EditorSection, Copy } from './types'
 import { isImageFile, MAX_FILE_MB } from '@/lib/image-compress'
 import { CREATIVES_PER_SCREEN } from '@/lib/slides'
@@ -142,6 +143,7 @@ export default function SlideCanvas({
   }
 
   const isDivider = section.mockup_type === 'divider'
+  const isDistribution = section.mockup_type === 'distribution'
   const isReels = section.mockup_type === 'instagram_reels'
   const isLandingPage = section.mockup_type === 'landing_page'
   // Reels are video-based like the plain video mockup, so they share the
@@ -240,7 +242,14 @@ export default function SlideCanvas({
           </div>
         )}
 
-        {isDivider ? (
+        {isDistribution ? (
+          // Same component the client's deck renders, so the preview can't
+          // drift from the delivered slide. min-height is overridden because
+          // .campaign-pres claims the full viewport on the public page.
+          <div className="campaign-pres rounded-2xl px-5" style={{ minHeight: 0, overflow: 'hidden' }}>
+            <DistributionSlide plan={section.plan} />
+          </div>
+        ) : isDivider ? (
           <div className="relative rounded-2xl py-20 text-center" style={{ border: '1px dashed rgba(64,225,211,0.2)', background: 'rgba(64,225,211,0.02)' }}>
             <div className="absolute top-0 right-0 w-12 h-12" style={{ borderTop: '2px solid rgba(64,225,211,0.2)', borderRight: '2px solid rgba(64,225,211,0.2)' }} />
             <div className="absolute bottom-0 left-0 w-12 h-12" style={{ borderBottom: '2px solid rgba(64,225,211,0.1)', borderLeft: '2px solid rgba(64,225,211,0.1)' }} />

@@ -153,6 +153,7 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
       mockup_type: s.mockup_type,
       description: s.description,
       copyIds: s.copyIds ?? [],
+      ...(s.plan ? { plan: s.plan } : {}),
       assets: s.assets.map(a => ({ id: a.id, type: a.type, file_path: a.file_path, url: a.url, caption: a.caption })),
     })),
   }), [doc, status, passwordDirty, slug, slugDirty])

@@ -1,8 +1,9 @@
 import { resolveSectionCopies, type Copy } from './copies'
+import { hasVisibleContent, normalizePlan, type DistributionPlan } from './distribution'
 import type { CampaignSection, CampaignAsset } from './campaigns'
 
 export interface SlideData {
-  type: 'cover' | 'concept' | 'divider' | 'creatives' | 'closing'
+  type: 'cover' | 'concept' | 'divider' | 'creatives' | 'distribution' | 'closing'
   key?: string
   title: string
   subtitle?: string
@@ -18,6 +19,8 @@ export interface SlideData {
   /** Set only when a section spans several screens: which part this is, of how many. */
   part?: number
   partsTotal?: number
+  /** Only on 'distribution' slides. */
+  plan?: DistributionPlan
 }
 
 /** Creatives shown on one screen before the section pages onto the next.
@@ -34,10 +37,13 @@ export const CREATIVES_PER_SCREEN = 2
 // shape (from the admin editor) — both have mockup_type + assets, which is
 // all this helper reads. Loose typing here beats a Pick<> that both callers
 // have to maintain in lockstep.
-type SectionLike = { mockup_type: string; assets?: unknown[] }
+type SectionLike = { mockup_type: string; assets?: unknown[]; plan?: DistributionPlan | null }
 
 export function slidesPerSection(section: SectionLike): number {
   if (section.mockup_type === 'divider') return 1
+  // A distribution plan carries no assets — it renders from `plan`, and an
+  // empty one renders nothing at all rather than a blank screen.
+  if (section.mockup_type === 'distribution') return hasVisibleContent(section.plan) ? 1 : 0
   const assets = section.assets || []
   if (!assets.length) return 0
   if (section.mockup_type === 'carousel') return 1
@@ -79,6 +85,18 @@ export function buildCampaignSlides(opts: {
   for (const section of sections) {
     if (section.mockup_type === 'divider') {
       slides.push({ type: 'divider', key: section.id, title: section.title, content: section.description })
+    } else if (section.mockup_type === 'distribution') {
+      // Assetless like the divider, so it needs its own branch — the creatives
+      // branch below skips any section with an empty assets array.
+      if (hasVisibleContent(section.plan)) {
+        slides.push({
+          type: 'distribution',
+          key: section.id,
+          title: section.title,
+          content: section.description,
+          plan: normalizePlan(section.plan),
+        })
+      }
     } else if ((section.assets || []).length > 0) {
       const assets = section.assets || []
       // A carousel is a single post containing all its frames, so it never

@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 import bcrypt from 'bcryptjs'
 import sharp from 'sharp'
+import type { DistributionPlan } from './distribution'
 
 // ── Types ──
 
@@ -16,8 +17,10 @@ export interface CampaignAsset {
 export interface CampaignSection {
   id: string
   title: string
-  mockup_type: 'instagram_feed' | 'instagram_story' | 'instagram_reels' | 'facebook_feed' | 'carousel' | 'video' | 'landing_page' | 'general' | 'divider'
+  mockup_type: 'instagram_feed' | 'instagram_story' | 'instagram_reels' | 'facebook_feed' | 'carousel' | 'video' | 'landing_page' | 'general' | 'distribution' | 'divider'
   description?: string
+  /** Only for mockup_type 'distribution' — the media plan this slide renders. */
+  plan?: DistributionPlan
   /** Legacy boolean toggle — replaced by copyIds. Kept so old rows still load. */
   useCopies?: boolean
   /** IDs of the campaign copies to show on this slide. undefined = fall back to
