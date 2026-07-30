@@ -1,7 +1,8 @@
 'use client'
 
-import { useRef } from 'react'
-import { Plus, X, GripVertical, AlertTriangle, Bold, Heading1, Heading2, Heading3, List, ListTree, Pilcrow, Type } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Plus, X, GripVertical, AlertTriangle, Bold, Heading1, Heading2, Heading3, List, ListTree, Pilcrow, Type, Maximize2 } from 'lucide-react'
+import DistributionSlide from '@/app/c/[slug]/distribution-slide'
 import {
   normalizePlan,
   newDistributionChannel,
@@ -54,6 +55,7 @@ export default function DistributionPlanFields({
   onChange: (plan: DistributionPlan) => void
 }) {
   const textRef = useRef<HTMLTextAreaElement>(null)
+  const [editorOpen, setEditorOpen] = useState(false)
   const p = normalizePlan(plan)
   const warning = percentWarning(p.channels)
 
@@ -262,25 +264,37 @@ export default function DistributionPlanFields({
 
       <div>
         <Label>טקסט חופשי</Label>
-        <TextStyleToolbar
-          textareaRef={textRef}
+        {/* The inspector is 288px wide — far too narrow to write a plan in.
+            The panel keeps a short preview and hands the real editing to a
+            full-screen workspace. */}
+        <button
+          type="button"
+          onClick={() => setEditorOpen(true)}
+          className="flex items-center justify-center gap-1.5 w-full px-3 py-2.5 rounded-lg text-xs font-bold transition-all duration-200"
+          style={{ color: '#04211d', background: '#40e1d3' }}
+        >
+          <Maximize2 className="w-3.5 h-3.5" />
+          {(p.paragraph || '').trim() ? 'עריכת הטקסט' : 'כתיבת טקסט'}
+        </button>
+        {(p.paragraph || '').trim() && (
+          <p
+            className="mt-2 px-3 py-2 rounded-lg text-[11px] leading-relaxed line-clamp-3"
+            dir="auto"
+            style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-muted)' }}
+          >
+            {(p.paragraph || '').replace(/[#>*]/g, '').trim().slice(0, 140)}…
+          </p>
+        )}
+      </div>
+
+      {editorOpen && (
+        <PlanTextEditor
           value={p.paragraph ?? ''}
           onChange={next => patch({ paragraph: next })}
+          onClose={() => setEditorOpen(false)}
+          textareaRef={textRef}
         />
-        <textarea
-          ref={textRef}
-          value={p.paragraph ?? ''}
-          dir="auto"
-          rows={14}
-          placeholder={'הדבק כאן תוכנית שלמה, ואז סמן שורות והחל סגנון מהכפתורים למעלה.'}
-          onChange={e => patch({ paragraph: e.target.value })}
-          className="w-full px-3 py-2.5 rounded-b-lg text-sm outline-none resize-y leading-relaxed"
-          style={{ ...fieldStyle, borderTopLeftRadius: 0, borderTopRightRadius: 0, borderTop: 'none' }}
-        />
-        <p className="text-[10px] mt-1.5 leading-relaxed" style={{ color: 'var(--admin-text-muted)' }}>
-          הכפתורים פועלים על השורה שהסמן עליה, או על כל השורות שסימנת.
-        </p>
-      </div>
+      )}
 
       <div>
         <Label>תווית סה&quot;כ</Label>
@@ -410,6 +424,95 @@ function TextStyleToolbar({ textareaRef, value, onChange }: {
       >
         <Bold className="w-3.5 h-3.5" />מודגש
       </button>
+    </div>
+  )
+}
+
+// ── Full-screen text workspace ──
+
+/**
+ * Writing a media plan in a 288px inspector column doesn't work: the toolbar
+ * wraps onto three rows and the textarea shows a handful of words per line.
+ * This is the same editor given the whole screen, with the rendered slide
+ * beside it so the operator sees what a style button actually did.
+ */
+function PlanTextEditor({ value, onChange, onClose, textareaRef }: {
+  value: string
+  onChange: (next: string) => void
+  onClose: () => void
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    // The editor behind this overlay scrolls; locking it keeps the page still.
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prev
+    }
+  }, [onClose])
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex flex-col"
+      style={{ background: 'rgba(6,9,11,0.92)', backdropFilter: 'blur(6px)' }}
+    >
+      <div
+        className="flex items-center justify-between px-5 py-3 shrink-0"
+        style={{ borderBottom: '1px solid var(--admin-border)', background: 'var(--admin-bg-card)' }}
+      >
+        <span className="text-sm font-black" style={{ color: 'var(--admin-text-primary)' }}>
+          טקסט תוכנית ההפצה
+        </span>
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold"
+          style={{ color: '#04211d', background: '#40e1d3' }}
+        >
+          <X className="w-3.5 h-3.5" /> סיום
+        </button>
+      </div>
+
+      <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-4 p-4">
+        {/* Write */}
+        <div className="flex flex-col min-h-0 lg:w-1/2">
+          <TextStyleToolbar textareaRef={textareaRef} value={value} onChange={onChange} />
+          <textarea
+            ref={textareaRef}
+            value={value}
+            dir="auto"
+            autoFocus
+            placeholder={'הדבק כאן תוכנית שלמה, ואז סמן שורות והחל סגנון מהכפתורים למעלה.'}
+            onChange={e => onChange(e.target.value)}
+            className="flex-1 min-h-0 w-full px-4 py-3 rounded-b-lg text-sm outline-none resize-none leading-loose"
+            style={{ ...fieldStyle, borderTopLeftRadius: 0, borderTopRightRadius: 0, borderTop: 'none' }}
+          />
+          <p className="text-[11px] mt-2 leading-relaxed shrink-0" style={{ color: 'var(--admin-text-muted)' }}>
+            הכפתורים פועלים על השורה שהסמן עליה, או על כל השורות שסימנת. Esc לסגירה.
+          </p>
+        </div>
+
+        {/* See */}
+        <div
+          className="flex-1 min-h-0 overflow-auto rounded-xl lg:w-1/2"
+          style={{ background: '#090c0e', border: '1px solid var(--admin-border)' }}
+        >
+          <div className="campaign-pres" style={{ minHeight: 0, padding: '8px 20px 20px' }}>
+            <DistributionSlide
+              plan={{
+                bullets: [],
+                channels: [],
+                paragraph: value,
+                budgetDisplay: 'both',
+                show: { bullets: false, channels: false, budget: false, timeline: false, paragraph: true },
+              }}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
