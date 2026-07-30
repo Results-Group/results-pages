@@ -7,6 +7,11 @@
 
 .campaign-pres{
   --bg-dark:#090c0e;
+  /* Results' own colours. The client's brand_color overrides --brand-cyan and
+     friends at runtime; these two never change, so anything that represents the
+     agency rather than the client can hold its identity. */
+  --results-cyan:#40e1d3;
+  --results-green:#2EC4B6;
   --brand-cyan:#40e1d3;
   --brand-rgb:64,225,211;
   --brand-yellow:#F3D56D;
@@ -61,7 +66,10 @@
 
 /* ── Header ── */
 .campaign-pres .pres-header{position:sticky;top:0;z-index:1000;background:rgba(9,12,14,0.85);backdrop-filter:blur(24px) saturate(1.4);border-bottom:1px solid rgba(255,255,255,0.04);padding:14px 40px;display:flex;align-items:center;justify-content:space-between}
-.campaign-pres .pres-header .brand{font-size:1.15rem;font-weight:900;letter-spacing:0.5px;background:linear-gradient(135deg,var(--brand-cyan),var(--brand-green));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+/* Always Results' cyan, never the client's brand colour: this line is the
+   agency's mark on the deck, and tying it to brand_color made it disappear
+   entirely for a client whose colour is black. */
+.campaign-pres .pres-header .brand{font-size:1.15rem;font-weight:900;letter-spacing:0.5px;background:linear-gradient(135deg,var(--results-cyan),var(--results-green));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .campaign-pres .pres-header .header-right{display:flex;align-items:center;gap:12px}
 .campaign-pres .pres-header .campaign-badge{background:rgba(var(--brand-rgb),0.06);border:1px solid rgba(var(--brand-rgb),0.15);border-radius:24px;padding:5px 18px;font-size:0.78rem;color:var(--text-secondary);letter-spacing:0.3px}
 .campaign-pres .pdf-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(243,213,109,0.06);border:1px solid rgba(243,213,109,0.15);border-radius:24px;padding:5px 18px;font-size:0.78rem;color:var(--brand-yellow);font-family:'Ping',sans-serif;cursor:pointer;transition:all 0.3s;white-space:nowrap}
