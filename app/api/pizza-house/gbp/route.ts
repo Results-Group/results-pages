@@ -18,6 +18,18 @@ export const dynamic = 'force-dynamic'
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
+/** Givat Ze'ev, Mar-Jul 2026, transcribed from the Business Profile UI. */
+const PREVIEW_GIVAT_ZEEV: MetricRow[] = [
+  { metric: 'BUSINESS_IMPRESSIONS_MOBILE_SEARCH', day: '2026-07-01', value: 5624 },
+  { metric: 'BUSINESS_IMPRESSIONS_MOBILE_MAPS', day: '2026-07-01', value: 4806 },
+  { metric: 'BUSINESS_IMPRESSIONS_DESKTOP_SEARCH', day: '2026-07-01', value: 1286 },
+  { metric: 'BUSINESS_IMPRESSIONS_DESKTOP_MAPS', day: '2026-07-01', value: 208 },
+  { metric: 'CALL_CLICKS', day: '2026-07-01', value: 7020 },
+  { metric: 'BUSINESS_DIRECTION_REQUESTS', day: '2026-07-01', value: 337 },
+  { metric: 'WEBSITE_CLICKS', day: '2026-07-01', value: 2203 },
+  { metric: 'BUSINESS_FOOD_MENU_CLICKS', day: '2026-07-01', value: 63 },
+]
+
 async function isAuthorized(req: NextRequest): Promise<boolean> {
   const ph = req.cookies.get('ph_session')?.value
   if (ph) {
@@ -62,6 +74,29 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid date range' }, { status: 400 })
   }
   const branch = searchParams.get('branch') || 'main'
+
+  // Preview: the real figures read off the Business Profile UI, so the panel can
+  // be reviewed before Google grants quota. Totals only — the source is a
+  // five-month summary, and spreading it over daily rows would be inventing a
+  // shape we have never seen. Owner/admin only, flagged in the response, and
+  // never written to the metrics table.
+  if (searchParams.get('preview') === '1') {
+    const rp = req.cookies.get('rp_session')?.value
+    const session = rp ? await verifySessionToken(rp) : null
+    if (!session || session.scope || !(session.isOwner || session.role === 'admin')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    return NextResponse.json({
+      connected: true,
+      preview: true,
+      has_data: true,
+      locations: [{ title: 'גבעת זאב (נתוני הדגמה)', branch_id: 'main' }],
+      range: { from, to },
+      summary: summarize(PREVIEW_GIVAT_ZEEV),
+      prev_summary: summarize([]),
+      series: null,
+    })
+  }
 
   // Unmapped listings are deliberately included in the "all" view rather than
   // hidden: better to show a number attributed to no branch than to silently

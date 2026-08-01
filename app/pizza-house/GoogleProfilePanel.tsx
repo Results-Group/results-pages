@@ -32,10 +32,11 @@ interface GbpResponse {
   connected: boolean
   reason?: string
   has_data?: boolean
+  preview?: boolean
   locations?: { title: string | null; branch_id: string | null }[]
   summary?: Summary
   prev_summary?: Summary
-  series?: { views: { day: string; value: number }[]; interactions: { day: string; value: number }[] }
+  series?: { views: { day: string; value: number }[]; interactions: { day: string; value: number }[] } | null
 }
 
 interface Palette {
@@ -60,11 +61,12 @@ function Delta({ current, previous, pal }: { current: number; previous: number; 
   )
 }
 
-export default function GoogleProfilePanel({ from, to, branch, pal }: {
+export default function GoogleProfilePanel({ from, to, branch, pal, preview = false }: {
   from: string
   to: string
   branch: string
   pal: Palette
+  preview?: boolean
 }) {
   const [data, setData] = useState<GbpResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -73,12 +75,12 @@ export default function GoogleProfilePanel({ from, to, branch, pal }: {
     if (!from || !to) return
     let cancelled = false
     setLoading(true)
-    fetch(`/api/pizza-house/gbp?from=${from}&to=${to}&branch=${branch}`, { credentials: 'include' })
+    fetch(`/api/pizza-house/gbp?from=${from}&to=${to}&branch=${branch}${preview ? '&preview=1' : ''}`, { credentials: 'include' })
       .then(r => (r.ok ? r.json() : null))
       .then(d => { if (!cancelled) { setData(d); setLoading(false) } })
       .catch(() => { if (!cancelled) { setData(null); setLoading(false) } })
     return () => { cancelled = true }
-  }, [from, to, branch])
+  }, [from, to, branch, preview])
 
   if (loading) {
     return (
@@ -126,7 +128,7 @@ export default function GoogleProfilePanel({ from, to, branch, pal }: {
   }
 
   return (
-    <Shell pal={pal} subtitle={data.locations?.map(l => l.title).filter(Boolean).join(' · ')}>
+    <Shell pal={pal} subtitle={data.locations?.map(l => l.title).filter(Boolean).join(' · ')} preview={data.preview}>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
         {kpis.map(k => (
           <div key={k.label} className="rounded-xl p-3" style={{ background: pal.bgElevated, border: `1px solid ${pal.border}` }}>
@@ -143,7 +145,7 @@ export default function GoogleProfilePanel({ from, to, branch, pal }: {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-3">
-        <div className="lg:col-span-2 rounded-xl p-3" style={{ background: pal.bgElevated, border: `1px solid ${pal.border}` }}>
+        {data.series && <div className="lg:col-span-2 rounded-xl p-3" style={{ background: pal.bgElevated, border: `1px solid ${pal.border}` }}>
           <div className="text-[11px] font-bold mb-2" style={{ color: pal.textMuted }}>צפיות ואינטראקציות לאורך זמן</div>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={(data.series?.views ?? []).map((v, i) => ({
@@ -158,9 +160,9 @@ export default function GoogleProfilePanel({ from, to, branch, pal }: {
               <Area type="monotone" dataKey="interactions" name="אינטראקציות" stroke={pal.yellow} fill={pal.yellow} fillOpacity={0.15} />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+        </div>}
 
-        <div className="rounded-xl p-3" style={{ background: pal.bgElevated, border: `1px solid ${pal.border}` }}>
+        <div className={`rounded-xl p-3${data.series ? '' : ' lg:col-span-3'}`} style={{ background: pal.bgElevated, border: `1px solid ${pal.border}` }}>
           <div className="text-[11px] font-bold mb-2" style={{ color: pal.textMuted }}>איפה מצאו את העסק</div>
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
@@ -179,11 +181,18 @@ export default function GoogleProfilePanel({ from, to, branch, pal }: {
   )
 }
 
-function Shell({ children, pal, subtitle }: { children: React.ReactNode; pal: Palette; subtitle?: string }) {
+function Shell({ children, pal, subtitle, preview }: { children: React.ReactNode; pal: Palette; subtitle?: string; preview?: boolean }) {
   return (
     <div className="rounded-xl sm:rounded-2xl p-3 sm:p-5 mt-4" style={{ background: pal.bgCard, border: `1px solid ${pal.border}` }}>
-      <div className="flex items-baseline gap-2 mb-3">
+      <div className="flex items-baseline gap-2 mb-3 flex-wrap">
         <h2 className="text-sm sm:text-base font-black" style={{ color: pal.text }}>פרופיל Google</h2>
+        {/* Unmissable: these numbers are real but hand-entered, not synced. */}
+        {preview && (
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+            style={{ background: `${pal.yellow}22`, color: pal.yellow, border: `1px solid ${pal.yellow}55` }}>
+            נתוני הדגמה — טרם מסונכרן מ-Google
+          </span>
+        )}
         {subtitle && <span className="text-[10px]" style={{ color: pal.textMuted }}>{subtitle}</span>}
       </div>
       {children}
