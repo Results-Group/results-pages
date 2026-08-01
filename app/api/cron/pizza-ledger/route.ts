@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { verifySessionToken } from '@/lib/auth'
 import { runWithBranch, listPizzaBranches } from '@/lib/pizza-house-db'
 import { fetchDayIdentities, recordDay, logLedgerRun } from '@/lib/pizza-house-ledger'
 import { captureException, logger } from '@/lib/logger'
@@ -25,13 +26,30 @@ function isoDaysAgo(n: number): string {
   return d.toISOString().slice(0, 10)
 }
 
-export async function GET(req: NextRequest) {
+/**
+ * Vercel Cron presents the shared secret; a signed-in owner/admin may also run
+ * it by hand. The backfill has to happen while the POS still holds the days —
+ * requiring the secret would mean copying it out of Vercel to a terminal, and
+ * the job only ever reads the POS and writes our own ledger.
+ */
+async function isAuthorized(req: NextRequest): Promise<boolean> {
   const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) {
+  if (cronSecret && req.headers.get('authorization') === `Bearer ${cronSecret}`) return true
+
+  const rp = req.cookies.get('rp_session')?.value
+  if (rp) {
+    const session = await verifySessionToken(rp)
+    if (session && !session.scope && (session.isOwner || session.role === 'admin')) return true
+  }
+  return false
+}
+
+export async function GET(req: NextRequest) {
+  if (!process.env.CRON_SECRET) {
     logger.error('CRON_SECRET is not configured — refusing cron request')
     return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
   }
-  if (req.headers.get('authorization') !== `Bearer ${cronSecret}`) {
+  if (!(await isAuthorized(req))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
