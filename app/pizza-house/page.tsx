@@ -18,6 +18,7 @@ import {
   CartesianGrid,
 } from 'recharts'
 import { RefreshCw, LogOut, TrendingUp, TrendingDown, Minus, Truck, Store, Sun, Moon, Clock, PackageX, Wallet, Receipt, ShoppingBag } from 'lucide-react'
+import GoogleProfilePanel from './GoogleProfilePanel'
 
 // ── Types ──
 
@@ -460,6 +461,9 @@ export default function PizzaHouseDashboard() {
                 </Card>
               ))}
             </div>
+
+            {/* ── Google Business Profile ── */}
+            <GoogleProfilePanel from={from} to={to} branch={data.branch} pal={pal} />
 
             {/* ── Order timing KPI ── */}
             {data.orderTiming && (

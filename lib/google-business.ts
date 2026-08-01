@@ -31,18 +31,33 @@ export const GBP_SCOPE = [
   'https://www.googleapis.com/auth/userinfo.email',
 ].join(' ')
 
-/** The daily metrics we chart. Names are Google's DailyMetric enum. */
-export const GBP_METRICS = [
+/**
+ * The daily metrics we chart. Names are Google's DailyMetric enum.
+ *
+ * Split deliberately into impressions (how many saw the listing) and actions
+ * (what they did next), because Business Profile's own two headline numbers are
+ * the sums of these two groups — verified against Givat Ze'ev, Mar–Jul 2026:
+ *   impressions 5,624 + 4,806 + 1,286 + 208            = 11,924 profile views
+ *   actions     7,020 + 337 + 2,203 + 63               =  9,623 interactions
+ */
+export const GBP_IMPRESSION_METRICS = [
   'BUSINESS_IMPRESSIONS_DESKTOP_MAPS',
   'BUSINESS_IMPRESSIONS_DESKTOP_SEARCH',
   'BUSINESS_IMPRESSIONS_MOBILE_MAPS',
   'BUSINESS_IMPRESSIONS_MOBILE_SEARCH',
-  'BUSINESS_CONVERSATIONS',
-  'BUSINESS_DIRECTION_REQUESTS',
-  'CALL_CLICKS',
-  'WEBSITE_CLICKS',
-  'BUSINESS_BOOKINGS',
 ] as const
+
+export const GBP_ACTION_METRICS = [
+  'CALL_CLICKS',
+  'BUSINESS_DIRECTION_REQUESTS',
+  'WEBSITE_CLICKS',
+  'BUSINESS_CONVERSATIONS',
+  'BUSINESS_BOOKINGS',
+  'BUSINESS_FOOD_ORDERS',
+  'BUSINESS_FOOD_MENU_CLICKS',
+] as const
+
+export const GBP_METRICS = [...GBP_IMPRESSION_METRICS, ...GBP_ACTION_METRICS] as const
 
 export function isGbpConfigured(): boolean {
   return Boolean(process.env.GOOGLE_OAUTH_CLIENT_ID && process.env.GOOGLE_OAUTH_CLIENT_SECRET)
