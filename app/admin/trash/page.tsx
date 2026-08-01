@@ -62,11 +62,14 @@ export default function TrashPage() {
     }
   }
 
-  async function purge(kind: 'pages' | 'campaigns' | 'reports', id: string) {
-    if (!confirm(t('trash.purgeConfirm'))) return
+  async function purge(kind: 'pages' | 'campaigns' | 'reports', id: string, label: string) {
+    // Typing the name back is the guard against an accidental irreversible
+    // delete — the server rejects anything else, so a slip is a 400, not a loss.
+    const typed = prompt(`${t('trash.purgeConfirm')}\n\n${label}`)
+    if (typed === null) return
     setBusy(id)
     try {
-      const res = await fetch(`/api/${kind}/${id}?purge=1`, { method: 'DELETE' })
+      const res = await fetch(`/api/${kind}/${id}?purge=1&confirm=${encodeURIComponent(typed)}`, { method: 'DELETE' })
       if (res.ok) await load()
     } finally {
       setBusy(null)
@@ -109,7 +112,7 @@ export default function TrashPage() {
                     deletedAt={c.deleted_at}
                     busy={busy === c.id}
                     onRestore={() => restore('campaigns', c.id)}
-                    onPurge={() => purge('campaigns', c.id)}
+                    onPurge={() => purge('campaigns', c.id, c.campaign_name)}
                   />
                 ))}
               </div>
@@ -130,7 +133,7 @@ export default function TrashPage() {
                     deletedAt={r.deleted_at}
                     busy={busy === r.id}
                     onRestore={() => restore('reports', r.id)}
-                    onPurge={() => purge('reports', r.id)}
+                    onPurge={() => purge('reports', r.id, r.report_name)}
                   />
                 ))}
               </div>
@@ -151,7 +154,7 @@ export default function TrashPage() {
                     deletedAt={p.deleted_at}
                     busy={busy === p.id}
                     onRestore={() => restore('pages', p.id)}
-                    onPurge={() => purge('pages', p.id)}
+                    onPurge={() => purge('pages', p.id, p.title)}
                   />
                 ))}
               </div>

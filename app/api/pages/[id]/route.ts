@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPageById, updatePage, deletePage, purgePage, moveFile, getPageByShortUrl } from '@/lib/db'
 import { getSessionFromRequest, requireResourcePermission } from '@/lib/auth'
+import { requirePurgeConfirmation } from '@/lib/purge-guard'
 import { findOrCreateClient } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
@@ -130,6 +131,8 @@ export async function DELETE(req: NextRequest, { params }: Ctx) {
   // ?purge=1 permanently deletes (files + row); default is a reversible soft-delete.
   const purge = new URL(req.url).searchParams.get('purge') === '1'
   if (purge) {
+    const guardErr = await requirePurgeConfirmation(req, page.title)
+    if (guardErr) return guardErr
     await purgePage(id)
   } else {
     await deletePage(id)

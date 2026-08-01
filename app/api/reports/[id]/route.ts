@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest, requireWorkspacePermission, requireResourcePermission } from '@/lib/auth'
+import { requirePurgeConfirmation } from '@/lib/purge-guard'
 import { getReportById, updateReport, deleteReport, purgeReport } from '@/lib/performance-reports'
 import { findOrCreateClient } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
@@ -85,8 +86,13 @@ export async function DELETE(
     if (permErr) return permErr
 
     const purge = new URL(request.url).searchParams.get('purge') === '1'
-    if (purge) await purgeReport(id)
-    else await deleteReport(id)
+    if (purge) {
+      const guardErr = await requirePurgeConfirmation(request, existing.report_name)
+      if (guardErr) return guardErr
+      await purgeReport(id)
+    } else {
+      await deleteReport(id)
+    }
     await logAudit({ actor: session, action: purge ? 'purge' : 'delete', entity_type: 'report', entity_id: id, entity_label: existing.report_name, workspace_id: existing.workspace_id })
     return NextResponse.json({ success: true, purged: purge })
   } catch (err) {
