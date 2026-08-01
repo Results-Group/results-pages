@@ -75,8 +75,6 @@ export async function GET(req: NextRequest) {
     }
 
     const accessToken = await accessTokenFor(tokens.refresh_token)
-    const accounts = await listAccounts(accessToken)
-    const primary = accounts[0]
 
     // Identify the granting account for display only.
     const profile = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
@@ -84,15 +82,33 @@ export async function GET(req: NextRequest) {
     })
       .then(r => (r.ok ? r.json() : null))
       .catch(() => null)
-    const email = profile?.email || primary?.accountName || 'unknown'
+    const email = profile?.email || 'unknown'
 
+    // Persist the grant BEFORE enumerating anything. The refresh token is the
+    // part a human had to authorise; discovering accounts and locations is
+    // retryable API work. Doing it the other way round meant a disabled API
+    // threw away a perfectly good grant and forced the whole consent again.
     await saveConnection({
       account_email: email,
       refresh_token: tokens.refresh_token,
-      account_resource: primary?.name ?? null,
       scopes: tokens.scope,
       connected_by: session.userId,
     })
+
+    let primary: Awaited<ReturnType<typeof listAccounts>>[number] | undefined
+    let discoveryError: string | null = null
+    try {
+      primary = (await listAccounts(accessToken))[0]
+      if (primary) {
+        await supabase
+          .from('gbp_connections')
+          .update({ account_resource: primary.name })
+          .eq('account_email', email)
+      }
+    } catch (err) {
+      discoveryError = err instanceof Error ? err.message : 'unknown'
+      captureException(err, { route: 'GET /api/google-business/callback', step: 'listAccounts' })
+    }
 
     const { data: conn } = await supabase
       .from('gbp_connections')
@@ -120,11 +136,20 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const res = page(
-      'החיבור הושלם',
-      `חשבון <strong>${email}</strong> חובר בהצלחה.<br>נמצאו <strong>${locationRows}</strong> סניפים ב-Business Profile.<br><br>
-       אפשר לסגור את החלון — הסנכרון הלילי יתחיל מעצמו.`
-    )
+    // The grant is saved either way; say plainly which half succeeded.
+    const res = discoveryError
+      ? page(
+          'ההרשאה נשמרה — אבל לא הצלחנו לקרוא את הסניפים',
+          `חשבון <strong>${email}</strong> חובר, וההרשאה שמורה — <strong>אין צורך לאשר שוב</strong>.<br><br>
+           גוגל החזירה: <code style="color:#f3d56d">${discoveryError.slice(0, 200)}</code><br><br>
+           אם זה API שעדיין לא הופעל — להפעיל אותו ואז לרענן את הסניפים, בלי לחזור על האישור.`,
+          false
+        )
+      : page(
+          'החיבור הושלם',
+          `חשבון <strong>${email}</strong> חובר בהצלחה.<br>נמצאו <strong>${locationRows}</strong> סניפים ב-Business Profile.<br><br>
+           אפשר לסגור את החלון — הסנכרון הלילי יתחיל מעצמו.`
+        )
     res.cookies.delete('gbp_oauth_state')
     return res
   } catch (err) {
