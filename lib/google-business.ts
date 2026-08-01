@@ -19,8 +19,17 @@ const ACCOUNTS_API = 'https://mybusinessaccountmanagement.googleapis.com/v1'
 const INFO_API = 'https://mybusinessbusinessinformation.googleapis.com/v1'
 const PERFORMANCE_API = 'https://businessprofileperformance.googleapis.com/v1'
 
-/** Full management scope — required by the Performance and Information APIs. */
-export const GBP_SCOPE = 'https://www.googleapis.com/auth/business.manage'
+/**
+ * business.manage is what the Performance and Information APIs require.
+ * openid + email is added only so a stored connection can say which account
+ * granted it — without them the callback has no way to read the address and
+ * every connection records as "unknown". Deliberately nothing beyond these.
+ */
+export const GBP_SCOPE = [
+  'https://www.googleapis.com/auth/business.manage',
+  'openid',
+  'https://www.googleapis.com/auth/userinfo.email',
+].join(' ')
 
 /** The daily metrics we chart. Names are Google's DailyMetric enum. */
 export const GBP_METRICS = [
