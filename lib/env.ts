@@ -27,6 +27,9 @@ const envSchema = z.object({
   GEMINI_MODEL: z.string().optional(),
   // Secret shared with Vercel Cron — required for the cron endpoint to run
   CRON_SECRET: z.string().optional(),
+  // Google Business Profile (OAuth — client secret never leaves the server)
+  GOOGLE_OAUTH_CLIENT_ID: z.string().optional(),
+  GOOGLE_OAUTH_CLIENT_SECRET: z.string().optional(),
   // Base44 digital-business-cards app (REST API)
   BASE44_APP_ID: z.string().optional(),
   BASE44_API_KEY: z.string().optional(),
