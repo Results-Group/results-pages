@@ -90,7 +90,11 @@ export function authorizeUrl(origin: string, state: string): string {
     // prompt=consent Google withholds it on re-authorisation.
     access_type: 'offline',
     prompt: 'consent',
-    include_granted_scopes: 'true',
+    // NOT include_granted_scopes: that folds every scope this OAuth client was
+    // ever granted into our token. Reusing an existing client meant the first
+    // grant came back carrying Gmail and Calendar access alongside the one
+    // scope we asked for — far more damage than this integration is worth if
+    // the token ever leaks.
     state,
   })
   return `${OAUTH_AUTH_URL}?${params}`
