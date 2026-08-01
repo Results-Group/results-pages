@@ -34,6 +34,7 @@ interface GbpResponse {
   reason?: string
   has_data?: boolean
   preview?: boolean
+  preview_period?: string
   locations?: { title: string | null; branch_id: string | null }[]
   summary?: Summary
   prev_summary?: Summary
@@ -76,9 +77,25 @@ export default function GoogleProfilePanel({ from, to, branch, pal, preview = fa
     if (!from || !to) return
     let cancelled = false
     setLoading(true)
-    fetch(`/api/pizza-house/gbp?from=${from}&to=${to}&branch=${branch}${preview ? '&preview=1' : ''}`, { credentials: 'include' })
+    const url = (p: boolean) =>
+      `/api/pizza-house/gbp?from=${from}&to=${to}&branch=${branch}${p ? '&preview=1' : ''}`
+
+    fetch(url(preview), { credentials: 'include' })
       .then(r => (r.ok ? r.json() : null))
-      .then(d => { if (!cancelled) { setData(d); setLoading(false) } })
+      .then(async d => {
+        // Nothing synced yet? Fall back to the figures transcribed from
+        // Business Profile so the tab is useful while Google's quota request
+        // is pending. Only an admin gets them — a client must never be shown
+        // hand-entered numbers as though they were their own live dashboard.
+        if (!preview && (!d?.connected || !d?.has_data)) {
+          const r2 = await fetch(url(true), { credentials: 'include' }).catch(() => null)
+          if (r2?.ok) {
+            const demo = await r2.json()
+            if (!cancelled && demo?.connected) { setData(demo); setLoading(false); return }
+          }
+        }
+        if (!cancelled) { setData(d); setLoading(false) }
+      })
       .catch(() => { if (!cancelled) { setData(null); setLoading(false) } })
     return () => { cancelled = true }
   }, [from, to, branch, preview])
@@ -129,7 +146,7 @@ export default function GoogleProfilePanel({ from, to, branch, pal, preview = fa
   }
 
   return (
-    <Shell pal={pal} subtitle={data.locations?.map(l => l.title).filter(Boolean).join(' · ')} preview={data.preview}>
+    <Shell pal={pal} subtitle={data.locations?.map(l => l.title).filter(Boolean).join(' · ')} preview={data.preview} preview_period={data.preview_period}>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
         {kpis.map(k => (
           <div key={k.label} className="rounded-xl p-3" style={{ background: pal.bgElevated, border: `1px solid ${pal.border}` }}>
@@ -182,7 +199,7 @@ export default function GoogleProfilePanel({ from, to, branch, pal, preview = fa
   )
 }
 
-function Shell({ children, pal, subtitle, preview }: { children: React.ReactNode; pal: Palette; subtitle?: string; preview?: boolean }) {
+function Shell({ children, pal, subtitle, preview, preview_period }: { children: React.ReactNode; pal: Palette; subtitle?: string; preview?: boolean; preview_period?: string }) {
   return (
     <div className="rounded-xl sm:rounded-2xl p-3 sm:p-5 mt-4" style={{ background: pal.bgCard, border: `1px solid ${pal.border}` }}>
       <div className="flex items-baseline gap-2 mb-3 flex-wrap">
@@ -191,7 +208,7 @@ function Shell({ children, pal, subtitle, preview }: { children: React.ReactNode
         {preview && (
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
             style={{ background: `${pal.yellow}22`, color: pal.yellow, border: `1px solid ${pal.yellow}55` }}>
-            נתוני הדגמה — טרם מסונכרן מ-Google
+            נתונים מ-Google שהוזנו ידנית{preview_period ? ` · ${preview_period}` : ''} — טרם מסונכרן
           </span>
         )}
         {subtitle && <span className="text-[10px]" style={{ color: pal.textMuted }}>{subtitle}</span>}

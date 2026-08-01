@@ -122,8 +122,12 @@ export async function GET(req: NextRequest) {
       connected: true,
       preview: true,
       has_data: true,
-      locations: chosen.map(([id, b]) => ({ title: `${b.title} (הדגמה)`, branch_id: id })),
-      range: { from, to },
+      locations: chosen.map(([id, b]) => ({ title: b.title, branch_id: id })),
+      // The period these numbers actually cover — NOT the picker's range. The
+      // source is a fixed five-month summary, so echoing the requested range
+      // back would quietly imply the figures responded to it.
+      range: { from: '2026-03-01', to: '2026-07-31' },
+      preview_period: 'מרץ–יולי 2026',
       summary: summarize(chosen.flatMap(([, b]) => b.rows)),
       prev_summary: summarize([]),
       series: null,
