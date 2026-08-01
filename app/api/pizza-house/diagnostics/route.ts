@@ -3,11 +3,10 @@ import { verifySessionToken } from '@/lib/auth'
 import { runWithBranch, isPizzaBranch, pizzaHouseQuery } from '@/lib/pizza-house-db'
 
 /**
- * TEMPORARY read-only diagnostics — round 2 of the 2026-08-01 dashboard
- * investigation. Round 1 established: DB history starts 2026-06-25, no
- * identity columns are populated anywhere, and dc_deals (852 rows) is the
- * remaining delivery-undercount suspect. This round: what dc_deals is, how it
- * overlaps the fee-item heuristic, and how far z_info reaches back.
+ * TEMPORARY read-only diagnostics — round 3 (final) of the 2026-08-01
+ * dashboard investigation. Two questions left: does deals.paydesk expose a
+ * dedicated delivery station (→ fee-less delivery undercount), and does
+ * dc_deals carry usable meal-card identity (fill rates only, no values).
  * Aggregates only. DELETE THIS FILE after one read.
  */
 
@@ -29,7 +28,6 @@ async function isAuthorized(req: NextRequest): Promise<boolean> {
 }
 
 const FEE = "(p.name LIKE '%משלוח%' OR p.name LIKE '%מישלוח%')"
-const IDENT_RE = /^[A-Za-z0-9_]+$/
 
 async function safe<T>(label: string, fn: () => Promise<T>): Promise<T | { error: string }> {
   try {
@@ -51,79 +49,51 @@ export async function GET(req: NextRequest) {
   const TO = '2026-08-01'
 
   const data = await runWithBranch(branch, async () => {
-    const dcCols = await safe('dcCols', () => pizzaHouseQuery<{ Field: string; Type: string }>(
-      `SHOW COLUMNS FROM dc_deals`))
-    const fields = Array.isArray(dcCols) ? dcCols.map(c => c.Field).filter(f => IDENT_RE.test(f)) : []
-    const dateField = fields.find(f => /date|tm|time/i.test(f))
+    // ── Delivery: does the station number carry the channel? ──
+    // For each paydesk in July (positive-sum deals): how many deals carry a
+    // delivery-fee item vs not, and the average ticket of each half.
+    const byPaydesk = await safe('byPaydesk', () => pizzaHouseQuery(
+      `SELECT d.paydesk,
+              COUNT(*) as orders,
+              SUM(CASE WHEN EXISTS (SELECT 1 FROM paymentitm p WHERE p.id_deal = d.id_deal AND ${FEE}) THEN 1 ELSE 0 END) as with_fee,
+              SUM(CASE WHEN EXISTS (SELECT 1 FROM paymentitm p WHERE p.id_deal = d.id_deal AND ${FEE}) THEN 0 ELSE 1 END) as without_fee,
+              ROUND(AVG(CASE WHEN EXISTS (SELECT 1 FROM paymentitm p WHERE p.id_deal = d.id_deal AND ${FEE}) THEN d.sum END), 2) as avg_with_fee,
+              ROUND(AVG(CASE WHEN EXISTS (SELECT 1 FROM paymentitm p WHERE p.id_deal = d.id_deal AND ${FEE}) THEN NULL ELSE d.sum END), 2) as avg_without_fee
+       FROM deals d
+       WHERE d.tm_open >= ? AND d.tm_open < ? AND d.sum > 0
+       GROUP BY d.paydesk ORDER BY orders DESC`, [FROM, TO]))
 
-    const dc: Record<string, unknown> = {
-      columns: Array.isArray(dcCols) ? dcCols.map(c => `${c.Field}:${c.Type}`) : dcCols,
-    }
+    // Hour-of-day profile per paydesk half — a delivery station's fee-less
+    // deals should mirror its fee-bearing hours, not the walk-in counter's.
+    const hourlyShape = await safe('hourlyShape', () => pizzaHouseQuery(
+      `SELECT d.paydesk,
+              CASE WHEN EXISTS (SELECT 1 FROM paymentitm p WHERE p.id_deal = d.id_deal AND ${FEE}) THEN 'fee' ELSE 'nofee' END as half,
+              SUM(CASE WHEN HOUR(d.tm_open) BETWEEN 11 AND 16 THEN 1 ELSE 0 END) as noon,
+              SUM(CASE WHEN HOUR(d.tm_open) BETWEEN 17 AND 23 THEN 1 ELSE 0 END) as evening
+       FROM deals d
+       WHERE d.tm_open >= ? AND d.tm_open < ? AND d.sum > 0
+       GROUP BY d.paydesk, half ORDER BY d.paydesk, half`, [FROM, TO]))
 
-    dc.byType = await safe('dcTypes', () => pizzaHouseQuery(
-      `SELECT type, COUNT(*) as rows_cnt FROM dc_deals GROUP BY type`))
+    // ── Meal-card identity: fill rates in dc_deals (no values) ──
+    const dcIdentity = await safe('dcIdentity', async () =>
+      (await pizzaHouseQuery(
+        `SELECT COUNT(*) as total,
+                SUM(CASE WHEN id_card IS NOT NULL AND id_card NOT IN ('', '---', '0') THEN 1 ELSE 0 END) as id_card_filled,
+                COUNT(DISTINCT CASE WHEN id_card NOT IN ('', '---', '0') THEN id_card END) as id_card_distinct,
+                SUM(CASE WHEN name IS NOT NULL AND name NOT IN ('', '---', '0') THEN 1 ELSE 0 END) as name_filled,
+                COUNT(DISTINCT CASE WHEN name NOT IN ('', '---', '0') THEN name END) as name_distinct,
+                SUM(CASE WHEN name_company IS NOT NULL AND name_company NOT IN ('', '---', '0') THEN 1 ELSE 0 END) as company_filled,
+                COUNT(DISTINCT CASE WHEN name_company NOT IN ('', '---', '0') THEN name_company END) as company_distinct
+         FROM dc_deals`))[0])
 
-    if (dateField) {
-      dc.range = await safe('dcRange', async () =>
-        (await pizzaHouseQuery(
-          `SELECT MIN(\`${dateField}\`) as first, MAX(\`${dateField}\`) as last, COUNT(*) as rows_total FROM dc_deals`))[0])
-    }
+    // How many July meal-card orders would gain an identity
+    const dcJuly = await safe('dcJuly', async () =>
+      (await pizzaHouseQuery(
+        `SELECT COUNT(*) as rows_cnt,
+                COUNT(DISTINCT CASE WHEN id_card NOT IN ('', '---', '0') THEN id_card END) as distinct_cards
+         FROM dc_deals WHERE date >= ? AND date < ? AND isreturn = 0`, [FROM, TO]))[0])
 
-    if (fields.includes('id_deal')) {
-      // dc_deals that are real July orders (positive-sum deals)
-      dc.julyOrders = await safe('dcJuly', async () =>
-        (await pizzaHouseQuery(
-          `SELECT COUNT(DISTINCT d.id_deal) as n, ROUND(AVG(d.sum),2) as avg_order
-           FROM dc_deals dc JOIN deals d ON d.id_deal = dc.id_deal
-           WHERE d.tm_open >= ? AND d.tm_open < ? AND d.sum > 0`, [FROM, TO]))[0])
-
-      // ...of those, how many the fee-item heuristic MISSES
-      dc.julyOrdersWithoutFeeItem = await safe('dcNoFee', async () =>
-        (await pizzaHouseQuery(
-          `SELECT COUNT(DISTINCT d.id_deal) as n, ROUND(AVG(d.sum),2) as avg_order
-           FROM dc_deals dc JOIN deals d ON d.id_deal = dc.id_deal
-           WHERE d.tm_open >= ? AND d.tm_open < ? AND d.sum > 0
-             AND NOT EXISTS (SELECT 1 FROM paymentitm p WHERE p.id_deal = d.id_deal AND ${FEE})`,
-          [FROM, TO]))[0])
-
-      dc.julyByType = await safe('dcJulyByType', () => pizzaHouseQuery(
-        `SELECT dc.type, COUNT(DISTINCT d.id_deal) as orders, ROUND(AVG(d.sum),2) as avg_order
-         FROM dc_deals dc JOIN deals d ON d.id_deal = dc.id_deal
-         WHERE d.tm_open >= ? AND d.tm_open < ? AND d.sum > 0
-         GROUP BY dc.type`, [FROM, TO]))
-    }
-
-    // The corrected metric, previewed: positive-sum July deals that are
-    // delivery by EITHER signal (fee item OR dc_deals row), on the same
-    // denominator the KPI uses.
-    const corrected = await safe('corrected', async () => {
-      const [row] = await pizzaHouseQuery<{ orders: number; delivery: number }>(
-        `SELECT COUNT(*) as orders,
-                SUM(CASE WHEN EXISTS (SELECT 1 FROM paymentitm p WHERE p.id_deal = d.id_deal AND ${FEE})
-                          ${fields.includes('id_deal') ? "OR EXISTS (SELECT 1 FROM dc_deals dc WHERE dc.id_deal = d.id_deal)" : ''}
-                     THEN 1 ELSE 0 END) as delivery
-         FROM deals d WHERE d.tm_open >= ? AND d.tm_open < ? AND d.sum > 0`, [FROM, TO])
-      return row
-    })
-
-    // z_info: does the Z-report history reach back years?
-    const zCols = await safe('zCols', () => pizzaHouseQuery<{ Field: string; Type: string }>(
-      `SHOW COLUMNS FROM z_info`))
-    const zFields = Array.isArray(zCols) ? zCols.map(c => c.Field).filter(f => IDENT_RE.test(f)) : []
-    const zDate = zFields.find(f => /date|tm|time/i.test(f))
-    const zInfo: Record<string, unknown> = {
-      columns: Array.isArray(zCols) ? zCols.map(c => `${c.Field}:${c.Type}`) : zCols,
-    }
-    if (zDate) {
-      zInfo.range = await safe('zRange', async () =>
-        (await pizzaHouseQuery(
-          `SELECT MIN(\`${zDate}\`) as first, MAX(\`${zDate}\`) as last, COUNT(*) as rows_total FROM z_info`))[0])
-      zInfo.yearly = await safe('zYearly', () => pizzaHouseQuery(
-        `SELECT DATE_FORMAT(\`${zDate}\`, '%Y') as y, COUNT(*) as rows_cnt
-         FROM z_info GROUP BY y ORDER BY y DESC LIMIT 12`))
-    }
-
-    return { branch, dc, corrected, zInfo }
+    return { branch, byPaydesk, hourlyShape, dcIdentity, dcJuly }
   })
 
   return NextResponse.json(data)
