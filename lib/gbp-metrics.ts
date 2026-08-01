@@ -102,6 +102,39 @@ export function delta(current: number, previous: number): number | null {
   return Math.round(((current - previous) / previous) * 1000) / 10
 }
 
+const HE_MONTHS = ['ינו', 'פבר', 'מרץ', 'אפר', 'מאי', 'יונ', 'יול', 'אוג', 'ספט', 'אוק', 'נוב', 'דצמ']
+
+/**
+ * Monthly totals — the granularity these metrics are actually read at.
+ *
+ * Profile views and calls move slowly; a daily line is noise dressed as
+ * information, and Google's own interface reports them by month. Storage stays
+ * daily because that is what the API serves and it lets any date range be cut,
+ * but nothing above this function should think in days.
+ *
+ * Months with no rows are omitted rather than zero-filled: unlike a missing day
+ * inside a synced range, a missing month usually means we had not synced yet,
+ * and drawing it as zero would invent a collapse that never happened.
+ */
+export function monthlySeries(
+  rows: MetricRow[],
+  metrics: readonly string[]
+): { month: string; label: string; value: number }[] {
+  const wanted = new Set<string>(metrics)
+  const byMonth = new Map<string, number>()
+  for (const r of rows) {
+    if (!wanted.has(r.metric)) continue
+    const month = r.day.slice(0, 7)
+    byMonth.set(month, (byMonth.get(month) ?? 0) + (Number(r.value) || 0))
+  }
+  return [...byMonth.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, value]) => {
+      const monthIndex = Number(month.slice(5, 7)) - 1
+      return { month, label: HE_MONTHS[monthIndex] ?? month, value }
+    })
+}
+
 /**
  * Daily totals for a chart line. Fills absent days with zero so the series is
  * dense — a gap in Google's response means "no activity", not "unknown", and a

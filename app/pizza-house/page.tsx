@@ -252,6 +252,9 @@ function legendFmt(pal: Palette) {
 export default function PizzaHouseDashboard() {
   const router = useRouter()
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+  // Google's numbers tell a different story from the till's, on a different
+  // clock — mixing them into one scroll made both harder to read.
+  const [tab, setTab] = useState<'sales' | 'google'>('sales')
   const [preset, setPreset] = useState('7d')
   const [from, setFrom] = useState(PRESETS.find(p => p.id === '7d')!.range().from)
   const [to, setTo] = useState(PRESETS.find(p => p.id === '7d')!.range().to)
@@ -395,13 +398,36 @@ export default function PizzaHouseDashboard() {
       </div>
 
       <main className="px-4 sm:px-6 max-w-7xl mx-auto">
+        {/* ── Tabs ── */}
+        <div className="flex gap-1 pt-3 pb-1">
+          {([
+            { id: 'sales' as const, label: 'מכירות' },
+            { id: 'google' as const, label: 'פרופיל Google' },
+          ]).map(t => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className="px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-colors"
+              style={tab === t.id
+                ? { background: pal.yellowSubtle, color: pal.yellow, border: `1px solid ${pal.yellowMedium}` }
+                : { background: 'transparent', color: pal.textMuted, border: '1px solid transparent' }}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {tab === 'google' && (
+          <GoogleProfilePanel from={from} to={to} branch={branch} pal={pal} />
+        )}
+
         {error && (
           <div className="mb-6 p-4 rounded-xl text-sm" style={{ color: pal.danger, background: pal.colorScheme === 'dark' ? 'rgba(248,113,113,0.1)' : 'rgba(220,38,38,0.06)', border: `1px solid ${pal.danger}33` }}>
             {error}
           </div>
         )}
 
-        {loading && !data && (
+        {tab === 'sales' && loading && !data && (
           <>
             <div className="flex items-center justify-center gap-2.5 py-4 mb-2 text-sm" style={{ color: pal.textMuted }}>
               <RefreshCw className="w-4 h-4 animate-spin" /> טוען נתונים מהקופה...
@@ -410,7 +436,7 @@ export default function PizzaHouseDashboard() {
           </>
         )}
 
-        {data && s && p && (
+        {tab === 'sales' && data && s && p && (
           <div className={loading ? 'opacity-50 pointer-events-none transition-opacity' : 'transition-opacity'}>
 
             {/* ── Hero KPIs — the numbers that matter most ── */}
@@ -461,9 +487,6 @@ export default function PizzaHouseDashboard() {
                 </Card>
               ))}
             </div>
-
-            {/* ── Google Business Profile ── */}
-            <GoogleProfilePanel from={from} to={to} branch={data.branch} pal={pal} />
 
             {/* ── Order timing KPI ── */}
             {data.orderTiming && (

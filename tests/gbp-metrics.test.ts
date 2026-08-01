@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { summarize, delta, dailySeries, type MetricRow } from '@/lib/gbp-metrics'
+import { summarize, delta, dailySeries, monthlySeries, type MetricRow } from '@/lib/gbp-metrics'
 
 /**
  * Fixture: Givat Ze'ev, March–July 2026, read off the Business Profile UI.
@@ -68,6 +68,32 @@ describe('delta', () => {
 
   it('has no opinion without a baseline', () => {
     expect(delta(100, 0)).toBeNull()
+  })
+})
+
+describe('monthlySeries', () => {
+  it('rolls days up into months, in order, with Hebrew labels', () => {
+    const rows = [
+      row('CALL_CLICKS', 100, '2026-05-03'),
+      row('CALL_CLICKS', 50, '2026-05-28'),
+      row('CALL_CLICKS', 80, '2026-06-11'),
+    ]
+    expect(monthlySeries(rows, ['CALL_CLICKS'])).toEqual([
+      { month: '2026-05', label: 'מאי', value: 150 },
+      { month: '2026-06', label: 'יונ', value: 80 },
+    ])
+  })
+
+  it('omits months with no rows rather than drawing a collapse to zero', () => {
+    const rows = [row('CALL_CLICKS', 10, '2026-03-01'), row('CALL_CLICKS', 10, '2026-07-01')]
+    expect(monthlySeries(rows, ['CALL_CLICKS']).map(m => m.month)).toEqual(['2026-03', '2026-07'])
+  })
+
+  it('adds up every requested metric', () => {
+    const rows = [row('CALL_CLICKS', 5, '2026-07-02'), row('WEBSITE_CLICKS', 3, '2026-07-20')]
+    expect(monthlySeries(rows, ['CALL_CLICKS', 'WEBSITE_CLICKS'])).toEqual([
+      { month: '2026-07', label: 'יול', value: 8 },
+    ])
   })
 })
 

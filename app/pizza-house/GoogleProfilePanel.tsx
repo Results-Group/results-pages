@@ -17,6 +17,7 @@ import { Eye, Phone, Navigation, Globe, UtensilsCrossed, MessageSquare, Trending
  */
 
 interface Surface { metric: string; label: string; value: number; pct: number }
+interface MonthPoint { month: string; label: string; value: number }
 interface Summary {
   views: number
   interactions: number
@@ -36,7 +37,7 @@ interface GbpResponse {
   locations?: { title: string | null; branch_id: string | null }[]
   summary?: Summary
   prev_summary?: Summary
-  series?: { views: { day: string; value: number }[]; interactions: { day: string; value: number }[] } | null
+  series?: { views: MonthPoint[]; interactions: MonthPoint[] } | null
 }
 
 interface Palette {
@@ -145,15 +146,15 @@ export default function GoogleProfilePanel({ from, to, branch, pal, preview = fa
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-3">
-        {data.series && <div className="lg:col-span-2 rounded-xl p-3" style={{ background: pal.bgElevated, border: `1px solid ${pal.border}` }}>
-          <div className="text-[11px] font-bold mb-2" style={{ color: pal.textMuted }}>צפיות ואינטראקציות לאורך זמן</div>
+        {data.series && data.series.views.length > 1 && <div className="lg:col-span-2 rounded-xl p-3" style={{ background: pal.bgElevated, border: `1px solid ${pal.border}` }}>
+          <div className="text-[11px] font-bold mb-2" style={{ color: pal.textMuted }}>צפיות ואינטראקציות — לפי חודש</div>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={(data.series?.views ?? []).map((v, i) => ({
-              day: v.day.slice(5),
+              label: v.label,
               views: v.value,
               interactions: data.series?.interactions[i]?.value ?? 0,
             }))}>
-              <XAxis dataKey="day" tick={{ fontSize: 10, fill: pal.textMuted }} interval="preserveStartEnd" />
+              <XAxis dataKey="label" tick={{ fontSize: 10, fill: pal.textMuted }} />
               <YAxis tick={{ fontSize: 10, fill: pal.textMuted }} width={38} />
               <Tooltip contentStyle={{ background: pal.tooltipBg, border: `1px solid ${pal.border}`, borderRadius: 8, fontSize: 12 }} />
               <Area type="monotone" dataKey="views" name="צפיות" stroke={pal.cyan} fill={pal.cyan} fillOpacity={0.15} />
@@ -162,7 +163,7 @@ export default function GoogleProfilePanel({ from, to, branch, pal, preview = fa
           </ResponsiveContainer>
         </div>}
 
-        <div className={`rounded-xl p-3${data.series ? '' : ' lg:col-span-3'}`} style={{ background: pal.bgElevated, border: `1px solid ${pal.border}` }}>
+        <div className={`rounded-xl p-3${data.series && data.series.views.length > 1 ? '' : ' lg:col-span-3'}`} style={{ background: pal.bgElevated, border: `1px solid ${pal.border}` }}>
           <div className="text-[11px] font-bold mb-2" style={{ color: pal.textMuted }}>איפה מצאו את העסק</div>
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>

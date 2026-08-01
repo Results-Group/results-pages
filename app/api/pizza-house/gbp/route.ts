@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifySessionToken } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
-import { summarize, dailySeries, ACTION_METRICS, IMPRESSION_METRICS, type MetricRow } from '@/lib/gbp-metrics'
+import { summarize, monthlySeries, ACTION_METRICS, IMPRESSION_METRICS, type MetricRow } from '@/lib/gbp-metrics'
 
 /**
  * GET /api/pizza-house/gbp?from=&to=&branch=
@@ -132,9 +132,10 @@ export async function GET(req: NextRequest) {
     prev_range: { from: prevFrom, to: prevTo },
     summary: summarize(rows),
     prev_summary: summarize(prevRows),
+    // Monthly, not daily: these numbers move slowly and a daily line is noise.
     series: {
-      views: dailySeries(rows, IMPRESSION_METRICS, from, to),
-      interactions: dailySeries(rows, ACTION_METRICS, from, to),
+      views: monthlySeries(rows, IMPRESSION_METRICS),
+      interactions: monthlySeries(rows, ACTION_METRICS),
     },
     // Empty until the first sync lands; the UI uses it to explain the state.
     has_data: rows.length > 0,
