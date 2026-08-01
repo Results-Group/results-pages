@@ -3,14 +3,12 @@ import { verifySessionToken } from '@/lib/auth'
 import { runWithBranch, isPizzaBranch, pizzaHouseQuery } from '@/lib/pizza-house-db'
 
 /**
- * TEMPORARY read-only diagnostics — investigating three client reports on the
- * dashboard numbers (2026-08-01): delivery undercount, returning-customers
- * near zero despite years of history, and customer-identity signals beyond the
- * credit card. Same pattern as the July phone-hunt inspectors: deploy, query
- * once through an authorized session, analyze, DELETE THIS FILE.
- *
- * Everything returned is aggregate — counts, fill rates, column names, item
- * names. No customer values ever leave the DB.
+ * TEMPORARY read-only diagnostics — round 2 of the 2026-08-01 dashboard
+ * investigation. Round 1 established: DB history starts 2026-06-25, no
+ * identity columns are populated anywhere, and dc_deals (852 rows) is the
+ * remaining delivery-undercount suspect. This round: what dc_deals is, how it
+ * overlaps the fee-item heuristic, and how far z_info reaches back.
+ * Aggregates only. DELETE THIS FILE after one read.
  */
 
 export const dynamic = 'force-dynamic'
@@ -30,9 +28,8 @@ async function isAuthorized(req: NextRequest): Promise<boolean> {
   return false
 }
 
+const FEE = "(p.name LIKE '%משלוח%' OR p.name LIKE '%מישלוח%')"
 const IDENT_RE = /^[A-Za-z0-9_]+$/
-/** Column-name patterns that could carry customer identity or order channel. */
-const HUNT_RE = 'phone|tel|mail|addr|street|city|client|cust|deliver|courier|shipp|order_type|type|source|origin|takeaway|remark|comment|note'
 
 async function safe<T>(label: string, fn: () => Promise<T>): Promise<T | { error: string }> {
   try {
@@ -54,103 +51,79 @@ export async function GET(req: NextRequest) {
   const TO = '2026-08-01'
 
   const data = await runWithBranch(branch, async () => {
-    // ── 1. How deep does the data actually go? ──
-    const depth = await safe('depth', async () => ({
-      deals: (await pizzaHouseQuery(
-        `SELECT MIN(tm_open) as first, MAX(tm_open) as last, COUNT(*) as rows_total FROM deals`))[0],
-      creditcard: (await pizzaHouseQuery(
-        `SELECT MIN(date) as first, MAX(date) as last, COUNT(*) as rows_total FROM creditcard`))[0],
-      dealsMonthly: await pizzaHouseQuery(
-        `SELECT DATE_FORMAT(tm_open, '%Y-%m') as ym, COUNT(*) as deals
-         FROM deals GROUP BY ym ORDER BY ym DESC LIMIT 40`),
-      creditcardMonthly: await pizzaHouseQuery(
-        `SELECT DATE_FORMAT(date, '%Y-%m') as ym, COUNT(*) as rows_cnt
-         FROM creditcard GROUP BY ym ORDER BY ym DESC LIMIT 40`),
-    }))
+    const dcCols = await safe('dcCols', () => pizzaHouseQuery<{ Field: string; Type: string }>(
+      `SHOW COLUMNS FROM dc_deals`))
+    const fields = Array.isArray(dcCols) ? dcCols.map(c => c.Field).filter(f => IDENT_RE.test(f)) : []
+    const dateField = fields.find(f => /date|tm|time/i.test(f))
 
-    // ── 2. Returning-customers: is validto churn destroying identity? ──
-    const returning = await safe('returning', async () => ({
-      julyCards_cardPlusValidto: (await pizzaHouseQuery(
-        `SELECT COUNT(DISTINCT CONCAT(id_card,'|',validto)) as n FROM creditcard
-         WHERE date >= ? AND date < ? AND id_card != '' AND sum > 0`, [FROM, TO]))[0],
-      returning_cardPlusValidto: (await pizzaHouseQuery(
-        `SELECT COUNT(DISTINCT CONCAT(c.id_card,'|',c.validto)) as n FROM creditcard c
-         WHERE c.date >= ? AND c.date < ? AND c.id_card != '' AND c.sum > 0
-           AND EXISTS (SELECT 1 FROM creditcard p
-                       WHERE p.id_card = c.id_card AND p.validto = c.validto AND p.date < ?)`,
-        [FROM, TO, FROM]))[0],
-      returning_cardOnly: (await pizzaHouseQuery(
-        `SELECT COUNT(DISTINCT c.id_card) as n FROM creditcard c
-         WHERE c.date >= ? AND c.date < ? AND c.id_card != '' AND c.sum > 0
-           AND EXISTS (SELECT 1 FROM creditcard p
-                       WHERE p.id_card = c.id_card AND p.date < ?)`,
-        [FROM, TO, FROM]))[0],
-      cardsBeforeJuly: (await pizzaHouseQuery(
-        `SELECT COUNT(DISTINCT id_card) as n FROM creditcard WHERE date < ? AND id_card != ''`,
-        [FROM]))[0],
-    }))
-
-    // ── 3. Delivery: what does the item ledger actually contain? ──
-    const delivery = await safe('delivery', async () => ({
-      topItems: await pizzaHouseQuery(
-        `SELECT name, COUNT(DISTINCT id_deal) as deals, ROUND(SUM(sum),0) as total
-         FROM paymentitm WHERE date >= ? AND date < ?
-         GROUP BY name ORDER BY deals DESC LIMIT 50`, [FROM, TO]),
-      deliveryishNames: await pizzaHouseQuery(
-        `SELECT name, COUNT(DISTINCT id_deal) as deals, ROUND(SUM(sum),0) as total
-         FROM paymentitm WHERE date >= ? AND date < ?
-           AND (name LIKE '%שליח%' OR name LIKE '%חינם%' OR name LIKE '%וולט%'
-                OR LOWER(name) LIKE '%wolt%' OR name LIKE '%תן ביס%' OR name LIKE '%ביס%'
-                OR LOWER(name) LIKE '%deliver%' OR name LIKE '%הובלה%' OR name LIKE '%משלוח%')
-         GROUP BY name ORDER BY deals DESC LIMIT 40`, [FROM, TO]),
-    }))
-
-    // ── 4. Schema hunt: identity + channel signals anywhere in the DB ──
-    const huntCols = await safe('hunt', () => pizzaHouseQuery<{ t: string; c: string; dt: string }>(
-      `SELECT TABLE_NAME as t, COLUMN_NAME as c, DATA_TYPE as dt
-       FROM information_schema.COLUMNS
-       WHERE TABLE_SCHEMA = DATABASE() AND COLUMN_NAME REGEXP ?
-       ORDER BY TABLE_NAME, COLUMN_NAME`, [HUNT_RE]))
-
-    const tables = await safe('tables', () => pizzaHouseQuery<{ t: string; rows_est: number }>(
-      `SELECT TABLE_NAME as t, TABLE_ROWS as rows_est FROM information_schema.TABLES
-       WHERE TABLE_SCHEMA = DATABASE() ORDER BY TABLE_ROWS DESC`))
-
-    const dealsCols = await safe('dealsCols', () => pizzaHouseQuery(
-      `SHOW COLUMNS FROM deals`))
-
-    // ── 5. Fill rates for hunted columns (aggregates only, capped) ──
-    const fillRates: Record<string, unknown> = {}
-    if (Array.isArray(huntCols) && Array.isArray(tables)) {
-      const sizeByTable = new Map(tables.map(x => [x.t, Number(x.rows_est) || 0]))
-      for (const { t, c } of huntCols.slice(0, 30)) {
-        if (!IDENT_RE.test(t) || !IDENT_RE.test(c)) continue
-        if ((sizeByTable.get(t) ?? 0) > 3_000_000) { fillRates[`${t}.${c}`] = 'skipped (too large)'; continue }
-        fillRates[`${t}.${c}`] = await safe(`${t}.${c}`, async () =>
-          (await pizzaHouseQuery(
-            `SELECT COUNT(*) as total,
-                    SUM(CASE WHEN \`${c}\` IS NOT NULL AND \`${c}\` NOT IN ('', '---', '0') THEN 1 ELSE 0 END) as filled,
-                    COUNT(DISTINCT \`${c}\`) as distinct_vals
-             FROM \`${t}\``))[0])
-      }
+    const dc: Record<string, unknown> = {
+      columns: Array.isArray(dcCols) ? dcCols.map(c => `${c.Field}:${c.Type}`) : dcCols,
     }
 
-    // ── 6. Channel flags: GROUP BY any deals column that smells like a type ──
-    const channelFlags: Record<string, unknown> = {}
-    if (Array.isArray(dealsCols)) {
-      const candidates = (dealsCols as { Field: string }[])
-        .map(x => x.Field)
-        .filter(f => IDENT_RE.test(f) && /type|kind|source|origin|table|deliver|takeaway|club|station|pos/i.test(f))
-        .slice(0, 8)
-      for (const f of candidates) {
-        channelFlags[f] = await safe(`deals.${f}`, () => pizzaHouseQuery(
-          `SELECT \`${f}\` as v, COUNT(*) as deals FROM deals
-           WHERE tm_open >= ? AND tm_open < ? GROUP BY \`${f}\`
-           ORDER BY deals DESC LIMIT 15`, [FROM, TO]))
-      }
+    dc.byType = await safe('dcTypes', () => pizzaHouseQuery(
+      `SELECT type, COUNT(*) as rows_cnt FROM dc_deals GROUP BY type`))
+
+    if (dateField) {
+      dc.range = await safe('dcRange', async () =>
+        (await pizzaHouseQuery(
+          `SELECT MIN(\`${dateField}\`) as first, MAX(\`${dateField}\`) as last, COUNT(*) as rows_total FROM dc_deals`))[0])
     }
 
-    return { branch, depth, returning, delivery, huntCols, tables, dealsCols, fillRates, channelFlags }
+    if (fields.includes('id_deal')) {
+      // dc_deals that are real July orders (positive-sum deals)
+      dc.julyOrders = await safe('dcJuly', async () =>
+        (await pizzaHouseQuery(
+          `SELECT COUNT(DISTINCT d.id_deal) as n, ROUND(AVG(d.sum),2) as avg_order
+           FROM dc_deals dc JOIN deals d ON d.id_deal = dc.id_deal
+           WHERE d.tm_open >= ? AND d.tm_open < ? AND d.sum > 0`, [FROM, TO]))[0])
+
+      // ...of those, how many the fee-item heuristic MISSES
+      dc.julyOrdersWithoutFeeItem = await safe('dcNoFee', async () =>
+        (await pizzaHouseQuery(
+          `SELECT COUNT(DISTINCT d.id_deal) as n, ROUND(AVG(d.sum),2) as avg_order
+           FROM dc_deals dc JOIN deals d ON d.id_deal = dc.id_deal
+           WHERE d.tm_open >= ? AND d.tm_open < ? AND d.sum > 0
+             AND NOT EXISTS (SELECT 1 FROM paymentitm p WHERE p.id_deal = d.id_deal AND ${FEE})`,
+          [FROM, TO]))[0])
+
+      dc.julyByType = await safe('dcJulyByType', () => pizzaHouseQuery(
+        `SELECT dc.type, COUNT(DISTINCT d.id_deal) as orders, ROUND(AVG(d.sum),2) as avg_order
+         FROM dc_deals dc JOIN deals d ON d.id_deal = dc.id_deal
+         WHERE d.tm_open >= ? AND d.tm_open < ? AND d.sum > 0
+         GROUP BY dc.type`, [FROM, TO]))
+    }
+
+    // The corrected metric, previewed: positive-sum July deals that are
+    // delivery by EITHER signal (fee item OR dc_deals row), on the same
+    // denominator the KPI uses.
+    const corrected = await safe('corrected', async () => {
+      const [row] = await pizzaHouseQuery<{ orders: number; delivery: number }>(
+        `SELECT COUNT(*) as orders,
+                SUM(CASE WHEN EXISTS (SELECT 1 FROM paymentitm p WHERE p.id_deal = d.id_deal AND ${FEE})
+                          ${fields.includes('id_deal') ? "OR EXISTS (SELECT 1 FROM dc_deals dc WHERE dc.id_deal = d.id_deal)" : ''}
+                     THEN 1 ELSE 0 END) as delivery
+         FROM deals d WHERE d.tm_open >= ? AND d.tm_open < ? AND d.sum > 0`, [FROM, TO])
+      return row
+    })
+
+    // z_info: does the Z-report history reach back years?
+    const zCols = await safe('zCols', () => pizzaHouseQuery<{ Field: string; Type: string }>(
+      `SHOW COLUMNS FROM z_info`))
+    const zFields = Array.isArray(zCols) ? zCols.map(c => c.Field).filter(f => IDENT_RE.test(f)) : []
+    const zDate = zFields.find(f => /date|tm|time/i.test(f))
+    const zInfo: Record<string, unknown> = {
+      columns: Array.isArray(zCols) ? zCols.map(c => `${c.Field}:${c.Type}`) : zCols,
+    }
+    if (zDate) {
+      zInfo.range = await safe('zRange', async () =>
+        (await pizzaHouseQuery(
+          `SELECT MIN(\`${zDate}\`) as first, MAX(\`${zDate}\`) as last, COUNT(*) as rows_total FROM z_info`))[0])
+      zInfo.yearly = await safe('zYearly', () => pizzaHouseQuery(
+        `SELECT DATE_FORMAT(\`${zDate}\`, '%Y') as y, COUNT(*) as rows_cnt
+         FROM z_info GROUP BY y ORDER BY y DESC LIMIT 12`))
+    }
+
+    return { branch, dc, corrected, zInfo }
   })
 
   return NextResponse.json(data)
