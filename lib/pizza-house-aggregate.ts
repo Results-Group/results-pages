@@ -56,20 +56,33 @@ function groupSum<T extends Record<string, unknown>>(
 function aggSummary(list: Record<string, unknown>[]): Record<string, number> {
   const s = {
     revenue: 0, orders: 0, refunds: 0, refund_count: 0, items_sold: 0, discounts: 0,
-    discounted_lines: 0, delivery_orders: 0, unique_customers: 0, returning_customers: 0,
+    discounted_lines: 0, delivery_orders: 0, delivery_revenue: 0, unique_customers: 0,
+    unique_by_card: 0, unique_by_meal_card: 0, returning_customers: 0,
   }
+  // Payment counts behind identity_coverage_pct, re-derived so the cross-branch
+  // figure is a true weighted share rather than an average of percentages.
+  let identifiedPayments = 0
+  let totalPayments = 0
   for (const x of list) {
     s.revenue += n(x.revenue); s.orders += n(x.orders); s.refunds += n(x.refunds)
     s.refund_count += n(x.refund_count); s.items_sold += n(x.items_sold); s.discounts += n(x.discounts)
     s.discounted_lines += n(x.discounted_lines); s.delivery_orders += n(x.delivery_orders)
+    s.delivery_revenue += n(x.delivery_revenue)
     s.unique_customers += n(x.unique_customers); s.returning_customers += n(x.returning_customers)
+    s.unique_by_card += n(x.unique_by_card); s.unique_by_meal_card += n(x.unique_by_meal_card)
+    // Reconstruct the payment counts from the branch's own percentage.
+    const orders = n(x.orders)
+    identifiedPayments += (n(x.identity_coverage_pct) / 100) * orders
+    totalPayments += orders
   }
   return {
     ...s,
     avg_order: s.orders ? r2(s.revenue / s.orders) : 0,
     items_per_order: s.orders ? r2(s.items_sold / s.orders) : 0,
     delivery_pct: s.orders ? r1((s.delivery_orders / s.orders) * 100) : 0,
-    returning_pct: s.unique_customers ? r1((s.returning_customers / s.unique_customers) * 100) : 0,
+    delivery_revenue_pct: s.revenue ? r1((s.delivery_revenue / s.revenue) * 100) : 0,
+    identity_coverage_pct: totalPayments ? r1((identifiedPayments / totalPayments) * 100) : 0,
+    returning_pct: s.unique_by_card ? r1((s.returning_customers / s.unique_by_card) * 100) : 0,
   }
 }
 

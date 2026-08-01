@@ -74,10 +74,25 @@ export async function fetchSummary(r: DateRange) {
     [r.from, r.to]
   )
 
-  const [delivery] = await pizzaHouseQuery<{ delivery_orders: number }>(
-    `SELECT COUNT(DISTINCT id_deal) as delivery_orders
-     FROM paymentitm
-     WHERE date >= ? AND date < ? AND ${DELIVERY_PATTERN}`,
+  // Delivery is counted off `deals` on exactly the denominator the percentage
+  // uses — positive-sum deals, by tm_open. Counting DISTINCT id_deal in
+  // paymentitm instead swept in refunded deals and used a different date
+  // column, so the KPI (1306) and the channel chart (1279) disagreed on the
+  // same screen. Revenue share comes from the same pass: delivery is ~39% of
+  // orders but ~56% of money, and the money is what an owner feels.
+  const [delivery] = await pizzaHouseQuery<{
+    delivery_orders: number
+    delivery_revenue: number | null
+  }>(
+    `SELECT
+       COUNT(*) as delivery_orders,
+       ROUND(SUM(d.sum), 2) as delivery_revenue
+     FROM deals d
+     WHERE d.tm_open >= ? AND d.tm_open < ? AND d.sum > 0
+       AND EXISTS (
+         SELECT 1 FROM paymentitm p
+         WHERE p.id_deal = d.id_deal AND ${DELIVERY_PATTERN.replace(/name/g, 'p.name')}
+       )`,
     [r.from, r.to]
   )
 
@@ -98,6 +113,30 @@ export async function fetchSummary(r: DateRange) {
     [r.from, r.to]
   )
 
+  // Meal cards (Cibus/Ten-Bis) are the second identity this DB actually holds:
+  // dc_deals.id_card is populated on every row (852/852 verified 2026-08-01),
+  // and a meal card belongs to one person. Adding them lifts identity coverage
+  // from ~52% of payments (credit card only) to ~72%. The two pools can't be
+  // deduplicated against each other — someone paying by both card and meal card
+  // counts twice — which is why the dashboard labels this "identified
+  // customers" rather than claiming a true headcount.
+  const [mealCards] = await pizzaHouseQuery<{ meal_card_customers: number }>(
+    `SELECT COUNT(DISTINCT id_card) as meal_card_customers
+     FROM dc_deals
+     WHERE date >= ? AND date < ? AND isreturn = 0
+       AND id_card IS NOT NULL AND id_card NOT IN ('', '---', '0')`,
+    [r.from, r.to]
+  )
+
+  // Share of payments that carry any identity at all — cash carries none.
+  const [coverage] = await pizzaHouseQuery<{ identified: number; total: number }>(
+    `SELECT
+       SUM(CASE WHEN id_pay IN (2, 11) THEN 1 ELSE 0 END) as identified,
+       COUNT(*) as total
+     FROM payment WHERE date >= ? AND date < ? AND sum > 0`,
+    [r.from, r.to]
+  )
+
   // Cards seen in range that were also seen before the range = returning
   const [returning] = await pizzaHouseQuery<{ returning_customers: number }>(
     `SELECT COUNT(DISTINCT CONCAT(c.id_card, '|', c.validto)) as returning_customers
@@ -111,6 +150,13 @@ export async function fetchSummary(r: DateRange) {
   )
 
   const orders = deals?.orders ?? 0
+  const revenue = Number(deals?.revenue ?? 0)
+  const deliveryOrders = delivery?.delivery_orders ?? 0
+  const deliveryRevenue = Number(delivery?.delivery_revenue ?? 0)
+  const cardCustomers = customers?.unique_customers ?? 0
+  const mealCardCustomers = mealCards?.meal_card_customers ?? 0
+  const identifiedCustomers = cardCustomers + mealCardCustomers
+
   return {
     revenue: deals?.revenue ?? 0,
     orders,
@@ -121,13 +167,23 @@ export async function fetchSummary(r: DateRange) {
     items_per_order: orders > 0 ? Math.round(((items?.items_sold ?? 0) / orders) * 10) / 10 : 0,
     discounts: items?.discounts ?? 0,
     discounted_lines: items?.discounted_lines ?? 0,
-    delivery_orders: delivery?.delivery_orders ?? 0,
-    delivery_pct: orders > 0 ? Math.round(((delivery?.delivery_orders ?? 0) / orders) * 100) : 0,
-    unique_customers: customers?.unique_customers ?? 0,
+    delivery_orders: deliveryOrders,
+    delivery_pct: orders > 0 ? Math.round((deliveryOrders / orders) * 100) : 0,
+    delivery_revenue: deliveryRevenue,
+    delivery_revenue_pct: revenue > 0 ? Math.round((deliveryRevenue / revenue) * 100) : 0,
+    unique_customers: identifiedCustomers,
+    unique_by_card: cardCustomers,
+    unique_by_meal_card: mealCardCustomers,
+    identity_coverage_pct:
+      Number(coverage?.total ?? 0) > 0
+        ? Math.round((Number(coverage!.identified) / Number(coverage!.total)) * 100)
+        : 0,
     returning_customers: returning?.returning_customers ?? 0,
+    // Returning stays on the credit-card pool: it's the only one with usable
+    // prior-period history in this DB, and mixing pools would understate it.
     returning_pct:
-      (customers?.unique_customers ?? 0) > 0
-        ? Math.round(((returning?.returning_customers ?? 0) / customers!.unique_customers) * 100)
+      cardCustomers > 0
+        ? Math.round(((returning?.returning_customers ?? 0) / cardCustomers) * 100)
         : 0,
   }
 }

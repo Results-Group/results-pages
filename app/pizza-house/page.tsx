@@ -33,7 +33,12 @@ interface Summary {
   discounted_lines: number
   delivery_orders: number
   delivery_pct: number
+  delivery_revenue: number
+  delivery_revenue_pct: number
   unique_customers: number
+  unique_by_card: number
+  unique_by_meal_card: number
+  identity_coverage_pct: number
   returning_customers: number
   returning_pct: number
 }
@@ -436,18 +441,22 @@ export default function PizzaHouseDashboard() {
             {/* ── Secondary KPIs ── */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 mt-2 sm:mt-4">
               {([
-                { label: 'פריטים להזמנה', val: String(s.items_per_order), color: pal.text, k: 'items_per_order' as const, invert: false },
-                { label: 'אחוז משלוחים', val: s.delivery_pct + '%', color: pal.text, k: 'delivery_pct' as const, invert: false },
-                { label: 'לקוחות ייחודיים', val: num(s.unique_customers), color: pal.cyan, k: 'unique_customers' as const, invert: false },
-                { label: 'לקוחות חוזרים', val: s.returning_pct + '%', color: pal.cyan, k: 'returning_pct' as const, invert: false },
-                { label: 'הנחות שניתנו', val: money(s.discounts), color: pal.yellow, k: 'discounts' as const, invert: true },
-                { label: 'זיכויים / החזרות', val: money(s.refunds), color: pal.danger, k: 'refunds' as const, invert: true },
-                { label: 'פריטים שנמכרו', val: num(s.items_sold), color: pal.text, k: 'items_sold' as const, invert: false },
+                { label: 'פריטים להזמנה', val: String(s.items_per_order), color: pal.text, k: 'items_per_order' as const, invert: false, note: '' },
+                { label: 'משלוחים — מההזמנות', val: s.delivery_pct + '%', color: pal.text, k: 'delivery_pct' as const, invert: false, note: `${num(s.delivery_orders)} הזמנות` },
+                { label: 'משלוחים — מההכנסות', val: s.delivery_revenue_pct + '%', color: pal.text, k: 'delivery_revenue_pct' as const, invert: false, note: money(s.delivery_revenue) },
+                { label: 'לקוחות מזוהים', val: num(s.unique_customers), color: pal.cyan, k: 'unique_customers' as const, invert: false, note: `${num(s.unique_by_card)} אשראי + ${num(s.unique_by_meal_card)} סועד · ${s.identity_coverage_pct}% מהתשלומים` },
+                { label: 'לקוחות חוזרים', val: s.returning_pct + '%', color: pal.cyan, k: 'returning_pct' as const, invert: false, note: 'מתוך משלמי אשראי בלבד' },
+                { label: 'הנחות שניתנו', val: money(s.discounts), color: pal.yellow, k: 'discounts' as const, invert: true, note: '' },
+                { label: 'זיכויים / החזרות', val: money(s.refunds), color: pal.danger, k: 'refunds' as const, invert: true, note: '' },
+                { label: 'פריטים שנמכרו', val: num(s.items_sold), color: pal.text, k: 'items_sold' as const, invert: false, note: '' },
               ]).map((kpi) => (
                 <Card key={kpi.k} pal={pal}>
                   <div className="text-[10px] sm:text-xs mb-1" style={{ color: pal.textMuted }}>{kpi.label}</div>
                   <div className="text-lg sm:text-2xl font-black leading-tight tabular-nums" style={{ color: kpi.color }}>{kpi.val}</div>
                   <div className="mt-1"><Delta current={s[kpi.k]} previous={p[kpi.k]} invert={kpi.invert} pal={pal} /></div>
+                  {kpi.note && (
+                    <div className="text-[9px] sm:text-[10px] mt-1 leading-snug" style={{ color: pal.textMuted }}>{kpi.note}</div>
+                  )}
                 </Card>
               ))}
             </div>
