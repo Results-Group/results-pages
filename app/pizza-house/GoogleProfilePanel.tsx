@@ -162,8 +162,12 @@ export default function GoogleProfilePanel({ from, to, branch, pal, preview = fa
         ))}
       </div>
 
+      {/* min-w-0 on the children: a grid item's default min-width is auto, so a
+          percentage-width chart measures against a track sized by its own
+          content and Recharts resolves the width to 0 — the pie silently
+          vanishes and only its legend renders. */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-3">
-        {data.series && data.series.views.length > 1 && <div className="lg:col-span-2 rounded-xl p-3" style={{ background: pal.bgElevated, border: `1px solid ${pal.border}` }}>
+        {data.series && data.series.views.length > 1 && <div className="lg:col-span-2 min-w-0 rounded-xl p-3" style={{ background: pal.bgElevated, border: `1px solid ${pal.border}` }}>
           <div className="text-[11px] font-bold mb-2" style={{ color: pal.textMuted }}>צפיות ואינטראקציות — לפי חודש</div>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={(data.series?.views ?? []).map((v, i) => ({
@@ -174,25 +178,40 @@ export default function GoogleProfilePanel({ from, to, branch, pal, preview = fa
               <XAxis dataKey="label" tick={{ fontSize: 10, fill: pal.textMuted }} />
               <YAxis tick={{ fontSize: 10, fill: pal.textMuted }} width={38} />
               <Tooltip contentStyle={{ background: pal.tooltipBg, border: `1px solid ${pal.border}`, borderRadius: 8, fontSize: 12 }} />
-              <Area type="monotone" dataKey="views" name="צפיות" stroke={pal.cyan} fill={pal.cyan} fillOpacity={0.15} />
-              <Area type="monotone" dataKey="interactions" name="אינטראקציות" stroke={pal.yellow} fill={pal.yellow} fillOpacity={0.15} />
+              <Area isAnimationActive={false} type="monotone" dataKey="views" name="צפיות" stroke={pal.cyan} fill={pal.cyan} fillOpacity={0.15} />
+              <Area isAnimationActive={false} type="monotone" dataKey="interactions" name="אינטראקציות" stroke={pal.yellow} fill={pal.yellow} fillOpacity={0.15} />
             </AreaChart>
           </ResponsiveContainer>
         </div>}
 
-        <div className={`rounded-xl p-3${data.series && data.series.views.length > 1 ? '' : ' lg:col-span-3'}`} style={{ background: pal.bgElevated, border: `1px solid ${pal.border}` }}>
+        <div className={`min-w-0 rounded-xl p-3${data.series && data.series.views.length > 1 ? '' : ' lg:col-span-3'}`} style={{ background: pal.bgElevated, border: `1px solid ${pal.border}` }}>
           <div className="text-[11px] font-bold mb-2" style={{ color: pal.textMuted }}>איפה מצאו את העסק</div>
-          <ResponsiveContainer width="100%" height={200}>
+          {/* Matches the doughnuts that already work in this dashboard: an
+              explicit height wrapper, and animation off. With animation on the
+              sectors mount at radius zero inside a tab that isn't visible yet,
+              and the entry tween never runs — recharts leaves the sector groups
+              in place with empty shapes, so the chart reads as a legend
+              floating over nothing. */}
+          <div className="h-[200px]">
+          <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie data={s.bySurface} dataKey="value" nameKey="label" innerRadius={45} outerRadius={72} paddingAngle={2}>
+              <Pie
+                isAnimationActive={false}
+                data={s.bySurface.map(x => ({ name: x.label, value: x.value }))}
+                dataKey="value"
+                innerRadius={40}
+                outerRadius={65}
+                paddingAngle={2}
+              >
                 {s.bySurface.map((_, i) => (
-                  <Cell key={i} fill={pal.chartColors[i % pal.chartColors.length]} />
+                  <Cell key={i} fill={pal.chartColors[i % pal.chartColors.length]} stroke="none" />
                 ))}
               </Pie>
-              <Legend wrapperStyle={{ fontSize: 10 }} />
+              <Legend wrapperStyle={{ fontSize: 10 }} verticalAlign="bottom" height={36} />
               <Tooltip contentStyle={{ background: pal.tooltipBg, border: `1px solid ${pal.border}`, borderRadius: 8, fontSize: 12 }} />
             </PieChart>
           </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </Shell>
