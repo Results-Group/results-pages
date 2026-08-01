@@ -18,17 +18,42 @@ export const dynamic = 'force-dynamic'
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
-/** Givat Ze'ev, Mar-Jul 2026, transcribed from the Business Profile UI. */
-const PREVIEW_GIVAT_ZEEV: MetricRow[] = [
-  { metric: 'BUSINESS_IMPRESSIONS_MOBILE_SEARCH', day: '2026-07-01', value: 5624 },
-  { metric: 'BUSINESS_IMPRESSIONS_MOBILE_MAPS', day: '2026-07-01', value: 4806 },
-  { metric: 'BUSINESS_IMPRESSIONS_DESKTOP_SEARCH', day: '2026-07-01', value: 1286 },
-  { metric: 'BUSINESS_IMPRESSIONS_DESKTOP_MAPS', day: '2026-07-01', value: 208 },
-  { metric: 'CALL_CLICKS', day: '2026-07-01', value: 7020 },
-  { metric: 'BUSINESS_DIRECTION_REQUESTS', day: '2026-07-01', value: 337 },
-  { metric: 'WEBSITE_CLICKS', day: '2026-07-01', value: 2203 },
-  { metric: 'BUSINESS_FOOD_MENU_CLICKS', day: '2026-07-01', value: 63 },
-]
+/**
+ * Both branches, Mar-Jul 2026, transcribed from the Business Profile UI.
+ * Each set reconciles to Google's own two headline figures exactly, which is
+ * what made it safe to build the aggregation before having API access.
+ */
+const preview = (v: Record<string, number>): MetricRow[] =>
+  Object.entries(v).map(([metric, value]) => ({ metric, day: '2026-07-01', value }))
+
+const PREVIEW_BY_BRANCH: Record<string, { title: string; rows: MetricRow[] }> = {
+  main: {
+    title: 'גבעת זאב',
+    rows: preview({
+      BUSINESS_IMPRESSIONS_MOBILE_SEARCH: 5624,
+      BUSINESS_IMPRESSIONS_MOBILE_MAPS: 4806,
+      BUSINESS_IMPRESSIONS_DESKTOP_SEARCH: 1286,
+      BUSINESS_IMPRESSIONS_DESKTOP_MAPS: 208,
+      CALL_CLICKS: 7020,
+      BUSINESS_DIRECTION_REQUESTS: 337,
+      WEBSITE_CLICKS: 2203,
+      BUSINESS_FOOD_MENU_CLICKS: 63,
+    }),
+  },
+  mevaseret: {
+    title: 'מבשרת ציון',
+    rows: preview({
+      BUSINESS_IMPRESSIONS_MOBILE_SEARCH: 2557,
+      BUSINESS_IMPRESSIONS_MOBILE_MAPS: 1130,
+      BUSINESS_IMPRESSIONS_DESKTOP_SEARCH: 710,
+      BUSINESS_IMPRESSIONS_DESKTOP_MAPS: 90,
+      CALL_CLICKS: 1565,
+      BUSINESS_DIRECTION_REQUESTS: 339,
+      WEBSITE_CLICKS: 714,
+      BUSINESS_FOOD_MENU_CLICKS: 41,
+    }),
+  },
+}
 
 async function isAuthorized(req: NextRequest): Promise<boolean> {
   const ph = req.cookies.get('ph_session')?.value
@@ -86,13 +111,20 @@ export async function GET(req: NextRequest) {
     if (!session || session.scope || !(session.isOwner || session.role === 'admin')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    // "all" sums the branches, the same way the live path sums their locations.
+    const chosen = branch === 'all'
+      ? Object.entries(PREVIEW_BY_BRANCH)
+      : Object.entries(PREVIEW_BY_BRANCH).filter(([id]) => id === branch)
+    if (chosen.length === 0) {
+      return NextResponse.json({ connected: false, reason: 'אין נתוני הדגמה לסניף זה' })
+    }
     return NextResponse.json({
       connected: true,
       preview: true,
       has_data: true,
-      locations: [{ title: 'גבעת זאב (נתוני הדגמה)', branch_id: 'main' }],
+      locations: chosen.map(([id, b]) => ({ title: `${b.title} (הדגמה)`, branch_id: id })),
       range: { from, to },
-      summary: summarize(PREVIEW_GIVAT_ZEEV),
+      summary: summarize(chosen.flatMap(([, b]) => b.rows)),
       prev_summary: summarize([]),
       series: null,
     })

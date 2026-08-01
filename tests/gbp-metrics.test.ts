@@ -59,6 +59,48 @@ describe('summarize — reproduces Business Profile’s own headline numbers', (
   })
 })
 
+/** Mevaseret Zion, same period, same source. */
+const MEVASERET: MetricRow[] = [
+  row('BUSINESS_IMPRESSIONS_MOBILE_SEARCH', 2557),
+  row('BUSINESS_IMPRESSIONS_MOBILE_MAPS', 1130),
+  row('BUSINESS_IMPRESSIONS_DESKTOP_SEARCH', 710),
+  row('BUSINESS_IMPRESSIONS_DESKTOP_MAPS', 90),
+  row('CALL_CLICKS', 1565),
+  row('BUSINESS_DIRECTION_REQUESTS', 339),
+  row('WEBSITE_CLICKS', 714),
+  row('BUSINESS_FOOD_MENU_CLICKS', 41),
+]
+
+describe('summarize — the same derivation holds for a second location', () => {
+  const s = summarize(MEVASERET)
+
+  it('reproduces Mevaseret’s headline figures', () => {
+    expect(s.views).toBe(4487)
+    expect(s.interactions).toBe(2659)
+  })
+
+  it('matches its platform split', () => {
+    expect(s.bySurface.map(x => x.pct)).toEqual([57, 25, 16, 2])
+  })
+})
+
+describe('summarize — both branches together, as the "all" view sums them', () => {
+  const s = summarize([...GIVAT_ZEEV, ...MEVASERET])
+
+  it('adds the branches rather than averaging them', () => {
+    expect(s.views).toBe(11924 + 4487)
+    expect(s.interactions).toBe(9623 + 2659)
+    expect(s.calls).toBe(7020 + 1565)
+  })
+
+  it('recomputes the platform split across the combined total', () => {
+    // Mobile search: (5624 + 2557) / 16411 = 49.85% → 50
+    expect(s.bySurface[0].value).toBe(8181)
+    expect(s.bySurface[0].pct).toBe(50)
+    expect(s.bySurface.reduce((t, x) => t + x.value, 0)).toBe(s.views)
+  })
+})
+
 describe('delta', () => {
   it('matches the changes shown in the UI', () => {
     // Website clicks +53.7%, calls -4.1%
