@@ -40,6 +40,7 @@ const MIGRATIONS = [
   'migration-reports.sql',
   'migration-pizza-customer-ledger.sql',
   'migration-gbp.sql',
+  'migration-backups.sql',
 ]
 
 // ── Helpers ─────────────────────────────────────────────────────────────────

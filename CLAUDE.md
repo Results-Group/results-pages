@@ -88,7 +88,16 @@ npm run migrate    # מריץ את supabase/migration*.sql
 Monday.com (סנכרון לקוחות + לוח פידבק) · Gemini (תרגום דוחות, פירוק Excel, זיקוק PDF מיצוב ללקוח) ·
 Resend (מייל) · Sentry · Base44 REST (`lib/base44.ts` — אפליקציית כרטיסי הביקור הדיגיטליים DME) ·
 MySQL של קופת Aviv (Pizza House, קריאה בלבד, רב־סניפי — סניף חדש = שורה ב-`BRANCH_REGISTRY` + env vars).
-Vercel Crons (`vercel.json`): `sync-clients` ב-03:00, `archive-expired` ב-04:00 — מאומתים מול `CRON_SECRET`.
+Vercel Crons (`vercel.json`), כולם מאומתים מול `CRON_SECRET` (או סשן owner/admin להרצה ידנית):
+`backup` ב-01:00 · `pizza-ledger` ב-02:30 · `sync-clients` ב-03:00 · `archive-expired` ב-04:00 · `gbp-sync` ב-05:00.
+
+### גיבויים
+
+`lib/backup.ts` + `/api/cron/backup`, כל לילה. מייצא את כל הטבלאות לקובץ gzip יחיד ב-bucket `backups`
+(פרטי), ומעתיק את קבצי ה-storage באופן אינקרמנטלי לפי `backup_file_manifest`. שמירה: 30 יומיים +
+ראשון לכל חודש לשנה. סטטוס הריצה האחרונה מוצג בראש מסך "יומן פעילות".
+היעד נקבע ב-`backupTarget()`: אותו פרויקט Supabase כברירת מחדל, או פרויקט נפרד אם מוגדרים
+`BACKUP_SUPABASE_URL` + `BACKUP_SUPABASE_SERVICE_KEY` — מעבר בלי שינוי קוד.
 
 כל משתני הסביבה מוגדרים ב-`lib/env.ts` (סכימת zod). חובה: `NEXT_PUBLIC_SUPABASE_URL`,
 `SUPABASE_SERVICE_ROLE_KEY`, `SESSION_SECRET` (32+ תווים). השאר אופציונלי — פיצ'ר בלי מפתח מושבת.
