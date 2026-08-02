@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 import { getPageByClientSlug, downloadFile, createPageView } from '@/lib/db'
 import { signAccessToken, verifyAccessToken, CONTENT_ACCESS_MAX_AGE } from '@/lib/content-access'
 import { rateLimit } from '@/lib/rate-limit'
-import { databaseReachable } from '@/lib/db-health'
+import { databaseReachable, rebuildHold } from '@/lib/db-health'
 
 interface Ctx { params: Promise<{ path: string[] }> }
 
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
 
   if (!page) {
     // Outage, not absence: clients hold these links. See app/c/[slug]/page.tsx.
-    if (!(await databaseReachable())) {
+    if (rebuildHold() || !(await databaseReachable())) {
       return new NextResponse(expiredPage('המערכת בתחזוקה קצרה — הקישור יישאר בתוקף, נסו שוב בקרוב'), {
         status: 503,
         headers: { 'Content-Type': 'text/html; charset=utf-8', 'Retry-After': '600' },

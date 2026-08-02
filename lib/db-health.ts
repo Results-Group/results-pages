@@ -9,6 +9,17 @@ import { supabase } from './supabase'
  * cases. During an outage the public pages must say "we're on it", not
  * "this never existed".
  */
+/**
+ * REBUILD_HOLD=1 keeps every public page on the maintenance screen even though
+ * the (new, still-empty) database answers queries. Without it, the moment we
+ * switched projects every link clients hold flipped from "maintenance" back to
+ * a hard 404 — the empty database looked perfectly healthy. Remove the env var
+ * once the rebuilt content is live.
+ */
+export function rebuildHold(): boolean {
+  return process.env.REBUILD_HOLD === '1'
+}
+
 export async function databaseReachable(): Promise<boolean> {
   try {
     const { error } = await supabase

@@ -11,7 +11,7 @@ import { buildCampaignSlides } from '@/lib/slides'
 import CampaignPresentation from './presentation'
 import PasswordGate from './password-gate'
 import MaintenancePage from './maintenance'
-import { databaseReachable } from '@/lib/db-health'
+import { databaseReachable, rebuildHold } from '@/lib/db-health'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!campaign) {
     // During a database outage the link preview must not say "not found" —
     // clients re-share these links. See MaintenancePage.
-    if (!(await databaseReachable())) {
+    if (rebuildHold() || !(await databaseReachable())) {
       return { title: 'המצגת בעדכון | Results Digital', robots: { index: false, follow: false } }
     }
     return { title: 'Campaign Not Found' }
@@ -94,7 +94,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     // clients hold links we sent them, so during an outage they must see
     // "we're on it", not a 404. Added 2026-08-02, the night the production
     // Supabase project was deleted and every sent link broke at once.
-    if (!(await databaseReachable())) return <MaintenancePage />
+    if (rebuildHold() || !(await databaseReachable())) return <MaintenancePage />
     notFound()
   }
 

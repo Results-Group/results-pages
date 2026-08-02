@@ -8,7 +8,7 @@ import { verifyAccessToken } from '@/lib/content-access'
 import ReportPresentation from './report-presentation'
 import PasswordGate from './password-gate'
 import MaintenancePage from '../../c/[slug]/maintenance'
-import { databaseReachable } from '@/lib/db-health'
+import { databaseReachable, rebuildHold } from '@/lib/db-health'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -43,7 +43,7 @@ export default async function ReportPage({ params, searchParams }: PageProps) {
 
   if (!report) {
     // Outage, not absence: clients hold these links. See app/c/[slug]/page.tsx.
-    if (!(await databaseReachable())) return <MaintenancePage />
+    if (rebuildHold() || !(await databaseReachable())) return <MaintenancePage />
     notFound()
   }
 
