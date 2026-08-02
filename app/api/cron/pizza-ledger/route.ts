@@ -16,7 +16,9 @@ import { captureException, logger } from '@/lib/logger'
  */
 
 export const dynamic = 'force-dynamic'
-export const maxDuration = 60
+// 300, not 60: a 40-day × 2-branch backfill takes ~2 minutes against the POS,
+// and at 60s the function died mid-run (504) with the tail days never folded.
+export const maxDuration = 300
 
 const MAX_BACKFILL_DAYS = 45
 
