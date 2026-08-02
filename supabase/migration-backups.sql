@@ -38,6 +38,14 @@ CREATE TABLE IF NOT EXISTS backup_file_manifest (
   PRIMARY KEY (bucket, path)
 );
 
+-- Which destination a row describes. Without it, pointing the job at a fresh
+-- Supabase project would find every file "already copied" and dutifully back up
+-- nothing at all — the manifest describes a copy, not a source.
+ALTER TABLE backup_file_manifest ADD COLUMN IF NOT EXISTS target TEXT NOT NULL DEFAULT 'local';
+
+ALTER TABLE backup_file_manifest DROP CONSTRAINT IF EXISTS backup_file_manifest_pkey;
+ALTER TABLE backup_file_manifest ADD PRIMARY KEY (target, bucket, path);
+
 ALTER TABLE backup_file_manifest ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Service role full access on backup_file_manifest" ON backup_file_manifest;
 CREATE POLICY "Service role full access on backup_file_manifest"

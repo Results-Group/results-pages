@@ -10,6 +10,8 @@ import { assetProxyUrl } from '@/lib/asset-url'
 import { buildCampaignSlides } from '@/lib/slides'
 import CampaignPresentation from './presentation'
 import PasswordGate from './password-gate'
+import MaintenancePage from './maintenance'
+import { databaseReachable } from '@/lib/db-health'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -29,7 +31,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params
   const campaign = await getCampaignBySlug(slug)
 
-  if (!campaign) return { title: 'Campaign Not Found' }
+  if (!campaign) {
+    // During a database outage the link preview must not say "not found" —
+    // clients re-share these links. See MaintenancePage.
+    if (!(await databaseReachable())) {
+      return { title: 'המצגת בעדכון | Results Digital', robots: { index: false, follow: false } }
+    }
+    return { title: 'Campaign Not Found' }
+  }
 
   // Link previews always carry our own branded card. Using the client's logo
   // meant a client without one shared as a bare link with no image at all, and
@@ -81,6 +90,11 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
   const rawCampaign = await getCampaignBySlug(slug)
 
   if (!rawCampaign) {
+    // Null means either "no such campaign" or "the database is down" — and
+    // clients hold links we sent them, so during an outage they must see
+    // "we're on it", not a 404. Added 2026-08-02, the night the production
+    // Supabase project was deleted and every sent link broke at once.
+    if (!(await databaseReachable())) return <MaintenancePage />
     notFound()
   }
 

@@ -7,6 +7,8 @@ import { getSession } from '@/lib/auth'
 import { verifyAccessToken } from '@/lib/content-access'
 import ReportPresentation from './report-presentation'
 import PasswordGate from './password-gate'
+import MaintenancePage from '../../c/[slug]/maintenance'
+import { databaseReachable } from '@/lib/db-health'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -39,7 +41,11 @@ export default async function ReportPage({ params, searchParams }: PageProps) {
   const sp = await searchParams
   const report = await getReportBySlug(slug)
 
-  if (!report) notFound()
+  if (!report) {
+    // Outage, not absence: clients hold these links. See app/c/[slug]/page.tsx.
+    if (!(await databaseReachable())) return <MaintenancePage />
+    notFound()
+  }
 
   const session = await getSession()
   const isEditorOrAdmin = !!session && (session.role === 'admin' || session.role === 'editor')

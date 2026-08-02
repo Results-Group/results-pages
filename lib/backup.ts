@@ -62,14 +62,50 @@ const COPY_BUDGET = 600
  */
 const CONCURRENCY = 8
 
-/** Where snapshots are written — this project unless told otherwise. */
+/**
+ * Where snapshots are written — this project unless told otherwise.
+ *
+ * `id` labels manifest rows. It matters because the manifest records what has
+ * been copied *to a given destination*: switching to a fresh project without it
+ * would find every file "already copied" and back up nothing.
+ */
 export function backupTarget() {
   const url = process.env.BACKUP_SUPABASE_URL
   const key = process.env.BACKUP_SUPABASE_SERVICE_KEY
   if (url && key) {
-    return { client: createClient(url, key, { auth: { persistSession: false } }), offsite: true }
+    return {
+      client: createClient(url, key, { auth: { persistSession: false } }),
+      offsite: true,
+      // Host only — never the key, and nothing that ends up in a log.
+      id: (() => { try { return new URL(url).host } catch { return 'offsite' } })(),
+    }
   }
-  return { client: supabase, offsite: false }
+  return { client: supabase, offsite: false, id: 'local' }
+}
+
+/**
+ * Creates the destination bucket when it isn't there yet.
+ *
+ * The migration creates it in this project, but an offsite target is a fresh
+ * Supabase project with nothing in it — and requiring a manual step there is
+ * exactly how a backup ends up silently writing nowhere.
+ *
+ * Private, always: the snapshot holds every client record and every admin row.
+ */
+export async function ensureBucket(target: ReturnType<typeof backupTarget>['client']): Promise<void> {
+  // Best-effort, deliberately. The storage *admin* API (getBucket/listBuckets/
+  // createBucket) answers "Missing tenant config" on this project even though
+  // object reads and writes work perfectly — so treating it as a precondition
+  // failed every run for a bucket that was sitting right there. The upload in
+  // writeSnapshot is the real check: it throws "Bucket not found" loudly, and
+  // that failure is recorded.
+  const { data } = await target.storage.getBucket(BACKUP_BUCKET)
+  if (data) {
+    if (data.public) throw new Error('Backup bucket is public — refusing to write snapshots to it')
+    return
+  }
+  // Private, always: the snapshot holds every client record and every admin row.
+  await target.storage.createBucket(BACKUP_BUCKET, { public: false })
 }
 
 export interface TableDump { table: string; rows: unknown[] }
@@ -142,7 +178,8 @@ export async function listAllObjects(): Promise<StorageObject[]> {
  */
 export async function copyChangedFiles(
   objects: StorageObject[],
-  target: ReturnType<typeof backupTarget>['client']
+  target: ReturnType<typeof backupTarget>['client'],
+  targetId: string
 ): Promise<{ copied: number; bytes: number; remaining: number }> {
   // Paged, not a plain select: Supabase caps a select at 1000 rows, and with a
   // 1,566-file manifest that silently made the last 566 look new — they were
@@ -152,6 +189,7 @@ export async function copyChangedFiles(
     const { data, error } = await supabase
       .from('backup_file_manifest')
       .select('bucket,path,size,source_updated_at')
+      .eq('target', targetId)
       .range(from, from + PAGE - 1)
     if (error || !data) break
     for (const m of data) known.set(`${m.bucket}/${m.path}`, m)
@@ -200,10 +238,10 @@ export async function copyChangedFiles(
     const copiedAt = new Date().toISOString()
     await supabase.from('backup_file_manifest').upsert(
       done.map(o => ({
-        bucket: o.bucket, path: o.path, size: o.size,
+        target: targetId, bucket: o.bucket, path: o.path, size: o.size,
         source_updated_at: o.updated_at, copied_at: copiedAt,
       })),
-      { onConflict: 'bucket,path' }
+      { onConflict: 'target,bucket,path' }
     )
   }
 

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifySessionToken } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import {
-  backupTarget, dumpTables, listAllObjects, copyChangedFiles,
+  backupTarget, ensureBucket, dumpTables, listAllObjects, copyChangedFiles,
   writeSnapshot, pruneOldSnapshots,
 } from '@/lib/backup'
 import { captureException, logger } from '@/lib/logger'
@@ -40,13 +40,14 @@ export async function GET(req: NextRequest) {
   }
 
   const startedAt = new Date().toISOString()
-  const { client: target, offsite } = backupTarget()
+  const { client: target, offsite, id: targetId } = backupTarget()
 
   try {
+    await ensureBucket(target)
     const { dumps, total } = await dumpTables()
     const objects = await listAllObjects()
     const snapshotPath = await writeSnapshot(dumps, objects, target)
-    const { copied, bytes, remaining } = await copyChangedFiles(objects, target)
+    const { copied, bytes, remaining } = await copyChangedFiles(objects, target, targetId)
     const pruned = await pruneOldSnapshots(target)
 
     await supabase.from('backup_runs').insert({
