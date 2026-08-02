@@ -153,7 +153,10 @@ export async function deleteClient(id: string): Promise<void> {
 }
 
 export async function uploadClientLogo(file: File | Blob, clientId: string): Promise<string> {
-  const storagePath = `clients/${clientId}/logo.webp`
+  // Unique per upload — a fixed `logo.webp` under a year-long cache header made
+  // a replaced logo look unsaved for as long as anything held the old copy.
+  // See the note on uploadLogoImage in lib/campaigns.ts.
+  const storagePath = `clients/${clientId}/logo-${crypto.randomUUID().slice(0, 8)}.webp`
   return compressAndUploadImage(file, storagePath)
 }
 

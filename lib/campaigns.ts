@@ -294,7 +294,13 @@ export async function uploadLogoImage(
 ): Promise<string> {
   // Storage keys must be ASCII-safe — use the campaign UUID as the folder
   // (client names may contain Hebrew/spaces which Supabase rejects).
-  const storagePath = `campaigns/${campaignId}/logo.webp`
+  //
+  // The filename carries a fresh id on every upload. It used to be a constant
+  // `logo.webp`, which meant replacing a logo wrote new bytes to a URL that the
+  // CDN and every browser had been told to cache for a year: the upload
+  // succeeded, the old image kept being served, and it read as "the save didn't
+  // work". Uploaded assets already use a unique name for exactly this reason.
+  const storagePath = `campaigns/${campaignId}/logo-${crypto.randomUUID().slice(0, 8)}.webp`
   return compressAndUploadImage(file, storagePath)
 }
 
