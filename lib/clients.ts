@@ -1,5 +1,7 @@
 import { supabase } from './supabase'
 import { compressAndUploadImage, getAssetPublicUrl } from './campaigns'
+import { clientNameKey } from './client-name'
+export { clientNameKey } from './client-name'
 
 export interface ClientContact {
   name?: string
@@ -49,13 +51,31 @@ export async function getClientById(id: string): Promise<Client | null> {
 }
 
 export async function getClientByName(name: string, workspaceId?: string | null): Promise<Client | null> {
-  let query = supabase.from('clients').select('*').eq('name', name)
+  const key = clientNameKey(name)
+  if (!key) return null
+
+  // Matching happens in JS rather than SQL: the comparison has to ignore case
+  // AND separators, which no plain column filter expresses. The table holds
+  // tens of clients, so reading the workspace's rows is cheaper than the
+  // machinery an equivalent SQL expression would need.
+  let query = supabase.from('clients').select('*')
   if (workspaceId) query = query.eq('workspace_id', workspaceId)
   else query = query.is('workspace_id', null)
-  // limit(1) instead of maybeSingle so stray duplicates don't turn into errors
-  const { data, error } = await query.limit(1)
+
+  const { data, error } = await query
   if (error || !data || data.length === 0) return null
-  return enrich(data[0] as Client)
+
+  const rows = data as Client[]
+  // An exact hit wins over a loose one, so an existing precise name is never
+  // shadowed by a differently-punctuated sibling.
+  const exact = rows.find(c => c.name === name)
+  if (exact) return enrich(exact)
+
+  const loose = rows.filter(c => clientNameKey(c.name) === key)
+  if (loose.length === 0) return null
+  // Among loose matches prefer the record linked to Monday — that is the
+  // canonical one, and its name is the one that should win.
+  return enrich(loose.find(c => c.monday_item_id) ?? loose[0])
 }
 
 export async function getClientByMondayItemId(mondayItemId: string): Promise<Client | null> {
