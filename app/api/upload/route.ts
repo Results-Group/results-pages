@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPageByClientSlug, getPageByShortUrl, createPage, uploadFile, purgePage } from '@/lib/db'
-import { getSessionFromRequest, getActiveWorkspaceId, requireWorkspacePermission } from '@/lib/auth'
+import { getSessionFromRequest, getActiveWorkspaceId, requireWorkspacePermission, userExists } from '@/lib/auth'
 import { findOrCreateClient } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
 import { minifyHtml } from '@/lib/minify'
@@ -15,6 +15,17 @@ export const maxDuration = 60
 export async function POST(req: NextRequest) {
   const session = await getSessionFromRequest(req)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // A signed cookie can outlive the account it names — after the 2026-08-02
+  // rebuild, everyone's session carried a user id from the old database and
+  // every upload died on a foreign-key violation surfaced as a generic 500.
+  // Say "log in again" instead.
+  if (!(await userExists(session.userId))) {
+    return NextResponse.json(
+      { error: 'הסשן שלך אינו תקף עוד — יש להתנתק ולהתחבר מחדש' },
+      { status: 401 },
+    )
+  }
 
   const workspaceId = await getActiveWorkspaceId(req)
   if (workspaceId) {

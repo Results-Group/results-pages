@@ -163,6 +163,33 @@ export async function createSessionCookie(
   }
 }
 
+/**
+ * Does the account named by a session still exist?
+ *
+ * Sessions are self-contained signed tokens, so a valid cookie can outlive its
+ * account. After the 2026-08-02 rebuild every staff cookie carried a user id
+ * from the old database, and each create hit a foreign-key violation reported
+ * as a generic 500. Callers that write `created_by` check this first and answer
+ * "log in again".
+ *
+ * Fails open: a database hiccup must not log the whole team out.
+ */
+export async function userExists(userId: string | undefined): Promise<boolean> {
+  if (!userId) return false
+  const { supabase } = await import('./supabase')
+  try {
+    const { data, error } = await supabase
+      .from('admin_users')
+      .select('id')
+      .eq('id', userId)
+      .limit(1)
+    if (error) return true
+    return (data?.length ?? 0) > 0
+  } catch {
+    return true
+  }
+}
+
 export async function hasAdminUsers(): Promise<boolean> {
   const { supabase } = await import('./supabase')
   try {

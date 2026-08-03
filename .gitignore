@@ -10,3 +10,9 @@ prisma/dev.db
 prisma/dev.db-journal
 public/pages/
 .vercel
+
+# DME migration: full Base44 export — contains customer PII
+dme-backup/
+
+# Supabase service-role key for the DME import — never commit
+dme-migration/.env
