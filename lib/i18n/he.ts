@@ -396,6 +396,7 @@ const he = {
   'public.enter': 'כניסה',
   'public.partOf': 'מתוך',
   'public.allSlides': 'כל השקפים',
+  'public.slide': 'שקף',
   'public.copyVersion': 'נוסח',
   'public.copyLabel': 'בחרו נוסח לתצוגה',
   'public.preparing': 'מכין...',

@@ -398,6 +398,7 @@ const en: Record<TranslationKey, string> = {
   'public.enter': 'Enter',
   'public.partOf': 'of',
   'public.allSlides': 'All slides',
+  'public.slide': 'Slide',
   'public.copyVersion': 'Version',
   'public.copyLabel': 'Choose a version',
   'public.preparing': 'Preparing...',

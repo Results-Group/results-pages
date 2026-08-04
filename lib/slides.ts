@@ -39,6 +39,32 @@ export const CREATIVES_PER_SCREEN = 2
 // have to maintain in lockstep.
 type SectionLike = { mockup_type: string; assets?: unknown[]; plan?: DistributionPlan | null }
 
+/** Creatives on one client screen, for this section's mockup type.
+ *
+ *  A carousel is a single post containing all its frames, so it never splits.
+ *  A landing_page mockup is a wide MacBook + iPhone pair — two of them side by
+ *  side overflow the slide, so it gets a screen each. Everything else shows at
+ *  most two: three or four on one screen pushed the reader past the fold.
+ *
+ *  Every consumer of the split reads it from here — buildCampaignSlides, the
+ *  sidebar count and the editor's page breaks. The video and landing-page
+ *  branches of the editor canvas used to page by their own (missing) rules,
+ *  so five video links looked like one screen and became three for the client. */
+export function creativesPerScreen(section: SectionLike): number {
+  if (section.mockup_type === 'carousel') return Math.max(1, (section.assets || []).length)
+  if (section.mockup_type === 'landing_page') return 1
+  return CREATIVES_PER_SCREEN
+}
+
+/** Split a section's assets into the screens the client will scroll through. */
+export function pageAssets<T>(assets: T[], perScreen: number): T[][] {
+  const pages: T[][] = []
+  for (let i = 0; i < assets.length; i += Math.max(1, perScreen)) {
+    pages.push(assets.slice(i, i + Math.max(1, perScreen)))
+  }
+  return pages
+}
+
 export function slidesPerSection(section: SectionLike): number {
   if (section.mockup_type === 'divider') return 1
   // A distribution plan carries no assets — it renders from `plan`, and an
@@ -46,9 +72,7 @@ export function slidesPerSection(section: SectionLike): number {
   if (section.mockup_type === 'distribution') return hasVisibleContent(section.plan) ? 1 : 0
   const assets = section.assets || []
   if (!assets.length) return 0
-  if (section.mockup_type === 'carousel') return 1
-  if (section.mockup_type === 'landing_page') return assets.length
-  return Math.ceil(assets.length / CREATIVES_PER_SCREEN)
+  return Math.ceil(assets.length / creativesPerScreen(section))
 }
 
 /** Total client-facing slide count — cover + optional concept + sum over
@@ -99,16 +123,7 @@ export function buildCampaignSlides(opts: {
       }
     } else if ((section.assets || []).length > 0) {
       const assets = section.assets || []
-      // A carousel is a single post containing all its frames, so it never
-      // splits. A landing_page mockup is a wide MacBook + iPhone pair — two of
-      // them side-by-side would overflow the slide, so pin at 1 per screen.
-      // Everything else shows at most two creatives per screen: three or four
-      // on one screen forced the reader to scroll past the fold, so the
-      // section is paged into consecutive screens instead.
-      const perScreen =
-        section.mockup_type === 'carousel' ? assets.length :
-        section.mockup_type === 'landing_page' ? 1 :
-        CREATIVES_PER_SCREEN
+      const perScreen = creativesPerScreen(section)
       const partsTotal = Math.ceil(assets.length / perScreen)
       for (let i = 0; i < assets.length; i += perScreen) {
         slides.push({

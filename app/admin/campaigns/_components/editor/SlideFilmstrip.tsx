@@ -14,8 +14,32 @@ import {
   Star, BookOpen, CheckCircle2, Sparkles, BarChart3,
 } from 'lucide-react'
 import { assetProxyUrl } from '@/lib/asset-url'
-import { countClientSlides } from '@/lib/slides'
+import { countClientSlides, slidesPerSection } from '@/lib/slides'
 import type { EditorSection, MockupType, CampaignMeta } from './types'
+
+/** The slide numbers a chip stands for, as the client will count them.
+ *  `null` when the section produces no slide at all (no assets yet). */
+type SlideRange = { from: number; to: number } | null
+
+/** The number badge on a chip. A section with four creatives is two client
+ *  screens, so it shows "8–9": numbering the chips 1..n while the total badge
+ *  counted real slides made the sidebar contradict itself, and the operator
+ *  trusted the smaller number. */
+function SlideNum({ range, active, dim }: { range: SlideRange; active?: boolean; dim?: boolean }) {
+  return (
+    <span
+      className="flex items-center justify-center min-w-5 px-1 h-5 rounded text-[10px] font-bold shrink-0 tabular-nums"
+      style={{
+        background: active ? 'rgba(64,225,211,0.15)' : 'var(--admin-bg-elevated)',
+        color: active ? '#40e1d3' : 'var(--admin-text-muted)',
+        opacity: dim ? 0.6 : 1,
+      }}
+      title={range && range.to > range.from ? `שקפים ${range.from}–${range.to}` : undefined}
+    >
+      {!range ? '–' : range.from === range.to ? range.from : `${range.from}–${range.to}`}
+    </span>
+  )
+}
 
 function typeIcon(type: MockupType) {
   if (type === 'video') return <Film className="w-3 h-3" />
@@ -32,7 +56,7 @@ const STATUS_DOT: Record<string, string> = {
 
 /** Non-interactive chip for cover / concept / closing slides. When `onDelete`
  * is supplied (concept slide), a hover ✕ lets the user remove that slide. */
-function SystemSlideChip({ label, icon, dim, onDelete }: { label: string; icon: React.ReactNode; dim?: boolean; onDelete?: () => void }) {
+function SystemSlideChip({ label, icon, num, dim, onDelete }: { label: string; icon: React.ReactNode; num: number; dim?: boolean; onDelete?: () => void }) {
   return (
     <div
       className="flex items-center gap-2 rounded-xl px-2 py-2"
@@ -45,9 +69,7 @@ function SystemSlideChip({ label, icon, dim, onDelete }: { label: string; icon: 
       {/* spacer to align with drag handle */}
       <span className="w-3.5 h-3.5 shrink-0" />
 
-      <div className="w-5 h-5 rounded flex items-center justify-center shrink-0" style={{ background: 'var(--admin-hover-bg)', color: 'var(--admin-text-muted)' }}>
-        {icon}
-      </div>
+      <SlideNum range={{ from: num, to: num }} />
 
       <div className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center" style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)' }}>
         <span style={{ color: 'var(--admin-text-muted)' }}>{icon}</span>
@@ -74,9 +96,9 @@ function SystemSlideChip({ label, icon, dim, onDelete }: { label: string; icon: 
   )
 }
 
-function SortableItem({ section, index, active, status, onSelect, onDuplicate, onRemove }: {
+function SortableItem({ section, range, active, status, onSelect, onDuplicate, onRemove }: {
   section: EditorSection
-  index: number
+  range: SlideRange
   active: boolean
   status?: 'approved' | 'rejected' | 'pending'
   onSelect: () => void
@@ -115,10 +137,7 @@ function SortableItem({ section, index, active, status, onSelect, onDuplicate, o
             <GripVertical className="w-3.5 h-3.5" />
           </button>
 
-          <span className="flex items-center justify-center w-5 h-5 rounded text-[10px] font-bold shrink-0"
-            style={{ background: active ? 'rgba(64,225,211,0.15)' : 'var(--admin-bg-elevated)', color: active ? '#40e1d3' : 'var(--admin-text-muted)' }}>
-            {index + 1}
-          </span>
+          <SlideNum range={range} active={active} />
 
           <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0 flex items-center justify-center" style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)' }}>
             {firstImage ? (
@@ -194,6 +213,16 @@ export default function SlideFilmstrip({ sections, activeId, feedback, meta, onS
   // consistent with the "שקף X מתוך Y" divider inside the editor preview.
   const total = countClientSlides(sections, { hasConcept: !!meta.concept })
 
+  // Walk the deck once and hand each chip the slide numbers it produces, so
+  // the sidebar reads top to bottom as 1 … total with no gaps.
+  let cursor = 1 + (meta.concept ? 1 : 0) // cover, and the concept slide if set
+  const ranges: SlideRange[] = sections.map(s => {
+    const n = slidesPerSection(s)
+    const range = n === 0 ? null : { from: cursor + 1, to: cursor + n }
+    cursor += n
+    return range
+  })
+
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center justify-between px-1 mb-2">
@@ -205,11 +234,11 @@ export default function SlideFilmstrip({ sections, activeId, feedback, meta, onS
       </div>
 
       {/* Cover — always first */}
-      <SystemSlideChip label="שקף שער" icon={<Star className="w-3 h-3" />} />
+      <SystemSlideChip label="שקף שער" num={1} icon={<Star className="w-3 h-3" />} />
 
       {/* Concept — only when filled; deletable (clears the concept text) */}
       {meta.concept && (
-        <SystemSlideChip label="קונספט" icon={<BookOpen className="w-3 h-3" />} onDelete={onClearConcept} />
+        <SystemSlideChip label="קונספט" num={2} icon={<BookOpen className="w-3 h-3" />} onDelete={onClearConcept} />
       )}
 
       {/* Thin divider */}
@@ -223,7 +252,7 @@ export default function SlideFilmstrip({ sections, activeId, feedback, meta, onS
               <SortableItem
                 key={section.id}
                 section={section}
-                index={i}
+                range={ranges[i]}
                 active={section.id === activeId}
                 status={feedback?.[section.id]}
                 onSelect={() => onSelect(section.id)}
@@ -261,7 +290,7 @@ export default function SlideFilmstrip({ sections, activeId, feedback, meta, onS
       <div className="mx-2 mt-0.5" style={{ height: 1, background: 'var(--admin-hover-bg)' }} />
 
       {/* Closing — always last */}
-      <SystemSlideChip label="שקף סיום" icon={<CheckCircle2 className="w-3 h-3" />} />
+      <SystemSlideChip label="שקף סיום" num={total} icon={<CheckCircle2 className="w-3 h-3" />} />
     </div>
   )
 }

@@ -171,16 +171,20 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
     }).catch(() => {})
   }
 
-  function getSlideLabel(slide: SlideData, i: number): string {
+  function getSlideLabel(slide: SlideData): string {
     if (slide.type === 'cover') return t('public.cover')
     if (slide.type === 'concept') return t('public.concept')
     if (slide.type === 'closing') return t('public.closing')
-    if (slide.type === 'divider') return slide.title || `${t('public.divider')} ${i}`
+    if (slide.type === 'divider') return slide.title || ''
     if (slide.type === 'distribution') return slide.title || t('public.dist.title')
-    const base = slide.title || `${t('public.section')} ${i}`
+    // Untitled slides carry no name at all: the fallback used to read
+    // "סקציה 4", numbered by position in the deck rather than by section, so
+    // two halves of one section came out as "סקציה 3" and "סקציה 4". The index
+    // already numbers every row — an invented name only misinforms.
+    const base = slide.title || ''
     // A section spanning several screens repeats its name, so say which part
     // this is — otherwise the index lists the same title six times over.
-    return slide.partsTotal
+    return base && slide.partsTotal
       ? `${base} · ${slide.part} ${t('public.partOf')} ${slide.partsTotal}`
       : base
   }
@@ -188,7 +192,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   return (
     <DeckShell
       count={slides.length}
-      labelFor={i => getSlideLabel(slides[i], i)}
+      labelFor={i => getSlideLabel(slides[i])}
       headerTitle={`${clientName} — ${campaignName}`}
       brandColor={brandColor}
       lang={lang}

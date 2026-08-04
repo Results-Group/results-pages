@@ -160,6 +160,11 @@ export default function DeckShell({
 
   const indices = Array.from({ length: count }, (_, i) => i)
 
+  /** labelFor may legitimately return '' for an untitled slide. The index
+   *  dialog then shows the number alone, but a progress bar still needs
+   *  something to announce, so it falls back to "שקף N". */
+  const slideName = (i: number) => labelFor(i) || `${t('public.slide')} ${i + 1}`
+
   return (
     <div
       className={`campaign-pres${variantClass ? ` ${variantClass}` : ''}`}
@@ -184,8 +189,8 @@ export default function DeckShell({
             key={i}
             className={`story-bar${i === activeSlide ? ' current' : ''}`}
             onClick={() => goSlide(i)}
-            title={labelFor(i)}
-            aria-label={labelFor(i)}
+            title={slideName(i)}
+            aria-label={slideName(i)}
             aria-current={i === activeSlide ? 'step' : undefined}
           >
             <div className={`story-bar-fill ${i < activeSlide ? 'done' : i === activeSlide ? 'active' : ''}`} />
@@ -230,7 +235,10 @@ export default function DeckShell({
                   onClick={() => { goSlide(i); setShowIndex(false) }}
                 >
                   <span className="slide-index-num">{i + 1}</span>
-                  <span className="slide-index-name">{labelFor(i)}</span>
+                  {/* Only real titles. A slide the operator never named shows
+                      its number alone — an invented "סקציה 4" reads like a
+                      name and numbers a different thing than the badge does. */}
+                  {labelFor(i) ? <span className="slide-index-name">{labelFor(i)}</span> : null}
                 </button>
               ))}
             </div>

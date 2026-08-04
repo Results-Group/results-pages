@@ -15,8 +15,29 @@ import { CaptionExpansionProvider } from '@/app/c/[slug]/mockups/AdCaption'
 import DistributionSlide from '@/app/c/[slug]/distribution-slide'
 import type { EditorAsset, EditorSection, Copy } from './types'
 import { isImageFile, MAX_FILE_MB } from '@/lib/image-compress'
-import { CREATIVES_PER_SCREEN } from '@/lib/slides'
+import { creativesPerScreen, pageAssets } from '@/lib/slides'
 import { maxAssetsFor } from './types'
+
+/**
+ * The line the client's deck will break on.
+ *
+ * Shown in every asset branch — images, videos and landing pages alike. The
+ * editor used to page only the image grid, so five video links read as one
+ * screen in the editor and arrived as three in the deck, and the sidebar total
+ * looked wrong to the operator who had just counted the canvas.
+ */
+function PageDivider({ index, total }: { index: number; total: number }) {
+  const line = { background: 'linear-gradient(90deg, transparent, var(--admin-border) 20%, var(--admin-border) 80%, transparent)' }
+  return (
+    <div className="flex items-center gap-3 mb-3">
+      <div className="flex-1 h-px" style={line} />
+      <span className="text-[10px] font-bold uppercase tracking-wide shrink-0" style={{ color: 'rgba(64,225,211,0.7)' }}>
+        שקף {index + 1} מתוך {total}
+      </span>
+      <div className="flex-1 h-px" style={line} />
+    </div>
+  )
+}
 
 interface UploadProgress {
   total: number
@@ -151,7 +172,9 @@ export default function SlideCanvas({
   // same URL-input flow instead of the image drop zone.
   const isVideo = section.mockup_type === 'video' || isReels
   const isStory = section.mockup_type === 'instagram_story'
-  const isCarousel = section.mockup_type === 'carousel'
+  // The exact screens the client will scroll through, from lib/slides — the
+  // canvas must never invent its own split.
+  const assetPages = pageAssets(section.assets, creativesPerScreen(section))
   const maxWidth = device === 'mobile' ? 420 : 960
   // Per-slide filter: only campaign copies whose IDs the editor picked here.
   const selectedIds = new Set(section.copyIds ?? [])
@@ -258,8 +281,11 @@ export default function SlideCanvas({
             <p className="text-sm font-semibold" style={{ color: 'var(--admin-text-muted)' }}>שקף ביניים — מציג כותרת וטקסט בלבד</p>
           </div>
         ) : isLandingPage ? (
-          <div className="space-y-4">
-            {section.assets.map(asset => {
+          <div className="space-y-6">
+            {assetPages.map((page, pageIdx) => (
+            <div key={pageIdx} className="space-y-4">
+            {assetPages.length > 1 && <PageDivider index={pageIdx} total={assetPages.length} />}
+            {page.map(asset => {
               const url = asset.url || ''
               const isInternal = url.startsWith('/pages/')
               return (
@@ -308,6 +334,8 @@ export default function SlideCanvas({
                 </div>
               )
             })}
+            </div>
+            ))}
             <button onClick={onAddVideo} className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200"
               style={{ color: '#40e1d3', border: '1px dashed rgba(64,225,211,0.25)', background: 'rgba(64,225,211,0.03)' }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.08)' }}
@@ -316,8 +344,11 @@ export default function SlideCanvas({
             </button>
           </div>
         ) : isVideo ? (
-          <div className="space-y-4">
-            {section.assets.map(asset => (
+          <div className="space-y-6">
+            {assetPages.map((page, pageIdx) => (
+            <div key={pageIdx} className="space-y-4">
+            {assetPages.length > 1 && <PageDivider index={pageIdx} total={assetPages.length} />}
+            {page.map(asset => (
               <div key={asset.id} className="rounded-xl p-4 transition-all duration-200" style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)' }}>
                 <div className="flex items-start gap-3">
                   <div className="flex-1 space-y-2">
@@ -349,6 +380,8 @@ export default function SlideCanvas({
                 )}
               </div>
             ))}
+            </div>
+            ))}
             <button onClick={onAddVideo} className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200"
               style={{ color: '#40e1d3', border: '1px dashed rgba(64,225,211,0.25)', background: 'rgba(64,225,211,0.03)' }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(64,225,211,0.08)' }}
@@ -364,15 +397,7 @@ export default function SlideCanvas({
               // of 2 for the viewer. The editor used to show all 4 in one grid,
               // which made operators think the client would see a 2×2 layout.
               // Rendering the same page breaks removes the mismatch.
-              //
-              // Carousel is exempt because the client renders it as a single
-              // post containing every frame — paging it in the editor would
-              // now diverge in the OTHER direction.
-              const perScreen = isCarousel ? section.assets.length : CREATIVES_PER_SCREEN
-              const pages: EditorAsset[][] = []
-              for (let i = 0; i < section.assets.length; i += perScreen) {
-                pages.push(section.assets.slice(i, i + perScreen))
-              }
+              const pages = assetPages
               const gridClass = isStory
                 ? 'grid grid-cols-2 sm:grid-cols-3 gap-5'
                 : 'grid grid-cols-1 sm:grid-cols-2 gap-5'
@@ -382,15 +407,7 @@ export default function SlideCanvas({
                     <div className="mb-6 space-y-6">
                       {pages.map((page, pageIdx) => (
                         <div key={pageIdx}>
-                          {pages.length > 1 && (
-                            <div className="flex items-center gap-3 mb-3">
-                              <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--admin-border) 20%, var(--admin-border) 80%, transparent)' }} />
-                              <span className="text-[10px] font-bold uppercase tracking-wide shrink-0" style={{ color: 'rgba(64,225,211,0.7)' }}>
-                                שקף {pageIdx + 1} מתוך {pages.length}
-                              </span>
-                              <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--admin-border) 20%, var(--admin-border) 80%, transparent)' }} />
-                            </div>
-                          )}
+                          {pages.length > 1 && <PageDivider index={pageIdx} total={pages.length} />}
                           {/* One expansion state per screen, matching the
                               client deck — see CaptionExpansionProvider. */}
                           <CaptionExpansionProvider>
