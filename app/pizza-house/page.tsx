@@ -36,6 +36,11 @@ interface Summary {
   delivery_pct: number
   delivery_revenue: number
   delivery_revenue_pct: number
+  order_count: number
+  pickup_orders: number
+  counter_sales: number
+  counter_sales_revenue: number
+  counter_sale_max: number
   unique_customers: number
   unique_by_card: number
   unique_by_meal_card: number
@@ -469,8 +474,9 @@ export default function PizzaHouseDashboard() {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 mt-2 sm:mt-4">
               {([
                 { label: 'פריטים להזמנה', val: String(s.items_per_order), color: pal.text, k: 'items_per_order' as const, invert: false, note: '' },
-                { label: 'משלוחים — מההזמנות', val: s.delivery_pct + '%', color: pal.text, k: 'delivery_pct' as const, invert: false, note: `${num(s.delivery_orders)} הזמנות` },
+                { label: 'משלוחים — מההזמנות', val: s.delivery_pct + '%', color: pal.text, k: 'delivery_pct' as const, invert: false, note: `${num(s.delivery_orders)} מתוך ${num(s.order_count)} הזמנות` },
                 { label: 'משלוחים — מההכנסות', val: s.delivery_revenue_pct + '%', color: pal.text, k: 'delivery_revenue_pct' as const, invert: false, note: money(s.delivery_revenue) },
+                { label: 'מכירות דלפק', val: num(s.counter_sales), color: pal.textMuted, k: 'counter_sales' as const, invert: false, note: `עד ₪${s.counter_sale_max} · ${money(s.counter_sales_revenue)} · לא נספרות כהזמנות` },
                 { label: 'לקוחות מזוהים', val: num(s.unique_customers), color: pal.cyan, k: 'unique_customers' as const, invert: false, note: `${num(s.unique_by_card)} אשראי + ${num(s.unique_by_meal_card)} סועד · ${s.identity_coverage_pct}% מהתשלומים` },
                 { label: 'לקוחות חוזרים', val: s.returning_pct + '%', color: pal.cyan, k: 'returning_pct' as const, invert: false, note: 'מתוך משלמי אשראי בלבד' },
                 { label: 'הנחות שניתנו', val: money(s.discounts), color: pal.yellow, k: 'discounts' as const, invert: true, note: '' },
@@ -895,7 +901,11 @@ export default function PizzaHouseDashboard() {
                     <div key={i} className="p-3 rounded-xl" style={{ background: pal.bgElevated }}>
                       <div className="flex justify-between items-center mb-1">
                         <span className="font-bold inline-flex items-center gap-1.5" style={{ color: pal.textSecondary }}>
-                          {c.channel === 'delivery' ? <><Truck className="w-4 h-4" style={{ color: pal.cyan }} /> משלוחים</> : <><Store className="w-4 h-4" style={{ color: pal.yellow }} /> איסוף / ישיבה</>}
+                          {c.channel === 'delivery'
+                            ? <><Truck className="w-4 h-4" style={{ color: pal.cyan }} /> משלוחים</>
+                            : c.channel === 'counter'
+                              ? <><Store className="w-4 h-4" style={{ color: pal.textMuted }} /> מכירות דלפק</>
+                              : <><Store className="w-4 h-4" style={{ color: pal.yellow }} /> איסוף / ישיבה</>}
                         </span>
                         <span className="font-black tabular-nums" style={{ color: pal.yellow }}>{money(c.revenue)}</span>
                       </div>

@@ -13,6 +13,34 @@ export interface DateRange {
 
 const DELIVERY_PATTERN = "(name LIKE '%משלוח%' OR name LIKE '%מישלוח%')"
 
+/**
+ * Below this, a till transaction is a counter sale — a slice, a can — not an
+ * order anyone would deliver.
+ *
+ * The owner reported ~80% deliveries while the dashboard showed 39%. Measured
+ * over 30 days at Giv'at Ze'ev: 1,035 of 3,286 transactions were under ₪60 and
+ * carried 7 deliveries between them (≈0%), while ₪100+ ran 68–71% delivery.
+ * Counting counter sales as orders dragged the whole ratio down. Splitting them
+ * out moved the number to 56%, and the rest of the gap is delivery fees keyed
+ * as "מחיר כללי" (337 orders) or free deliveries never keyed at all — both
+ * fixed at the till, not here.
+ *
+ * Approved by the client at ₪60 on 2026-08-03. Business definition, not a
+ * technical constant: changing it changes what "order" means on the dashboard.
+ */
+const COUNTER_SALE_MAX = 60
+
+/**
+ * Every positive till transaction is exactly one of three channels. Kept as one
+ * expression so the KPI cards and the channel chart can never disagree — they
+ * already did once (1306 vs 1279 on the same screen).
+ */
+const CHANNEL_SQL = `CASE
+  WHEN EXISTS (SELECT 1 FROM paymentitm p WHERE p.id_deal = d.id_deal AND ${DELIVERY_PATTERN.replace(/name/g, 'p.name')}) THEN 'delivery'
+  WHEN d.sum < ${COUNTER_SALE_MAX} THEN 'counter'
+  ELSE 'pickup'
+END`
+
 const PAY_TYPES: Record<number, string> = {
   0: 'מזומן',
   1: 'שיק',
@@ -80,21 +108,31 @@ export async function fetchSummary(r: DateRange) {
   // column, so the KPI (1306) and the channel chart (1279) disagreed on the
   // same screen. Revenue share comes from the same pass: delivery is ~39% of
   // orders but ~56% of money, and the money is what an owner feels.
-  const [delivery] = await pizzaHouseQuery<{
-    delivery_orders: number
-    delivery_revenue: number | null
+  const channelRows = await pizzaHouseQuery<{
+    channel: string
+    orders: number
+    revenue: number | null
   }>(
-    `SELECT
-       COUNT(*) as delivery_orders,
-       ROUND(SUM(d.sum), 2) as delivery_revenue
+    `SELECT ${CHANNEL_SQL} as channel,
+            COUNT(*) as orders,
+            ROUND(SUM(d.sum), 2) as revenue
      FROM deals d
      WHERE d.tm_open >= ? AND d.tm_open < ? AND d.sum > 0
-       AND EXISTS (
-         SELECT 1 FROM paymentitm p
-         WHERE p.id_deal = d.id_deal AND ${DELIVERY_PATTERN.replace(/name/g, 'p.name')}
-       )`,
+     GROUP BY channel`,
     [r.from, r.to]
   )
+  const channelOf = (name: string) => channelRows.find(c => c.channel === name)
+  const deliveryOrders = channelOf('delivery')?.orders ?? 0
+  const deliveryRevenue = Number(channelOf('delivery')?.revenue ?? 0)
+  const pickupOrders = channelOf('pickup')?.orders ?? 0
+  const pickupRevenue = Number(channelOf('pickup')?.revenue ?? 0)
+  const counterOrders = channelOf('counter')?.orders ?? 0
+  const counterRevenue = Number(channelOf('counter')?.revenue ?? 0)
+
+  // Delivery share is of *orders* — delivery + pickup. Counter sales are
+  // reported separately rather than folded into the denominator.
+  const realOrders = deliveryOrders + pickupOrders
+  const realOrderRevenue = deliveryRevenue + pickupRevenue
 
   // Customer identity = card fingerprint (id_card + validto).
   //
@@ -150,9 +188,6 @@ export async function fetchSummary(r: DateRange) {
   )
 
   const orders = deals?.orders ?? 0
-  const revenue = Number(deals?.revenue ?? 0)
-  const deliveryOrders = delivery?.delivery_orders ?? 0
-  const deliveryRevenue = Number(delivery?.delivery_revenue ?? 0)
   const cardCustomers = customers?.unique_customers ?? 0
   const mealCardCustomers = mealCards?.meal_card_customers ?? 0
   const identifiedCustomers = cardCustomers + mealCardCustomers
@@ -168,9 +203,16 @@ export async function fetchSummary(r: DateRange) {
     discounts: items?.discounts ?? 0,
     discounted_lines: items?.discounted_lines ?? 0,
     delivery_orders: deliveryOrders,
-    delivery_pct: orders > 0 ? Math.round((deliveryOrders / orders) * 100) : 0,
+    delivery_pct: realOrders > 0 ? Math.round((deliveryOrders / realOrders) * 100) : 0,
     delivery_revenue: deliveryRevenue,
-    delivery_revenue_pct: revenue > 0 ? Math.round((deliveryRevenue / revenue) * 100) : 0,
+    delivery_revenue_pct:
+      realOrderRevenue > 0 ? Math.round((deliveryRevenue / realOrderRevenue) * 100) : 0,
+    // The denominator behind both percentages, so the UI can state it plainly.
+    order_count: realOrders,
+    pickup_orders: pickupOrders,
+    counter_sales: counterOrders,
+    counter_sales_revenue: counterRevenue,
+    counter_sale_max: COUNTER_SALE_MAX,
     unique_customers: identifiedCustomers,
     unique_by_card: cardCustomers,
     unique_by_meal_card: mealCardCustomers,
@@ -398,19 +440,16 @@ export async function fetchChannels(r: DateRange) {
     revenue: number
     avg_order: number
   }>(
-    `SELECT
-       CASE WHEN dlv.id_deal IS NOT NULL THEN 'delivery' ELSE 'pickup' END as channel,
+    // Same CHANNEL_SQL as the KPI cards — these two disagreed on screen once
+    // (1306 vs 1279) and the fix is that there is only one definition.
+    `SELECT ${CHANNEL_SQL} as channel,
        COUNT(*) as orders,
        ROUND(SUM(d.sum), 2) as revenue,
        ROUND(AVG(d.sum), 2) as avg_order
      FROM deals d
-     LEFT JOIN (
-       SELECT DISTINCT id_deal FROM paymentitm
-       WHERE date >= ? AND date < ? AND ${DELIVERY_PATTERN}
-     ) dlv ON dlv.id_deal = d.id_deal
      WHERE d.tm_open >= ? AND d.tm_open < ? AND d.sum > 0
      GROUP BY channel`,
-    [r.from, r.to, r.from, r.to]
+    [r.from, r.to]
   )
   return rows
 }
