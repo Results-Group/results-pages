@@ -21,7 +21,11 @@ export async function GET(
   const { path } = await params
   const filePath = (path || []).map(decodeURIComponent).join('/')
 
-  const hasAllowedPrefix = filePath.startsWith('campaigns/') || filePath.startsWith('clients/')
+  // Every product that stores images in the campaign-assets bucket has to be
+  // listed here. A missing prefix doesn't fail loudly — it 404s every image in
+  // that product with no error anywhere to explain why.
+  const ALLOWED_PREFIXES = ['campaigns/', 'clients/', 'strategy/']
+  const hasAllowedPrefix = ALLOWED_PREFIXES.some(p => filePath.startsWith(p))
   if (!filePath || !hasAllowedPrefix || filePath.includes('..')) {
     return new NextResponse('Not found', { status: 404 })
   }
