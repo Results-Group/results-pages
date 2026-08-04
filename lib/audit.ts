@@ -3,7 +3,10 @@ import { captureException } from './logger'
 import type { SessionUser } from './auth'
 
 export type AuditAction = 'create' | 'update' | 'delete' | 'restore' | 'publish' | 'purge'
-export type AuditEntity = 'campaign' | 'page' | 'client' | 'user' | 'workspace' | 'report'
+// Mirrored by a CHECK constraint on audit_log.entity_type. Adding a value here
+// without widening the constraint makes every logAudit call for it fail
+// silently — the trail just has a hole in it.
+export type AuditEntity = 'campaign' | 'page' | 'client' | 'user' | 'workspace' | 'report' | 'strategy_doc'
 
 export interface AuditEntry {
   id: string

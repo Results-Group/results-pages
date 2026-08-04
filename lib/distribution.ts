@@ -9,6 +9,8 @@
  * the same number twice and the table can't disagree with the chart.
  */
 
+import { type PlanDoc, type PlanDocNode, docIsEmpty } from './rich-doc'
+
 export interface DistributionChannel {
   id: string
   /** "Meta", "Google Search", "TikTok" */
@@ -225,26 +227,11 @@ export function percentWarning(channels: DistributionChannel[]): string | null {
 // ── Rich text document ──
 
 /**
- * A ProseMirror/TipTap document, typed structurally so nothing outside the
- * admin editor has to depend on TipTap — the client's deck renders this with a
- * plain React function and never loads the library.
- *
- * The renderer walks these nodes and emits text only. Storing the document
- * rather than HTML is what keeps that guarantee: there is no markup to inject,
- * whatever gets pasted into the editor.
+ * The document types and generic helpers now live in lib/rich-doc.ts so the
+ * strategy deck can share them. Re-exported here so existing importers of
+ * lib/distribution keep working unchanged.
  */
-export interface PlanDocNode {
-  type: string
-  attrs?: { level?: number }
-  content?: PlanDocNode[]
-  text?: string
-  marks?: { type: string }[]
-}
-
-export interface PlanDoc {
-  type: 'doc'
-  content?: PlanDocNode[]
-}
+export { type PlanDoc, type PlanDocNode, docIsEmpty, docPlainText, docFromLines, emptyDoc } from './rich-doc'
 
 const textNode = (text: string, bold = false): PlanDocNode => ({
   type: 'text',
@@ -307,22 +294,6 @@ export function planTextToDoc(src: string): PlanDoc {
   }
 
   return { type: 'doc', content }
-}
-
-/** True when the document holds no visible text. */
-export function docIsEmpty(doc?: PlanDoc | null): boolean {
-  if (!doc || !Array.isArray(doc.content) || doc.content.length === 0) return true
-  const hasText = (nodes: PlanDocNode[]): boolean =>
-    nodes.some(n => (typeof n.text === 'string' && n.text.trim().length > 0) || (n.content ? hasText(n.content) : false))
-  return !hasText(doc.content)
-}
-
-/** Flattens a document to plain text — used for previews and summaries. */
-export function docPlainText(doc?: PlanDoc | null): string {
-  if (!doc?.content) return ''
-  const walk = (nodes: PlanDocNode[]): string =>
-    nodes.map(n => (typeof n.text === 'string' ? n.text : '') + (n.content ? ` ${walk(n.content)}` : '')).join(' ')
-  return walk(doc.content).replace(/\s+/g, ' ').trim()
 }
 
 /** The document to render: the rich one if present, else the legacy text. */

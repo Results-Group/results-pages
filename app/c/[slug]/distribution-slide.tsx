@@ -4,6 +4,7 @@
 // which renders this component directly, gets the same styles. The bundler
 // dedupes the second import.
 import './presentation.css'
+import { RichText, DIST_CLASSES } from '@/app/_deck/rich-text'
 import {
   normalizePlan,
   visibleBlocks,
@@ -17,7 +18,6 @@ import {
   type DistributionPlan,
   type DistributionChannel,
   type PlanDoc,
-  type PlanDocNode,
 } from '@/lib/distribution'
 import he from '@/lib/i18n/he'
 import en from '@/lib/i18n/en'
@@ -176,60 +176,9 @@ export default function DistributionSlide({
 }
 
 /**
- * Renders the stored document.
- *
- * A deliberate whitelist: any node type not handled here renders as nothing,
- * and text is emitted as text. That is what makes it safe to show a document an
- * operator pasted from anywhere into a page a client opens — there is no path
- * from the stored data to markup.
- */
-function renderNodes(nodes: PlanDocNode[], keyPrefix = ''): React.ReactNode {
-  return nodes.map((node, i) => {
-    const key = `${keyPrefix}${i}`
-    switch (node.type) {
-      case 'text': {
-        const bold = node.marks?.some(m => m.type === 'bold')
-        const italic = node.marks?.some(m => m.type === 'italic')
-        let out: React.ReactNode = node.text ?? ''
-        if (italic) out = <em key={key}>{out}</em>
-        if (bold) out = <strong key={key}>{out}</strong>
-        return <span key={key}>{out}</span>
-      }
-      case 'hardBreak':
-        return <br key={key} />
-      case 'heading': {
-        const level = Math.min(Math.max(node.attrs?.level ?? 2, 1), 3)
-        return (
-          <h3 key={key} className={`dist-text-h lvl-${level}`}>
-            {renderNodes(node.content || [], `${key}-`)}
-          </h3>
-        )
-      }
-      case 'paragraph':
-        return <p key={key} className="dist-text-p">{renderNodes(node.content || [], `${key}-`)}</p>
-      case 'bulletList':
-      case 'orderedList':
-        return (
-          <ul key={key} className={`dist-text-list${node.type === 'orderedList' ? ' is-ordered' : ''}`}>
-            {renderNodes(node.content || [], `${key}-`)}
-          </ul>
-        )
-      case 'listItem':
-        return <li key={key}>{renderNodes(node.content || [], `${key}-`)}</li>
-      default:
-        return null
-    }
-  })
-}
-
-/**
  * The free-text block: a whole plan written or pasted in, rendered as headings,
  * nested bullets and prose. Centred on the slide, text right-aligned.
  */
 function PlanText({ doc }: { doc: PlanDoc }) {
-  return (
-    <div className="dist-text rp-anim rp-up rp-d3" dir="rtl">
-      {renderNodes(doc.content || [])}
-    </div>
-  )
+  return <RichText doc={doc} classes={DIST_CLASSES} className="dist-text rp-anim rp-up rp-d3" />
 }

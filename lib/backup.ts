@@ -40,6 +40,7 @@ const TABLES = [
   'gbp_connections',
   'gbp_locations',
   'gbp_daily_metrics',
+  'strategy_docs',
 ] as const
 
 const SOURCE_BUCKETS = ['landing-pages', 'campaign-assets'] as const
