@@ -5,6 +5,7 @@ import { LayoutGrid, Settings2, Upload, Lock, Trash2, Clock, Plus, X, Sparkles, 
 import ClientAutocomplete from '../../../_components/client-autocomplete'
 import DistributionPlanFields from './DistributionPlanFields'
 import { MOCKUP_TYPES, newCopy, type CampaignMeta, type EditorSection, type MockupType } from './types'
+import CopyTextArea from './CopyTextArea'
 import { useT, useDir } from '@/lib/i18n'
 
 const fieldStyle: React.CSSProperties = {
@@ -404,18 +405,14 @@ export default function Inspector({
                     onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
                     onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
                   />
-                  <textarea
+                  <CopyTextArea
                     value={copy.body}
-                    onChange={e => onUpdateMeta({
-                      copies: meta.copies.map((c, i) => i === idx ? { ...c, body: e.target.value } : c),
+                    onChange={body => onUpdateMeta({
+                      copies: meta.copies.map((c, i) => i === idx ? { ...c, body } : c),
                     })}
-                    rows={3}
                     placeholder={`${t('campaigns.versionPlaceholder')} ${idx + 1}...`}
-                    dir="auto"
-                    className="w-full px-3 py-2.5 rounded-lg text-sm outline-none resize-none transition-all duration-200"
+                    label={copy.label || `${t('campaigns.versionLabel')} ${idx + 1}`}
                     style={fieldStyle}
-                    onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
-                    onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
                   />
                 </div>
               ))}
