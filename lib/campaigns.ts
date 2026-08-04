@@ -64,9 +64,18 @@ export interface Campaign {
 
 // ── Queries ──
 
-export async function getCampaigns(filters?: { search?: string; status?: string; workspace_id?: string; deleted?: boolean; templates?: boolean }) {
+/** A campaign in a list view: no sections, but the two numbers the list shows. */
+export type CampaignSummary = Omit<Campaign, 'sections'> & {
+  section_count: number
+  asset_count: number
+}
+
+export async function getCampaigns(filters?: { search?: string; status?: string; workspace_id?: string; deleted?: boolean; templates?: boolean }): Promise<CampaignSummary[]> {
   let query = supabase.from('campaigns')
-    .select('id,client,client_id,campaign_name,slug,concept,logo_path,status,publish_at,expires_at,password,created_by,workspace_id,deleted_at,is_template,created_at,updated_at')
+    // `sections` is read here only to count it — see the strip below. The list
+    // used to omit the column entirely, which is why every card showed
+    // "0 שקפים · 0 תוצרים": there was nothing to count.
+    .select('id,client,client_id,campaign_name,slug,concept,logo_path,status,publish_at,expires_at,password,created_by,workspace_id,deleted_at,is_template,created_at,updated_at,sections')
     .order('created_at', { ascending: false })
 
   // Templates are a separate list; the normal list never shows them.
@@ -89,7 +98,19 @@ export async function getCampaigns(filters?: { search?: string; status?: string;
 
   const { data, error } = await query
   if (error) throw error
-  return (data || []) as Campaign[]
+
+  // Counted on the server and dropped from the payload: the numbers are two
+  // integers, and a list of 40 campaigns has no business shipping every
+  // section's copy and asset metadata to the browser to derive them.
+  return (data || []).map(row => {
+    const { sections, ...rest } = row as Campaign
+    const list = Array.isArray(sections) ? sections : []
+    return {
+      ...rest,
+      section_count: list.length,
+      asset_count: list.reduce((sum, s) => sum + (Array.isArray(s?.assets) ? s.assets.length : 0), 0),
+    } as CampaignSummary
+  })
 }
 
 export async function getCampaignById(id: string): Promise<Campaign | null> {

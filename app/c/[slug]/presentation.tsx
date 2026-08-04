@@ -11,6 +11,7 @@ import InstagramReelsMockup from './mockups/instagram-reels'
 import LandingPageMockup from './mockups/landing-page-mockup'
 import FacebookFeedMockup from './mockups/facebook-feed'
 import VideoPlayer from './mockups/VideoPlayer'
+import { CaptionExpansionProvider } from './mockups/AdCaption'
 import CarouselFeed from './mockups/carousel-feed'
 import GeneralCard from './mockups/general-card'
 import DistributionSlide from './distribution-slide'
@@ -607,7 +608,11 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
         </div>
       )}
 
+      {/* One expansion state for the whole grid: the mockups sit side by side
+          showing the same copy, and expanding one alone left the pair at
+          different heights. */}
       {assets.length > 0 && !isCarousel && (
+        <CaptionExpansionProvider>
         <div className={`assets-grid ${isStory ? 'story-grid' : isLanding ? 'landing-grid' : 'standard-grid'} count-${Math.min(assets.length, 4)}`}>
           {assets.map((asset, i) => (
             <div
@@ -634,6 +639,7 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
             </div>
           ))}
         </div>
+        </CaptionExpansionProvider>
       )}
     </div>
   )

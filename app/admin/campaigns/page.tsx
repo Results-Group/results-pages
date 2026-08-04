@@ -14,7 +14,8 @@ interface Campaign {
   campaign_name: string
   slug: string
   status: 'draft' | 'published' | 'archived'
-  sections: { assets: unknown[] }[]
+  section_count?: number
+  asset_count?: number
   created_at: string
   workspace_id: string | null
   created_by?: string | null
@@ -237,14 +238,10 @@ export default function CampaignsListPage() {
     }
   }
 
-  function parseSections(raw: unknown): { assets: unknown[] }[] {
-    if (Array.isArray(raw)) return raw
-    if (typeof raw === 'string') { try { const p = JSON.parse(raw); if (Array.isArray(p)) return p } catch {} }
-    return []
-  }
-
-  const totalAssets = (c: Campaign) => parseSections(c.sections).reduce((sum, s) => sum + (s.assets?.length || 0), 0)
-  const totalSections = (c: Campaign) => parseSections(c.sections).length
+  // Counted by the API, not here: the list endpoint no longer ships every
+  // campaign's sections just so the card can show two numbers.
+  const totalAssets = (c: Campaign) => c.asset_count ?? 0
+  const totalSections = (c: Campaign) => c.section_count ?? 0
 
   const filteredCampaigns = campaigns.filter(c =>
     (statusFilter === 'all' || c.status === statusFilter) &&

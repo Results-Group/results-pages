@@ -11,6 +11,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { Upload, Trash2, GripVertical, Link2, RefreshCw, LayoutTemplate, ImageIcon } from 'lucide-react'
 import CanvasAsset from './CanvasAsset'
+import { CaptionExpansionProvider } from '@/app/c/[slug]/mockups/AdCaption'
 import DistributionSlide from '@/app/c/[slug]/distribution-slide'
 import type { EditorAsset, EditorSection, Copy } from './types'
 import { isImageFile, MAX_FILE_MB } from '@/lib/image-compress'
@@ -390,6 +391,9 @@ export default function SlideCanvas({
                               <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--admin-border) 20%, var(--admin-border) 80%, transparent)' }} />
                             </div>
                           )}
+                          {/* One expansion state per screen, matching the
+                              client deck — see CaptionExpansionProvider. */}
+                          <CaptionExpansionProvider>
                           <div className={gridClass}>
                             {page.map(asset => (
                               <SortableAssetCard
@@ -405,6 +409,7 @@ export default function SlideCanvas({
                               />
                             ))}
                           </div>
+                          </CaptionExpansionProvider>
                         </div>
                       ))}
                     </div>
