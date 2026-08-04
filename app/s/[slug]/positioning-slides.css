@@ -67,16 +67,63 @@
   background: linear-gradient(90deg, var(--results-cyan), var(--results-green));
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-/* The המיצוב slide. It is the conclusion the whole document builds toward, so
-   it is the only place the deck sets type this large. */
-.campaign-pres .pos-statement.is-hero { max-width: 1000px }
-.campaign-pres .pos-statement.is-hero .pos-statement-body { position: relative }
-.campaign-pres .pos-statement.is-hero .dist-text-p {
-  font-size: 1.75rem; line-height: 1.85; color: var(--text-primary); font-weight: 700;
+/* ── the המיצוב slide ──────────────────────────────────────────────────────
+   The conclusion the whole document builds to, and the slide a client
+   screenshots. It is framed and vertically centred rather than being the plain
+   statement at a larger size — as plain text it read as a paragraph someone
+   forgot to finish, with half the screen empty beneath it. */
+.campaign-pres .pos-hero {
+  position: relative; min-height: 60vh; max-width: 1020px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  padding: 54px 40px;
 }
-.campaign-pres .pos-statement.is-hero .pos-statement-body::before {
-  content: ''; display: block; width: 64px; height: 3px; margin: 0 auto 30px;
-  background: linear-gradient(90deg, var(--results-cyan), var(--brand-yellow)); border-radius: 2px;
+.campaign-pres .pos-hero-frame {
+  position: absolute; inset: 0; border-radius: 26px; pointer-events: none;
+  border: 1px solid rgba(243,213,109,0.22);
+}
+.campaign-pres .pos-hero-glow {
+  position: absolute; inset: 0; pointer-events: none; border-radius: 26px; overflow: hidden;
+}
+.campaign-pres .pos-hero-glow::after {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: 900px; height: 520px; transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse, rgba(64,225,211,0.10) 0%, transparent 70%);
+}
+/* Two corner marks rather than four: the cover already uses all four, and
+   repeating it exactly would read as a duplicate rather than a rhyme. */
+.campaign-pres .pos-hero-corner {
+  position: absolute; width: 52px; height: 52px; pointer-events: none;
+  border-color: var(--brand-yellow); opacity: 0.7;
+}
+/* Flush with the frame, same radius — offset by a pixel they drew a doubled
+   line at the corner. */
+.campaign-pres .pos-hero-corner.tr { top: 0; right: 0; border-top: 2px solid; border-right: 2px solid; border-top-right-radius: 26px }
+.campaign-pres .pos-hero-corner.bl { bottom: 0; left: 0; border-bottom: 2px solid; border-left: 2px solid; border-bottom-left-radius: 26px }
+
+.campaign-pres .pos-hero-inner {
+  position: relative; z-index: 1; max-width: 800px; text-align: center;
+}
+.campaign-pres .pos-hero-kicker {
+  display: inline-block; margin-bottom: 22px;
+  font-size: 0.82rem; font-weight: 800; letter-spacing: 0.28em;
+  background: linear-gradient(90deg, var(--results-cyan), var(--brand-yellow));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.campaign-pres .pos-hero-sub {
+  font-size: 0.98rem; color: var(--text-secondary); margin: 0 0 22px;
+}
+/* No quote watermark here, deliberately. Flanking glyphs floated free of a
+   centred paragraph that wraps, and one behind the text smudged the kicker.
+   The frame, the glow and the type carry the slide on their own. */
+.campaign-pres .pos-hero-quote { position: relative }
+.campaign-pres .pos-hero-quote .dist-text-p {
+  font-size: 2rem; line-height: 1.6; font-weight: 700;
+  color: var(--text-primary); margin: 0 0 12px; letter-spacing: -0.02em;
+}
+.campaign-pres .pos-hero-quote .dist-text-p:last-child { margin-bottom: 0 }
+.campaign-pres .pos-hero-rule {
+  width: 72px; height: 3px; margin: 34px auto 0; border-radius: 2px;
+  background: linear-gradient(90deg, var(--results-cyan), var(--brand-yellow));
 }
 
 /* ── info ── */
@@ -103,14 +150,27 @@
 /* Numbering is a render concern, never stored — so reordering the boxes in the
    editor renumbers them automatically. */
 .campaign-pres .pos-box-num {
-  position: absolute; top: 10px; inset-inline-end: 18px;
-  font-size: 3.4rem; font-weight: 900; line-height: 1;
-  color: rgba(64,225,211,0.09); pointer-events: none;
+  position: absolute; top: 4px; inset-inline-end: 16px;
+  font-size: 5.4rem; font-weight: 900; line-height: 1;
+  /* Bright enough to read as a step number rather than a watermark, but still
+     behind the content — hence the z-index and the padding on the title. */
+  color: rgba(64,225,211,0.28); pointer-events: none; z-index: 0;
 }
-.campaign-pres .pos-box-title { font-size: 1.15rem; font-weight: 800; margin: 0 0 6px; position: relative }
+.campaign-pres .pos-box-title {
+  font-size: 1.15rem; font-weight: 800; margin: 0 0 6px;
+  position: relative; z-index: 1; padding-inline-end: 52px;
+}
 .campaign-pres .pos-box-sub { font-size: 0.92rem; color: var(--text-secondary); margin: 0 0 14px }
 .campaign-pres .pos-box-desc { font-size: 1rem; color: var(--text-secondary); line-height: 1.8; margin: 0 }
-.campaign-pres .pos-box-list { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 7px }
+/* A small label over each list, so "+" and "−" aren't the only thing telling
+   the reader which side they're looking at. */
+.campaign-pres .pos-box-listlabel {
+  display: block; margin: 14px 0 6px; font-size: 0.76rem; font-weight: 800;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.campaign-pres .pos-box-listlabel.is-pros { color: var(--results-green) }
+.campaign-pres .pos-box-listlabel.is-cons { color: #ff9b7a }
+.campaign-pres .pos-box-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px }
 .campaign-pres .pos-box-list li {
   position: relative; padding-inline-start: 24px; font-size: 0.96rem; color: var(--text-secondary);
 }
@@ -146,7 +206,13 @@
 .campaign-pres .pos-th-logo.needs-backdrop {
   background: #fff; border-radius: 6px; padding: 4px 6px; max-height: 34px;
 }
+/* The check has its own colour: a red "doesn't know" cell with a green tick
+   reads as a contradiction. 'none' keeps the default green. */
 .campaign-pres .pos-check { color: var(--results-green); flex-shrink: 0 }
+.campaign-pres .pos-checks[data-check-tint="white"] .pos-check { color: var(--tint-white-fg) }
+.campaign-pres .pos-checks[data-check-tint="green"] .pos-check { color: var(--tint-green-fg) }
+.campaign-pres .pos-checks[data-check-tint="light"] .pos-check { color: var(--tint-light-fg) }
+.campaign-pres .pos-checks[data-check-tint="alert"] .pos-check { color: var(--tint-alert-fg) }
 .campaign-pres .pos-checks { display: inline-flex; gap: 2px }
 
 /* ── question ── */
@@ -195,26 +261,79 @@
 .campaign-pres .pos-lang-desc { font-size: 0.98rem; color: var(--text-secondary); line-height: 1.75; margin: 0; white-space: pre-wrap }
 
 /* ── heat gauges ── */
-.campaign-pres .pos-gauges { display: grid; gap: 26px; max-width: 720px; margin: 0 auto }
-.campaign-pres .pos-gauge-heading { font-size: 1.05rem; font-weight: 800; margin: 0 0 10px; text-align: center }
-/* LTR on the track only: 0 sits at the left and 10 at the right, matching the
-   distribution timeline. The labels below are still read right-to-left. */
+/* Full width, not a centred 720px column: five short bars floating in the
+   middle of a wide slide read as a form, not as a brand profile. */
+.campaign-pres .pos-gauges { display: grid; gap: 30px; width: 100% }
+.campaign-pres .pos-gauge-heading {
+  font-size: 1rem; font-weight: 800; margin: 0 0 12px; text-align: center;
+  letter-spacing: 0.01em;
+}
+/* LTR for everything on the scale: 0 sits at the left and 10 at the right,
+   matching the distribution timeline. The headings above stay RTL. */
+.campaign-pres .pos-gauge-body { direction: ltr }
 .campaign-pres .pos-gauge-track {
-  direction: ltr; position: relative; height: 8px; border-radius: 99px;
+  position: relative; height: 8px; border-radius: 99px;
   background: rgba(255,255,255,0.06);
 }
 .campaign-pres .pos-gauge-fill {
-  position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: 99px;
-  background: linear-gradient(90deg, var(--results-cyan), var(--results-green));
+  position: absolute; inset-block: 0; left: 0; border-radius: 99px;
+  background: linear-gradient(90deg, var(--results-cyan), var(--brand-yellow));
 }
 .campaign-pres .pos-gauge-thumb {
-  position: absolute; top: 50%; width: 18px; height: 18px; border-radius: 50%;
+  position: absolute; top: 50%; width: 20px; height: 20px; border-radius: 50%;
   transform: translate(-50%, -50%); background: var(--text-primary);
-  box-shadow: 0 0 0 4px rgba(64,225,211,0.25);
+  box-shadow: 0 0 0 5px rgba(64,225,211,0.22), 0 2px 10px rgba(0,0,0,0.6);
 }
+
+/* The editor's control. A native range input, restyled to match the read-only
+   track exactly — the operator must not see a different gauge from the client.
+   Unstyled, it rendered as the browser's blue default. */
+.campaign-pres .pos-gauge-range {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 20px; background: transparent; cursor: pointer; display: block;
+}
+.campaign-pres .pos-gauge-range::-webkit-slider-runnable-track {
+  height: 8px; border-radius: 99px;
+  background: linear-gradient(90deg, var(--results-cyan) 0%, var(--brand-yellow) var(--fill), rgba(255,255,255,0.06) var(--fill));
+}
+.campaign-pres .pos-gauge-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; margin-top: -6px;
+  width: 20px; height: 20px; border-radius: 50%; border: none;
+  background: var(--text-primary);
+  box-shadow: 0 0 0 5px rgba(64,225,211,0.22), 0 2px 10px rgba(0,0,0,0.6);
+}
+.campaign-pres .pos-gauge-range::-moz-range-track {
+  height: 8px; border-radius: 99px; background: rgba(255,255,255,0.06);
+}
+.campaign-pres .pos-gauge-range::-moz-range-progress {
+  height: 8px; border-radius: 99px;
+  background: linear-gradient(90deg, var(--results-cyan), var(--brand-yellow));
+}
+.campaign-pres .pos-gauge-range::-moz-range-thumb {
+  width: 20px; height: 20px; border-radius: 50%; border: none;
+  background: var(--text-primary);
+  box-shadow: 0 0 0 5px rgba(64,225,211,0.22), 0 2px 10px rgba(0,0,0,0.6);
+}
+.campaign-pres .pos-gauge-range:focus-visible { outline: none }
+.campaign-pres .pos-gauge-range:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 5px rgba(64,225,211,0.5), 0 2px 10px rgba(0,0,0,0.6);
+}
+
+/* The 0–10 scale under the track. Numbers up to the current value are lit, so
+   the value is readable at a glance and not only by bar length. */
+.campaign-pres .pos-gauge-scale {
+  display: flex; justify-content: space-between; margin-top: 9px;
+  font-size: 0.74rem; font-variant-numeric: tabular-nums;
+  color: var(--text-secondary); opacity: 0.45;
+}
+.campaign-pres .pos-gauge-scale span { flex: 1; text-align: center }
+.campaign-pres .pos-gauge-scale span:first-child { text-align: left }
+.campaign-pres .pos-gauge-scale span:last-child { text-align: right }
+.campaign-pres .pos-gauge-scale .is-passed { color: var(--results-cyan); opacity: 1; font-weight: 700 }
+
 .campaign-pres .pos-gauge-ends {
-  direction: ltr; display: flex; justify-content: space-between;
-  margin-top: 10px; font-size: 0.88rem; color: var(--text-secondary);
+  display: flex; justify-content: space-between;
+  margin-top: 6px; font-size: 0.9rem; font-weight: 700; color: var(--text-primary);
 }
 
 /* ── positioning map ── */
@@ -227,20 +346,37 @@
   /* Sized from its HEIGHT, so the whole map is always on screen. Letting the
      width fill the slide and deriving the height from the ratio pushed the
      bottom half — and any competitor placed there — below the fold. */
-  height: min(58vh, 520px); width: auto; max-width: 100%; margin-inline: auto;
+  height: min(50vh, 440px); width: auto; max-width: 100%; margin-inline: auto;
 }
+/* Dashed and faint: the axes are a reference grid, not content. Solid 1px
+   lines competed with the marks sitting on them. */
+/* The coordinate space, inset from the frame. Padding on the plot would not
+   do: percentage offsets on an absolutely positioned child resolve against the
+   padding box, so a mark at 100% would still land on the border and collide
+   with the axis label there. */
+.campaign-pres .pos-map-field { position: absolute; inset: 46px }
+
 .campaign-pres .pos-map-axis-x,
-.campaign-pres .pos-map-axis-y { position: absolute; background: rgba(255,255,255,0.12) }
-.campaign-pres .pos-map-axis-x { left: 0; right: 0; top: 50%; height: 1px }
-.campaign-pres .pos-map-axis-y { top: 0; bottom: 0; left: 50%; width: 1px }
-.campaign-pres .pos-map-label {
-  position: absolute; font-size: 0.86rem; font-weight: 700; color: var(--text-secondary);
-  background: rgba(9,12,14,0.72); padding: 3px 9px; border-radius: 8px; white-space: nowrap;
+.campaign-pres .pos-map-axis-y { position: absolute; opacity: 0.5 }
+.campaign-pres .pos-map-axis-x {
+  left: -14px; right: -14px; top: 50%; height: 0;
+  border-top: 1px dashed rgba(255,255,255,0.16);
 }
-.campaign-pres .pos-map-label.at-right { top: 50%; right: 10px; transform: translateY(-50%) }
-.campaign-pres .pos-map-label.at-left { top: 50%; left: 10px; transform: translateY(-50%) }
-.campaign-pres .pos-map-label.at-top { top: 10px; left: 50%; transform: translateX(-50%) }
-.campaign-pres .pos-map-label.at-bottom { bottom: 10px; left: 50%; transform: translateX(-50%) }
+.campaign-pres .pos-map-axis-y {
+  top: -14px; bottom: -14px; left: 50%; width: 0;
+  border-left: 1px dashed rgba(255,255,255,0.16);
+}
+/* Axis labels sit clear of the lines, in the deck's small-caps voice. The
+   black pills they had before looked like UI dropped onto the chart. */
+.campaign-pres .pos-map-label {
+  position: absolute; white-space: nowrap;
+  font-size: 0.72rem; font-weight: 800; letter-spacing: 0.16em;
+  color: var(--text-secondary); opacity: 0.75;
+}
+.campaign-pres .pos-map-label.at-right { top: calc(50% - 26px); right: 16px }
+.campaign-pres .pos-map-label.at-left { top: calc(50% - 26px); left: 16px }
+.campaign-pres .pos-map-label.at-top { top: 16px; left: 50%; transform: translateX(-50%) }
+.campaign-pres .pos-map-label.at-bottom { bottom: 16px; left: 50%; transform: translateX(-50%) }
 /* A ring, not a filled disc: at any fill opacity strong enough to read, a
    yellow circle drowns the logos it exists to highlight. */
 .campaign-pres .pos-map-zone {
@@ -259,13 +395,15 @@
   background: #fff; border-radius: 8px; padding: 5px 7px;
 }
 .campaign-pres .pos-map-dot {
-  width: 14px; height: 14px; border-radius: 50%;
-  background: var(--results-cyan); box-shadow: 0 0 0 4px rgba(64,225,211,0.2);
+  width: 13px; height: 13px; border-radius: 50%;
+  background: var(--results-cyan);
+  box-shadow: 0 0 0 5px rgba(64,225,211,0.14), 0 0 18px 2px rgba(64,225,211,0.35);
 }
 .campaign-pres .pos-map-mark-label {
-  font-size: 0.76rem; font-weight: 700; color: var(--text-primary);
-  background: rgba(9,12,14,0.75); padding: 2px 7px; border-radius: 6px;
-  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 0.78rem; font-weight: 700; color: var(--text-primary);
+  /* Readable over the plot without a hard black pill behind every mark. */
+  text-shadow: 0 1px 6px rgba(9,12,14,0.95), 0 0 14px rgba(9,12,14,0.8);
+  max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .campaign-pres .pos-map-mark-num { display: none }
 .campaign-pres .pos-map-legend {
@@ -284,7 +422,9 @@
   .campaign-pres .pos-boxes,
   .campaign-pres .pos-lang { grid-template-columns: 1fr }
   .campaign-pres .pos-statement.is-transition .pos-statement-title { font-size: 1.9rem }
-  .campaign-pres .pos-statement.is-hero .dist-text-p { font-size: 1.3rem }
+  .campaign-pres .pos-hero { min-height: 54vh; padding: 34px 18px }
+  .campaign-pres .pos-hero-quote .dist-text-p { font-size: 1.32rem; line-height: 1.65 }
+  .campaign-pres .pos-hero-corner { width: 28px; height: 28px }
   .campaign-pres .pos-question-quote { font-size: 1.2rem; padding: 28px 26px }
 
   /* Image first regardless of the desktop side: alternating sides on a phone
@@ -309,6 +449,7 @@
   .campaign-pres .pos-cell-label img { max-height: 20px; max-width: 60px; object-fit: contain }
 
   .campaign-pres .pos-map-plot { --pos-aspect: 1; aspect-ratio: 1; height: auto; width: 100% }
+  .campaign-pres .pos-map-field { inset: 34px }
   /* Six logos at 375px collide into mush; number the marks and list them below. */
   .campaign-pres .pos-map-mark { width: clamp(34px, 12vw, 56px) }
   .campaign-pres .pos-map-mark-label { display: none }

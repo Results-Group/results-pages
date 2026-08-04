@@ -100,8 +100,8 @@ describe('matrix_table — cells follow their column', () => {
   it('drops cells for a removed column and fills cells for a new one', () => {
     const table = SECTION_KINDS.matrix_table.create()
     const [first, second] = table.columns
-    table.rows[0].cells[first.id] = { text: 'A', checks: 0, tint: 'green' }
-    table.rows[0].cells[second.id] = { text: 'B', checks: 0, tint: 'alert' }
+    table.rows[0].cells[first.id] = { text: 'A', checks: 0, tint: 'green', checkTint: 'none' }
+    table.rows[0].cells[second.id] = { text: 'B', checks: 0, tint: 'alert', checkTint: 'none' }
 
     const withColumnRemoved = { ...table, columns: [second] }
     const out = normalizeSection(withColumnRemoved) as MatrixTableSection
@@ -115,7 +115,7 @@ describe('matrix_table — cells follow their column', () => {
     const table = SECTION_KINDS.matrix_table.create()
     const added = { id: 'new-col', label: 'מתחרה 3' }
     const out = normalizeSection({ ...table, columns: [...table.columns, added] }) as MatrixTableSection
-    expect(out.rows[0].cells['new-col']).toEqual({ text: '', checks: 0, tint: 'none' })
+    expect(out.rows[0].cells['new-col']).toEqual({ text: '', checks: 0, tint: 'none', checkTint: 'none' })
   })
 
   it('locks the preset tables to their fixed columns', () => {
@@ -126,8 +126,17 @@ describe('matrix_table — cells follow their column', () => {
   it('rejects an invented tint rather than emitting an unstyled cell', () => {
     const table = SECTION_KINDS.matrix_table.create()
     const colId = table.columns[0].id
-    table.rows[0].cells[colId] = { text: '', checks: 0, tint: 'neon' as never }
+    table.rows[0].cells[colId] = { text: '', checks: 0, tint: 'neon' as never, checkTint: 'none' }
     expect((normalizeSection(table) as MatrixTableSection).rows[0].cells[colId].tint).toBe('none')
+  })
+
+  it('gives the check its own colour, independent of the cell background', () => {
+    // A red "doesn't know" cell with a green tick reads as a contradiction.
+    const table = SECTION_KINDS.matrix_table.create()
+    const colId = table.columns[0].id
+    table.rows[0].cells[colId] = { text: '', checks: 1, tint: 'alert', checkTint: 'alert' }
+    const out = normalizeSection(table) as MatrixTableSection
+    expect(out.rows[0].cells[colId]).toMatchObject({ tint: 'alert', checkTint: 'alert' })
   })
 })
 

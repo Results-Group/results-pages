@@ -2,7 +2,7 @@
 
 import { assetProxyUrl } from '@/lib/asset-url'
 import { useLogoNeedsDarkBackdrop } from '@/app/c/[slug]/mockups/useLogoContrast'
-import { matrixHeaderLabel } from '@/lib/strategy/registry'
+import { matrixHeaderLabel, emptyCell } from '@/lib/strategy/registry'
 import type { MatrixTableSection, MatrixColumn, MatrixCell } from '@/lib/strategy/types'
 import { EmptyHint, SlideHeader, type SlideProps } from './index'
 
@@ -55,7 +55,7 @@ function ColumnHeading({ column }: { column: MatrixColumn }) {
 function CellBody({ cell }: { cell: MatrixCell }) {
   if (cell.checks > 0) {
     return (
-      <span className="pos-checks" aria-label={`${cell.checks}`}>
+      <span className="pos-checks" data-check-tint={cell.checkTint} aria-label={`${cell.checks}`}>
         {Array.from({ length: cell.checks }, (_, i) => <Check key={i} />)}
       </span>
     )
@@ -96,7 +96,7 @@ export default function MatrixTableSlide({ section, edit }: SlideProps<MatrixTab
           <div key={row.id} style={{ display: 'contents' }}>
             <div className="pos-cell pos-row-header">{row.header}</div>
             {columns.map(column => {
-              const cell = row.cells[column.id] ?? { text: '', checks: 0, tint: 'none' as const }
+              const cell = row.cells[column.id] ?? emptyCell()
               return (
                 <div className="pos-cell" key={column.id} data-tint={cell.tint}>
                   {/* Hidden on desktop; on mobile it is what tells the reader

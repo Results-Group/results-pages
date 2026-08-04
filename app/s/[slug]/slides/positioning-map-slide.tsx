@@ -116,20 +116,22 @@ export default function PositioningMapSlide({ section, edit }: SlideProps<Positi
 
       <div
         className="pos-map-plot rp-anim rp-up rp-d3"
-        ref={plotRef}
         // The deck's global arrow handler must not steal the keys a focused
         // mark uses to nudge itself.
         data-deck-keys={edit ? 'off' : undefined}
         data-swipe={edit ? 'off' : undefined}
       >
-        <div className="pos-map-axis-x" />
-        <div className="pos-map-axis-y" />
-
         {/* `start` is the end a Hebrew reader meets first: the right edge, the bottom. */}
         {section.axisX.startLabel ? <span className="pos-map-label at-right">{section.axisX.startLabel}</span> : null}
         {section.axisX.endLabel ? <span className="pos-map-label at-left">{section.axisX.endLabel}</span> : null}
         {section.axisY.startLabel ? <span className="pos-map-label at-bottom">{section.axisY.startLabel}</span> : null}
         {section.axisY.endLabel ? <span className="pos-map-label at-top">{section.axisY.endLabel}</span> : null}
+
+        {/* The coordinate space is this inset layer, not the framed plot — see
+            the note on .pos-map-field. The drag hook measures it too. */}
+        <div className="pos-map-field" ref={plotRef}>
+        <div className="pos-map-axis-x" />
+        <div className="pos-map-axis-y" />
 
         {section.zones.map(zone => (
           <div
@@ -155,6 +157,7 @@ export default function PositioningMapSlide({ section, edit }: SlideProps<Positi
             onDragCommit={onDragCommit}
           />
         ))}
+        </div>
       </div>
 
       {/* Below 768px the on-plot labels are hidden — six of them collide into

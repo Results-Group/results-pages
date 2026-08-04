@@ -208,7 +208,8 @@ export default function MatrixTableFields({ section, onChange, ensureDoc }: Fiel
                           </button>
                         ))}
                       </div>
-                      <div className="flex gap-1">
+                      <span className="block text-[10px] mb-1" style={{ color: 'var(--admin-text-muted)' }}>רקע התא</span>
+                      <div className="flex gap-1 mb-1.5">
                         {TINTS.map(tint => (
                           <button
                             key={tint.value} type="button" title={tint.label}
@@ -219,6 +220,28 @@ export default function MatrixTableFields({ section, onChange, ensureDoc }: Fiel
                               border: `1px solid ${cell.tint === tint.value ? 'var(--admin-text-primary)' : 'var(--admin-border)'}`,
                             }}
                           />
+                        ))}
+                      </div>
+
+                      {/* Separate from the cell background: a red "doesn't
+                          know" cell with a green tick reads as a contradiction. */}
+                      <span className="block text-[10px] mb-1" style={{ color: 'var(--admin-text-muted)' }}>צבע הוי</span>
+                      <div className="flex gap-1">
+                        {TINTS.map(tint => (
+                          <button
+                            key={tint.value} type="button" title={tint.label}
+                            onClick={() => patchCell(row.id, column.id, { checkTint: tint.value })}
+                            className="flex-1 h-5 rounded grid place-items-center"
+                            style={{
+                              background: 'transparent',
+                              border: `1px solid ${cell.checkTint === tint.value ? 'var(--admin-text-primary)' : 'var(--admin-border)'}`,
+                              color: tint.value === 'none' ? '#2EC4B6' : tint.swatch,
+                            }}
+                          >
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          </button>
                         ))}
                       </div>
                     </div>

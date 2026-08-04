@@ -74,6 +74,13 @@ export interface MatrixCell {
   /** Number of ✓ marks. The spec allows "one or more". 0 = none. */
   checks: number
   tint: CellTint
+  /**
+   * Colour of the ✓ marks, independent of the cell's background.
+   * 'none' is the default green. They are separate because a check can mean
+   * "yes, and that's bad" — a red-tinted "doesn't know" cell with a green tick
+   * reads as a contradiction.
+   */
+  checkTint: CellTint
 }
 
 export interface MatrixColumn {

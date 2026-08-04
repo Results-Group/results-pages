@@ -50,7 +50,7 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
 const TINTS: CellTint[] = ['none', 'white', 'green', 'light', 'alert']
 
 export function emptyCell(): MatrixCell {
-  return { text: '', checks: 0, tint: 'none' }
+  return { text: '', checks: 0, tint: 'none', checkTint: 'none' }
 }
 
 function normalizeCell(raw: unknown): MatrixCell {
@@ -60,6 +60,7 @@ function normalizeCell(raw: unknown): MatrixCell {
     text: str(c.text),
     checks: clamp(Math.round(num(c.checks, 0)), 0, 5),
     tint: TINTS.includes(c.tint as CellTint) ? (c.tint as CellTint) : 'none',
+    checkTint: TINTS.includes(c.checkTint as CellTint) ? (c.checkTint as CellTint) : 'none',
   }
 }
 
@@ -199,7 +200,9 @@ export const SECTION_KINDS = {
         id: str(z?.id) || uid(),
         cx: clamp(num(z?.cx, 0), -1, 1),
         cy: clamp(num(z?.cy, 0), -1, 1),
-        r: clamp(num(z?.r, 0.25), 0.05, 0.9),
+        // Radius, so 0.5 already spans the whole plot. Allowing 0.9 let the
+        // ring run off two edges and read as a stray arc.
+        r: clamp(num(z?.r, 0.22), 0.04, 0.5),
       })),
     }),
   },

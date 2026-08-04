@@ -15,6 +15,9 @@ import { SlideHeader, type SlideProps } from './index'
  * For the client it is a plain div with role="meter" — not role="slider", which
  * a screen-reader user could focus but not operate.
  */
+/** 0–10, rendered under every track. */
+const SCALE = Array.from({ length: 11 }, (_, i) => i)
+
 export default function HeatGaugesSlide({ section, edit }: SlideProps<HeatGaugesSection>) {
   const setValue = (id: string, value: number, commit: boolean) => {
     const gauges = section.gauges.map(g => (g.id === id ? { ...g, value } : g))
@@ -36,38 +39,49 @@ export default function HeatGaugesSlide({ section, edit }: SlideProps<HeatGauges
             <div className="pos-gauge" key={gauge.id}>
               <h3 className="pos-gauge-heading">{gauge.heading}</h3>
 
-              {edit ? (
-                <input
-                  type="range"
-                  min={0}
-                  max={10}
-                  step={0.5}
-                  value={gauge.value}
-                  aria-label={gauge.heading}
-                  className="pos-gauge-range"
-                  onInput={e => setValue(gauge.id, Number(e.currentTarget.value), false)}
-                  onChange={e => setValue(gauge.id, Number(e.currentTarget.value), false)}
-                  onPointerUp={e => setValue(gauge.id, Number(e.currentTarget.value), true)}
-                  onBlur={e => setValue(gauge.id, Number(e.currentTarget.value), true)}
-                  onKeyUp={e => setValue(gauge.id, Number(e.currentTarget.value), true)}
-                />
-              ) : (
-                <div
-                  className="pos-gauge-track"
-                  role="meter"
-                  aria-valuenow={gauge.value}
-                  aria-valuemin={0}
-                  aria-valuemax={10}
-                  aria-label={`${gauge.heading}: ${gauge.minLabel} עד ${gauge.maxLabel}`}
-                >
-                  <div className="pos-gauge-fill" style={{ width: `${pct}%` }} />
-                  <div className="pos-gauge-thumb" style={{ insetInlineStart: `${pct}%` }} />
-                </div>
-              )}
+              <div className="pos-gauge-body">
+                {edit ? (
+                  <input
+                    type="range"
+                    min={0}
+                    max={10}
+                    step={0.5}
+                    value={gauge.value}
+                    aria-label={gauge.heading}
+                    className="pos-gauge-range"
+                    style={{ ['--fill' as string]: `${pct}%` }}
+                    onInput={e => setValue(gauge.id, Number(e.currentTarget.value), false)}
+                    onChange={e => setValue(gauge.id, Number(e.currentTarget.value), false)}
+                    onPointerUp={e => setValue(gauge.id, Number(e.currentTarget.value), true)}
+                    onBlur={e => setValue(gauge.id, Number(e.currentTarget.value), true)}
+                    onKeyUp={e => setValue(gauge.id, Number(e.currentTarget.value), true)}
+                  />
+                ) : (
+                  <div
+                    className="pos-gauge-track"
+                    role="meter"
+                    aria-valuenow={gauge.value}
+                    aria-valuemin={0}
+                    aria-valuemax={10}
+                    aria-label={`${gauge.heading}: ${gauge.minLabel} עד ${gauge.maxLabel}`}
+                  >
+                    <div className="pos-gauge-fill" style={{ width: `${pct}%` }} />
+                    <div className="pos-gauge-thumb" style={{ left: `${pct}%` }} />
+                  </div>
+                )}
 
-              <div className="pos-gauge-ends">
-                <span>{gauge.minLabel}</span>
-                <span>{gauge.maxLabel}</span>
+                {/* The 0–10 scale, so a reader can name the value rather than
+                    only compare bar lengths. */}
+                <div className="pos-gauge-scale" aria-hidden="true">
+                  {SCALE.map(n => (
+                    <span key={n} className={n <= gauge.value ? 'is-passed' : undefined}>{n}</span>
+                  ))}
+                </div>
+
+                <div className="pos-gauge-ends">
+                  <span>{gauge.minLabel}</span>
+                  <span>{gauge.maxLabel}</span>
+                </div>
               </div>
             </div>
           )

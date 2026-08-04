@@ -8,8 +8,12 @@ import { EmptyHint, type SlideProps } from './index'
 /**
  * One centred statement. Serves six slides in the spec — the plan's purpose,
  * both transition slides, the negative positioning, the brand values, and the
- * positioning itself, which is the conclusion the whole document builds to and
- * the only place the deck sets type this large.
+ * positioning itself.
+ *
+ * The `hero` variant is the המיצוב slide: the conclusion the whole document
+ * builds toward, and the one the client will screenshot. It gets its own
+ * treatment — framed, vertically centred, with the statement set as a pull
+ * quote — rather than being the plain variant at a larger font size.
  */
 
 const CLASSES: RichTextClasses = {
@@ -19,11 +23,38 @@ const CLASSES: RichTextClasses = {
 }
 
 export default function StatementSlide({ section, edit }: SlideProps<StatementSection>) {
-  const isTransition = section.variant === 'transition'
   const empty = docIsEmpty(section.body)
 
+  if (section.variant === 'hero') {
+    return (
+      <div className="pos-hero">
+        {/* Inset frame and glow, echoing the cover — this slide is the other
+            bookend of the document. */}
+        <div className="pos-hero-frame" aria-hidden="true" />
+        <div className="pos-hero-glow" aria-hidden="true" />
+        <div className="pos-hero-corner tr" aria-hidden="true" />
+        <div className="pos-hero-corner bl" aria-hidden="true" />
+
+        <div className="pos-hero-inner">
+          {section.title ? <span className="pos-hero-kicker rp-anim rp-in rp-d1">{section.title}</span> : null}
+          {section.subtitle ? <p className="pos-hero-sub rp-anim rp-up rp-d2">{section.subtitle}</p> : null}
+
+          <div className="pos-hero-quote rp-anim rp-up rp-d3">
+            {empty
+              ? <EmptyHint edit={edit}>נסחו כאן את המיצוב</EmptyHint>
+              : <RichText doc={section.body} classes={CLASSES} />}
+          </div>
+
+          <div className="pos-hero-rule rp-anim rp-wipe rp-d4" aria-hidden="true" />
+        </div>
+      </div>
+    )
+  }
+
+  const isTransition = section.variant === 'transition'
+
   return (
-    <div className={`pos-statement${isTransition ? ' is-transition' : ''}${section.variant === 'hero' ? ' is-hero' : ''}`}>
+    <div className={`pos-statement${isTransition ? ' is-transition' : ''}`}>
       {section.title ? (
         isTransition
           ? <h2 className="pos-statement-title rp-anim rp-scale rp-d1">{section.title}</h2>

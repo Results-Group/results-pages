@@ -116,11 +116,11 @@ export default function PositioningMapFields({ section, onChange, ensureDoc }: F
           <div className="flex gap-1.5">
             <NumberField label="אופקי %" value={toPct(zone.cx)} onChange={v => onChange({ zones: [{ ...zone, cx: fromPct(v) }] })} />
             <NumberField label="אנכי %" value={toPct(zone.cy)} onChange={v => onChange({ zones: [{ ...zone, cy: fromPct(v) }] })} />
-            <NumberField label="גודל %" min={5} max={90} value={Math.round(zone.r * 100)} onChange={v => onChange({ zones: [{ ...zone, r: v / 100 }] })} />
+            <NumberField label="גודל %" min={4} max={50} value={Math.round(zone.r * 100)} onChange={v => onChange({ zones: [{ ...zone, r: v / 100 }] })} />
           </div>
         </RepeaterCard>
       ) : (
-        <AddButton onClick={() => onChange({ zones: [{ id: uid(), cx: 0, cy: 0, r: 0.25 }] })}>עיגול הדגשה</AddButton>
+        <AddButton onClick={() => onChange({ zones: [{ id: uid(), cx: 0, cy: 0, r: 0.22 }] })}>עיגול הדגשה</AddButton>
       )}
     </>
   )

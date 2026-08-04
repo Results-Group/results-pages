@@ -3,6 +3,9 @@
 import type { BoxesSection } from '@/lib/strategy/types'
 import { EmptyHint, SlideHeader, type SlideProps } from './index'
 
+const PROS_LABEL = 'יתרונות'
+const CONS_LABEL = 'חסרונות'
+
 /**
  * Three numbered cards. Serves the alternatives map (with pros/cons lists),
  * the founding values and the tone of voice (title + description).
@@ -38,14 +41,22 @@ export default function BoxesSlide({ section, edit }: SlideProps<BoxesSection>) 
               {section.variant === 'proscons' && (
                 <>
                   {pros.length > 0 && (
-                    <ul className="pos-box-list is-pros">
-                      {pros.map((p, j) => <li key={j}>{p}</li>)}
-                    </ul>
+                    <>
+                      {/* Labels live in the renderer, like the brand-language
+                          box titles — they are structure, not content. */}
+                      <span className="pos-box-listlabel is-pros">{PROS_LABEL}</span>
+                      <ul className="pos-box-list is-pros">
+                        {pros.map((p, j) => <li key={j}>{p}</li>)}
+                      </ul>
+                    </>
                   )}
                   {cons.length > 0 && (
-                    <ul className="pos-box-list is-cons">
-                      {cons.map((c, j) => <li key={j}>{c}</li>)}
-                    </ul>
+                    <>
+                      <span className="pos-box-listlabel is-cons">{CONS_LABEL}</span>
+                      <ul className="pos-box-list is-cons">
+                        {cons.map((c, j) => <li key={j}>{c}</li>)}
+                      </ul>
+                    </>
                   )}
                 </>
               )}
