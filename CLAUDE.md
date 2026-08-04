@@ -17,16 +17,29 @@ npm run migrate    # מריץ את supabase/migration*.sql
 לפני commit: `npm run typecheck` + `npm run lint` + `npm run test`.
 להרצת האפליקציה בתצוגה מקדימה יש `.claude/launch.json` (הקונפיגורציה `dev`).
 
-## ארבעה מוצרים תחת גג אחד
+## חמישה מוצרים תחת גג אחד
 
 | מוצר | Admin | ציבורי | Lib |
 |---|---|---|---|
 | דפי נחיתה (HTML מועלה) | `/admin/pages`, `/admin/upload` | `/pages/*`, `/r/<short>` | `lib/db.ts` |
 | Campaign Creative Builder | `/admin/campaigns` | `/c/<slug>` | `lib/campaigns.ts`, `lib/slides.ts`, `lib/copies.ts` |
 | דוחות ביצועים | `/admin/reports` | `/report/<slug>` | `lib/performance-reports.ts` |
+| מסמכי אסטרטגיה (מצגת מיצוב) | `/admin/strategy` | `/s/<slug>` | `lib/strategy/*`, `lib/strategy-docs.ts` |
 | דשבורד Pizza House | — | `/pizza-house` | `lib/pizza-house-*.ts` |
 
 מסביב: לקוחות (`/admin/clients`), משתמשים, סביבות עבודה, יומן פעילות, סל מיחזור.
+
+### מסמכי אסטרטגיה — מה שונה מהקמפיינים
+
+`strategy_docs` עם `sections: JSONB`, אבל שני דברים נבנו אחרת **בכוונה** כתיקון לחוב של הקמפיינים:
+**`lib/strategy/registry.ts`** הוא מקור אמת יחיד לסוגי השקפים (במקום 8 רשימות מקבילות) —
+ה-`satisfies` שם גורם ל-typecheck להיכשל עד שכל צרכן מעודכן. וה-sections הם
+**discriminated union**, כך שהשמירה היא `sections: doc.sections` כמות שהוא — אין רשימת שדות
+שאפשר לשכוח ממנה משהו, וזה מה שמבטל את מלכודת `sectionFromApi`.
+`lib/strategy/normalize.ts` הוא spread מעל היצרן: שדה **וגם סוג שקף** שהגרסה לא מכירה שורדים.
+שלד המצגה (`app/_deck/`) משותף עם הקמפיינים — ניווט, מקלדת, החלקה, שקף פתיחה/סיום, ורנדרר
+הטקסט העשיר (`renderNodes` — גבול אבטחה, עותק אחד בלבד).
+צבעי המסמך תמיד Results ולא צבע המותג: ירוק/אדום/צהוב נושאים משמעות קבועה.
 
 ### Campaign Builder — הליבה
 העורך: `app/admin/campaigns/_components/editor/` (CampaignEditor / SlideCanvas / Inspector / SlideFilmstrip

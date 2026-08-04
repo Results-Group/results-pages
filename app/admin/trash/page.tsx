@@ -25,26 +25,36 @@ interface TrashedReport {
   deleted_at: string | null
 }
 
+interface TrashedStrategyDoc {
+  id: string
+  doc_name: string
+  client: string
+  deleted_at: string | null
+}
+
 export default function TrashPage() {
   const t = useT()
 
   const [pages, setPages] = useState<TrashedPage[]>([])
   const [campaigns, setCampaigns] = useState<TrashedCampaign[]>([])
   const [reports, setReports] = useState<TrashedReport[]>([])
+  const [strategyDocs, setStrategyDocs] = useState<TrashedStrategyDoc[]>([])
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const [pRes, cRes, rRes] = await Promise.all([
+      const [pRes, cRes, rRes, sRes] = await Promise.all([
         fetch('/api/pages?deleted=1'),
         fetch('/api/campaigns?deleted=1'),
         fetch('/api/reports?deleted=1'),
+        fetch('/api/strategy-docs?deleted=1'),
       ])
       setPages(pRes.ok ? await pRes.json() : [])
       setCampaigns(cRes.ok ? await cRes.json() : [])
       setReports(rRes.ok ? await rRes.json() : [])
+      setStrategyDocs(sRes.ok ? await sRes.json() : [])
     } finally {
       setLoading(false)
     }
@@ -52,7 +62,7 @@ export default function TrashPage() {
 
   useEffect(() => { load() }, [load])
 
-  async function restore(kind: 'pages' | 'campaigns' | 'reports', id: string) {
+  async function restore(kind: 'pages' | 'campaigns' | 'reports' | 'strategy-docs', id: string) {
     setBusy(id)
     try {
       const res = await fetch(`/api/${kind}/${id}/restore`, { method: 'POST' })
@@ -62,7 +72,7 @@ export default function TrashPage() {
     }
   }
 
-  async function purge(kind: 'pages' | 'campaigns' | 'reports', id: string, label: string) {
+  async function purge(kind: 'pages' | 'campaigns' | 'reports' | 'strategy-docs', id: string, label: string) {
     // Typing the name back is the guard against an accidental irreversible
     // delete — the server rejects anything else, so a slip is a 400, not a loss.
     const typed = prompt(`${t('trash.purgeConfirm')}\n\n${label}`)
@@ -76,7 +86,7 @@ export default function TrashPage() {
     }
   }
 
-  const isEmpty = pages.length === 0 && campaigns.length === 0 && reports.length === 0
+  const isEmpty = pages.length === 0 && campaigns.length === 0 && reports.length === 0 && strategyDocs.length === 0
 
   return (
     <div className="max-w-4xl">
@@ -134,6 +144,27 @@ export default function TrashPage() {
                     busy={busy === r.id}
                     onRestore={() => restore('reports', r.id)}
                     onPurge={() => purge('reports', r.id, r.report_name)}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {strategyDocs.length > 0 && (
+            <section>
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-1.5" style={{ color: 'var(--admin-text-secondary)' }}>
+                <FileText className="w-4 h-4" /> {t('trash.strategy')} ({strategyDocs.length})
+              </h3>
+              <div className="space-y-2">
+                {strategyDocs.map(d => (
+                  <TrashRow
+                    key={d.id}
+                    title={d.doc_name}
+                    subtitle={d.client}
+                    deletedAt={d.deleted_at}
+                    busy={busy === d.id}
+                    onRestore={() => restore('strategy-docs', d.id)}
+                    onPurge={() => purge('strategy-docs', d.id, d.doc_name)}
                   />
                 ))}
               </div>

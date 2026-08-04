@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
+  Compass,
   FileText,
   Upload,
   LogOut,
@@ -137,6 +138,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/upload', label: t('nav.upload'), icon: Upload, show: currentUser?.role !== 'viewer' },
     { href: '/admin/campaigns', label: t('nav.campaigns'), icon: Megaphone, show: currentUser?.role !== 'viewer' },
     { href: '/admin/reports', label: t('nav.reports'), icon: BarChart3, show: currentUser?.role !== 'viewer' },
+    { href: '/admin/strategy', label: t('nav.strategy'), icon: Compass, show: currentUser?.role !== 'viewer' },
     { href: '/admin/clients', label: t('nav.clients'), icon: Contact, show: currentUser?.role !== 'viewer' },
     { href: '/admin/users', label: t('nav.users'), icon: Users, show: isAdmin || isOwner },
     { href: '/admin/workspaces', label: t('nav.workspaces'), icon: Building, show: isAdmin || isOwner },
