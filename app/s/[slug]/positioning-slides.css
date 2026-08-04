@@ -1,0 +1,327 @@
+/**
+ * Brand-positioning deck — the slide types unique to strategy documents.
+ *
+ * Scoped under `.campaign-pres` like everything else, so the admin bundle can
+ * import it without bleeding into the admin theme, and so the shared tokens,
+ * chrome, cover/closing and `rp-anim` utilities in presentation.css all apply.
+ * A separate file rather than an addition to that one: campaign decks would
+ * otherwise ship ~500 lines they never use.
+ *
+ * Colour rule for this deck: semantic colours come from --results-* and the
+ * literals below, NEVER from --brand-*. The client's brand colour overwrites
+ * --brand-green at runtime, and a "correct/incorrect" pair whose hue changes
+ * per client is a bug, not theming.
+ */
+
+.campaign-pres.pos-deck {
+  /* Cell tints. The spec asks for 45% fills, which were designed against a
+     light ground; at 45% on #090c0e white reads as a glaring block and body
+     text on it is unreadable. Same five meanings, expressed as a chip —
+     low-opacity fill, brighter border, tint-matched text — which is the
+     language .dist-head and .slide-part already use. Each is a bg/border/fg
+     triple, so reverting to flat 45% is one line per tint. */
+  --tint-white-bg: rgba(255,255,255,0.16);
+  --tint-white-bd: rgba(255,255,255,0.34);
+  --tint-white-fg: #f4f4f5;
+  --tint-green-bg: rgba(46,196,182,0.18);
+  --tint-green-bd: rgba(46,196,182,0.42);
+  --tint-green-fg: #7ee6da;
+  --tint-light-bg: rgba(163,230,53,0.16);
+  --tint-light-bd: rgba(163,230,53,0.40);
+  --tint-light-fg: #c9ef7a;
+  --tint-alert-bg: rgba(239,88,52,0.18);
+  --tint-alert-bd: rgba(239,88,52,0.44);
+  --tint-alert-fg: #ff9b7a;
+}
+
+/* Embedded in the admin canvas: no full-viewport height, no fixed background
+   layers. Replaces the inline minHeight:0 hack in the campaign SlideCanvas. */
+.campaign-pres.is-embedded { min-height: 0; background: transparent; overflow: visible }
+.campaign-pres.is-embedded .bg-noise,
+.campaign-pres.is-embedded .bg-grid,
+.campaign-pres.is-embedded .ambient-light,
+.campaign-pres.is-embedded .ambient-light-2,
+.campaign-pres.is-embedded .ambient-light-3 { display: none }
+
+/* ── Shared slide furniture ── */
+.campaign-pres .pos-sub {
+  font-size: 1.05rem; color: var(--text-secondary);
+  margin: -18px 0 30px; max-width: 820px; line-height: 1.8;
+}
+.campaign-pres .pos-empty {
+  color: var(--text-secondary); opacity: 0.45;
+  font-style: italic; font-size: 0.95rem;
+}
+
+/* ── statement ── */
+.campaign-pres .pos-statement { max-width: 900px; margin: 0 auto; text-align: center; padding: 40px 0 }
+.campaign-pres .pos-statement .dist-text-p {
+  font-size: 1.25rem; line-height: 2.05; color: var(--text-secondary); margin: 0 0 14px;
+}
+.campaign-pres .pos-statement.is-transition {
+  min-height: 52vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.campaign-pres .pos-statement.is-transition .pos-statement-title {
+  font-size: 2.6rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 22px;
+  background: linear-gradient(90deg, var(--results-cyan), var(--results-green));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+/* The המיצוב slide. It is the conclusion the whole document builds toward, so
+   it is the only place the deck sets type this large. */
+.campaign-pres .pos-statement.is-hero { max-width: 1000px }
+.campaign-pres .pos-statement.is-hero .pos-statement-body { position: relative }
+.campaign-pres .pos-statement.is-hero .dist-text-p {
+  font-size: 1.75rem; line-height: 1.85; color: var(--text-primary); font-weight: 700;
+}
+.campaign-pres .pos-statement.is-hero .pos-statement-body::before {
+  content: ''; display: block; width: 64px; height: 3px; margin: 0 auto 30px;
+  background: linear-gradient(90deg, var(--results-cyan), var(--brand-yellow)); border-radius: 2px;
+}
+
+/* ── info ── */
+.campaign-pres .pos-info-groups { display: grid; gap: 26px; max-width: 900px }
+.campaign-pres .pos-info-group-heading {
+  font-size: 1.05rem; font-weight: 800; color: var(--results-cyan); margin: 0 0 10px;
+}
+.campaign-pres .pos-bullets { list-style: none; padding: 0; margin: 0; display: grid; gap: 9px }
+.campaign-pres .pos-bullets li {
+  position: relative; padding-inline-start: 22px;
+  color: var(--text-secondary); font-size: 1.02rem; line-height: 1.75;
+}
+.campaign-pres .pos-bullets li::before {
+  content: ''; position: absolute; inset-inline-start: 0; top: 0.62em;
+  width: 7px; height: 7px; border-radius: 50%; background: var(--results-cyan); opacity: 0.85;
+}
+
+/* ── boxes (three numbered cards) ── */
+.campaign-pres .pos-boxes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px }
+.campaign-pres .pos-box {
+  background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 18px;
+  padding: 26px 24px 24px; position: relative; overflow: hidden;
+}
+/* Numbering is a render concern, never stored — so reordering the boxes in the
+   editor renumbers them automatically. */
+.campaign-pres .pos-box-num {
+  position: absolute; top: 10px; inset-inline-end: 18px;
+  font-size: 3.4rem; font-weight: 900; line-height: 1;
+  color: rgba(64,225,211,0.09); pointer-events: none;
+}
+.campaign-pres .pos-box-title { font-size: 1.15rem; font-weight: 800; margin: 0 0 6px; position: relative }
+.campaign-pres .pos-box-sub { font-size: 0.92rem; color: var(--text-secondary); margin: 0 0 14px }
+.campaign-pres .pos-box-desc { font-size: 1rem; color: var(--text-secondary); line-height: 1.8; margin: 0 }
+.campaign-pres .pos-box-list { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 7px }
+.campaign-pres .pos-box-list li {
+  position: relative; padding-inline-start: 24px; font-size: 0.96rem; color: var(--text-secondary);
+}
+.campaign-pres .pos-box-list li::before {
+  position: absolute; inset-inline-start: 0; top: 0; font-weight: 900;
+}
+.campaign-pres .pos-box-list.is-pros li::before { content: '+'; color: var(--results-green) }
+.campaign-pres .pos-box-list.is-cons li::before { content: '−'; color: #ff9b7a }
+
+/* ── matrix table (Facing / awareness / attack angles) ── */
+.campaign-pres .pos-table {
+  display: grid; background: var(--card-bg); border: 1px solid var(--border-color);
+  border-radius: 18px; overflow: hidden;
+}
+.campaign-pres .pos-th, .campaign-pres .pos-cell {
+  padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex; align-items: center; gap: 8px; min-height: 56px;
+}
+.campaign-pres .pos-th {
+  font-weight: 800; font-size: 0.98rem; background: rgba(var(--brand-rgb), 0.05);
+  justify-content: center; text-align: center; flex-direction: column;
+}
+.campaign-pres .pos-row-header { font-weight: 700; color: var(--text-primary); font-size: 0.98rem }
+.campaign-pres .pos-cell { color: var(--text-secondary); font-size: 0.96rem; justify-content: center; text-align: center }
+.campaign-pres .pos-cell[data-tint="white"] { background: var(--tint-white-bg); box-shadow: inset 0 0 0 1px var(--tint-white-bd); color: var(--tint-white-fg) }
+.campaign-pres .pos-cell[data-tint="green"] { background: var(--tint-green-bg); box-shadow: inset 0 0 0 1px var(--tint-green-bd); color: var(--tint-green-fg) }
+.campaign-pres .pos-cell[data-tint="light"] { background: var(--tint-light-bg); box-shadow: inset 0 0 0 1px var(--tint-light-bd); color: var(--tint-light-fg) }
+.campaign-pres .pos-cell[data-tint="alert"] { background: var(--tint-alert-bg); box-shadow: inset 0 0 0 1px var(--tint-alert-bd); color: var(--tint-alert-fg) }
+/* The row header column is start-aligned; the data columns are centred. */
+.campaign-pres .pos-table > .pos-row-header { justify-content: flex-start; text-align: start }
+.campaign-pres .pos-th-logo { max-height: 30px; max-width: 96px; object-fit: contain }
+/* Competitor logos are overwhelmingly dark-on-white and vanish on #090c0e. */
+.campaign-pres .pos-th-logo.needs-backdrop {
+  background: #fff; border-radius: 6px; padding: 4px 6px; max-height: 34px;
+}
+.campaign-pres .pos-check { color: var(--results-green); flex-shrink: 0 }
+.campaign-pres .pos-checks { display: inline-flex; gap: 2px }
+
+/* ── question ── */
+.campaign-pres .pos-question-quote {
+  background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px;
+  padding: 40px 44px; position: relative; overflow: hidden;
+  font-size: 1.6rem; font-weight: 800; line-height: 1.6; color: var(--text-primary);
+  max-width: 900px; margin: 0 0 26px;
+}
+.campaign-pres .pos-question-quote::before {
+  content: ''; position: absolute; top: 0; inset-inline-start: 0; width: 3px; height: 100%;
+  background: linear-gradient(to bottom, var(--results-cyan), var(--brand-yellow));
+}
+.campaign-pres .pos-question-quote::after {
+  content: '"'; position: absolute; top: 14px; inset-inline-end: 26px; font-size: 6rem; line-height: 1;
+  color: rgba(64,225,211,0.06); pointer-events: none;
+}
+.campaign-pres .pos-question-lead { color: var(--text-secondary); margin: 0 0 14px; font-size: 1.02rem }
+
+/* ── split media ── */
+.campaign-pres .pos-split { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: center }
+.campaign-pres .pos-split.is-media-end { direction: ltr }
+.campaign-pres .pos-split.is-media-end > * { direction: rtl }
+.campaign-pres .pos-split-media {
+  border-radius: 20px; overflow: hidden; border: 1px solid var(--border-color);
+  background: rgba(255,255,255,0.02); aspect-ratio: 4 / 3;
+  display: flex; align-items: center; justify-content: center;
+}
+.campaign-pres .pos-split-media img { width: 100%; height: 100%; object-fit: cover }
+.campaign-pres .pos-split-title { font-size: 1.5rem; font-weight: 800; margin: 0 0 14px }
+.campaign-pres .pos-split-desc { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.95; white-space: pre-wrap; margin: 0 }
+
+/* ── brand language ── */
+.campaign-pres .pos-lang { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px }
+.campaign-pres .pos-lang-box {
+  border-radius: 16px; padding: 20px; background: var(--card-bg);
+  /* --results-green, not --brand-green: "how the brand says it" must stay
+     green even for a client whose brand colour is red. */
+  border: 1.5px solid rgba(46,196,182,0.45);
+}
+.campaign-pres .pos-lang-box.is-negative {
+  border-color: rgba(239,88,52,0.5); grid-column: 1 / -1;
+}
+.campaign-pres .pos-lang-title { font-size: 1rem; font-weight: 800; margin: 0 0 8px; color: var(--results-green) }
+.campaign-pres .pos-lang-box.is-negative .pos-lang-title { color: #ff9b7a }
+.campaign-pres .pos-lang-desc { font-size: 0.98rem; color: var(--text-secondary); line-height: 1.75; margin: 0; white-space: pre-wrap }
+
+/* ── heat gauges ── */
+.campaign-pres .pos-gauges { display: grid; gap: 26px; max-width: 720px; margin: 0 auto }
+.campaign-pres .pos-gauge-heading { font-size: 1.05rem; font-weight: 800; margin: 0 0 10px; text-align: center }
+/* LTR on the track only: 0 sits at the left and 10 at the right, matching the
+   distribution timeline. The labels below are still read right-to-left. */
+.campaign-pres .pos-gauge-track {
+  direction: ltr; position: relative; height: 8px; border-radius: 99px;
+  background: rgba(255,255,255,0.06);
+}
+.campaign-pres .pos-gauge-fill {
+  position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: 99px;
+  background: linear-gradient(90deg, var(--results-cyan), var(--results-green));
+}
+.campaign-pres .pos-gauge-thumb {
+  position: absolute; top: 50%; width: 18px; height: 18px; border-radius: 50%;
+  transform: translate(-50%, -50%); background: var(--text-primary);
+  box-shadow: 0 0 0 4px rgba(64,225,211,0.25);
+}
+.campaign-pres .pos-gauge-ends {
+  direction: ltr; display: flex; justify-content: space-between;
+  margin-top: 10px; font-size: 0.88rem; color: var(--text-secondary);
+}
+
+/* ── positioning map ── */
+.campaign-pres .pos-map { max-width: 900px; margin: 0 auto }
+.campaign-pres .pos-map-plot {
+  /* LTR maths on the plot; RTL lives only in which end gets which label. */
+  direction: ltr; position: relative; --pos-aspect: 0.75; aspect-ratio: 4 / 3;
+  border: 1px solid var(--border-color); border-radius: 18px;
+  background: var(--card-bg); overflow: hidden;
+  /* Sized from its HEIGHT, so the whole map is always on screen. Letting the
+     width fill the slide and deriving the height from the ratio pushed the
+     bottom half — and any competitor placed there — below the fold. */
+  height: min(58vh, 520px); width: auto; max-width: 100%; margin-inline: auto;
+}
+.campaign-pres .pos-map-axis-x,
+.campaign-pres .pos-map-axis-y { position: absolute; background: rgba(255,255,255,0.12) }
+.campaign-pres .pos-map-axis-x { left: 0; right: 0; top: 50%; height: 1px }
+.campaign-pres .pos-map-axis-y { top: 0; bottom: 0; left: 50%; width: 1px }
+.campaign-pres .pos-map-label {
+  position: absolute; font-size: 0.86rem; font-weight: 700; color: var(--text-secondary);
+  background: rgba(9,12,14,0.72); padding: 3px 9px; border-radius: 8px; white-space: nowrap;
+}
+.campaign-pres .pos-map-label.at-right { top: 50%; right: 10px; transform: translateY(-50%) }
+.campaign-pres .pos-map-label.at-left { top: 50%; left: 10px; transform: translateY(-50%) }
+.campaign-pres .pos-map-label.at-top { top: 10px; left: 50%; transform: translateX(-50%) }
+.campaign-pres .pos-map-label.at-bottom { bottom: 10px; left: 50%; transform: translateX(-50%) }
+/* A ring, not a filled disc: at any fill opacity strong enough to read, a
+   yellow circle drowns the logos it exists to highlight. */
+.campaign-pres .pos-map-zone {
+  position: absolute; border-radius: 50%; transform: translate(-50%, -50%);
+  width: calc(var(--zone-r) * 2 * var(--pos-aspect) * 100%); aspect-ratio: 1;
+  border: 2px solid var(--brand-yellow); background: rgba(243,213,109,0.05);
+  z-index: 1; pointer-events: none;
+}
+.campaign-pres .pos-map-mark {
+  position: absolute; transform: translate(-50%, -50%); z-index: 2;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  width: clamp(56px, 9vw, 92px); text-align: center;
+}
+.campaign-pres .pos-map-mark img {
+  width: 100%; max-height: 46px; object-fit: contain;
+  background: #fff; border-radius: 8px; padding: 5px 7px;
+}
+.campaign-pres .pos-map-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--results-cyan); box-shadow: 0 0 0 4px rgba(64,225,211,0.2);
+}
+.campaign-pres .pos-map-mark-label {
+  font-size: 0.76rem; font-weight: 700; color: var(--text-primary);
+  background: rgba(9,12,14,0.75); padding: 2px 7px; border-radius: 6px;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.campaign-pres .pos-map-mark-num { display: none }
+.campaign-pres .pos-map-legend {
+  list-style: none; padding: 0; margin: 18px 0 0;
+  display: none; gap: 8px; color: var(--text-secondary); font-size: 0.92rem;
+}
+.campaign-pres .pos-map-legend li { display: flex; gap: 8px; align-items: center }
+.campaign-pres .pos-map-legend-num {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+  display: grid; place-items: center; font-size: 0.76rem; font-weight: 800;
+  background: rgba(64,225,211,0.14); color: var(--results-cyan);
+}
+
+/* ── Responsive: one breakpoint, matching the rest of the deck ── */
+@media (max-width: 768px) {
+  .campaign-pres .pos-boxes,
+  .campaign-pres .pos-lang { grid-template-columns: 1fr }
+  .campaign-pres .pos-statement.is-transition .pos-statement-title { font-size: 1.9rem }
+  .campaign-pres .pos-statement.is-hero .dist-text-p { font-size: 1.3rem }
+  .campaign-pres .pos-question-quote { font-size: 1.2rem; padding: 28px 26px }
+
+  /* Image first regardless of the desktop side: alternating sides on a phone
+     reads as random rather than as rhythm. Same call .cover-body already makes. */
+  .campaign-pres .pos-split { grid-template-columns: 1fr; gap: 20px }
+  .campaign-pres .pos-split.is-media-end { direction: rtl; display: flex; flex-direction: column-reverse }
+
+  /* Tables transpose to cards. The dist-table trick (hide the header row, emit
+     labels via content:attr) can't work here — a Facing column header may be an
+     image, and content: can't render one — so the label is a real element that
+     is simply hidden on desktop. */
+  .campaign-pres .pos-table { grid-template-columns: 1fr !important; border-radius: 14px }
+  .campaign-pres .pos-th { display: none }
+  .campaign-pres .pos-row-header {
+    background: rgba(var(--brand-rgb), 0.07); font-weight: 800; justify-content: flex-start;
+  }
+  .campaign-pres .pos-cell { justify-content: space-between; text-align: start; min-height: 48px }
+  .campaign-pres .pos-cell-label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.85rem; color: var(--text-secondary); font-weight: 700;
+  }
+  .campaign-pres .pos-cell-label img { max-height: 20px; max-width: 60px; object-fit: contain }
+
+  .campaign-pres .pos-map-plot { --pos-aspect: 1; aspect-ratio: 1; height: auto; width: 100% }
+  /* Six logos at 375px collide into mush; number the marks and list them below. */
+  .campaign-pres .pos-map-mark { width: clamp(34px, 12vw, 56px) }
+  .campaign-pres .pos-map-mark-label { display: none }
+  .campaign-pres .pos-map-mark-num {
+    display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%;
+    font-size: 0.72rem; font-weight: 800;
+    background: var(--results-cyan); color: #06282a;
+  }
+  .campaign-pres .pos-map-legend { display: grid }
+  .campaign-pres .pos-map-label { font-size: 0.74rem; padding: 2px 6px }
+}
+
+/* Desktop hides the per-cell labels the mobile cards need. */
+@media (min-width: 769px) {
+  .campaign-pres .pos-cell-label { display: none }
+}

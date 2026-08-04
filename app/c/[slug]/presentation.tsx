@@ -17,6 +17,7 @@ import DistributionSlide from './distribution-slide'
 import { parseVideoUrl } from '@/lib/video-utils'
 import { assetProxyUrl } from '@/lib/asset-url'
 import DeckShell from '@/app/_deck/DeckShell'
+import { CoverSlide, ClosingSlide } from '@/app/_deck/cover-slide'
 import he from '@/lib/i18n/he'
 import en from '@/lib/i18n/en'
 
@@ -210,7 +211,14 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
       ) : undefined}
       renderSlide={i => (
         <>
-          {slides[i].type === 'cover' && <CoverSlide slide={slides[i]} />}
+          {slides[i].type === 'cover' && (
+            <CoverSlide
+              clientName={slides[i].title}
+              headline={slides[i].subtitle || 'New Creative'}
+              eyebrow={slides[i].date || 'Creative Campaign'}
+              logoUrl={slides[i].logoUrl}
+            />
+          )}
           {slides[i].type === 'concept' && <ConceptSlide slide={slides[i]} />}
           {slides[i].type === 'divider' && <DividerSlide slide={slides[i]} index={i} />}
           {slides[i].type === 'distribution' && (
@@ -224,7 +232,9 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
           {slides[i].type === 'creatives' && (
             <CreativesSlide slide={slides[i]} activeCopyIdx={activeCopyIdx} onActiveCopyChange={setActiveCopyIdx} onAssetClick={setLightboxAsset} lang={lang} />
           )}
-          {slides[i].type === 'closing' && <ClosingSlide slide={slides[i]} />}
+          {slides[i].type === 'closing' && (
+            <ClosingSlide title={slides[i].title} clientName={slides[i].subtitle} />
+          )}
         </>
       )}
       renderBelowSlide={i => (showFeedback && isApprovable(slides[i]) ? (
@@ -493,87 +503,6 @@ function PinnableImage({ asset, pins, canPin, reviewerName, onReviewerNameChange
   )
 }
 
-const PARTNER_LOGOS = [
-  { src: '/partners/google.png', alt: 'Google Partner' },
-  { src: '/partners/meta.png', alt: 'Meta Business Partner' },
-  { src: '/partners/tiktok.png', alt: 'TikTok Marketing Partners' },
-  { src: '/partners/wix.png', alt: 'Wix Partner' },
-]
-
-function PartnerLogos() {
-  return (
-    <div className="partner-logos">
-      {PARTNER_LOGOS.map(p => (
-        // Normalized to monochrome white so the mixed light/dark badge lockups
-        // read uniformly on the dark cover.
-        // eslint-disable-next-line @next/next/no-img-element
-        <img key={p.src} src={p.src} alt={p.alt} className="partner-logo-img" />
-      ))}
-    </div>
-  )
-}
-
-function ResultsLogo() {
-  // The real brand logo (yellow bars + arrow + "Results" wordmark) served from
-  // /logo.png, instead of a hand-drawn imitation.
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src="/logo.png" alt="Results" className="results-logo-img" />
-}
-
-function CoverSlide({ slide }: { slide: SlideData }) {
-  return (
-    <div className="cover-slide-v2">
-      {/* Fine inset gold frame — the "firm" cue */}
-      <div className="cover-frame" aria-hidden />
-      {/* Corner decorations */}
-      <div className="cover-corner tl" />
-      <div className="cover-corner tr" />
-      <div className="cover-corner bl" />
-      <div className="cover-corner br" />
-
-      {/* Top bar */}
-      <div className="cover-top-bar rp-anim rp-up rp-d1">
-        <ResultsLogo />
-      </div>
-
-      {/* Main content */}
-      <div className="cover-body">
-        {/* Left: campaign info */}
-        <div className="cover-left">
-          <div className="cover-eyebrow rp-anim rp-in rp-d2">
-            <span className="cover-eyebrow-dot" />
-            {slide.date || 'Creative Campaign'}
-          </div>
-          <h1 className="cover-headline rp-anim rp-in rp-d3">
-            {slide.subtitle || 'New Creative'}
-          </h1>
-          <div className="cover-meta-line rp-anim rp-up rp-d4">
-            <span className="cover-client-name">{slide.title}</span>
-            <span className="cover-meta-sep" aria-hidden />
-            <span className="cover-by">By Results Digital</span>
-          </div>
-          <div className="cover-h-rule rp-anim rp-wipe rp-d5" />
-          <div className="rp-anim rp-up rp-d6">
-            <PartnerLogos />
-          </div>
-        </div>
-
-        {/* Right: client logo */}
-        <div className="cover-right rp-anim rp-scale rp-d2">
-          {slide.logoUrl ? (
-            <img src={slide.logoUrl} alt={slide.title} className="cover-client-logo" />
-          ) : (
-            <div className="cover-client-initials">
-              {(slide.title || '?').slice(0, 2).toUpperCase()}
-            </div>
-          )}
-        </div>
-      </div>
-
-    </div>
-  )
-}
-
 function ConceptSlide({ slide }: { slide: SlideData }) {
   return (
     <div className="concept-slide">
@@ -716,37 +645,6 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
  * sign-off instead of the cover's asymmetric two-column. It doesn't repeat the
  * cover's badge pill, corner brackets, partner row or client-logo panel.
  */
-function ClosingSlide({ slide }: { slide: SlideData }) {
-  return (
-    <div className="closing-slide-v2">
-      <div className="cover-frame" aria-hidden />
-      <div className="closing-glow-center" aria-hidden />
-
-      <div className="closing-stack">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="Results" className="closing-logo rp-anim rp-up rp-d1" />
-
-        <h1 className="closing-headline rp-anim rp-up rp-d3">{slide.title}</h1>
-
-        {slide.subtitle && (
-          <p className="closing-client rp-anim rp-up rp-d4">{slide.subtitle}</p>
-        )}
-
-        <div className="closing-rule rp-anim rp-up rp-d5" />
-
-        <a
-          className="closing-url rp-anim rp-up rp-d6"
-          href="https://www.resultsdigital.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          www.resultsdigital.org
-        </a>
-      </div>
-    </div>
-  )
-}
-
 function AssetRenderer({ asset, mockupType, clientLogoUrl, clientName, captionOverride }: {
   asset: CampaignAsset; mockupType: string; clientLogoUrl: string | null; clientName: string; captionOverride?: string
 }) {
