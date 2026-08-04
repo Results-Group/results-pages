@@ -16,7 +16,7 @@ import GeneralCard from './mockups/general-card'
 import DistributionSlide from './distribution-slide'
 import { parseVideoUrl } from '@/lib/video-utils'
 import { assetProxyUrl } from '@/lib/asset-url'
-import { readableAccent } from '@/lib/brand-color'
+import DeckShell from '@/app/_deck/DeckShell'
 import he from '@/lib/i18n/he'
 import en from '@/lib/i18n/en'
 
@@ -34,45 +34,16 @@ type FeedbackStatus = 'approved' | 'rejected' | 'pending'
 interface SlideFeedback { slide_key: string; status: FeedbackStatus; comment: string | null; author: string | null }
 interface SlidePin { id: string; slide_key: string; asset_id: string | null; x: number; y: number; comment: string | null; author: string | null; resolved: boolean }
 
-/** Convert a #RRGGBB (or #RGB) hex to an rgba() string. Falls back to the raw value. */
-function hexToRgba(hex: string, alpha: number): string {
-  let h = hex.trim().replace('#', '')
-  if (h.length === 3) h = h.split('').map(c => c + c).join('')
-  if (!/^[0-9a-fA-F]{6}$/.test(h)) return hex
-  const r = parseInt(h.slice(0, 2), 16)
-  const g = parseInt(h.slice(2, 4), 16)
-  const b = parseInt(h.slice(4, 6), 16)
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`
-}
-
-/** Convert a #RRGGBB (or #RGB) hex to an 'R, G, B' triplet for rgba(var(--brand-rgb), a). */
-function hexToRgbTriplet(hex: string): string | null {
-  let h = hex.trim().replace('#', '')
-  if (h.length === 3) h = h.split('').map(c => c + c).join('')
-  if (!/^[0-9a-fA-F]{6}$/.test(h)) return null
-  const r = parseInt(h.slice(0, 2), 16)
-  const g = parseInt(h.slice(2, 4), 16)
-  const b = parseInt(h.slice(4, 6), 16)
-  return `${r}, ${g}, ${b}`
-}
-
 export default function CampaignPresentation({ slides, clientName, campaignName, brandColor, campaignId, feedbackEnabled, lang = 'he' }: Props) {
   const dict = lang === 'en' ? en : he
   const t = (key: keyof typeof he) => dict[key] ?? he[key] ?? key
-  // A brand colour drives 58 rules here, including the header title and the
-  // nav-button hover. Lifted to stay legible on the dark ground — a black brand
-  // colour otherwise painted both of them invisible.
-  const accent = readableAccent(brandColor)
-  const [activeSlide, setActiveSlide] = useState(0)
   const [lightboxAsset, setLightboxAsset] = useState<{ url: string; caption?: string; slideKey?: string; assetId?: string } | null>(null)
-  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 })
   const [feedback, setFeedback] = useState<Record<string, SlideFeedback>>({})
   const [feedbackError, setFeedbackError] = useState<Record<string, boolean>>({})
   const [pins, setPins] = useState<SlidePin[]>([])
   // Reviewer name — remembered across slides and visits (per campaign)
   const [reviewerName, setReviewerName] = useState('')
   const [doneDismissed, setDoneDismissed] = useState(false)
-  const [showIndex, setShowIndex] = useState(false)
   // Selected copy variant, shared across slides so the choice sticks as the
   // client moves through the deck.
   const [activeCopyIdx, setActiveCopyIdx] = useState(0)
@@ -157,40 +128,16 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
     }
   }, [campaignId])
 
-  // ── Swipe navigation ──
-  // The deck presents like Instagram stories, so a phone user's instinct is to
-  // swipe. Direction follows the RTL layout and the on-screen arrows: "next"
-  // points left, so a leftward drag advances.
-  const touchStart = useRef<{ x: number; y: number } | null>(null)
-  const SWIPE_MIN_PX = 60
-
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    // Never hijack a swipe that belongs to the carousel's own scroll track.
-    if ((e.target as HTMLElement)?.closest?.('.carousel-track')) { touchStart.current = null; return }
-    const t = e.touches[0]
-    touchStart.current = { x: t.clientX, y: t.clientY }
-  }, [])
-
-  const goSlide = useCallback((n: number) => {
-    setActiveSlide(n)
-    // 'auto', not 'smooth': smooth scrolling is animation-frame driven, so with
-    // animations paused the client stayed 1400px down the previous slide.
-    window.scrollTo({ top: 0, behavior: 'auto' })
-  }, [])
-
-  const onTouchEnd = useCallback((e: React.TouchEvent) => {
-    const start = touchStart.current
-    touchStart.current = null
-    if (!start || lightboxAsset) return
-    const t = e.changedTouches[0]
-    const dx = t.clientX - start.x
-    const dy = t.clientY - start.y
-    // Ignore short drags, and anything more vertical than horizontal — that's
-    // the reader scrolling a tall creatives slide, not changing slide.
-    if (Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) < Math.abs(dy) * 1.5) return
-    if (dx < 0) goSlide(Math.min(slides.length - 1, activeSlide + 1))
-    else goSlide(Math.max(0, activeSlide - 1))
-  }, [lightboxAsset, activeSlide, slides.length, goSlide])
+  // Escape closes the lightbox. DeckShell owns Escape for its own slide index;
+  // this listener runs first because the lightbox is the topmost surface.
+  useEffect(() => {
+    if (!lightboxAsset) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setLightboxAsset(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [lightboxAsset])
 
   // Approval progress across all feedback-enabled (creative) slides
   // Divider slides are just section breaks — there's nothing to approve on them,
@@ -222,36 +169,6 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
     }).catch(() => {})
   }
 
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
-      if (e.key === 'Escape' && lightboxAsset) { setLightboxAsset(null); return }
-      if (e.key === 'Escape' && showIndex) { setShowIndex(false); return }
-      // Route through goSlide so keyboard navigation also resets the scroll
-      // position — otherwise arrow keys left the reader mid-way down the page.
-      if (e.key === 'ArrowLeft') goSlide(Math.min(slides.length - 1, activeSlide + 1))
-      if (e.key === 'ArrowRight') goSlide(Math.max(0, activeSlide - 1))
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [slides.length, lightboxAsset, showIndex, activeSlide, goSlide])
-
-  useEffect(() => {
-    let rafId = 0
-    let pending = false
-    function onMove(e: MouseEvent) {
-      if (pending) return
-      pending = true
-      rafId = requestAnimationFrame(() => {
-        setMousePos({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight })
-        pending = false
-      })
-    }
-    window.addEventListener('mousemove', onMove, { passive: true })
-    return () => { window.removeEventListener('mousemove', onMove); cancelAnimationFrame(rafId) }
-  }, [])
-
-
   function getSlideLabel(slide: SlideData, i: number): string {
     if (slide.type === 'cover') return t('public.cover')
     if (slide.type === 'concept') return t('public.concept')
@@ -266,215 +183,111 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
       : base
   }
 
-  const parallaxX = (mousePos.x - 0.5) * -20
-  const parallaxY = (mousePos.y - 0.5) * -20
-
   return (
-    <>
-      <div
-        className="campaign-pres"
-        style={accent ? ({
-          '--brand-cyan': accent,
-          '--brand-green': accent,
-          '--border-color': `${hexToRgba(accent, 0.14)}`,
-          ...(hexToRgbTriplet(accent) ? { '--brand-rgb': hexToRgbTriplet(accent) } : {}),
-        } as React.CSSProperties) : undefined}
-      >
-        {/* Parallax background layers */}
-        <div className="bg-noise" />
-        <div className="bg-grid" style={{ transform: `translate(${parallaxX * 0.3}px, ${parallaxY * 0.3}px)` }} />
-        <div className="ambient-light" style={{ transform: `translate(${parallaxX}px, ${parallaxY}px)` }} />
-        <div className="ambient-light-2" style={{ transform: `translate(${parallaxX * -0.6}px, ${parallaxY * -0.6}px)` }} />
-        <div className="ambient-light-3" style={{ transform: `translate(${parallaxX * 0.8}px, ${parallaxY * -0.8}px)` }} />
-
-        {/* Story-style progress bars */}
-        <div className="story-progress">
-          {slides.map((slide, i) => (
-            <button
-              key={i}
-              className={`story-bar${i === activeSlide ? ' current' : ''}`}
-              onClick={() => goSlide(i)}
-              title={getSlideLabel(slide, i)}
-              aria-label={getSlideLabel(slide, i)}
-              aria-current={i === activeSlide ? 'step' : undefined}
-            >
-              <div className={`story-bar-fill ${i < activeSlide ? 'done' : i === activeSlide ? 'active' : ''}`} />
-            </button>
-          ))}
-        </div>
-
-        {/* Header */}
-        <header className="pres-header">
-          {/* The campaign takes the prominent slot — it's what the client came
-              to review; the agency name sits on the opposite side. */}
-          <div className="brand">{clientName} — {campaignName}</div>
-          <div className="header-right">
-            {/* The copy switcher used to live here, but a small pill in the
-                header was easy to miss (especially on mobile) and appeared even
-                on slides with no variants. It now sits inside the slide, next to
-                the text it actually changes. */}
-            {showFeedback && feedbackSlides.length > 0 && (
-              <div className={`approval-progress${allApproved ? ' complete' : ''}`}>
-                <span className="approval-progress-count">
-                  {allApproved ? `✓ ${t('public.allApprovedShort')}` : `${t('public.approvedLabel')} ${approvedCount}/${feedbackSlides.length}`}
-                </span>
-                <div className="approval-progress-track">
-                  <div className="approval-progress-fill" style={{ width: `${feedbackSlides.length ? (approvedCount / feedbackSlides.length) * 100 : 0}%` }} />
-                </div>
-                {!allApproved && (
-                  <button className="approve-all-btn" onClick={approveAllRemaining}>{t('public.approveAll')}</button>
-                )}
-              </div>
-            )}
-            <div className="campaign-badge">Results Digital</div>
+    <DeckShell
+      count={slides.length}
+      labelFor={i => getSlideLabel(slides[i], i)}
+      headerTitle={`${clientName} — ${campaignName}`}
+      brandColor={brandColor}
+      lang={lang}
+      // The lightbox is the topmost surface: while it's open, arrows and swipes
+      // belong to it, not to the deck underneath.
+      navLocked={!!lightboxAsset}
+      // The closing slide carries its own sign-off.
+      hideFooterOn={i => slides[i].type === 'closing'}
+      headerExtra={showFeedback && feedbackSlides.length > 0 ? (
+        <div className={`approval-progress${allApproved ? ' complete' : ''}`}>
+          <span className="approval-progress-count">
+            {allApproved ? `✓ ${t('public.allApprovedShort')}` : `${t('public.approvedLabel')} ${approvedCount}/${feedbackSlides.length}`}
+          </span>
+          <div className="approval-progress-track">
+            <div className="approval-progress-fill" style={{ width: `${feedbackSlides.length ? (approvedCount / feedbackSlides.length) * 100 : 0}%` }} />
           </div>
-        </header>
-
-        <main className="pres-main" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-          {/* Plain section keyed on the slide index: React swaps it immediately
-              and the CSS class replays the transition. AnimatePresence with
-              mode="wait" held the next slide until the previous one's exit
-              animation finished — and when animations are paused (backgrounded
-              tab, battery saver) that exit never completed, so the counter
-              advanced but the deck never moved. */}
-          <section key={activeSlide} className="slide active slide-enter">
-            {slides[activeSlide].type === 'cover' && <CoverSlide slide={slides[activeSlide]} />}
-            {slides[activeSlide].type === 'concept' && <ConceptSlide slide={slides[activeSlide]} />}
-            {slides[activeSlide].type === 'divider' && <DividerSlide slide={slides[activeSlide]} index={activeSlide} />}
-            {slides[activeSlide].type === 'distribution' && (
-              <DistributionSlide
-                plan={slides[activeSlide].plan}
-                title={slides[activeSlide].title}
-                description={slides[activeSlide].content}
-                lang={lang}
-              />
-            )}
-            {slides[activeSlide].type === 'creatives' && (
-              <CreativesSlide slide={slides[activeSlide]} activeCopyIdx={activeCopyIdx} onActiveCopyChange={setActiveCopyIdx} onAssetClick={setLightboxAsset} lang={lang} />
-            )}
-            {slides[activeSlide].type === 'closing' && <ClosingSlide slide={slides[activeSlide]} />}
-          </section>
-
-          {showFeedback && isApprovable(slides[activeSlide]) && (
-            <ApprovalBar
-              key={slides[activeSlide].key}
-              slideKey={slides[activeSlide].key as string}
-              current={feedback[slides[activeSlide].key as string]}
-              error={!!feedbackError[slides[activeSlide].key as string]}
-              onSubmit={submitFeedback}
-              reviewerName={reviewerName}
-              onReviewerNameChange={updateReviewerName}
+          {!allApproved && (
+            <button className="approve-all-btn" onClick={approveAllRemaining}>{t('public.approveAll')}</button>
+          )}
+        </div>
+      ) : undefined}
+      renderSlide={i => (
+        <>
+          {slides[i].type === 'cover' && <CoverSlide slide={slides[i]} />}
+          {slides[i].type === 'concept' && <ConceptSlide slide={slides[i]} />}
+          {slides[i].type === 'divider' && <DividerSlide slide={slides[i]} index={i} />}
+          {slides[i].type === 'distribution' && (
+            <DistributionSlide
+              plan={slides[i].plan}
+              title={slides[i].title}
+              description={slides[i].content}
               lang={lang}
             />
           )}
-        </main>
-
-        {/* All-approved confirmation */}
-        <AnimatePresence>
-          {showFeedback && allApproved && !doneDismissed && (
-            <motion.div
-              className="approval-done-banner"
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 24 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <span className="approval-done-check">✓</span>
-              <span>{t('public.allApproved')}</span>
-              <button className="approval-done-close" onClick={() => setDoneDismissed(true)} aria-label="✕">✕</button>
-            </motion.div>
+          {slides[i].type === 'creatives' && (
+            <CreativesSlide slide={slides[i]} activeCopyIdx={activeCopyIdx} onActiveCopyChange={setActiveCopyIdx} onAssetClick={setLightboxAsset} lang={lang} />
           )}
-        </AnimatePresence>
-
-        {/* Slide index — the practical way to reach a specific slide */}
-        {showIndex && (
-          <>
-            <div className="slide-index-backdrop" onClick={() => setShowIndex(false)} />
-            <div className="slide-index" role="dialog" aria-label={t('public.allSlides')}>
-              <div className="slide-index-head">{t('public.allSlides')}</div>
-              <div className="slide-index-list">
-                {slides.map((s, i) => (
-                  <button
-                    key={i}
-                    className={`slide-index-item${i === activeSlide ? ' active' : ''}`}
-                    onClick={() => { goSlide(i); setShowIndex(false) }}
-                  >
-                    <span className="slide-index-num">{i + 1}</span>
-                    <span className="slide-index-name">{getSlideLabel(s, i)}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Bottom nav arrows */}
-        <div className="slide-footer-nav">
-          <button onClick={() => goSlide(Math.max(0, activeSlide - 1))} disabled={activeSlide === 0} className="nav-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
-            {t('public.previous')}
-          </button>
-          {/* The counter doubles as the slide index. With 20 slides the header
-              bars are ~15px wide each, so jumping to a specific slide by
-              tapping a sliver isn't practical at any screen size. */}
-          <button
-            className="slide-counter"
-            onClick={() => setShowIndex(v => !v)}
-            aria-expanded={showIndex}
-            title={t('public.allSlides')}
-          >
-            {activeSlide + 1} / {slides.length}
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ transform: showIndex ? 'rotate(180deg)' : undefined }}>
-              <polyline points="18 15 12 9 6 15" />
-            </svg>
-          </button>
-          <button onClick={() => goSlide(Math.min(slides.length - 1, activeSlide + 1))} disabled={activeSlide === slides.length - 1} className="nav-btn">
-            {t('public.next')}
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
-          </button>
-        </div>
-
-        {/* The closing slide carries its own sign-off, so the global footer
-            would just repeat the same contact line underneath it. */}
-        {slides[activeSlide].type !== 'closing' && (
-          <footer className="pres-footer">
-            <a href="https://www.resultsdigital.org" target="_blank" rel="noopener noreferrer">www.resultsdigital.org</a>
-            <p>By Results Digital</p>
-          </footer>
-        )}
-
-        {/* Lightbox with pin annotations */}
-        <AnimatePresence>
-          {lightboxAsset && (
-            <div
-              className="lightbox-overlay"
-              onClick={() => setLightboxAsset(null)}
-            >
+          {slides[i].type === 'closing' && <ClosingSlide slide={slides[i]} />}
+        </>
+      )}
+      renderBelowSlide={i => (showFeedback && isApprovable(slides[i]) ? (
+        <ApprovalBar
+          key={slides[i].key}
+          slideKey={slides[i].key as string}
+          current={feedback[slides[i].key as string]}
+          error={!!feedbackError[slides[i].key as string]}
+          onSubmit={submitFeedback}
+          reviewerName={reviewerName}
+          onReviewerNameChange={updateReviewerName}
+          lang={lang}
+        />
+      ) : null)}
+      overlays={
+        <>
+          {/* All-approved confirmation */}
+          <AnimatePresence>
+            {showFeedback && allApproved && !doneDismissed && (
               <motion.div
-                className="lightbox-content"
-                initial={{ scale: 0.9 }}
-                animate={{ scale: 1 }}
+                className="approval-done-banner"
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 24 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                onClick={e => e.stopPropagation()}
               >
-                <PinnableImage
-                  asset={lightboxAsset}
-                  pins={pins.filter(p => p.slide_key === lightboxAsset.slideKey && (!lightboxAsset.assetId || p.asset_id === lightboxAsset.assetId))}
-                  canPin={showFeedback}
-                  reviewerName={reviewerName}
-                  onReviewerNameChange={updateReviewerName}
-                  onAddPin={addPin}
-                  onRemovePin={removePin}
-                  lang={lang}
-                />
-                {lightboxAsset.caption && <p className="lightbox-caption">{lightboxAsset.caption}</p>}
-                <button className="lightbox-close" onClick={() => setLightboxAsset(null)}>✕</button>
+                <span className="approval-done-check">✓</span>
+                <span>{t('public.allApproved')}</span>
+                <button className="approval-done-close" onClick={() => setDoneDismissed(true)} aria-label="✕">✕</button>
               </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
-      </div>
-    </>
+            )}
+          </AnimatePresence>
+
+          {/* Lightbox with pin annotations */}
+          <AnimatePresence>
+            {lightboxAsset && (
+              <div className="lightbox-overlay" onClick={() => setLightboxAsset(null)}>
+                <motion.div
+                  className="lightbox-content"
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <PinnableImage
+                    asset={lightboxAsset}
+                    pins={pins.filter(p => p.slide_key === lightboxAsset.slideKey && (!lightboxAsset.assetId || p.asset_id === lightboxAsset.assetId))}
+                    canPin={showFeedback}
+                    reviewerName={reviewerName}
+                    onReviewerNameChange={updateReviewerName}
+                    onAddPin={addPin}
+                    onRemovePin={removePin}
+                    lang={lang}
+                  />
+                  {lightboxAsset.caption && <p className="lightbox-caption">{lightboxAsset.caption}</p>}
+                  <button className="lightbox-close" onClick={() => setLightboxAsset(null)}>✕</button>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+        </>
+      }
+    />
   )
 }
 

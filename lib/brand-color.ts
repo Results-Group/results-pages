@@ -29,6 +29,19 @@ const ACHROMATIC = 0.08
 /** Where a greyscale brand lands: a crisp near-white, not a muddy mid grey. */
 const MONOCHROME_ACCENT = '#ededed'
 
+/** Convert a #RRGGBB (or #RGB) hex to an rgba() string. Falls back to the raw value. */
+export function hexToRgba(hex: string, alpha: number): string {
+  const rgb = parseHex(hex)
+  if (!rgb) return hex
+  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`
+}
+
+/** Convert a #RRGGBB (or #RGB) hex to an 'R, G, B' triplet for rgba(var(--brand-rgb), a). */
+export function hexToRgbTriplet(hex: string): string | null {
+  const rgb = parseHex(hex)
+  return rgb ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : null
+}
+
 export function parseHex(hex: string): { r: number; g: number; b: number } | null {
   let h = (hex || '').trim().replace('#', '')
   if (h.length === 3) h = h.split('').map(c => c + c).join('')

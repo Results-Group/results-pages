@@ -16,8 +16,11 @@ export default function MaintenancePage() {
     }}>
       <title>המצגת בעדכון | Results Digital</title>
       <meta name="robots" content="noindex" />
-      {/* Try again on its own — a client who leaves the tab open recovers without touching anything. */}
-      <script dangerouslySetInnerHTML={{ __html: 'setTimeout(function(){location.reload()},300000)' }} />
+      {/* Try again on its own — a client who leaves the tab open recovers
+          without touching anything. A meta refresh rather than a script: React
+          never executes a <script> it renders on the client, so the reload
+          silently did nothing for anyone who arrived via client navigation. */}
+      <meta httpEquiv="refresh" content="300" />
       <div style={{ maxWidth: 480, padding: '0 24px' }}>
         <div style={{
           fontSize: 15, fontWeight: 700, letterSpacing: '0.2em', marginBottom: 28,
