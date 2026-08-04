@@ -10,6 +10,7 @@ const en: Record<TranslationKey, string> = {
   'nav.users': 'Users',
   'nav.workspaces': 'Workspaces',
   'nav.audit': 'Activity Log',
+  'nav.strategy': 'Strategy Documents',
   'nav.trash': 'Trash',
 
   // Common
@@ -445,6 +446,23 @@ const en: Record<TranslationKey, string> = {
   // Public report presentation
   'public.reportFor': 'Performance report for',
   'public.hebrew': 'Hebrew',
+
+  // ── Strategy documents ──
+  'strategy.title': 'Strategy Documents',
+  'strategy.subtitle': 'Brand positioning decks',
+  'strategy.new': 'New document',
+  'strategy.empty': 'No strategy documents yet',
+  'strategy.slides': 'slides',
+  'strategy.kind.statement': 'Statement',
+  'strategy.kind.info': 'Info & bullets',
+  'strategy.kind.matrixTable': 'Table',
+  'strategy.kind.boxes': 'Three boxes',
+  'strategy.kind.positioningMap': 'Positioning map',
+  'strategy.kind.question': 'Guiding question',
+  'strategy.kind.splitMedia': 'Image & text',
+  'strategy.kind.brandLanguage': 'Brand language',
+  'strategy.kind.heatGauges': 'Heat gauges',
+  'trash.strategy': 'Strategy documents',
 }
 
 export default en

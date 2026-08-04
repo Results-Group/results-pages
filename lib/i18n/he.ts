@@ -8,6 +8,7 @@ const he = {
   'nav.users': 'משתמשים',
   'nav.workspaces': 'סביבות עבודה',
   'nav.audit': 'יומן פעילות',
+  'nav.strategy': 'מסמכי אסטרטגיה',
   'nav.trash': 'סל מיחזור',
 
   // Common
@@ -443,6 +444,23 @@ const he = {
   // Public report presentation
   'public.reportFor': 'דוח ביצועים עבור',
   'public.hebrew': 'עברית',
+
+  // ── Strategy documents ──
+  'strategy.title': 'מסמכי אסטרטגיה',
+  'strategy.subtitle': 'מצגות מיצוב מותג',
+  'strategy.new': 'מסמך חדש',
+  'strategy.empty': 'עדיין אין מסמכי אסטרטגיה',
+  'strategy.slides': 'שקפים',
+  'strategy.kind.statement': 'טקסט מרכזי',
+  'strategy.kind.info': 'מידע ובולטים',
+  'strategy.kind.matrixTable': 'טבלה',
+  'strategy.kind.boxes': 'שלוש תיבות',
+  'strategy.kind.positioningMap': 'מפת מיצוב',
+  'strategy.kind.question': 'שאלה מנחה',
+  'strategy.kind.splitMedia': 'תמונה וטקסט',
+  'strategy.kind.brandLanguage': 'שפת מותג',
+  'strategy.kind.heatGauges': 'מדדי חום',
+  'trash.strategy': 'מסמכי אסטרטגיה',
 } as const
 
 export default he
