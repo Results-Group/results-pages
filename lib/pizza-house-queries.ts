@@ -137,18 +137,24 @@ export async function fetchSummary(r: DateRange) {
   // Customer identity = card fingerprint (id_card + validto).
   //
   // Ideally this would be phone-based, since a real person keeps their number
-  // across card renewals and multi-card use. This POS holds no phone to use.
-  // Both places it could live have been walked, on both branches:
+  // across card renewals and multi-card use. This POS holds no phone to use,
+  // and that is not a guess about where to look: on 2026-08-05 every one of
+  // the 26 tables in the interface database was enumerated on both branches,
+  // and every column named like a customer, an address or a delivery was
+  // counted. The complete result:
   //
-  //   creditcard.phone   2180/2180 rows are the literal "---"   (2026-07-23)
-  //   clients.phone      the customer-club table has 2 rows      (2026-08-05)
-  //   deals.client_id    0 of 3278 orders carry one              (2026-08-05)
+  //   clients            the customer-club table — 2 rows (Mevaseret: 1)
+  //   clients.address    empty even on those rows
+  //   creditcard.phone   0 of 2180 rows — all the literal "---"
+  //   deals.client_id    0 of 3926 rows
   //
-  // The Aviv interface spec documents a full club record — phone, mobile,
-  // address, delivery discount — and the tables are there. The branch simply
-  // never enrolls anyone: `clients` holds two rows, and not one deal in a
-  // month links to it. Delivery orders arrive as plain deals with no customer
-  // attached, which is also why the delivery split has to key off a line item.
+  // There is no delivery-address table and no order-customer table; `deals`
+  // is id_deal, tm_open, tm_close, sum, paydesk, client_id, tax*, id_z and
+  // nothing else. The Aviv spec documents a full club record — phone, mobile,
+  // address, delivery discount — and the table is there with those exact
+  // columns. The branch simply never enrolls anyone. A delivery order arrives
+  // as a plain deal with no customer attached, which is also why the delivery
+  // split has to key off a line item rather than an order type.
   //
   // So the card fingerprint is the best identity this DB actually holds. Real
   // per-person identity would have to come from whatever takes the delivery
