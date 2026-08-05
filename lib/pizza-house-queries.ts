@@ -137,11 +137,23 @@ export async function fetchSummary(r: DateRange) {
   // Customer identity = card fingerprint (id_card + validto).
   //
   // Ideally this would be phone-based, since a real person keeps their number
-  // across card renewals and multi-card use. Aviv POS on this deployment does
-  // populate `creditcard.phone` — but every row is the literal placeholder
-  // "---" (verified 2026-07-23: 2180/2180 rows). The cashier flow never
-  // captures a phone into the card payment record. Falling back to the card
-  // fingerprint is the best identity this DB actually holds.
+  // across card renewals and multi-card use. This POS holds no phone to use.
+  // Both places it could live have been walked, on both branches:
+  //
+  //   creditcard.phone   2180/2180 rows are the literal "---"   (2026-07-23)
+  //   clients.phone      the customer-club table has 2 rows      (2026-08-05)
+  //   deals.client_id    0 of 3278 orders carry one              (2026-08-05)
+  //
+  // The Aviv interface spec documents a full club record — phone, mobile,
+  // address, delivery discount — and the tables are there. The branch simply
+  // never enrolls anyone: `clients` holds two rows, and not one deal in a
+  // month links to it. Delivery orders arrive as plain deals with no customer
+  // attached, which is also why the delivery split has to key off a line item.
+  //
+  // So the card fingerprint is the best identity this DB actually holds. Real
+  // per-person identity would have to come from whatever takes the delivery
+  // orders, not from the till. Don't re-litigate this from the spec — the
+  // fields exist and are empty.
   //
   // Known limitation: a card renewal (new validto) counts as a new customer.
   const [customers] = await pizzaHouseQuery<{ unique_customers: number }>(
