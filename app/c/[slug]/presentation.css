@@ -786,7 +786,9 @@
 .campaign-pres .fbpage-bar{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:0 24px 14px;border-bottom:1px solid #dadde1}
 .campaign-pres .fbpage-identity{display:flex;align-items:flex-end;gap:16px;min-width:0}
 .campaign-pres .fbpage-avatar{width:132px;height:132px;border-radius:50%;margin-top:-34px;border:4px solid #fff;background:#dadde1;overflow:hidden;flex:0 0 auto}
-.campaign-pres .fbpage-avatar-img{width:100%;height:100%;object-fit:cover;display:block}
+/* contain, not cover: the avatar is a client LOGO, and cover cropped any
+   non-square mark inside the circle. White ground + breathing room instead. */
+.campaign-pres .fbpage-avatar-img{width:100%;height:100%;object-fit:contain;display:block;background:#fff;padding:14%}
 .campaign-pres .fbpage-avatar-initials,.campaign-pres .ytchan-avatar-initials{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.4rem;font-weight:800;color:#65676b}
 .campaign-pres .fbpage-names{padding-bottom:6px;min-width:0}
 .campaign-pres .fbpage-name{margin:0;font-size:1.6rem;font-weight:800;color:#050505;letter-spacing:-0.01em}
@@ -804,7 +806,7 @@
 .campaign-pres .ytchan-banner-img{width:100%;height:100%;object-fit:cover;display:block}
 .campaign-pres .ytchan-head{display:flex;align-items:center;gap:22px;padding:22px 26px 12px}
 .campaign-pres .ytchan-avatar{width:128px;height:128px;border-radius:50%;background:#272727;overflow:hidden;flex:0 0 auto}
-.campaign-pres .ytchan-avatar-img{width:100%;height:100%;object-fit:cover;display:block}
+.campaign-pres .ytchan-avatar-img{width:100%;height:100%;object-fit:contain;display:block;background:#fff;padding:14%}
 .campaign-pres .ytchan-info{min-width:0}
 .campaign-pres .ytchan-name{margin:0;font-size:1.9rem;font-weight:700;letter-spacing:-0.02em;color:#f1f1f1}
 .campaign-pres .ytchan-meta{margin:6px 0 0;font-size:0.88rem;color:#aaa}
