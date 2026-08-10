@@ -154,6 +154,8 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
       description: s.description,
       copyIds: s.copyIds ?? [],
       ...(s.plan ? { plan: s.plan } : {}),
+      ...(s.stats ? { stats: s.stats } : {}),
+      ...(s.profile ? { profile: s.profile } : {}),
       assets: s.assets.map(a => ({ id: a.id, type: a.type, file_path: a.file_path, url: a.url, caption: a.caption })),
     })),
   }), [doc, status, passwordDirty, slug, slugDirty])
@@ -820,6 +822,7 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
             onApplyContentToAll={applyContentToAll}
             slug={slug}
             onSlugChange={v => { setSlug(v); setSlugDirty(true) }}
+            campaignId={campaignId}
           />
         </aside>
       </div>

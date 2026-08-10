@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import CampaignEditor, { type EditorInitial } from '../_components/editor/CampaignEditor'
 import type { CampaignDocument } from '../_components/editor/types'
-import { newSection } from '../_components/editor/types'
+import { newSection, sectionFromApi } from '../_components/editor/types'
+import { createCampaignLaunchTemplate } from '@/lib/campaign-launch-template'
 
 function getActiveWorkspace(): string | null {
   try {
@@ -16,6 +17,16 @@ export default function NewCampaignPage() {
   const [initial, setInitial] = useState<EditorInitial | null>(null)
 
   useEffect(() => {
+    // Read via location.search inside the effect (the page is already
+    // client-only and builds its state here) — useSearchParams would force a
+    // Suspense boundary for no gain.
+    const template = new URLSearchParams(window.location.search).get('template')
+    // Templates go through sectionFromApi like any loaded campaign, so the
+    // template can never carry a field the mapper drops on the next autosave.
+    const sections = template === 'launch'
+      ? createCampaignLaunchTemplate().map(s => sectionFromApi(s, []))
+      : [newSection()]
+
     const doc: CampaignDocument = {
       meta: {
         client: '',
@@ -31,7 +42,7 @@ export default function NewCampaignPage() {
         publishAt: null,
         expiresAt: null,
       },
-      sections: [newSection()],
+      sections,
     }
     setInitial({ doc, status: 'draft' })
   }, [])

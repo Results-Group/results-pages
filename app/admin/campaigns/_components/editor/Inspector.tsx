@@ -4,6 +4,8 @@ import { useState, useRef } from 'react'
 import { LayoutGrid, Settings2, Upload, Lock, Trash2, Clock, Plus, X, Sparkles, Loader2, Check, Image as ImageIcon, CopyPlus } from 'lucide-react'
 import ClientAutocomplete from '../../../_components/client-autocomplete'
 import DistributionPlanFields from './DistributionPlanFields'
+import StatsFields from './StatsFields'
+import ProfileFields from './ProfileFields'
 import { MOCKUP_TYPES, newCopy, type CampaignMeta, type EditorSection, type MockupType } from './types'
 import CopyTextArea from './CopyTextArea'
 import { useT, useDir } from '@/lib/i18n'
@@ -28,7 +30,7 @@ function SectionDivider({ label }: { label?: string }) {
 }
 
 export default function Inspector({
-  section, meta, onUpdateSection, onUpdateMeta, onUploadLogo, uploadingLogo, passwordDirty, onPasswordDirty, onGenerateCopy, onApplyContentToAll, slug, onSlugChange,
+  section, meta, onUpdateSection, onUpdateMeta, onUploadLogo, uploadingLogo, passwordDirty, onPasswordDirty, onGenerateCopy, onApplyContentToAll, slug, onSlugChange, campaignId,
 }: {
   section: EditorSection | null
   meta: CampaignMeta
@@ -42,6 +44,8 @@ export default function Inspector({
   onApplyContentToAll?: () => void
   slug?: string | null
   onSlugChange?: (slug: string) => void
+  /** Needed to upload the cover mockup images; null while the draft is unsaved. */
+  campaignId?: string | null
 }) {
   const [tab, setTab] = useState<'slide' | 'campaign'>('slide')
   const logoRef = useRef<HTMLInputElement>(null)
@@ -84,6 +88,9 @@ export default function Inspector({
     landing_page: t('campaigns.mockup.landing_page'),
     general: t('campaigns.mockup.general'),
     distribution: t('campaigns.mockup.distribution'),
+    stats: t('campaigns.mockup.stats'),
+    facebook_cover: t('campaigns.mockup.facebook_cover'),
+    youtube_cover: t('campaigns.mockup.youtube_cover'),
     divider: t('campaigns.mockup.divider'),
   }
 
@@ -186,6 +193,27 @@ export default function Inspector({
                   <DistributionPlanFields
                     plan={section.plan}
                     onChange={plan => onUpdateSection({ plan })}
+                  />
+                </>
+              )}
+
+              {(section.mockup_type === 'facebook_cover' || section.mockup_type === 'youtube_cover') && (
+                <>
+                  <SectionDivider label={mockupLabels[section.mockup_type]} />
+                  <ProfileFields
+                    profile={section.profile}
+                    campaignId={campaignId ?? null}
+                    onChange={profile => onUpdateSection({ profile })}
+                  />
+                </>
+              )}
+
+              {section.mockup_type === 'stats' && (
+                <>
+                  <SectionDivider label={t('campaigns.mockup.stats')} />
+                  <StatsFields
+                    stats={section.stats}
+                    onChange={stats => onUpdateSection({ stats })}
                   />
                 </>
               )}

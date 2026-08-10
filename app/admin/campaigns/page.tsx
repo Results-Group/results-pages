@@ -623,6 +623,28 @@ export default function CampaignsListPage() {
               <button onClick={() => setTemplatesOpen(false)} className="p-1 rounded-lg" style={{ color: 'var(--admin-text-muted)' }} aria-label="close"><X className="w-5 h-5" /></button>
             </div>
             <p className="text-xs mb-4" style={{ color: 'var(--admin-text-muted)' }}>{t('campaigns.templatesHint')}</p>
+
+            {/* Built-in system template — pinned above the saved (DB) templates,
+                shown even when none exist. Uses the /new page's seeding flow, so
+                no row is created until the operator's first save. */}
+            <div className="flex items-center justify-between gap-3 p-3 rounded-lg mb-2" style={{ background: 'rgba(64,225,211,0.05)', border: '1px solid rgba(64,225,211,0.25)' }}>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold truncate flex items-center gap-2" style={{ color: 'var(--admin-text-primary)' }}>
+                  {t('campaigns.launchTemplateTitle')}
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: 'rgba(64,225,211,0.15)', color: '#40e1d3' }}>{t('campaigns.systemTemplate')}</span>
+                </p>
+                <p className="text-xs truncate" style={{ color: 'var(--admin-text-muted)' }}>{t('campaigns.launchTemplateHint')}</p>
+              </div>
+              <button
+                onClick={() => router.push('/admin/campaigns/new?template=launch')}
+                className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold"
+                style={{ background: 'var(--admin-accent)', color: 'var(--admin-accent-text)' }}
+              >
+                <Plus className="w-3.5 h-3.5" />
+                {t('campaigns.useTemplate')}
+              </button>
+            </div>
+
             {templates === null ? (
               <p className="text-sm py-6 text-center" style={{ color: 'var(--admin-text-muted)' }}>...</p>
             ) : templates.length === 0 ? (

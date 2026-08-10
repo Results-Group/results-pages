@@ -8,6 +8,7 @@ export interface EditorAsset {
 }
 
 import type { DistributionPlan } from '@/lib/distribution'
+import type { StatsBlock, ProfileBlock } from '@/lib/launch-stats'
 
 export type MockupType =
   | 'instagram_feed'
@@ -19,6 +20,9 @@ export type MockupType =
   | 'landing_page'
   | 'general'
   | 'distribution'
+  | 'stats'
+  | 'facebook_cover'
+  | 'youtube_cover'
   | 'divider'
 
 export interface EditorSection {
@@ -31,6 +35,10 @@ export interface EditorSection {
   assets: EditorAsset[]
   /** Only for mockup_type 'distribution'. */
   plan?: DistributionPlan
+  /** Only for mockup_type 'stats'. */
+  stats?: StatsBlock
+  /** Only for the cover mockups (facebook_cover / youtube_cover). */
+  profile?: ProfileBlock
 }
 
 /** A single ad-text variation on the campaign. `label` is optional
@@ -72,6 +80,9 @@ export const MOCKUP_TYPES: Record<MockupType, string> = {
   landing_page: 'הטמעת דף נחיתה',
   general: 'כללי',
   distribution: 'תוכנית הפצה',
+  stats: 'סיכום נתונים',
+  facebook_cover: 'עמוד פייסבוק',
+  youtube_cover: 'ערוץ יוטיוב',
   divider: 'חוצץ / שקף ביניים',
 }
 
@@ -94,7 +105,9 @@ export function maxAssetsFor(mockupType: MockupType): number {
  * saved fine, dropped on reload, wiped on publish.
  */
 export function sectionFromApi(
-  raw: Partial<EditorSection> & { useCopies?: boolean },
+  // Assets arrive API-shaped (every field but id optional) — the mapper fills
+  // the defaults, so the parameter says so instead of forcing callers to cast.
+  raw: Omit<Partial<EditorSection>, 'assets'> & { useCopies?: boolean; assets?: (Partial<EditorAsset> & { id?: string })[] },
   allCopyIds: string[],
 ): EditorSection {
   // Legacy sections have `useCopies: boolean` and no `copyIds` — map the
@@ -107,6 +120,8 @@ export function sectionFromApi(
     description: raw.description || '',
     copyIds,
     ...(raw.plan ? { plan: raw.plan } : {}),
+    ...(raw.stats ? { stats: raw.stats } : {}),
+    ...(raw.profile ? { profile: raw.profile } : {}),
     assets: (raw.assets || []).map(a => ({
       id: a.id || crypto.randomUUID(),
       type: (a.type || 'image') as 'image' | 'video',

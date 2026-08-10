@@ -20,6 +20,21 @@ describe('sectionFromApi', () => {
     expect(sectionFromApi({ id: 's1', mockup_type: 'general' }, []).plan).toBeUndefined()
   })
 
+  it('carries the stats block through a load', () => {
+    const stats = {
+      kpis: [{ id: 'k1', label: 'חשיפות', value: '8,457,214', highlight: true }],
+      groups: [{ id: 'g1', title: 'Meta', kpis: [{ id: 'k2', label: 'השקעה', value: '₪29,920' }] }],
+      table: { headers: ['ערוץ', 'קליקים'], rows: [['Meta', '9,643']] },
+      note: 'נכון ל-26.06',
+    }
+    const section = sectionFromApi({ id: 's1', mockup_type: 'stats', stats }, [])
+    expect(section.stats).toEqual(stats)
+  })
+
+  it('leaves stats undefined for sections that have none', () => {
+    expect(sectionFromApi({ id: 's1', mockup_type: 'general' }, []).stats).toBeUndefined()
+  })
+
   it('keeps every editable field', () => {
     const section = sectionFromApi({
       id: 's1',

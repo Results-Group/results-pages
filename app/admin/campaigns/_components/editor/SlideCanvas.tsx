@@ -13,6 +13,8 @@ import { Upload, Trash2, GripVertical, Link2, RefreshCw, LayoutTemplate, ImageIc
 import CanvasAsset from './CanvasAsset'
 import { CaptionExpansionProvider } from '@/app/c/[slug]/mockups/AdCaption'
 import DistributionSlide from '@/app/c/[slug]/distribution-slide'
+import StatsSlide from '@/app/c/[slug]/stats-slide'
+import SocialCover from '@/app/c/[slug]/mockups/social-cover'
 import type { EditorAsset, EditorSection, Copy } from './types'
 import { isImageFile, MAX_FILE_MB } from '@/lib/image-compress'
 import { creativesPerScreen, pageAssets } from '@/lib/slides'
@@ -166,6 +168,8 @@ export default function SlideCanvas({
 
   const isDivider = section.mockup_type === 'divider'
   const isDistribution = section.mockup_type === 'distribution'
+  const isStats = section.mockup_type === 'stats'
+  const isCover = section.mockup_type === 'facebook_cover' || section.mockup_type === 'youtube_cover'
   const isReels = section.mockup_type === 'instagram_reels'
   const isLandingPage = section.mockup_type === 'landing_page'
   // Reels are video-based like the plain video mockup, so they share the
@@ -272,6 +276,16 @@ export default function SlideCanvas({
           // .campaign-pres claims the full viewport on the public page.
           <div className="campaign-pres rounded-2xl px-5" style={{ minHeight: 0, overflow: 'hidden' }}>
             <DistributionSlide plan={section.plan} />
+          </div>
+        ) : isCover ? (
+          // Same import-once rule as the distribution and stats slides above.
+          <div className="campaign-pres rounded-2xl px-5" style={{ minHeight: 0, overflow: 'hidden' }}>
+            <SocialCover kind={section.mockup_type as 'facebook_cover' | 'youtube_cover'} profile={section.profile} />
+          </div>
+        ) : isStats ? (
+          // Same import-once rule as the distribution slide above.
+          <div className="campaign-pres rounded-2xl px-5" style={{ minHeight: 0, overflow: 'hidden' }}>
+            <StatsSlide stats={section.stats} />
           </div>
         ) : isDivider ? (
           <div className="relative rounded-2xl py-20 text-center" style={{ border: '1px dashed rgba(64,225,211,0.2)', background: 'rgba(64,225,211,0.02)' }}>

@@ -15,6 +15,8 @@ import { CaptionExpansionProvider } from './mockups/AdCaption'
 import CarouselFeed from './mockups/carousel-feed'
 import GeneralCard from './mockups/general-card'
 import DistributionSlide from './distribution-slide'
+import StatsSlide from './stats-slide'
+import SocialCover from './mockups/social-cover'
 import { parseVideoUrl } from '@/lib/video-utils'
 import { assetProxyUrl } from '@/lib/asset-url'
 import DeckShell from '@/app/_deck/DeckShell'
@@ -51,6 +53,18 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   const [activeCopyIdx, setActiveCopyIdx] = useState(0)
 
   const showFeedback = Boolean(feedbackEnabled && campaignId)
+
+  /**
+   * A deck that reports numbers gets a named tab bar and a centred cover; a
+   * creative presentation keeps the story bars and the split cover.
+   *
+   * Derived from the content rather than stored as a per-campaign setting: a
+   * launch report is exactly a deck that carries stats slides, and a creative
+   * deck never does. A stored flag would only restate what the sections already
+   * say — and could then contradict them, which is the failure mode this
+   * codebase keeps hitting (see the paging note in lib/slides.ts).
+   */
+  const isReport = slides.some(s => s.type === 'stats')
 
   // Remember the reviewer's name locally so they type it once, ever
   const reviewerKey = campaignId ? `rp_reviewer_${campaignId}` : ''
@@ -177,6 +191,8 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
     if (slide.type === 'closing') return t('public.closing')
     if (slide.type === 'divider') return slide.title || ''
     if (slide.type === 'distribution') return slide.title || t('public.dist.title')
+    if (slide.type === 'stats') return slide.title || t('public.stats.title')
+    if (slide.type === 'cover_mockup') return slide.title || t('public.coverMockup.title')
     // Untitled slides carry no name at all: the fallback used to read
     // "סקציה 4", numbered by position in the deck rather than by section, so
     // two halves of one section came out as "סקציה 3" and "סקציה 4". The index
@@ -196,6 +212,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
       headerTitle={`${clientName} — ${campaignName}`}
       brandColor={brandColor}
       lang={lang}
+      nav={isReport ? 'tabs' : 'story'}
       // The lightbox is the topmost surface: while it's open, arrows and swipes
       // belong to it, not to the deck underneath.
       navLocked={!!lightboxAsset}
@@ -222,6 +239,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
               headline={slides[i].subtitle || 'New Creative'}
               eyebrow={slides[i].date || 'Creative Campaign'}
               logoUrl={slides[i].logoUrl}
+              variant={isReport ? 'report' : 'default'}
             />
           )}
           {slides[i].type === 'concept' && <ConceptSlide slide={slides[i]} />}
@@ -232,6 +250,22 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
               title={slides[i].title}
               description={slides[i].content}
               lang={lang}
+            />
+          )}
+          {slides[i].type === 'stats' && (
+            <StatsSlide
+              stats={slides[i].stats}
+              title={slides[i].title}
+              description={slides[i].content}
+              lang={lang}
+            />
+          )}
+          {slides[i].type === 'cover_mockup' && (
+            <SocialCover
+              kind={slides[i].mockupType as 'facebook_cover' | 'youtube_cover'}
+              profile={slides[i].profile}
+              title={slides[i].title}
+              description={slides[i].content}
             />
           )}
           {slides[i].type === 'creatives' && (

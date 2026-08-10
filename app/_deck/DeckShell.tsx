@@ -35,6 +35,18 @@ export interface DeckShellProps {
   lang?: 'he' | 'en'
   /** Extra class on the root, e.g. 'pos-deck' for the strategy stylesheet. */
   variantClass?: string
+  /**
+   * How the reader moves between slides.
+   *
+   * 'story' (default) — thin Instagram-style progress bars. Right for a
+   * creative presentation, which is read front to back once.
+   *
+   * 'tabs' — a named tab bar, always visible. Right for a performance report,
+   * where the reader jumps between platforms and back again, and needs to see
+   * at a glance what the document contains. Opt-in per campaign so existing
+   * creative decks and strategy documents are untouched.
+   */
+  nav?: 'story' | 'tabs'
   renderSlide: (index: number) => React.ReactNode
   /** Rendered inside <main> under the slide (campaign: the approval bar). */
   renderBelowSlide?: (index: number) => React.ReactNode
@@ -59,6 +71,7 @@ export default function DeckShell({
   brandColor,
   lang = 'he',
   variantClass,
+  nav = 'story',
   renderSlide,
   renderBelowSlide,
   headerExtra,
@@ -167,7 +180,7 @@ export default function DeckShell({
 
   return (
     <div
-      className={`campaign-pres${variantClass ? ` ${variantClass}` : ''}`}
+      className={`campaign-pres${nav === 'tabs' ? ' nav-tabs' : ''}${variantClass ? ` ${variantClass}` : ''}`}
       style={accent ? ({
         '--brand-cyan': accent,
         '--brand-green': accent,
@@ -182,31 +195,69 @@ export default function DeckShell({
       <div className="ambient-light-2" style={{ transform: `translate(${parallaxX * -0.6}px, ${parallaxY * -0.6}px)` }} />
       <div className="ambient-light-3" style={{ transform: `translate(${parallaxX * 0.8}px, ${parallaxY * -0.8}px)` }} />
 
-      {/* Story-style progress bars */}
-      <div className="story-progress">
-        {indices.map(i => (
-          <button
-            key={i}
-            className={`story-bar${i === activeSlide ? ' current' : ''}`}
-            onClick={() => goSlide(i)}
-            title={slideName(i)}
-            aria-label={slideName(i)}
-            aria-current={i === activeSlide ? 'step' : undefined}
-          >
-            <div className={`story-bar-fill ${i < activeSlide ? 'done' : i === activeSlide ? 'active' : ''}`} />
-          </button>
-        ))}
-      </div>
+      {/* Navigation — story bars, or a named tab bar for report-style decks.
+          Report order mirrors the hand-built reports: header first, then the
+          tab strip sticks alone at the top while the header scrolls away. */}
+      {nav === 'tabs' ? (
+        <>
+          <header className="pres-header">
+            {/* "Client — document", with the tail lifted in the accent — the
+                same two-tone lockup the hand-built report headers use. */}
+            <div className="brand">
+              {headerTitle.includes('—') ? (
+                <>
+                  {headerTitle.slice(0, headerTitle.indexOf('—'))}
+                  <span className="brand-tail">— {headerTitle.slice(headerTitle.indexOf('—') + 1).trim()}</span>
+                </>
+              ) : headerTitle}
+            </div>
+            {headerExtra && <div className="header-right">{headerExtra}</div>}
+          </header>
+          {/* Horizontal scroll rather than wrap: a wrapping tab bar changes
+              height between slides and shifts the document under the reader. */}
+          <nav className="deck-tabs" role="tablist" aria-label={t('public.allSlides')}>
+            {indices.map(i => (
+              <button
+                key={i}
+                role="tab"
+                className={`deck-tab${i === activeSlide ? ' current' : ''}`}
+                onClick={() => goSlide(i)}
+                title={slideName(i)}
+                aria-selected={i === activeSlide}
+              >
+                {slideName(i)}
+              </button>
+            ))}
+          </nav>
+        </>
+      ) : (
+        <>
+          <div className="story-progress">
+            {indices.map(i => (
+              <button
+                key={i}
+                className={`story-bar${i === activeSlide ? ' current' : ''}`}
+                onClick={() => goSlide(i)}
+                title={slideName(i)}
+                aria-label={slideName(i)}
+                aria-current={i === activeSlide ? 'step' : undefined}
+              >
+                <div className={`story-bar-fill ${i < activeSlide ? 'done' : i === activeSlide ? 'active' : ''}`} />
+              </button>
+            ))}
+          </div>
 
-      <header className="pres-header">
-        {/* The document takes the prominent slot — it's what the client came to
-            read; the agency name sits on the opposite side. */}
-        <div className="brand">{headerTitle}</div>
-        <div className="header-right">
-          {headerExtra}
-          <div className="campaign-badge">Results Digital</div>
-        </div>
-      </header>
+          <header className="pres-header">
+            {/* The document takes the prominent slot — it's what the client came
+                to read; the agency name sits on the opposite side. */}
+            <div className="brand">{headerTitle}</div>
+            <div className="header-right">
+              {headerExtra}
+              <div className="campaign-badge">Results Digital</div>
+            </div>
+          </header>
+        </>
+      )}
 
       <main className="pres-main" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         {/* Plain section keyed on the slide index: React swaps it immediately

@@ -62,6 +62,22 @@ describe('creatives paging', () => {
     }
   })
 
+  it('a stats section renders one slide with content, zero without', () => {
+    const empty = { ...section('stats', 0), stats: { kpis: [], groups: [] } }
+    expect(slidesPerSection(empty)).toBe(0)
+
+    const withKpi = { ...section('stats', 0), stats: { kpis: [{ id: 'k1', label: 'חשיפות', value: '' }], groups: [] } }
+    expect(slidesPerSection(withKpi)).toBe(1)
+
+    const built = buildCampaignSlides({
+      client: 'Acme', campaignName: 'Q3', concept: null,
+      clientLogoUrl: null, date: '', sections: [withKpi, empty],
+    })
+    const statsSlides = built.filter(s => s.type === 'stats')
+    expect(statsSlides).toHaveLength(1)
+    expect(statsSlides[0].stats?.kpis[0].label).toBe('חשיפות')
+  })
+
   it('the sidebar total equals the number of slides actually built', () => {
     const sections = [
       section('landing_page', 1),
@@ -69,6 +85,7 @@ describe('creatives paging', () => {
       section('facebook_feed', 0),
       section('video', 5),
       section('carousel', 6),
+      { ...section('stats', 0), stats: { kpis: [{ id: 'k1', label: 'קליקים', value: '9,643' }], groups: [] } },
     ]
     const built = buildCampaignSlides({
       client: 'Acme', campaignName: 'Q3', concept: 'קונספט',

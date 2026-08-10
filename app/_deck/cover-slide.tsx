@@ -42,6 +42,7 @@ export function CoverSlide({
   headline,
   eyebrow,
   logoUrl,
+  variant = 'default',
 }: {
   /** The client, shown under the headline and used for the initials fallback. */
   clientName: string
@@ -50,7 +51,51 @@ export function CoverSlide({
   /** Small line above the headline; both products pass a formatted date. */
   eyebrow?: string
   logoUrl?: string | null
+  /**
+   * 'default' — the split cover: headline left, client mark right.
+   * 'report'  — centred, client name set large. A performance report opens on
+   *   *whose* results these are; a creative deck opens on what the work is.
+   */
+  variant?: 'default' | 'report'
 }) {
+  if (variant === 'report') {
+    return (
+      <div className="cover-slide-v2 cover-report">
+        <div className="cover-frame" aria-hidden />
+        <div className="cover-corner tl" />
+        <div className="cover-corner tr" />
+        <div className="cover-corner bl" />
+        <div className="cover-corner br" />
+
+        <div className="cover-report-stack">
+          <div className="cover-report-eyebrow rp-anim rp-in rp-d1">
+            <span className="cover-report-rule" aria-hidden />
+            By Results Digital
+            <span className="cover-report-rule" aria-hidden />
+          </div>
+
+          <h1 className="cover-report-client rp-anim rp-in rp-d2">{clientName}</h1>
+
+          <div className="cover-report-divider rp-anim rp-wipe rp-d3" />
+
+          <p className="cover-report-headline rp-anim rp-up rp-d4">
+            {headline}
+            {eyebrow ? <span className="cover-report-date"> · {eyebrow}</span> : null}
+          </p>
+
+          {logoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoUrl} alt={clientName} className="cover-report-logo rp-anim rp-scale rp-d5" />
+          )}
+
+          <div className="rp-anim rp-up rp-d6">
+            <PartnerLogos />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="cover-slide-v2">
       {/* Fine inset gold frame — the "firm" cue */}

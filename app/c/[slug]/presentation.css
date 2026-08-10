@@ -768,3 +768,230 @@
   .campaign-pres .dist-bar-name,.campaign-pres .dist-lane-name{flex-basis:78px;font-size:0.82rem}
   .campaign-pres .dist-ticks{margin-inline-start:92px}
 }
+
+/* ── Facebook page / YouTube channel cover mockups ──
+   Platform chrome is scenery: its job is to make the uploaded artwork read at
+   the right proportions. Both are dir="ltr" — these are the platforms' own
+   layouts, and mirroring them would look wrong to anyone who uses them. */
+.campaign-pres .cover-mockup-slide{padding:30px 0 20px}
+.campaign-pres .cover-mockup-frame{max-width:920px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid var(--border-color);box-shadow:0 24px 60px rgba(0,0,0,0.45)}
+
+/* Facebook */
+.campaign-pres .fbpage{background:#fff;color:#050505;font-family:'Helvetica Neue',Arial,sans-serif}
+.campaign-pres .fbpage-cover{position:relative;aspect-ratio:820/312;background:#e4e6eb;overflow:hidden}
+.campaign-pres .fbpage-cover-img{width:100%;height:100%;object-fit:cover;display:block}
+.campaign-pres .fbpage-cover-empty,.campaign-pres .ytchan-banner-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:600;color:#8a8d91;letter-spacing:0.02em}
+.campaign-pres .fbpage-bar{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:0 24px 14px;border-bottom:1px solid #dadde1}
+.campaign-pres .fbpage-identity{display:flex;align-items:flex-end;gap:16px;min-width:0}
+.campaign-pres .fbpage-avatar{width:132px;height:132px;border-radius:50%;margin-top:-34px;border:4px solid #fff;background:#dadde1;overflow:hidden;flex:0 0 auto}
+.campaign-pres .fbpage-avatar-img{width:100%;height:100%;object-fit:cover;display:block}
+.campaign-pres .fbpage-avatar-initials,.campaign-pres .ytchan-avatar-initials{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.4rem;font-weight:800;color:#65676b}
+.campaign-pres .fbpage-names{padding-bottom:6px;min-width:0}
+.campaign-pres .fbpage-name{margin:0;font-size:1.6rem;font-weight:800;color:#050505;letter-spacing:-0.01em}
+.campaign-pres .fbpage-meta{margin:3px 0 0;font-size:0.86rem;color:#65676b}
+.campaign-pres .fbpage-actions{display:flex;gap:8px;padding-bottom:8px;flex-shrink:0}
+.campaign-pres .fbpage-btn{padding:8px 16px;border-radius:6px;font-size:0.84rem;font-weight:700;background:#e4e6eb;color:#050505;white-space:nowrap}
+.campaign-pres .fbpage-btn.primary{background:#1877f2;color:#fff}
+.campaign-pres .fbpage-tabs{display:flex;gap:4px;padding:0 24px;background:#fff}
+.campaign-pres .fbpage-tab{padding:14px 16px;font-size:0.9rem;font-weight:600;color:#65676b}
+.campaign-pres .fbpage-tab.active{color:#1877f2;box-shadow:inset 0 -3px 0 #1877f2}
+
+/* YouTube */
+.campaign-pres .ytchan{background:#0f0f0f;color:#f1f1f1;font-family:Roboto,Arial,sans-serif;padding-bottom:4px}
+.campaign-pres .ytchan-banner{position:relative;aspect-ratio:2560/423;background:#272727;overflow:hidden;margin:14px 14px 0;border-radius:12px}
+.campaign-pres .ytchan-banner-img{width:100%;height:100%;object-fit:cover;display:block}
+.campaign-pres .ytchan-head{display:flex;align-items:center;gap:22px;padding:22px 26px 12px}
+.campaign-pres .ytchan-avatar{width:128px;height:128px;border-radius:50%;background:#272727;overflow:hidden;flex:0 0 auto}
+.campaign-pres .ytchan-avatar-img{width:100%;height:100%;object-fit:cover;display:block}
+.campaign-pres .ytchan-info{min-width:0}
+.campaign-pres .ytchan-name{margin:0;font-size:1.9rem;font-weight:700;letter-spacing:-0.02em;color:#f1f1f1}
+.campaign-pres .ytchan-meta{margin:6px 0 0;font-size:0.88rem;color:#aaa}
+.campaign-pres .ytchan-bio{margin:6px 0 0;font-size:0.85rem;color:#aaa;max-width:520px}
+.campaign-pres .ytchan-subscribe{display:inline-block;margin-top:14px;padding:9px 18px;border-radius:999px;background:#f1f1f1;color:#0f0f0f;font-size:0.86rem;font-weight:700}
+.campaign-pres .ytchan-tabs{display:flex;gap:6px;padding:0 26px;border-bottom:1px solid #303030}
+.campaign-pres .ytchan-tab{padding:14px 16px;font-size:0.92rem;font-weight:600;color:#aaa;text-transform:none}
+.campaign-pres .ytchan-tab.active{color:#f1f1f1;box-shadow:inset 0 -2px 0 #f1f1f1}
+
+@media(max-width:768px){
+  .campaign-pres .fbpage-avatar{width:78px;height:78px;margin-top:-20px;border-width:3px}
+  .campaign-pres .fbpage-name{font-size:1.1rem}
+  .campaign-pres .fbpage-actions,.campaign-pres .fbpage-tabs{display:none}
+  .campaign-pres .fbpage-bar{padding:0 14px 12px}
+  .campaign-pres .ytchan-head{flex-direction:column;text-align:center;gap:12px;padding:16px}
+  .campaign-pres .ytchan-avatar{width:82px;height:82px}
+  .campaign-pres .ytchan-name{font-size:1.25rem}
+  .campaign-pres .ytchan-tabs{display:none}
+}
+
+/* ── Report cover: centred, the client's name is the subject ── */
+.campaign-pres .cover-report{display:flex;align-items:center;justify-content:center;text-align:center}
+.campaign-pres .cover-report-stack{display:flex;flex-direction:column;align-items:center;gap:22px;padding:40px 24px;max-width:820px}
+.campaign-pres .cover-report-eyebrow{display:flex;align-items:center;gap:14px;font-size:0.72rem;font-weight:700;letter-spacing:0.32em;text-transform:uppercase;color:rgba(var(--brand-rgb),0.85)}
+.campaign-pres .cover-report-rule{display:block;width:56px;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--brand-rgb),0.6),transparent)}
+.campaign-pres .cover-report-client{margin:0;font-size:clamp(2.6rem,7vw,5.2rem);font-weight:900;line-height:1.05;letter-spacing:-0.03em;color:#fff;text-shadow:0 0 60px rgba(var(--brand-rgb),0.25)}
+.campaign-pres .cover-report-divider{width:70px;height:2px;border-radius:2px;background:var(--brand-cyan)}
+.campaign-pres .cover-report-headline{margin:0;font-size:clamp(1rem,2.2vw,1.35rem);font-weight:700;color:var(--brand-cyan)}
+.campaign-pres .cover-report-date{color:var(--text-secondary);font-weight:600}
+.campaign-pres .cover-report-logo{max-height:76px;max-width:230px;object-fit:contain;margin-top:6px}
+.campaign-pres .cover-report .partner-logos{margin-top:10px}
+
+/* ── Tab navigation (report-style decks) ──
+   Replaces the story bars. Sits directly under the header, always visible, so
+   the reader can see what the document contains and jump straight to it. */
+.campaign-pres.nav-tabs .deck-tabs{
+  position:sticky;top:0;z-index:1100;display:flex;align-items:stretch;gap:0;
+  padding:0 28px;overflow-x:auto;scrollbar-width:none;
+  background:rgba(5,5,5,0.6);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,0.07);
+}
+.campaign-pres.nav-tabs .deck-tabs::-webkit-scrollbar{display:none}
+.campaign-pres.nav-tabs .deck-tab{
+  position:relative;flex:0 0 auto;padding:22px 18px;border:none;background:none;cursor:pointer;
+  font-family:inherit;font-size:0.8rem;font-weight:600;white-space:nowrap;
+  color:#888;transition:color .2s;
+}
+.campaign-pres.nav-tabs .deck-tab:hover{color:var(--text-primary)}
+.campaign-pres.nav-tabs .deck-tab.current{color:var(--brand-cyan)}
+/* The underline is the active marker — an ::after rather than a border so the
+   tab's own height never changes and the bar can't jitter between slides. */
+.campaign-pres.nav-tabs .deck-tab::after{
+  content:'';position:absolute;inset-inline:0;bottom:0;height:2px;
+  background:var(--brand-cyan);opacity:0;transition:opacity .2s;
+}
+.campaign-pres.nav-tabs .deck-tab.current::after{opacity:1}
+/* ── Report skin ──
+   The rest of the report look, measured off the hand-built Lafayette page and
+   applied only under .nav-tabs so creative decks and strategy documents keep
+   the presentation chrome untouched. The differences are compositional, not
+   decorative: header above the tabs and centred; headings centred with an
+   underline instead of the deck's side bar; no bottom prev/next bar — the tab
+   strip IS the navigation, exactly like the page this look is copied from. */
+
+/* A report sits on a calm page: the parallax glow lights belong to the
+   presentation, and under the translucent KPI cells they read as a green wash
+   the hand-built reports don't have. Grid and grain stay. */
+.campaign-pres.nav-tabs .ambient-light,
+.campaign-pres.nav-tabs .ambient-light-2,
+.campaign-pres.nav-tabs .ambient-light-3{display:none}
+
+/* Header: a centred lockup that scrolls away; only the tab strip sticks. */
+.campaign-pres.nav-tabs .pres-header{
+  position:static;display:flex;justify-content:center;padding:24px 20px 18px;
+  background:rgba(5,5,5,0.92);border-bottom:none;
+}
+.campaign-pres.nav-tabs .pres-header .brand{
+  font-size:1.5rem;font-weight:900;letter-spacing:0.5px;text-align:center;
+  background:none;-webkit-text-fill-color:currentcolor;color:#fff;
+}
+.campaign-pres.nav-tabs .pres-header .brand-tail{color:var(--brand-cyan);margin-inline-start:8px}
+
+/* Centred headings with a centred rule — the deck's side-bar marker is a
+   presentation idiom, and it is exactly what made these slides read as
+   "not the report". */
+.campaign-pres.nav-tabs .slide-title{
+  flex-direction:column;align-items:center;gap:16px;text-align:center;
+  font-size:2rem;margin-bottom:18px;
+}
+.campaign-pres.nav-tabs .slide-title::before{
+  order:2;width:56px;height:3px;border-radius:3px;
+  background:var(--brand-cyan);
+}
+.campaign-pres.nav-tabs .dist-intro{text-align:center;margin-bottom:34px}
+.campaign-pres.nav-tabs .stats-note{max-width:820px;margin-inline:auto}
+
+/* The tab strip is the navigation; a second prev/next bar under it is deck
+   chrome the report never had. Keyboard arrows and swipe still work. */
+.campaign-pres.nav-tabs .slide-footer-nav{display:none}
+.campaign-pres.nav-tabs .pres-main{padding-top:16px;padding-bottom:24px}
+.campaign-pres.nav-tabs .pres-footer{justify-content:space-between;padding-bottom:28px}
+/* The report cover is one tab among ten, not an opening screen — it doesn't
+   get to claim the whole viewport and leave a void under the partner logos. */
+.campaign-pres.nav-tabs .cover-slide-v2{min-height:56vh;justify-content:center}
+
+@media(max-width:768px){
+  .campaign-pres.nav-tabs .deck-tabs{padding:0 10px}
+  .campaign-pres.nav-tabs .deck-tab{padding:14px 12px;font-size:0.78rem}
+  .campaign-pres.nav-tabs .pres-header{padding:18px 14px 12px}
+  .campaign-pres.nav-tabs .pres-header .brand{font-size:1.1rem}
+  .campaign-pres.nav-tabs .slide-title{font-size:1.5rem}
+  .campaign-pres.nav-tabs .pres-main{padding-bottom:16px}
+}
+
+/* ── Stats (KPI summary) Slide ── */
+.campaign-pres .stats-slide{padding:30px 0 20px}
+
+/* One framed mosaic, not a row of floating cards: the cells sit inside a
+   single bordered panel separated by 2px hairlines. Taken from the hand-built
+   Lafayette report, which is the house look these decks are measured against —
+   the values are all accent-coloured there, and the label is sentence case. */
+/* Ported VERBATIM from the hand-built Lafayette report's .hero-banner/.hb-cell
+   (the house look these decks are measured against): translucent checkerboard
+   cells — odd accent-tinted, even white-tinted — over the page, 2px gaps, no
+   border, a 1px accent ring via box-shadow. Don't "improve" it by making the
+   cells opaque; the hollow low-opacity look IS the design. */
+.campaign-pres .stats-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:2px;margin-bottom:36px;
+  border-radius:10px;overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,.3),0 0 0 1px rgba(var(--brand-rgb),.15);
+}
+.campaign-pres .stats-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:28px 20px}
+.campaign-pres .stats-tile:nth-child(odd){background:rgba(var(--brand-rgb),.08)}
+.campaign-pres .stats-tile:nth-child(even){background:rgba(255,255,255,.03)}
+.campaign-pres .stats-tile-label{font-size:0.78rem;font-weight:600;color:#888}
+.campaign-pres .stats-tile-value{font-size:2rem;font-weight:900;letter-spacing:-0.01em;color:var(--brand-cyan);font-variant-numeric:tabular-nums;direction:ltr}
+.campaign-pres .stats-tile-sub{font-size:0.72rem;color:var(--text-secondary);opacity:0.75}
+/* The one number the slide is about keeps the gold value only — the source
+   report has no special cell background for it. */
+.campaign-pres .stats-tile.highlight .stats-tile-value{color:var(--brand-yellow)}
+
+/* Platform cards, to the source report's grammar: a soft white-on-black card
+   with NO accent border, a white 800 title, and stats as label-over-value
+   cells in a grid — not label/value on one line. */
+/* Ported verbatim from the Lafayette report's .plat-block rules. */
+.campaign-pres .stats-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:32px}
+.campaign-pres .stats-group{padding:28px 32px;border-radius:12px;background:rgba(255,255,255,.03)}
+.campaign-pres .stats-group-title{font-size:1.15rem;font-weight:800;color:var(--text-primary);margin:0 0 18px}
+.campaign-pres .stats-group-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px}
+.campaign-pres .stats-group-row{display:flex;flex-direction:column;gap:4px}
+.campaign-pres .stats-group-label{font-size:.75rem;color:#888;margin-bottom:4px}
+.campaign-pres .stats-group-value{font-size:1.1rem;font-weight:800;color:var(--text-primary);font-variant-numeric:tabular-nums;direction:ltr;text-align:start;white-space:nowrap}
+.campaign-pres .stats-group-row.highlight .stats-group-value{color:var(--brand-cyan)}
+
+/* Tables to the source report's spec: quiet dark wrap, sentence-case gray
+   headers over a 2px accent rule, white 400 cells on hairlines with a faint
+   zebra, and the last column (the total / the headline metric) lifted in
+   accent bold. Wide tables scroll inside the wrap — never the slide. */
+/* Ported verbatim from the Lafayette report's .tw/.tbl rules. */
+.campaign-pres .stats-table-wrap{overflow-x:auto;border-radius:8px;border:1px solid rgba(255,255,255,.06);background:rgba(10,10,10,.6);margin-bottom:32px}
+.campaign-pres .stats-table{width:100%;border-collapse:collapse;min-width:480px;white-space:nowrap}
+.campaign-pres .stats-table th{padding:16px;text-align:start;font-size:.82rem;font-weight:600;color:#888;background:rgba(255,255,255,.02);border-bottom:2px solid rgba(var(--brand-rgb),.3)}
+.campaign-pres .stats-table td{padding:16px;font-size:.9rem;font-weight:400;color:var(--text-primary);border-bottom:1px solid rgba(255,255,255,.05);font-variant-numeric:tabular-nums}
+.campaign-pres .stats-table tbody tr:nth-child(even){background:rgba(255,255,255,.015)}
+.campaign-pres .stats-table tbody tr:hover{background:rgba(var(--brand-rgb),.04)}
+.campaign-pres .stats-table td:last-child,.campaign-pres .stats-table th:last-child{font-weight:800;color:var(--brand-cyan)}
+.campaign-pres .stats-table tbody tr:last-child td{border-bottom:none}
+/* The closing "סה"כ" row = the source report's tfoot: accent rule above, bold. */
+.campaign-pres .stats-table tbody tr:last-child td{border-top:2px solid rgba(var(--brand-rgb),.3);font-weight:800;background:rgba(var(--brand-rgb),.04)}
+
+/* Video-retention funnel. The track is LTR inside an RTL slide so the bars all
+   start from the same edge and shorten in one direction — a funnel read from
+   alternating sides isn't a funnel. */
+.campaign-pres .stats-funnel{background:var(--card-bg);border:1px solid var(--border-color);border-radius:18px;padding:22px;margin-bottom:30px}
+.campaign-pres .stats-funnel-row{display:flex;align-items:center;gap:14px;padding:8px 0}
+.campaign-pres .stats-funnel-label{flex:0 0 118px;font-size:0.88rem;font-weight:700;color:var(--text-primary)}
+.campaign-pres .stats-funnel-track{flex:1;min-width:60px;height:26px;border-radius:8px;background:rgba(255,255,255,0.05);overflow:hidden;direction:ltr}
+.campaign-pres .stats-funnel-fill{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,var(--brand-cyan),var(--brand-green));min-width:6px}
+.campaign-pres .stats-funnel-value{flex:0 0 130px;text-align:start;font-weight:700;color:var(--text-primary);font-variant-numeric:tabular-nums;font-size:0.9rem;direction:ltr}
+.campaign-pres .stats-funnel-pct{display:block;font-style:normal;font-size:0.72rem;font-weight:600;color:rgba(var(--brand-rgb),0.8)}
+
+.campaign-pres .stats-note{font-size:0.78rem;color:var(--text-secondary);opacity:0.65;margin:0;text-align:center}
+
+@media(max-width:768px){
+  /* The gap stays 2px on mobile — widening it re-creates the banded look. */
+  .campaign-pres .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .campaign-pres .stats-tile{padding:18px 10px}
+  .campaign-pres .stats-tile-value{font-size:1.5rem}
+  .campaign-pres .stats-groups{grid-template-columns:1fr}
+  .campaign-pres .stats-funnel-label{flex-basis:78px;font-size:0.8rem}
+  .campaign-pres .stats-funnel-value{flex-basis:88px;font-size:0.82rem}
+}

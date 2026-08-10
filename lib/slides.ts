@@ -1,9 +1,10 @@
 import { resolveSectionCopies, type Copy } from './copies'
 import { hasVisibleContent, normalizePlan, type DistributionPlan } from './distribution'
+import { hasStatsContent, normalizeStats, hasProfileContent, normalizeProfile, type StatsBlock, type ProfileBlock } from './launch-stats'
 import type { CampaignSection, CampaignAsset } from './campaigns'
 
 export interface SlideData {
-  type: 'cover' | 'concept' | 'divider' | 'creatives' | 'distribution' | 'closing'
+  type: 'cover' | 'concept' | 'divider' | 'creatives' | 'distribution' | 'stats' | 'cover_mockup' | 'closing'
   key?: string
   title: string
   subtitle?: string
@@ -21,6 +22,10 @@ export interface SlideData {
   partsTotal?: number
   /** Only on 'distribution' slides. */
   plan?: DistributionPlan
+  /** Only on 'stats' slides. */
+  stats?: StatsBlock
+  /** Only on 'cover_mockup' slides. */
+  profile?: ProfileBlock
 }
 
 /** Creatives shown on one screen before the section pages onto the next.
@@ -37,7 +42,7 @@ export const CREATIVES_PER_SCREEN = 2
 // shape (from the admin editor) — both have mockup_type + assets, which is
 // all this helper reads. Loose typing here beats a Pick<> that both callers
 // have to maintain in lockstep.
-type SectionLike = { mockup_type: string; assets?: unknown[]; plan?: DistributionPlan | null }
+type SectionLike = { mockup_type: string; assets?: unknown[]; plan?: DistributionPlan | null; stats?: StatsBlock | null; profile?: ProfileBlock | null }
 
 /** Creatives on one client screen, for this section's mockup type.
  *
@@ -70,6 +75,12 @@ export function slidesPerSection(section: SectionLike): number {
   // A distribution plan carries no assets — it renders from `plan`, and an
   // empty one renders nothing at all rather than a blank screen.
   if (section.mockup_type === 'distribution') return hasVisibleContent(section.plan) ? 1 : 0
+  // Same contract for the KPI summary: renders from `stats`, empty = no slide.
+  if (section.mockup_type === 'stats') return hasStatsContent(section.stats) ? 1 : 0
+  // The cover mockups are assetless too — they render from `profile`.
+  if (section.mockup_type === 'facebook_cover' || section.mockup_type === 'youtube_cover') {
+    return hasProfileContent(section.profile) ? 1 : 0
+  }
   const assets = section.assets || []
   if (!assets.length) return 0
   return Math.ceil(assets.length / creativesPerScreen(section))
@@ -119,6 +130,28 @@ export function buildCampaignSlides(opts: {
           title: section.title,
           content: section.description,
           plan: normalizePlan(section.plan),
+        })
+      }
+    } else if (section.mockup_type === 'stats') {
+      // Assetless like distribution — needs its own branch for the same reason.
+      if (hasStatsContent(section.stats)) {
+        slides.push({
+          type: 'stats',
+          key: section.id,
+          title: section.title,
+          content: section.description,
+          stats: normalizeStats(section.stats),
+        })
+      }
+    } else if (section.mockup_type === 'facebook_cover' || section.mockup_type === 'youtube_cover') {
+      if (hasProfileContent(section.profile)) {
+        slides.push({
+          type: 'cover_mockup',
+          key: section.id,
+          title: section.title,
+          content: section.description,
+          mockupType: section.mockup_type,
+          profile: normalizeProfile(section.profile),
         })
       }
     } else if ((section.assets || []).length > 0) {
