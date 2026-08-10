@@ -82,7 +82,7 @@ export default function StatsSlide({
 
       {/* Interactive companion to the table below — pick a metric, months
           redraw. Renders only when the table has enough numeric rows. */}
-      {showTable && <StatsChart table={b.table!} />}
+      {showTable && <StatsChart table={b.table!} lang={lang} />}
 
       {showTable && (
         <div className="stats-table-wrap rp-anim rp-up rp-d3">

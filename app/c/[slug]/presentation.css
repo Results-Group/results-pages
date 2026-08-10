@@ -1150,6 +1150,14 @@
 .campaign-pres .stats-chart-bar.hot{filter:brightness(1.18) drop-shadow(0 0 12px rgba(var(--brand-rgb),.35))}
 .campaign-pres .stats-chart-label{font-size:.78rem;font-weight:600;color:#888;white-space:nowrap}
 @keyframes stats-bar-rise{from{transform:scaleY(0)}}
+/* Bars ↔ trend switch: pushed to the far end of the chip row, hairline apart. */
+.campaign-pres .stats-chart-mode{display:flex;gap:6px;margin-inline-start:auto;padding-inline-start:14px;border-inline-start:1px solid rgba(255,255,255,.08)}
+.campaign-pres .stats-chart-mode .stats-chart-chip{display:inline-flex;align-items:center;gap:6px}
+.campaign-pres .stats-chart-trend{display:block;width:100%;height:auto}
+.campaign-pres .stats-chart-trend-line{stroke-dasharray:2000;stroke-dashoffset:2000;animation:stats-trend-draw .9s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes stats-trend-draw{to{stroke-dashoffset:0}}
+.campaign-pres .stats-chart-trend-value{fill:var(--text-primary);font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.campaign-pres .stats-chart-trend-label{fill:#888;font-size:13px;font-weight:600}
 @media(max-width:768px){
   .campaign-pres .stats-chart{padding:16px 12px 14px}
   .campaign-pres .stats-chart-plot{height:170px;gap:8px}
