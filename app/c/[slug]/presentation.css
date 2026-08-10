@@ -845,9 +845,11 @@
   border-bottom:1px solid rgba(255,255,255,0.07);
 }
 .campaign-pres.nav-tabs .deck-tabs::-webkit-scrollbar{display:none}
+/* Tabs stretch evenly across the full width (the source's .tb{flex:1}) so the
+   row reads centred instead of piling at the start edge. */
 .campaign-pres.nav-tabs .deck-tab{
-  position:relative;flex:0 0 auto;padding:22px 18px;border:none;background:none;cursor:pointer;
-  font-family:inherit;font-size:0.8rem;font-weight:600;white-space:nowrap;
+  position:relative;flex:1 1 0;text-align:center;padding:15px 18px;border:none;background:none;cursor:pointer;
+  font-family:inherit;font-size:0.88rem;font-weight:600;white-space:nowrap;
   color:#888;transition:color .2s;
 }
 .campaign-pres.nav-tabs .deck-tab:hover{color:var(--text-primary)}
@@ -874,16 +876,32 @@
 .campaign-pres.nav-tabs .ambient-light-2,
 .campaign-pres.nav-tabs .ambient-light-3{display:none}
 
-/* Header: a centred lockup that scrolls away; only the tab strip sticks. */
+/* Header: the source report's slim strip — accent dot + one-line two-tone
+   title on the start side, controls (presentation mode) on the end side. The
+   big lockup lives on the first tab now, not up here. */
 .campaign-pres.nav-tabs .pres-header{
-  position:static;display:flex;justify-content:center;padding:24px 20px 18px;
-  background:rgba(5,5,5,0.92);border-bottom:none;
+  position:static;display:flex;justify-content:space-between;align-items:center;gap:14px;
+  padding:14px 28px;background:rgba(5,5,5,0.92);
+  border-bottom:1px solid rgba(255,255,255,0.07);
 }
 .campaign-pres.nav-tabs .pres-header .brand{
-  font-size:1.5rem;font-weight:900;letter-spacing:0.5px;text-align:center;
+  display:flex;align-items:center;gap:12px;
+  font-size:1.05rem;font-weight:900;letter-spacing:0.5px;text-align:start;
   background:none;-webkit-text-fill-color:currentcolor;color:#fff;
 }
-.campaign-pres.nav-tabs .pres-header .brand-tail{color:var(--brand-cyan);margin-inline-start:8px}
+.campaign-pres.nav-tabs .pres-header .brand::before{
+  content:'';width:10px;height:10px;border-radius:50%;flex-shrink:0;
+  background:var(--brand-cyan);box-shadow:0 0 10px rgba(var(--brand-rgb),.6);
+}
+.campaign-pres.nav-tabs .pres-header .brand-tail{color:var(--brand-cyan);margin-inline-start:6px}
+.campaign-pres.nav-tabs .header-right{display:flex;align-items:center;gap:10px}
+.campaign-pres.nav-tabs .present-btn{
+  display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+  padding:7px 14px;border-radius:7px;border:1px solid rgba(var(--brand-rgb),.35);
+  background:rgba(var(--brand-rgb),.08);color:var(--brand-cyan);
+  font-family:inherit;font-size:.8rem;font-weight:700;transition:background .2s;
+}
+.campaign-pres.nav-tabs .present-btn:hover{background:rgba(var(--brand-rgb),.16)}
 
 /* Centred headings with a centred rule — the deck's side-bar marker is a
    presentation idiom, and it is exactly what made these slides read as
@@ -913,9 +931,30 @@
 .campaign-pres.nav-tabs .slide-footer-nav{display:none}
 .campaign-pres.nav-tabs .pres-main{padding-top:16px;padding-bottom:24px}
 .campaign-pres.nav-tabs .pres-footer{justify-content:space-between;padding-bottom:28px}
-/* The report cover is one tab among ten, not an opening screen — it doesn't
-   get to claim the whole viewport and leave a void under the partner logos. */
-.campaign-pres.nav-tabs .cover-slide-v2{min-height:56vh;justify-content:center}
+/* The cover is no longer a tab of its own — it opens the first data tab as a
+   hero block with the numbers right below, exactly like the source report's
+   overview pane. Compact: it shares the screen now. */
+.campaign-pres.nav-tabs .report-hero .cover-slide-v2{min-height:0;padding:56px 24px 40px}
+.campaign-pres.nav-tabs .report-hero{margin-bottom:36px}
+
+/* ── Presentation mode ──
+   The source report's מצב מצגת: fullscreen, chrome hidden, one screen per
+   slide with the arrow bar back on. Keyboard and swipe already navigate. */
+.campaign-pres.nav-tabs.presenting .pres-header,
+.campaign-pres.nav-tabs.presenting .deck-tabs,
+.campaign-pres.nav-tabs.presenting .pres-footer{display:none}
+.campaign-pres.nav-tabs.presenting .slide-footer-nav{
+  display:flex;position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+  z-index:1200;background:rgba(0,0,0,.72);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:6px 12px;
+}
+.campaign-pres.nav-tabs.presenting .pres-main{padding-top:12px}
+.campaign-pres .present-exit{
+  position:fixed;top:16px;inset-inline-end:16px;z-index:1200;width:36px;height:36px;
+  border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.6);
+  color:rgba(255,255,255,.55);font-size:.9rem;cursor:pointer;transition:color .2s;
+}
+.campaign-pres .present-exit:hover{color:#fff}
 
 @media(max-width:768px){
   .campaign-pres.nav-tabs .deck-tabs{padding:0 10px}
@@ -1004,13 +1043,22 @@
    with NO accent border, a white 800 title, and stats as label-over-value
    cells in a grid — not label/value on one line. */
 /* Ported verbatim from the Lafayette report's .plat-block rules. */
-.campaign-pres .stats-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:32px}
-.campaign-pres .stats-group{padding:28px 32px;border-radius:12px;background:rgba(255,255,255,.03)}
-.campaign-pres .stats-group-title{font-size:1.15rem;font-weight:800;color:var(--text-primary);margin:0 0 18px}
+.campaign-pres .stats-groups{margin-bottom:32px}
+/* Full-width stacked blocks, exactly the source's .plat-block: side-by-side
+   cards stretched each metric cell so wide that the RTL label and the LTR
+   value sat on opposite edges of the cell and the pairs read as scrambled. */
+.campaign-pres .stats-group{
+  padding:28px 32px;border-radius:12px;background:rgba(255,255,255,.03);margin-bottom:24px;
+  border-inline-start:4px solid var(--plat-color, rgba(var(--brand-rgb),.45));
+}
+.campaign-pres .stats-group-title{display:flex;align-items:center;gap:10px;font-size:1.15rem;font-weight:800;color:var(--text-primary);margin:0 0 18px}
+.campaign-pres .stats-group-icon{display:inline-flex;align-items:center}
 .campaign-pres .stats-group-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px}
 .campaign-pres .stats-group-row{display:flex;flex-direction:column;gap:4px}
 .campaign-pres .stats-group-label{font-size:.75rem;color:#888;margin-bottom:4px}
-.campaign-pres .stats-group-value{font-size:1.1rem;font-weight:800;color:var(--text-primary);font-variant-numeric:tabular-nums;direction:ltr;text-align:start;white-space:nowrap}
+/* bidi-plaintext keeps "₪29,920" rendering left-to-right while the text still
+   aligns to the same start edge as its label above. */
+.campaign-pres .stats-group-value{font-size:1.1rem;font-weight:800;color:var(--text-primary);font-variant-numeric:tabular-nums;unicode-bidi:plaintext;text-align:start;white-space:nowrap}
 .campaign-pres .stats-group-row.highlight .stats-group-value{color:var(--brand-cyan)}
 
 /* Tables to the source report's spec: quiet dark wrap, sentence-case gray

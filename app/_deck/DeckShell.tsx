@@ -105,6 +105,32 @@ export default function DeckShell({
   const activeSlide = Math.min(requestedSlide, Math.max(0, count - 1))
   const [showIndex, setShowIndex] = useState(false)
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 })
+  // Report presentation mode (tabs nav only): fullscreen, chrome hidden,
+  // slide-by-slide — the hand-built reports' מצב מצגת.
+  const [presenting, setPresenting] = useState(false)
+
+  const enterPresentation = useCallback(() => {
+    setPresenting(true)
+    // Fullscreen is best-effort — iOS Safari has no Fullscreen API, and the
+    // mode still works as a chrome-less view there.
+    document.documentElement.requestFullscreen?.().catch(() => {})
+  }, [])
+
+  const exitPresentation = useCallback(() => {
+    setPresenting(false)
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {})
+  }, [])
+
+  // The browser's own Esc leaves fullscreen without telling React — follow it,
+  // or the chrome stays hidden on a windowed page with no way back.
+  useEffect(() => {
+    if (!presenting) return
+    function onFsChange() {
+      if (!document.fullscreenElement) setPresenting(false)
+    }
+    document.addEventListener('fullscreenchange', onFsChange)
+    return () => document.removeEventListener('fullscreenchange', onFsChange)
+  }, [presenting])
 
   const goSlide = useCallback((n: number) => {
     setActiveSlide(n)
@@ -153,6 +179,9 @@ export default function DeckShell({
       // keys for themselves; without this, nudging a logo changes slide.
       if (target?.closest?.('[data-deck-keys="off"]')) return
       if (e.key === 'Escape' && showIndex) { setShowIndex(false); return }
+      // Esc also leaves presentation mode when fullscreen already ended (or
+      // never started — iOS), where the browser has nothing left to close.
+      if (e.key === 'Escape' && presenting && !document.fullscreenElement) { setPresenting(false); return }
       if (navLocked) return
       // Route through goSlide so keyboard navigation also resets the scroll
       // position — otherwise arrow keys left the reader mid-way down the page.
@@ -161,7 +190,7 @@ export default function DeckShell({
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [count, showIndex, navLocked, activeSlide, goSlide])
+  }, [count, showIndex, navLocked, activeSlide, goSlide, presenting])
 
   useEffect(() => {
     let rafId = 0
@@ -190,7 +219,7 @@ export default function DeckShell({
 
   return (
     <div
-      className={`campaign-pres${nav === 'tabs' ? ' nav-tabs' : ''}${variantClass ? ` ${variantClass}` : ''}`}
+      className={`campaign-pres${nav === 'tabs' ? ' nav-tabs' : ''}${presenting ? ' presenting' : ''}${variantClass ? ` ${variantClass}` : ''}`}
       style={accent ? ({
         '--brand-cyan': accent,
         '--brand-green': accent,
@@ -221,7 +250,16 @@ export default function DeckShell({
                 </>
               ) : headerTitle}
             </div>
-            {headerExtra && <div className="header-right">{headerExtra}</div>}
+            <div className="header-right">
+              {headerExtra}
+              <button className="present-btn" onClick={enterPresentation} title={t('public.presentMode')}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" />
+                  <line x1="21" y1="3" x2="14" y2="10" /><line x1="3" y1="21" x2="10" y2="14" />
+                </svg>
+                {t('public.presentMode')}
+              </button>
+            </div>
           </header>
           {/* Horizontal scroll rather than wrap: a wrapping tab bar changes
               height between slides and shifts the document under the reader. */}
@@ -327,6 +365,11 @@ export default function DeckShell({
             </div>
           </div>
         </>
+      )}
+
+      {/* Presentation mode's way out for readers without an Esc key. */}
+      {presenting && (
+        <button className="present-exit" onClick={exitPresentation} aria-label={t('public.presentExit')}>✕</button>
       )}
 
       {/* Bottom nav arrows */}

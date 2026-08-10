@@ -485,6 +485,8 @@ const he = {
   'public.dist.timeline': 'ציר זמן',
   'public.stats.title': 'סיכום נתונים',
   'public.groupOverview': 'סקירה כללית',
+  'public.presentMode': 'מצב מצגת',
+  'public.presentExit': 'יציאה ממצב מצגת',
   'public.coverMockup.title': 'נכסים דיגיטליים',
   'public.creativePresentationFor': 'מצגת קריאייטיב עבור',
 

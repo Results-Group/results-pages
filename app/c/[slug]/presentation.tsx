@@ -66,6 +66,15 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
    */
   const isReport = slides.some(s => s.type === 'stats')
 
+  /**
+   * In a report the cover is not a tab — the source reports open their first
+   * tab with the hero lockup and the numbers right under it. So the deck runs
+   * on the slide list minus the cover, and the first slide renders the hero
+   * above its own content. Creative decks keep the cover slide untouched.
+   */
+  const coverSlide = slides.find(s => s.type === 'cover')
+  const deckSlides = isReport ? slides.filter(s => s.type !== 'cover') : slides
+
   // Remember the reviewer's name locally so they type it once, ever
   const reviewerKey = campaignId ? `rp_reviewer_${campaignId}` : ''
   useEffect(() => {
@@ -218,12 +227,12 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
     const absorbable = (s: SlideData) => s.type === 'creatives' || s.type === 'cover_mockup'
     const out: { label: string; indices: number[] }[] = []
     let i = 0
-    while (i < slides.length) {
-      const s = slides[i]
+    while (i < deckSlides.length) {
+      const s = deckSlides[i]
       if (s.type === 'divider') {
         const indices = [i]
         let j = i + 1
-        while (j < slides.length && absorbable(slides[j])) { indices.push(j); j++ }
+        while (j < deckSlides.length && absorbable(deckSlides[j])) { indices.push(j); j++ }
         if (indices.length > 1) {
           out.push({ label: s.title || getSlideLabel(s), indices })
           i = j
@@ -235,6 +244,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
     }
     return out
   })()
+  // (groups index into deckSlides, which in a report excludes the cover.)
 
   /** The group a divider heads, when it heads one — for the overview chips. */
   const groupOf = (index: number) =>
@@ -242,8 +252,8 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
 
   return (
     <DeckShell
-      count={slides.length}
-      labelFor={i => getSlideLabel(slides[i])}
+      count={deckSlides.length}
+      labelFor={i => getSlideLabel(deckSlides[i])}
       headerTitle={`${clientName} — ${campaignName}`}
       brandColor={brandColor}
       lang={lang}
@@ -253,7 +263,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
       // belong to it, not to the deck underneath.
       navLocked={!!lightboxAsset}
       // The closing slide carries its own sign-off.
-      hideFooterOn={i => slides[i].type === 'closing'}
+      hideFooterOn={i => deckSlides[i].type === 'closing'}
       headerExtra={showFeedback && feedbackSlides.length > 0 ? (
         <div className={`approval-progress${allApproved ? ' complete' : ''}`}>
           <span className="approval-progress-count">
@@ -269,33 +279,46 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
       ) : undefined}
       renderSlide={(i, navigate) => (
         <>
-          {slides[i].type === 'cover' && (
+          {/* Report: the hero lockup opens the first tab, numbers right under
+              it — the cover is not a tab of its own (source-report shape). */}
+          {isReport && i === 0 && coverSlide && (
+            <div className="report-hero">
+              <CoverSlide
+                clientName={coverSlide.title}
+                headline={coverSlide.subtitle || 'New Creative'}
+                eyebrow={coverSlide.date || 'Creative Campaign'}
+                logoUrl={coverSlide.logoUrl}
+                variant="report"
+              />
+            </div>
+          )}
+          {deckSlides[i].type === 'cover' && (
             <CoverSlide
-              clientName={slides[i].title}
-              headline={slides[i].subtitle || 'New Creative'}
-              eyebrow={slides[i].date || 'Creative Campaign'}
-              logoUrl={slides[i].logoUrl}
-              variant={isReport ? 'report' : 'default'}
+              clientName={deckSlides[i].title}
+              headline={deckSlides[i].subtitle || 'New Creative'}
+              eyebrow={deckSlides[i].date || 'Creative Campaign'}
+              logoUrl={deckSlides[i].logoUrl}
+              variant="default"
             />
           )}
-          {slides[i].type === 'concept' && <ConceptSlide slide={slides[i]} />}
-          {slides[i].type === 'divider' && (
+          {deckSlides[i].type === 'concept' && <ConceptSlide slide={deckSlides[i]} />}
+          {deckSlides[i].type === 'divider' && (
             <>
-              <DividerSlide slide={slides[i]} index={i} />
+              <DividerSlide slide={deckSlides[i]} index={i} />
               {/* The launch group's overview, to the source report's shape:
                   the main film embedded under its accent label, then a card
                   per creative linking into its sub-tab. */}
               {(() => {
                 const g = groupOf(i)
                 if (!g || !navigate) return null
-                const mainIdx = g.indices.find(idx => (slides[idx].assets || []).some(a => a.url))
-                const mainAsset = mainIdx !== undefined ? (slides[mainIdx].assets || []).find(a => a.url) : undefined
+                const mainIdx = g.indices.find(idx => (deckSlides[idx].assets || []).some(a => a.url))
+                const mainAsset = mainIdx !== undefined ? (deckSlides[mainIdx].assets || []).find(a => a.url) : undefined
                 const mainInfo = mainAsset?.url ? parseVideoUrl(mainAsset.url) : null
                 return (
                   <div className="launch-overview rp-anim rp-up rp-d3">
                     {mainAsset && (
                       <div className="launch-main">
-                        <div className="launch-main-label">{slides[mainIdx as number].title || mainAsset.caption}</div>
+                        <div className="launch-main-label">{deckSlides[mainIdx as number].title || mainAsset.caption}</div>
                         <div className="showcase-frame is-video">
                           <VideoPlayer url={mainAsset.url || ''} embedUrl={mainInfo?.embedUrl} platform={mainInfo?.platform || 'other'} />
                         </div>
@@ -306,7 +329,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
                         <button key={idx} className="launch-chip" onClick={() => navigate(idx)}>
                           <span className="launch-chip-lbl">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" /></svg>
-                            {getSlideLabel(slides[idx]) || `${t('public.slide')} ${idx + 1}`}
+                            {getSlideLabel(deckSlides[idx]) || `${t('public.slide')} ${idx + 1}`}
                           </span>
                         </button>
                       ))}
@@ -316,44 +339,44 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
               })()}
             </>
           )}
-          {slides[i].type === 'distribution' && (
+          {deckSlides[i].type === 'distribution' && (
             <DistributionSlide
-              plan={slides[i].plan}
-              title={slides[i].title}
-              description={slides[i].content}
+              plan={deckSlides[i].plan}
+              title={deckSlides[i].title}
+              description={deckSlides[i].content}
               lang={lang}
             />
           )}
-          {slides[i].type === 'stats' && (
+          {deckSlides[i].type === 'stats' && (
             <StatsSlide
-              stats={slides[i].stats}
-              title={slides[i].title}
-              description={slides[i].content}
+              stats={deckSlides[i].stats}
+              title={deckSlides[i].title}
+              description={deckSlides[i].content}
               lang={lang}
             />
           )}
-          {slides[i].type === 'cover_mockup' && (
+          {deckSlides[i].type === 'cover_mockup' && (
             <SocialCover
-              kind={slides[i].mockupType as 'facebook_cover' | 'youtube_cover'}
-              profile={slides[i].profile}
-              title={slides[i].title}
-              description={slides[i].content}
+              kind={deckSlides[i].mockupType as 'facebook_cover' | 'youtube_cover'}
+              profile={deckSlides[i].profile}
+              title={deckSlides[i].title}
+              description={deckSlides[i].content}
             />
           )}
-          {slides[i].type === 'creatives' && (
-            <CreativesSlide slide={slides[i]} activeCopyIdx={activeCopyIdx} onActiveCopyChange={setActiveCopyIdx} onAssetClick={setLightboxAsset} lang={lang} plain={isReport} />
+          {deckSlides[i].type === 'creatives' && (
+            <CreativesSlide slide={deckSlides[i]} activeCopyIdx={activeCopyIdx} onActiveCopyChange={setActiveCopyIdx} onAssetClick={setLightboxAsset} lang={lang} plain={isReport} />
           )}
-          {slides[i].type === 'closing' && (
-            <ClosingSlide title={slides[i].title} clientName={slides[i].subtitle} />
+          {deckSlides[i].type === 'closing' && (
+            <ClosingSlide title={deckSlides[i].title} clientName={deckSlides[i].subtitle} />
           )}
         </>
       )}
-      renderBelowSlide={i => (showFeedback && isApprovable(slides[i]) ? (
+      renderBelowSlide={i => (showFeedback && isApprovable(deckSlides[i]) ? (
         <ApprovalBar
-          key={slides[i].key}
-          slideKey={slides[i].key as string}
-          current={feedback[slides[i].key as string]}
-          error={!!feedbackError[slides[i].key as string]}
+          key={deckSlides[i].key}
+          slideKey={deckSlides[i].key as string}
+          current={feedback[deckSlides[i].key as string]}
+          error={!!feedbackError[deckSlides[i].key as string]}
           onSubmit={submitFeedback}
           reviewerName={reviewerName}
           onReviewerNameChange={updateReviewerName}

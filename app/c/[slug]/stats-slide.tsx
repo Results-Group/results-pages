@@ -53,19 +53,29 @@ export default function StatsSlide({
 
       {groups.length > 0 && (
         <div className="stats-groups rp-anim rp-up rp-d2">
-          {groups.map(g => (
-            <div className="stats-group" key={g.id}>
-              <h3 className="stats-group-title">{g.title}</h3>
-              <div className="stats-group-list">
-                {g.kpis.filter(kpiVisible).map(k => (
-                  <div className={`stats-group-row${k.highlight ? ' highlight' : ''}`} key={k.id}>
-                    <span className="stats-group-label">{k.label}</span>
-                    <span className="stats-group-value">{k.value || '—'}</span>
-                  </div>
-                ))}
+          {groups.map(g => {
+            const plat = platformOf(g.title)
+            return (
+              <div
+                className="stats-group"
+                key={g.id}
+                style={plat ? ({ '--plat-color': plat.color } as React.CSSProperties) : undefined}
+              >
+                <h3 className="stats-group-title">
+                  {plat && <span className="stats-group-icon" style={{ color: plat.color }}>{plat.icon}</span>}
+                  {g.title}
+                </h3>
+                <div className="stats-group-list">
+                  {g.kpis.filter(kpiVisible).map(k => (
+                    <div className={`stats-group-row${k.highlight ? ' highlight' : ''}`} key={k.id}>
+                      <span className="stats-group-label">{k.label}</span>
+                      <span className="stats-group-value">{k.value || '—'}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
@@ -99,6 +109,47 @@ export default function StatsSlide({
 
 function kpiVisible(k: StatsKpi): boolean {
   return !!(k.label.trim() || k.value.trim())
+}
+
+/**
+ * Platform badge for a group whose title names an ad platform — the source
+ * report marks each platform block with the platform's colour on the start
+ * edge; the icon is the ask on top of that. Detection is by name so the
+ * operator controls it from the title alone, no extra field.
+ */
+function platformOf(title: string): { icon: React.ReactNode; color: string } | null {
+  const s = title.toLowerCase()
+  if (/meta|facebook|instagram|פייסבוק|אינסטגרם|מטא/.test(s)) {
+    return {
+      color: '#4267B2',
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+          <path d="M6.9 6.5C4.2 6.5 2 9.2 2 12.4c0 3 1.6 5.1 3.9 5.1 1.5 0 2.7-.9 4.1-3.2l1.2-2 .2.3c-1.7 3.1-3.3 4.9-5.6 4.9C3 17.5 1 15.2 1 12.3 1 8.7 3.5 5.5 6.9 5.5c1.9 0 3.5 1 5.1 3.3C13.6 6.5 15.2 5.5 17 5.5c3.4 0 6 3.2 6 6.8 0 2.9-2 5.2-4.8 5.2-2.3 0-3.9-1.8-5.6-4.9l-.9-1.6c-1.5-2.7-2.9-4.5-4.8-4.5zm10 0c-1.4 0-2.6.9-4 3.2l.9 1.6c1.5 2.8 2.7 4.2 4.2 4.2 1.7 0 3-1.6 3-3.9 0-2.8-1.8-5.1-4.1-5.1z" />
+        </svg>
+      ),
+    }
+  }
+  if (/google|youtube|גוגל|יוטיוב/.test(s)) {
+    return {
+      color: '#FBBC05',
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+          <path d="M12 2a10 10 0 1 0 0 20c5.5 0 9.6-3.9 9.6-9.6 0-.7-.1-1.2-.2-1.8H12v3.7h5.5c-.3 1.5-1.7 3.9-5.5 3.9a6.2 6.2 0 0 1 0-12.4c1.8 0 3 .8 3.7 1.4l2.6-2.5A9.6 9.6 0 0 0 12 2z" />
+        </svg>
+      ),
+    }
+  }
+  if (/tiktok|טיקטוק|טיק טוק/.test(s)) {
+    return {
+      color: '#fe2c55',
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+          <path d="M16.6 2h-3.2v13.1a2.8 2.8 0 1 1-2.8-2.8c.3 0 .6 0 .9.1V9.1a6.1 6.1 0 0 0-.9-.1 6.1 6.1 0 1 0 6.1 6.1V8.6a7.8 7.8 0 0 0 4.5 1.4V6.8A4.6 4.6 0 0 1 16.6 2z" />
+        </svg>
+      ),
+    }
+  }
+  return null
 }
 
 /** Video-retention funnel. Bar widths come from funnelWidths — see the note
