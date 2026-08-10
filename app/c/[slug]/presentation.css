@@ -787,8 +787,9 @@
 .campaign-pres .fbpage-identity{display:flex;align-items:flex-end;gap:16px;min-width:0}
 .campaign-pres .fbpage-avatar{width:132px;height:132px;border-radius:50%;margin-top:-34px;border:4px solid #fff;background:#dadde1;overflow:hidden;flex:0 0 auto}
 /* contain, not cover: the avatar is a client LOGO, and cover cropped any
-   non-square mark inside the circle. White ground + breathing room instead. */
-.campaign-pres .fbpage-avatar-img{width:100%;height:100%;object-fit:contain;display:block;background:#fff;padding:14%}
+   non-square mark inside the circle. Near-black ground — client logos here
+   are built for dark surfaces (Medera's is white; on white it vanished). */
+.campaign-pres .fbpage-avatar-img{width:100%;height:100%;object-fit:contain;display:block;background:#0a0a0a;padding:14%}
 .campaign-pres .fbpage-avatar-initials,.campaign-pres .ytchan-avatar-initials{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.4rem;font-weight:800;color:#65676b}
 .campaign-pres .fbpage-names{padding-bottom:6px;min-width:0}
 .campaign-pres .fbpage-name{margin:0;font-size:1.6rem;font-weight:800;color:#050505;letter-spacing:-0.01em}
@@ -802,11 +803,15 @@
 
 /* YouTube */
 .campaign-pres .ytchan{background:#0f0f0f;color:#f1f1f1;font-family:Roboto,Arial,sans-serif;padding-bottom:4px}
-.campaign-pres .ytchan-banner{position:relative;aspect-ratio:2560/423;background:#272727;overflow:hidden;margin:14px 14px 0;border-radius:12px}
-.campaign-pres .ytchan-banner-img{width:100%;height:100%;object-fit:cover;display:block}
+/* The banner takes the uploaded art's own proportions — forcing YouTube's
+   real 6:1 strip cropped most of a 16:9 cover away. The strip ratio stays
+   only for the empty placeholder, which has no image to size itself by. */
+.campaign-pres .ytchan-banner{position:relative;background:#272727;overflow:hidden;margin:14px 14px 0;border-radius:12px}
+.campaign-pres .ytchan-banner:has(.ytchan-banner-empty){aspect-ratio:2560/423}
+.campaign-pres .ytchan-banner-img{width:100%;height:auto;display:block}
 .campaign-pres .ytchan-head{display:flex;align-items:center;gap:22px;padding:22px 26px 12px}
 .campaign-pres .ytchan-avatar{width:128px;height:128px;border-radius:50%;background:#272727;overflow:hidden;flex:0 0 auto}
-.campaign-pres .ytchan-avatar-img{width:100%;height:100%;object-fit:contain;display:block;background:#fff;padding:14%}
+.campaign-pres .ytchan-avatar-img{width:100%;height:100%;object-fit:contain;display:block;background:#0a0a0a;padding:14%}
 .campaign-pres .ytchan-info{min-width:0}
 .campaign-pres .ytchan-name{margin:0;font-size:1.9rem;font-weight:700;letter-spacing:-0.02em;color:#f1f1f1}
 .campaign-pres .ytchan-meta{margin:6px 0 0;font-size:0.88rem;color:#aaa}
