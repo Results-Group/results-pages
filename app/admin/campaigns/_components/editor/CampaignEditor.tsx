@@ -699,7 +699,10 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
           </button>
         )}
         {slug && (
-          <a href={`/c/${slug}?preview=1`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg transition-colors duration-200" style={{ color: 'var(--admin-text-muted)' }}
+          // Published: the clean shareable URL. ?preview=1 only while it's a
+          // draft, where it's required — employees were copying the preview
+          // URL from this tab and sending clients a link that 404s for them.
+          <a href={`/c/${slug}${status === 'published' ? '' : '?preview=1'}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg transition-colors duration-200" style={{ color: 'var(--admin-text-muted)' }}
             onMouseEnter={e => { e.currentTarget.style.color = '#40e1d3' }}
             onMouseLeave={e => { e.currentTarget.style.color = 'var(--admin-text-muted)' }}
             title="פתח בטאב חדש">
