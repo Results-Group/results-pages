@@ -1,7 +1,7 @@
 'use client'
 
 import './presentation.css'
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { SlideData } from '@/lib/slides'
 import type { CampaignAsset } from '@/lib/campaigns'
@@ -155,14 +155,45 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
 
   // Escape closes the lightbox. DeckShell owns Escape for its own slide index;
   // this listener runs first because the lightbox is the topmost surface.
+  /**
+   * The lightbox gallery: every image on the slide the open image came from,
+   * so the reader pages through a graphics set without closing and reopening.
+   * Derived from the slide's own asset order — the arrows walk the pane.
+   */
+  const gallery = useMemo(() => {
+    if (!lightboxAsset?.slideKey || !lightboxAsset.assetId) return []
+    const slide = slides.find(s =>
+      s.key === lightboxAsset.slideKey && (s.assets || []).some(a => a.id === lightboxAsset.assetId))
+    if (!slide) return []
+    return (slide.assets || [])
+      .map(a => {
+        const url = a.file_path ? assetProxyUrl(a.file_path) : (a.public_url || '')
+        return url && a.type !== 'video' && !a.url
+          ? { url, caption: a.caption, slideKey: slide.key, assetId: a.id }
+          : null
+      })
+      .filter(Boolean) as { url: string; caption?: string; slideKey?: string; assetId: string }[]
+  }, [lightboxAsset, slides])
+  const galleryIdx = lightboxAsset ? gallery.findIndex(g => g.assetId === lightboxAsset.assetId) : -1
+
+  const stepGallery = useCallback((dir: 1 | -1) => {
+    if (galleryIdx === -1 || gallery.length < 2) return
+    const next = gallery[galleryIdx + dir]
+    if (next) setLightboxAsset(next)
+  }, [gallery, galleryIdx])
+
   useEffect(() => {
     if (!lightboxAsset) return
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') setLightboxAsset(null)
+      // Same direction language as the deck: in this RTL layout "next" points
+      // left, so ArrowLeft advances through the set.
+      if (e.key === 'ArrowLeft') stepGallery(1)
+      if (e.key === 'ArrowRight') stepGallery(-1)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [lightboxAsset])
+  }, [lightboxAsset, stepGallery])
 
   // Approval progress across all feedback-enabled (creative) slides
   // Divider slides are just section breaks — there's nothing to approve on them,
@@ -416,6 +447,29 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
           <AnimatePresence>
             {lightboxAsset && (
               <div className="lightbox-overlay" onClick={() => setLightboxAsset(null)}>
+                {/* Gallery arrows — walk the images of the pane this one came
+                    from. "Next" points left, matching the deck's RTL arrows. */}
+                {gallery.length > 1 && (
+                  <>
+                    <button
+                      className="lightbox-nav next"
+                      disabled={galleryIdx >= gallery.length - 1}
+                      onClick={e => { e.stopPropagation(); stepGallery(1) }}
+                      aria-label={t('public.next')}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
+                    </button>
+                    <button
+                      className="lightbox-nav prev"
+                      disabled={galleryIdx <= 0}
+                      onClick={e => { e.stopPropagation(); stepGallery(-1) }}
+                      aria-label={t('public.previous')}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
+                    </button>
+                    <div className="lightbox-counter">{galleryIdx + 1} / {gallery.length}</div>
+                  </>
+                )}
                 <motion.div
                   className="lightbox-content"
                   initial={{ scale: 0.9 }}
