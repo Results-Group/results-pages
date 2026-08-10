@@ -269,7 +269,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
             />
           )}
           {slides[i].type === 'creatives' && (
-            <CreativesSlide slide={slides[i]} activeCopyIdx={activeCopyIdx} onActiveCopyChange={setActiveCopyIdx} onAssetClick={setLightboxAsset} lang={lang} />
+            <CreativesSlide slide={slides[i]} activeCopyIdx={activeCopyIdx} onActiveCopyChange={setActiveCopyIdx} onAssetClick={setLightboxAsset} lang={lang} plain={isReport} />
           )}
           {slides[i].type === 'closing' && (
             <ClosingSlide title={slides[i].title} clientName={slides[i].subtitle} />
@@ -574,12 +574,19 @@ function DividerSlide({ slide, index }: { slide: SlideData; index: number }) {
   )
 }
 
-function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick, lang = 'he' }: {
+function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick, lang = 'he', plain = false }: {
   slide: SlideData
   activeCopyIdx: number
   onActiveCopyChange: (idx: number) => void
   onAssetClick: (a: { url: string; caption?: string; slideKey?: string; assetId?: string }) => void
   lang?: 'he' | 'en'
+  /**
+   * Report decks show the work itself — a large bare player / clean image with
+   * its caption as a heading, exactly like the hand-built launch reports. The
+   * platform mockup chrome (Facebook card, Instagram frame) belongs to
+   * creative-approval decks, where "how it looks in the feed" is the point.
+   */
+  plain?: boolean
 }) {
   const dict = lang === 'en' ? en : he
   const t = (key: keyof typeof he) => dict[key] ?? he[key] ?? key
@@ -646,10 +653,46 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
         </div>
       )}
 
+      {/* Report showcase: the creative itself, full width, caption as a small
+          accent heading above — videos stacked one per row, graphics in a
+          two-up grid. No feed chrome. */}
+      {assets.length > 0 && plain && !isCarousel && (
+        <div className={slide.mockupType === 'video' || slide.mockupType === 'instagram_reels' ? 'showcase-stack' : 'showcase-grid'}>
+          {assets.map((asset, i) => {
+            const imageUrl = asset.file_path ? assetProxyUrl(asset.file_path) : (asset.public_url || '')
+            const videoInfo = asset.url ? parseVideoUrl(asset.url) : null
+            const isVideo = asset.type === 'video' || !!videoInfo
+            return (
+              <figure key={asset.id} className="showcase-item rp-anim rp-up" style={{ animationDelay: `${Math.min(i, 6) * 0.08}s` }}>
+                {asset.caption && <figcaption className="showcase-cap">{asset.caption}</figcaption>}
+                {isVideo ? (
+                  <div className="showcase-frame is-video">
+                    <VideoPlayer
+                      url={asset.url || ''}
+                      embedUrl={videoInfo?.embedUrl}
+                      platform={videoInfo?.platform || 'other'}
+                    />
+                  </div>
+                ) : (
+                  <div
+                    className="showcase-frame"
+                    onClick={() => imageUrl && onAssetClick({ url: imageUrl, caption: asset.caption, slideKey: slide.key, assetId: asset.id })}
+                    style={{ cursor: imageUrl ? 'pointer' : 'default' }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={imageUrl} alt={asset.caption || ''} className="showcase-img" />
+                  </div>
+                )}
+              </figure>
+            )
+          })}
+        </div>
+      )}
+
       {/* One expansion state for the whole grid: the mockups sit side by side
           showing the same copy, and expanding one alone left the pair at
           different heights. */}
-      {assets.length > 0 && !isCarousel && (
+      {assets.length > 0 && !isCarousel && !plain && (
         <CaptionExpansionProvider>
         <div className={`assets-grid ${isStory ? 'story-grid' : isLanding ? 'landing-grid' : 'standard-grid'} count-${Math.min(assets.length, 4)}`}>
           {assets.map((asset, i) => (

@@ -899,6 +899,15 @@
 .campaign-pres.nav-tabs .dist-intro{text-align:center;margin-bottom:34px}
 .campaign-pres.nav-tabs .stats-note{max-width:820px;margin-inline:auto}
 
+/* Section headings inside a report tab = the source's h3.st: centred, white,
+   800, a hairline underneath, generous air above. Replaces the deck's small
+   uppercase accent label on the funnel/bars blocks. */
+.campaign-pres.nav-tabs .dist-block-title{
+  font-size:1.25rem;font-weight:800;color:var(--text-primary);text-align:center;
+  text-transform:none;letter-spacing:0;margin:0 0 18px;padding-bottom:10px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+
 /* The tab strip is the navigation; a second prev/next bar under it is deck
    chrome the report never had. Keyboard arrows and swipe still work. */
 .campaign-pres.nav-tabs .slide-footer-nav{display:none}
@@ -915,6 +924,23 @@
   .campaign-pres.nav-tabs .pres-header .brand{font-size:1.1rem}
   .campaign-pres.nav-tabs .slide-title{font-size:1.5rem}
   .campaign-pres.nav-tabs .pres-main{padding-bottom:16px}
+}
+
+/* ── Report creative showcase ──
+   Matches the launch-report source: a cyan mini-heading over a large, bare,
+   rounded frame. Videos one per row at reading width; graphics two-up. */
+.campaign-pres .showcase-stack{display:flex;flex-direction:column;gap:44px;align-items:center}
+.campaign-pres .showcase-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:28px;max-width:980px;margin:0 auto}
+.campaign-pres .showcase-item{margin:0;width:100%}
+.campaign-pres .showcase-stack .showcase-item{max-width:830px}
+.campaign-pres .showcase-cap{text-align:center;font-size:1rem;font-weight:700;color:var(--brand-cyan);margin-bottom:14px}
+.campaign-pres .showcase-frame{border-radius:12px;overflow:hidden;background:#000;box-shadow:0 12px 40px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.06)}
+.campaign-pres .showcase-frame.is-video{aspect-ratio:16/9}
+.campaign-pres .showcase-frame.is-video iframe,.campaign-pres .showcase-frame.is-video video{width:100%;height:100%}
+.campaign-pres .showcase-img{display:block;width:100%;height:auto}
+@media(max-width:768px){
+  .campaign-pres .showcase-stack{gap:28px}
+  .campaign-pres .showcase-grid{grid-template-columns:1fr;gap:20px}
 }
 
 /* ── Stats (KPI summary) Slide ── */
