@@ -78,6 +78,31 @@ describe('creatives paging', () => {
     expect(statsSlides[0].stats?.kpis[0].label).toBe('חשיפות')
   })
 
+  it('report decks page like the launch reports: one film per pane, graphics together', () => {
+    const statsSection = { ...section('stats', 0), stats: { kpis: [{ id: 'k', label: 'x', value: '1' }], groups: [] } }
+    const videos = { ...section('video', 3), assets: [0, 1, 2].map(i => ({ ...asset(i), type: 'video' as const, caption: `One liner ${i}`, url: 'https://youtu.be/x' })) }
+    const graphics = section('instagram_feed', 5)
+
+    // Report rules: each video its own pane, all five graphics on one.
+    expect(slidesPerSection(videos, { report: true })).toBe(3)
+    expect(slidesPerSection(graphics, { report: true })).toBe(1)
+    // The same sections in a creative deck keep the classic split.
+    expect(slidesPerSection(videos)).toBe(2)
+    expect(slidesPerSection(graphics)).toBe(3)
+
+    const sections = [statsSection, videos, graphics]
+    const built = buildCampaignSlides({
+      client: 'Acme', campaignName: 'Q3', concept: null,
+      clientLogoUrl: null, date: '', sections,
+    })
+    // A solo film's pane carries the film's name, not "title · 1 מתוך 3".
+    const videoSlides = built.filter(s => s.type === 'creatives' && s.mockupType === 'video')
+    expect(videoSlides.map(s => s.title)).toEqual(['One liner 0', 'One liner 1', 'One liner 2'])
+    expect(videoSlides.every(s => !s.partsTotal)).toBe(true)
+    // And the sidebar total agrees with the built deck.
+    expect(countClientSlides(sections, { hasConcept: false })).toBe(built.length)
+  })
+
   it('the sidebar total equals the number of slides actually built', () => {
     const sections = [
       section('landing_page', 1),

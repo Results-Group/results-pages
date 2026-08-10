@@ -14,7 +14,7 @@ import {
   Star, BookOpen, CheckCircle2, Sparkles, BarChart3, TrendingUp, Layers,
 } from 'lucide-react'
 import { assetProxyUrl } from '@/lib/asset-url'
-import { countClientSlides, slidesPerSection } from '@/lib/slides'
+import { countClientSlides, slidesPerSection, isReportSections } from '@/lib/slides'
 import type { EditorSection, MockupType, CampaignMeta } from './types'
 
 /** The slide numbers a chip stands for, as the client will count them.
@@ -216,12 +216,15 @@ export default function SlideFilmstrip({ sections, activeId, feedback, meta, onS
   // carousel counts as 1, an empty section counts as 0. This keeps the badge
   // consistent with the "שקף X מתוך Y" divider inside the editor preview.
   const total = countClientSlides(sections, { hasConcept: !!meta.concept })
+  // Report decks page creatives differently (one film per pane, graphics
+  // together) — the sidebar must count by the same rule the deck renders by.
+  const report = isReportSections(sections)
 
   // Walk the deck once and hand each chip the slide numbers it produces, so
   // the sidebar reads top to bottom as 1 … total with no gaps.
   let cursor = 1 + (meta.concept ? 1 : 0) // cover, and the concept slide if set
   const ranges: SlideRange[] = sections.map(s => {
-    const n = slidesPerSection(s)
+    const n = slidesPerSection(s, { report })
     const range = n === 0 ? null : { from: cursor + 1, to: cursor + n }
     cursor += n
     return range

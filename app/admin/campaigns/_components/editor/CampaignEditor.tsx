@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import { assetProxyUrl } from '@/lib/asset-url'
 import { compressImageClient, isImageFile, MAX_FILE_BYTES } from '@/lib/image-compress'
-import { buildCampaignSlides } from '@/lib/slides'
+import { buildCampaignSlides, isReportSections } from '@/lib/slides'
 import type { CampaignSection } from '@/lib/campaigns'
 import { useCampaignDocument } from './useCampaignDocument'
 import SlideFilmstrip from './SlideFilmstrip'
@@ -788,6 +788,7 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
           ) : (
             <SlideCanvas
               section={activeSection}
+              report={isReportSections(doc.sections)}
               clientName={doc.meta.client}
               clientLogoUrl={clientLogoUrl}
               device={device}

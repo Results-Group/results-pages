@@ -49,6 +49,8 @@ interface UploadProgress {
 
 interface CanvasProps {
   section: EditorSection | null
+  /** Report decks page creatives by the report rules (lib/slides). */
+  report?: boolean
   clientName: string
   clientLogoUrl: string | null
   device: 'desktop' | 'mobile'
@@ -131,7 +133,7 @@ function SortableAssetCard({ asset, section, clientName, clientLogoUrl, captionO
 }
 
 export default function SlideCanvas({
-  section, clientName, clientLogoUrl, device, uploading, uploadProgress,
+  section, report, clientName, clientLogoUrl, device, uploading, uploadProgress,
   copies, activeCopyIdx, onActiveCopyChange,
   onUpdateSection, onUpdateAsset, onRemoveAsset, onMoveAsset, onUploadFiles, onReplaceAsset, onAddVideo,
 }: CanvasProps) {
@@ -178,7 +180,7 @@ export default function SlideCanvas({
   const isStory = section.mockup_type === 'instagram_story'
   // The exact screens the client will scroll through, from lib/slides — the
   // canvas must never invent its own split.
-  const assetPages = pageAssets(section.assets, creativesPerScreen(section))
+  const assetPages = pageAssets(section.assets, creativesPerScreen(section, { report }))
   const maxWidth = device === 'mobile' ? 420 : 960
   // Per-slide filter: only campaign copies whose IDs the editor picked here.
   const selectedIds = new Set(section.copyIds ?? [])

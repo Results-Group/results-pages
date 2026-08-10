@@ -55,8 +55,25 @@ type SectionLike = { mockup_type: string; assets?: unknown[]; plan?: Distributio
  *  sidebar count and the editor's page breaks. The video and landing-page
  *  branches of the editor canvas used to page by their own (missing) rules,
  *  so five video links looked like one screen and became three for the client. */
-export function creativesPerScreen(section: SectionLike): number {
+/**
+ * A deck holding stats slides is a launch report, and the hand-built reports
+ * page creatives differently: every VIDEO gets its own sub-tab (named after
+ * its caption), and ALL of a section's graphics share one pane. Derived from
+ * the sections themselves so the editor and deck can never disagree.
+ */
+export function isReportSections(sections: SectionLike[]): boolean {
+  return sections.some(s => s.mockup_type === 'stats')
+}
+
+export function creativesPerScreen(section: SectionLike, opts?: { report?: boolean }): number {
   if (section.mockup_type === 'carousel') return Math.max(1, (section.assets || []).length)
+  if (opts?.report) {
+    // Report paging, matching the source reports: one film per pane; a whole
+    // graphics set on one pane.
+    if (section.mockup_type === 'video' || section.mockup_type === 'instagram_reels') return 1
+    if (section.mockup_type === 'landing_page') return 1
+    return Math.max(1, (section.assets || []).length)
+  }
   if (section.mockup_type === 'landing_page') return 1
   return CREATIVES_PER_SCREEN
 }
@@ -70,7 +87,7 @@ export function pageAssets<T>(assets: T[], perScreen: number): T[][] {
   return pages
 }
 
-export function slidesPerSection(section: SectionLike): number {
+export function slidesPerSection(section: SectionLike, opts?: { report?: boolean }): number {
   if (section.mockup_type === 'divider') return 1
   // A distribution plan carries no assets — it renders from `plan`, and an
   // empty one renders nothing at all rather than a blank screen.
@@ -83,7 +100,7 @@ export function slidesPerSection(section: SectionLike): number {
   }
   const assets = section.assets || []
   if (!assets.length) return 0
-  return Math.ceil(assets.length / creativesPerScreen(section))
+  return Math.ceil(assets.length / creativesPerScreen(section, opts))
 }
 
 /** Total client-facing slide count — cover + optional concept + sum over
@@ -91,9 +108,10 @@ export function slidesPerSection(section: SectionLike): number {
  *  number the operator sees matches the number of screens the client will
  *  scroll through. */
 export function countClientSlides(sections: SectionLike[], opts: { hasConcept: boolean }): number {
+  const report = isReportSections(sections)
   let n = 1 // cover
   if (opts.hasConcept) n += 1 // concept
-  for (const s of sections) n += slidesPerSection(s)
+  for (const s of sections) n += slidesPerSection(s, { report })
   n += 1 // closing
   return n
 }
@@ -109,6 +127,7 @@ export function buildCampaignSlides(opts: {
 }): SlideData[] {
   const { client, campaignName, concept, copies, clientLogoUrl, date, sections } = opts
   const allCopies = copies || []
+  const report = isReportSections(sections)
   const slides: SlideData[] = []
 
   slides.push({ type: 'cover', title: client, subtitle: campaignName, logoUrl: clientLogoUrl, date })
@@ -156,16 +175,22 @@ export function buildCampaignSlides(opts: {
       }
     } else if ((section.assets || []).length > 0) {
       const assets = section.assets || []
-      const perScreen = creativesPerScreen(section)
+      const perScreen = creativesPerScreen(section, { report })
       const partsTotal = Math.ceil(assets.length / perScreen)
       for (let i = 0; i < assets.length; i += perScreen) {
+        // In a report, a lone film's pane is named after the film — the source
+        // reports' sub-tabs read "One liner A", not "וריאציות · 1 מתוך 2".
+        const soloCaption = report && perScreen === 1 && partsTotal > 1
+          ? (assets[i]?.caption || '').trim()
+          : ''
         slides.push({
           type: 'creatives',
           key: section.id,
-          title: section.title,
+          title: soloCaption || section.title,
           // Numbered only when the section actually spans several screens, so a
-          // one-screen section stays clean.
-          ...(partsTotal > 1 ? { part: i / perScreen + 1, partsTotal } : {}),
+          // one-screen section stays clean — and never when the pane already
+          // carries the film's own name.
+          ...(partsTotal > 1 && !soloCaption ? { part: i / perScreen + 1, partsTotal } : {}),
           content: section.description,
           // Per-slide targeting: only copies whose IDs the editor chose here.
           copies: resolveSectionCopies(section, allCopies),

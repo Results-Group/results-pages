@@ -282,19 +282,35 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
           {slides[i].type === 'divider' && (
             <>
               <DividerSlide slide={slides[i]} index={i} />
-              {/* The launch group's overview: quick-link chips to each creative
-                  inside the group — the source report's vv-btn row. */}
+              {/* The launch group's overview, to the source report's shape:
+                  the main film embedded under its accent label, then a card
+                  per creative linking into its sub-tab. */}
               {(() => {
                 const g = groupOf(i)
                 if (!g || !navigate) return null
+                const mainIdx = g.indices.find(idx => (slides[idx].assets || []).some(a => a.url))
+                const mainAsset = mainIdx !== undefined ? (slides[mainIdx].assets || []).find(a => a.url) : undefined
+                const mainInfo = mainAsset?.url ? parseVideoUrl(mainAsset.url) : null
                 return (
-                  <div className="launch-chips rp-anim rp-up rp-d3">
-                    {g.indices.slice(1).map(idx => (
-                      <button key={idx} className="launch-chip" onClick={() => navigate(idx)}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" /></svg>
-                        {getSlideLabel(slides[idx]) || `${t('public.slide')} ${idx + 1}`}
-                      </button>
-                    ))}
+                  <div className="launch-overview rp-anim rp-up rp-d3">
+                    {mainAsset && (
+                      <div className="launch-main">
+                        <div className="launch-main-label">{slides[mainIdx as number].title || mainAsset.caption}</div>
+                        <div className="showcase-frame is-video">
+                          <VideoPlayer url={mainAsset.url || ''} embedUrl={mainInfo?.embedUrl} platform={mainInfo?.platform || 'other'} />
+                        </div>
+                      </div>
+                    )}
+                    <div className="launch-chips">
+                      {g.indices.slice(1).map(idx => (
+                        <button key={idx} className="launch-chip" onClick={() => navigate(idx)}>
+                          <span className="launch-chip-lbl">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" /></svg>
+                            {getSlideLabel(slides[idx]) || `${t('public.slide')} ${idx + 1}`}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )
               })()}
@@ -718,10 +734,12 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
             const imageUrl = asset.file_path ? assetProxyUrl(asset.file_path) : (asset.public_url || '')
             const videoInfo = asset.url ? parseVideoUrl(asset.url) : null
             const isVideo = asset.type === 'video' || !!videoInfo
-            return (
-              <figure key={asset.id} className="showcase-item rp-anim rp-up" style={{ animationDelay: `${Math.min(i, 6) * 0.08}s` }}>
-                {asset.caption && <figcaption className="showcase-cap">{asset.caption}</figcaption>}
-                {isVideo ? (
+            if (isVideo) {
+              return (
+                <figure key={asset.id} className="showcase-item rp-anim rp-up" style={{ animationDelay: `${Math.min(i, 6) * 0.08}s` }}>
+                  {/* The section title already heads the pane; repeating it as
+                      a caption doubled the label in the source comparison. */}
+                  {asset.caption && asset.caption !== slide.title && <figcaption className="showcase-cap">{asset.caption}</figcaption>}
                   <div className="showcase-frame is-video">
                     <VideoPlayer
                       url={asset.url || ''}
@@ -729,17 +747,21 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
                       platform={videoInfo?.platform || 'other'}
                     />
                   </div>
-                ) : (
-                  <div
-                    className="showcase-frame"
-                    onClick={() => imageUrl && onAssetClick({ url: imageUrl, caption: asset.caption, slideKey: slide.key, assetId: asset.id })}
-                    style={{ cursor: imageUrl ? 'pointer' : 'default' }}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={imageUrl} alt={asset.caption || ''} className="showcase-img" />
-                  </div>
-                )}
-              </figure>
+                </figure>
+              )
+            }
+            // Graphics, to the source report: 280px thumbnails in a centred
+            // wrapping row, hairline border, click to enlarge — not big cards.
+            return (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={asset.id}
+                src={imageUrl}
+                alt={asset.caption || ''}
+                className="showcase-thumb rp-anim rp-up"
+                style={{ animationDelay: `${Math.min(i, 6) * 0.08}s` }}
+                onClick={() => imageUrl && onAssetClick({ url: imageUrl, caption: asset.caption, slideKey: slide.key, assetId: asset.id })}
+              />
             )
           })}
         </div>
