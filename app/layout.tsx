@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import './globals.css'
 
 /**
@@ -42,14 +43,21 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="he" dir="rtl" suppressHydrationWarning>
-      <head>
-        <script
+      <body>
+        {/* Theme applied before paint so a light-mode user never sees a dark
+            flash. Via next/script (beforeInteractive) rather than a raw
+            <script> in <head>: React 19 treats a script tag rendered inside a
+            component as an error, and the dev overlay it raises blocked the
+            whole app for anyone opening localhost. */}
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}})()`,
           }}
         />
-      </head>
-      <body>{children}</body>
+        {children}
+      </body>
     </html>
   )
 }
