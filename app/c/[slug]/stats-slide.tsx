@@ -71,6 +71,12 @@ export default function StatsSlide({
                     <div className={`stats-group-row${k.highlight ? ' highlight' : ''}`} key={k.id}>
                       <span className="stats-group-label">{k.label}</span>
                       <span className="stats-group-value">{k.value || '—'}</span>
+                      {/* A change belongs to the figure above it. Split across
+                          its own cell — the shape before this — the reader had
+                          to pair "+50%" back to a keyword two columns away. */}
+                      {k.sublabel?.trim() && (
+                        <span className={`stats-group-sub${deltaClass(k.sublabel)}`}>{k.sublabel.trim()}</span>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -124,6 +130,19 @@ export default function StatsSlide({
 
 function kpiVisible(k: StatsKpi): boolean {
   return !!(k.label.trim() || k.value.trim())
+}
+
+/**
+ * A sublabel that opens with a sign reads as a change, and gets the pill: rise
+ * in the growth green, fall in red. Direction is taken from the sign alone, so
+ * a metric where falling is the win (cost per lead) should be phrased as the
+ * improvement — "שיפור 18%" — rather than as a negative number.
+ */
+function deltaClass(sub: string): string {
+  const s = sub.trim()
+  if (s.startsWith('+')) return ' up'
+  if (s.startsWith('-') || s.startsWith('−')) return ' down'
+  return ''
 }
 
 /**

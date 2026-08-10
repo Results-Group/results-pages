@@ -1102,6 +1102,16 @@
    edge. Forcing LTR left-aligned every all-digit value away from its label. */
 .campaign-pres .stats-group-value{font-size:1.1rem;font-weight:800;color:var(--text-primary);font-variant-numeric:tabular-nums;text-align:start;white-space:nowrap}
 .campaign-pres .stats-group-row.highlight .stats-group-value{color:var(--brand-cyan)}
+/* The change under a figure: a pill, so it reads as an annotation on the
+   number above rather than as another number in the row. */
+.campaign-pres .stats-group-sub{margin-top:7px;font-size:.72rem;font-weight:700;color:var(--text-secondary);opacity:.8}
+.campaign-pres .stats-group-sub.up,
+.campaign-pres .stats-group-sub.down{
+  align-self:flex-start;padding:3px 9px;border-radius:999px;opacity:1;
+  font-variant-numeric:tabular-nums;
+}
+.campaign-pres .stats-group-sub.up{color:#2EC4B6;background:rgba(46,196,182,.12)}
+.campaign-pres .stats-group-sub.down{color:#f07167;background:rgba(240,113,103,.12)}
 
 /* Tables to the source report's spec: quiet dark wrap, sentence-case gray
    headers over a 2px accent rule, white 400 cells on hairlines with a faint
