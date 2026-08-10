@@ -205,6 +205,41 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
       : base
   }
 
+  /**
+   * Report tab groups — the source report's launch tab holds its creatives as
+   * SUB-tabs, not top-level tabs. A divider slide absorbs the creative and
+   * cover-mockup slides that follow it into one group: the divider's title is
+   * the tab, the divider itself becomes the "סקירה כללית" sub-tab, and each
+   * absorbed slide a sub-tab beside it. Render-level only — sections, slides
+   * and the editor are untouched.
+   */
+  const groups = (() => {
+    if (!isReport) return undefined
+    const absorbable = (s: SlideData) => s.type === 'creatives' || s.type === 'cover_mockup'
+    const out: { label: string; indices: number[] }[] = []
+    let i = 0
+    while (i < slides.length) {
+      const s = slides[i]
+      if (s.type === 'divider') {
+        const indices = [i]
+        let j = i + 1
+        while (j < slides.length && absorbable(slides[j])) { indices.push(j); j++ }
+        if (indices.length > 1) {
+          out.push({ label: s.title || getSlideLabel(s), indices })
+          i = j
+          continue
+        }
+      }
+      out.push({ label: getSlideLabel(s), indices: [i] })
+      i++
+    }
+    return out
+  })()
+
+  /** The group a divider heads, when it heads one — for the overview chips. */
+  const groupOf = (index: number) =>
+    groups?.find(g => g.indices[0] === index && g.indices.length > 1)
+
   return (
     <DeckShell
       count={slides.length}
@@ -213,6 +248,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
       brandColor={brandColor}
       lang={lang}
       nav={isReport ? 'tabs' : 'story'}
+      groups={groups}
       // The lightbox is the topmost surface: while it's open, arrows and swipes
       // belong to it, not to the deck underneath.
       navLocked={!!lightboxAsset}
@@ -231,7 +267,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
           )}
         </div>
       ) : undefined}
-      renderSlide={i => (
+      renderSlide={(i, navigate) => (
         <>
           {slides[i].type === 'cover' && (
             <CoverSlide
@@ -243,7 +279,27 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
             />
           )}
           {slides[i].type === 'concept' && <ConceptSlide slide={slides[i]} />}
-          {slides[i].type === 'divider' && <DividerSlide slide={slides[i]} index={i} />}
+          {slides[i].type === 'divider' && (
+            <>
+              <DividerSlide slide={slides[i]} index={i} />
+              {/* The launch group's overview: quick-link chips to each creative
+                  inside the group — the source report's vv-btn row. */}
+              {(() => {
+                const g = groupOf(i)
+                if (!g || !navigate) return null
+                return (
+                  <div className="launch-chips rp-anim rp-up rp-d3">
+                    {g.indices.slice(1).map(idx => (
+                      <button key={idx} className="launch-chip" onClick={() => navigate(idx)}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" /></svg>
+                        {getSlideLabel(slides[idx]) || `${t('public.slide')} ${idx + 1}`}
+                      </button>
+                    ))}
+                  </div>
+                )
+              })()}
+            </>
+          )}
           {slides[i].type === 'distribution' && (
             <DistributionSlide
               plan={slides[i].plan}

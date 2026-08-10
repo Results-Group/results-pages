@@ -484,6 +484,7 @@ const he = {
   'public.dist.budgetSplit': 'חלוקת תקציב',
   'public.dist.timeline': 'ציר זמן',
   'public.stats.title': 'סיכום נתונים',
+  'public.groupOverview': 'סקירה כללית',
   'public.coverMockup.title': 'נכסים דיגיטליים',
   'public.creativePresentationFor': 'מצגת קריאייטיב עבור',
 

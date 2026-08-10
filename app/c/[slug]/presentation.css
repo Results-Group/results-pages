@@ -926,6 +926,17 @@
   .campaign-pres.nav-tabs .pres-main{padding-bottom:16px}
 }
 
+/* ── Launch-group sub-tabs + overview chips ──
+   Ported verbatim from the source report's .itab-nav/.itb and .vv-btn. */
+.campaign-pres .deck-subtabs{display:flex;justify-content:center;gap:2px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.08);margin:0 auto 28px;max-width:860px}
+.campaign-pres .deck-subtab{padding:8px 14px;border:none;background:transparent;color:#888;font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .25s;white-space:nowrap}
+.campaign-pres .deck-subtab:hover{color:rgba(255,255,255,.65)}
+.campaign-pres .deck-subtab.on{color:var(--brand-cyan);border-bottom-color:var(--brand-cyan)}
+
+.campaign-pres .launch-chips{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:34px}
+.campaign-pres .launch-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(var(--brand-rgb),.08);border:1px solid rgba(var(--brand-rgb),.3);color:var(--brand-cyan);padding:6px 12px;border-radius:4px;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .25s}
+.campaign-pres .launch-chip:hover{background:rgba(var(--brand-rgb),.2);color:#fff}
+
 /* ── Report creative showcase ──
    Matches the launch-report source: a cyan mini-heading over a large, bare,
    rounded frame. Videos one per row at reading width; graphics two-up. */

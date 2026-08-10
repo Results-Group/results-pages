@@ -486,6 +486,7 @@ const en: Record<TranslationKey, string> = {
   'public.dist.budgetSplit': 'Budget split',
   'public.dist.timeline': 'Timeline',
   'public.stats.title': 'Performance summary',
+  'public.groupOverview': 'Overview',
   'public.coverMockup.title': 'Digital assets',
   'public.creativePresentationFor': 'Creative presentation for',
 

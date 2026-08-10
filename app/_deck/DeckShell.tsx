@@ -47,7 +47,16 @@ export interface DeckShellProps {
    * creative decks and strategy documents are untouched.
    */
   nav?: 'story' | 'tabs'
-  renderSlide: (index: number) => React.ReactNode
+  /**
+   * Optional grouping for 'tabs' navigation: each group is one tab; a group
+   * holding several slides shows an inner sub-tab strip (the hand-built
+   * reports' itab-nav) for the slides inside it. Indices must cover every
+   * slide exactly once, in order. Without it, one tab per slide as before.
+   */
+  groups?: { label: string; indices: number[] }[]
+  /** `navigate` jumps the deck to another slide — for in-slide links (the
+   *  report overview's chips). Callers that don't need it just ignore it. */
+  renderSlide: (index: number, navigate?: (n: number) => void) => React.ReactNode
   /** Rendered inside <main> under the slide (campaign: the approval bar). */
   renderBelowSlide?: (index: number) => React.ReactNode
   /** Rendered in the header beside the badge (campaign: approval progress). */
@@ -72,6 +81,7 @@ export default function DeckShell({
   lang = 'he',
   variantClass,
   nav = 'story',
+  groups,
   renderSlide,
   renderBelowSlide,
   headerExtra,
@@ -216,16 +226,16 @@ export default function DeckShell({
           {/* Horizontal scroll rather than wrap: a wrapping tab bar changes
               height between slides and shifts the document under the reader. */}
           <nav className="deck-tabs" role="tablist" aria-label={t('public.allSlides')}>
-            {indices.map(i => (
+            {(groups ?? indices.map(i => ({ label: slideName(i), indices: [i] }))).map((g, gi) => (
               <button
-                key={i}
+                key={gi}
                 role="tab"
-                className={`deck-tab${i === activeSlide ? ' current' : ''}`}
-                onClick={() => goSlide(i)}
-                title={slideName(i)}
-                aria-selected={i === activeSlide}
+                className={`deck-tab${g.indices.includes(activeSlide) ? ' current' : ''}`}
+                onClick={() => goSlide(g.indices[0])}
+                title={g.label}
+                aria-selected={g.indices.includes(activeSlide)}
               >
-                {slideName(i)}
+                {g.label}
               </button>
             ))}
           </nav>
@@ -260,6 +270,28 @@ export default function DeckShell({
       )}
 
       <main className="pres-main" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        {/* Inner sub-tab strip — the source report's itab-nav. Appears only
+            inside a multi-slide group; the group's opening (divider) slide is
+            labelled "סקירה כללית" like the source, the rest by their own name. */}
+        {(() => {
+          const g = groups?.find(x => x.indices.includes(activeSlide))
+          if (!g || g.indices.length < 2) return null
+          return (
+            <nav className="deck-subtabs" role="tablist" aria-label={g.label}>
+              {g.indices.map((idx, k) => (
+                <button
+                  key={idx}
+                  role="tab"
+                  className={`deck-subtab${idx === activeSlide ? ' on' : ''}`}
+                  onClick={() => goSlide(idx)}
+                  aria-selected={idx === activeSlide}
+                >
+                  {k === 0 ? t('public.groupOverview') : slideName(idx)}
+                </button>
+              ))}
+            </nav>
+          )
+        })()}
         {/* Plain section keyed on the slide index: React swaps it immediately
             and the CSS class replays the transition. AnimatePresence with
             mode="wait" held the next slide until the previous one's exit
@@ -267,7 +299,7 @@ export default function DeckShell({
             tab, battery saver) that exit never completed, so the counter
             advanced but the deck never moved. */}
         <section key={activeSlide} className="slide active slide-enter">
-          {renderSlide(activeSlide)}
+          {renderSlide(activeSlide, goSlide)}
         </section>
         {renderBelowSlide?.(activeSlide)}
       </main>
