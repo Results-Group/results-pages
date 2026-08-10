@@ -89,7 +89,26 @@ describe('hasStatsContent', () => {
 })
 
 describe('funnelWidths', () => {
-  const stage = (percent?: string) => ({ ...newFunnelStage('s'), value: '1', ...(percent ? { percent } : {}) })
+  // Non-numeric values so these cases exercise the percent path — with
+  // numeric values the widths come from the values instead (tested below).
+  const stage = (percent?: string) => ({ ...newFunnelStage('s'), value: '—', ...(percent ? { percent } : {}) })
+
+  it('draws from the stage values first, so step-conversion percents cannot invert the shape', () => {
+    // The sales funnel: percent carries "closed 66.9% OF ARRIVALS" — bigger
+    // than the previous stage's percent. The bars must still narrow, because
+    // the quantities do.
+    const stages = [
+      { ...newFunnelStage('a'), value: '4,641', percent: '100%' },
+      { ...newFunnelStage('b'), value: '787', percent: '17%' },
+      { ...newFunnelStage('c'), value: '447', percent: '56.8% מהפגישות' },
+      { ...newFunnelStage('d'), value: '299', percent: '66.9% מהמגיעים' },
+    ]
+    const w = funnelWidths(stages)
+    expect(w[0]).toBe(100)
+    expect(w[1]).toBeGreaterThan(w[2])
+    expect(w[2]).toBeGreaterThan(w[3])
+    expect(Math.round(w[1])).toBe(17)
+  })
 
   it('follows the real percentages, scaled to the widest stage', () => {
     // Lafayette's YouTube retention: 38.04 / 15.27 / 11.44 / 9.08

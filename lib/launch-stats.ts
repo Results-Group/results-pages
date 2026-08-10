@@ -215,9 +215,12 @@ export function hasStatsContent(block?: StatsBlock | null): boolean {
 /**
  * Bar widths (percent of the track) for a funnel's stages.
  *
- * Derived from the operator's own `percent` strings when every stage parses,
- * otherwise a fixed positional taper. Only the BAR geometry is computed — the
- * text on screen is always the string that was typed.
+ * Derived from the stage VALUES when every stage parses as a number — the bar
+ * is the quantity, so the funnel keeps its true shape even when the `percent`
+ * strings carry step-to-step conversion ("66.9% מהמגיעים") rather than
+ * share-of-total. Falls back to the percent strings, then to a fixed
+ * positional taper. Only the BAR geometry is computed — the text on screen is
+ * always the string that was typed.
  *
  * Why not always taper positionally: a retention funnel that really drops
  * 38% → 15% → 11% → 9% drawn as four evenly-shrinking bars reads as a gentle
@@ -227,17 +230,20 @@ export function hasStatsContent(block?: StatsBlock | null): boolean {
 export function funnelWidths(stages: StatsFunnelStage[]): number[] {
   const n = stages.length
   if (n === 0) return []
-  const parsed = stages.map(s => {
-    const raw = (s.percent || '').replace(/[^\d.]/g, '')
-    const v = Number.parseFloat(raw)
+  const parseNum = (raw: string) => {
+    const v = Number.parseFloat(raw.replace(/[^\d.]/g, ''))
     return Number.isFinite(v) && v > 0 ? v : null
-  })
-  // All-or-nothing: a half-parsed funnel mixing real and invented proportions
-  // would be less honest than an obviously schematic one.
-  if (parsed.every(v => v !== null)) {
-    const max = Math.max(...(parsed as number[]))
-    // Scaled to the widest stage, floored at 6% so a tiny tail stays visible.
-    return (parsed as number[]).map(v => Math.max((v / max) * 100, 6))
   }
+  // All-or-nothing at each level: a half-parsed funnel mixing real and
+  // invented proportions would be less honest than an obviously schematic one.
+  const scaled = (nums: (number | null)[]) => {
+    const max = Math.max(...(nums as number[]))
+    // Scaled to the widest stage, floored at 6% so a tiny tail stays visible.
+    return (nums as number[]).map(v => Math.max((v / max) * 100, 6))
+  }
+  const values = stages.map(s => parseNum(s.value || ''))
+  if (values.every(v => v !== null)) return scaled(values)
+  const percents = stages.map(s => parseNum(s.percent || ''))
+  if (percents.every(v => v !== null)) return scaled(percents)
   return stages.map((_, i) => 100 - i * (60 / Math.max(n - 1, 1)))
 }
