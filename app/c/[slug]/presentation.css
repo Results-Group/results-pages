@@ -1033,7 +1033,8 @@
 /* Graphics row, ported from the source's cr-banners pane: centred wrapping
    280px thumbnails, hairline border, accent border on hover, click enlarges. */
 .campaign-pres .showcase-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;max-width:880px;margin:0 auto 24px}
-.campaign-pres .showcase-thumb{width:280px;max-width:100%;height:auto;border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,.08);transition:border-color .3s}
+/* Two per row: at 280px a 45-image set became a wall of stamps. */
+.campaign-pres .showcase-thumb{width:calc(50% - 6px);max-width:100%;height:auto;border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,.08);transition:border-color .3s}
 .campaign-pres .showcase-thumb:hover{border-color:rgba(var(--brand-rgb),.4)}
 .campaign-pres .showcase-item{margin:0;width:100%}
 .campaign-pres .showcase-stack .showcase-item{max-width:820px}
