@@ -175,6 +175,10 @@ function TrendPlot({ rows, col, values, max, hovered, onHover }: {
   const path = line.map((p, k) => `${k === 0 ? 'M' : 'L'}${p.px},${p.py}`).join(' ')
   const area = `${path} L${line[line.length - 1].px},${H - BOTTOM} L${line[0].px},${H - BOTTOM} Z`
 
+  // Past six points the value labels start colliding at the dense end, so a
+  // crowded trend shows values on hover only — the dots still tell the shape.
+  const dense = line.length > 6
+
   return (
     <svg className="stats-chart-trend" viewBox={`0 0 ${W} ${H}`} role="img">
       <defs>
@@ -201,7 +205,14 @@ function TrendPlot({ rows, col, values, max, hovered, onHover }: {
           {/* Generous invisible hit area — the visible dot is small. */}
           <circle cx={p.px} cy={p.py} r="22" fill="transparent" />
           <circle cx={p.px} cy={p.py} r={hovered === p.i ? 7 : 5} fill="var(--bg-dark)" stroke="var(--brand-cyan)" strokeWidth="2.5" />
-          <text x={p.px} y={p.py - 16} textAnchor="middle" className="stats-chart-trend-value">
+          <text
+            x={p.px}
+            y={p.py - 16}
+            textAnchor="middle"
+            className="stats-chart-trend-value"
+            opacity={dense ? (hovered === p.i ? 1 : 0) : 1}
+            style={{ transition: 'opacity .2s' }}
+          >
             {(rows[p.i][col] || '').trim()}
           </text>
           <text x={p.px} y={H - 10} textAnchor="middle" className="stats-chart-trend-label">
