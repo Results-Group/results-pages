@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import {
@@ -44,7 +43,6 @@ export interface EditorInitial {
 type Toast = { id: number; message: string; kind: 'success' | 'error' | 'info' }
 
 export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; initial: EditorInitial }) {
-  const router = useRouter()
   const { doc, canUndo, canRedo, setMeta, addSection, addSections, duplicateSection, removeSection, updateSection, moveSection, addAsset, updateAsset, removeAsset, moveAsset, undo, redo } = useCampaignDocument(initial.doc)
 
   const [campaignId, setCampaignId] = useState<string | null>(initial.campaignId ?? null)
@@ -213,7 +211,7 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
   // Serialize saves so a slow/stale request can never land after a newer one
   const saveQueue = useRef<Promise<unknown>>(Promise.resolve())
 
-  const save = useCallback(async (newStatus?: 'draft' | 'published', opts: { redirect?: boolean; silent?: boolean } = {}) => {
+  const save = useCallback(async (newStatus?: 'draft' | 'published', opts: { silent?: boolean } = {}) => {
     // Stop writing once a conflict is detected — the user must reload first
     if (conflictRef.current) {
       if (!opts.silent) toast('הקמפיין עודכן במקום אחר. רעננו את הדף לפני שמירה.', 'error')
@@ -286,7 +284,6 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
         if (newStatus) setStatus(newStatus)
         setSaveState('saved')
         if (!opts.silent) toast(newStatus === 'published' ? 'הקמפיין פורסם' : 'נשמר בהצלחה', 'success')
-        if (newStatus === 'published' && opts.redirect) router.push('/admin/campaigns')
         return data
       } catch (err) {
         setSaveState('error')
@@ -297,7 +294,7 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
     const result = saveQueue.current.then(run, run)
     saveQueue.current = result
     return result
-  }, [doc.meta, passwordDirty, campaignId, buildBody, ensureCampaignExists, syncFromServer, setMeta, router, toast])
+  }, [doc.meta, passwordDirty, campaignId, buildBody, ensureCampaignExists, syncFromServer, setMeta, toast])
 
   // Latest save in a ref so the debounced autosave never fires a stale closure
   const saveRef = useRef(save)
@@ -714,7 +711,9 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
           style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)' }}>
           <Save className="w-3.5 h-3.5" /> טיוטה
         </button>
-        <button onClick={() => save('published', { redirect: true })} disabled={saveState === 'saving'} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold disabled:opacity-30 transition-all duration-200"
+        {/* No redirect: publishing is a status change, not an exit — the
+            operator publishes and keeps polishing in place. */}
+        <button onClick={() => save('published')} disabled={saveState === 'saving'} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold disabled:opacity-30 transition-all duration-200"
           style={{ background: 'rgba(64,225,211,0.15)', border: '1px solid rgba(64,225,211,0.4)', color: '#40e1d3' }}>
           <Send className="w-3.5 h-3.5" /> {status === 'published' ? 'עדכן ופרסם' : 'פרסום'}
         </button>

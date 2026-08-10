@@ -21,6 +21,11 @@ function parseMetric(raw: string): number | null {
   return Number.isFinite(n) ? n : null
 }
 
+/** A dash cell means "no data here" — it must not disqualify its column. */
+function isNoData(cell: string): boolean {
+  return !cell || /^[—–\-!]+$/.test(cell)
+}
+
 /** A totals row anchors the table, but on the chart it would dwarf the months
  *  it sums — so it stays in the table only. */
 function isTotalsRow(row: string[]): boolean {
@@ -40,7 +45,7 @@ export default function StatsChart({ table, lang = 'he' }: { table: StatsTable; 
       .map((label, col) => ({ label, col }))
       .filter(({ col }) => {
         if (col === 0) return false // the label column (months)
-        const cells = rows.map(r => (r[col] || '').trim()).filter(Boolean)
+        const cells = rows.map(r => (r[col] || '').trim()).filter(c => !isNoData(c))
         return cells.length >= 2 && cells.every(c => parseMetric(c) !== null)
       })
     if (!metricColumns.length) return null
