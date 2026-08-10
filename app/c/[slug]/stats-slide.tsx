@@ -5,6 +5,7 @@
 // dedupes the second import.
 import './presentation.css'
 import { normalizeStats, funnelWidths, type StatsBlock, type StatsKpi, type StatsFunnel } from '@/lib/launch-stats'
+import StatsChart from './stats-chart'
 import he from '@/lib/i18n/he'
 import en from '@/lib/i18n/en'
 
@@ -78,6 +79,10 @@ export default function StatsSlide({
           })}
         </div>
       )}
+
+      {/* Interactive companion to the table below — pick a metric, months
+          redraw. Renders only when the table has enough numeric rows. */}
+      {showTable && <StatsChart table={b.table!} />}
 
       {showTable && (
         <div className="stats-table-wrap rp-anim rp-up rp-d3">

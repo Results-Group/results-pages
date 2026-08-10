@@ -934,8 +934,35 @@
 /* The cover is no longer a tab of its own — it opens the first data tab as a
    hero block with the numbers right below, exactly like the source report's
    overview pane. Compact: it shares the screen now. */
-.campaign-pres.nav-tabs .report-hero .cover-slide-v2{min-height:0;padding:56px 24px 40px}
+.campaign-pres.nav-tabs .report-hero .cover-slide-v2{min-height:0;padding:40px 24px 32px}
 .campaign-pres.nav-tabs .report-hero{margin-bottom:36px}
+/* The hero wears the source cover's corner cues, not the creative deck's: the
+   source frames its cover with four large 3px accent brackets at staggered
+   opacities (.5/.15/.3/.1) and no inset hairline frame. The stack is tightened
+   so the first KPI row already peeks above the fold on a laptop screen. */
+.campaign-pres.nav-tabs .report-hero .cover-frame{display:none}
+.campaign-pres.nav-tabs .report-hero .cover-corner{width:64px;height:64px}
+.campaign-pres.nav-tabs .report-hero .cover-corner.tr{border-top-width:3px;border-right-width:3px;border-color:rgba(var(--brand-rgb),.5)}
+.campaign-pres.nav-tabs .report-hero .cover-corner.tl{border-top-width:3px;border-left-width:3px;border-color:rgba(var(--brand-rgb),.15)}
+.campaign-pres.nav-tabs .report-hero .cover-corner.bl{border-bottom-width:3px;border-left-width:3px;border-color:rgba(var(--brand-rgb),.3)}
+.campaign-pres.nav-tabs .report-hero .cover-corner.br{border-bottom-width:3px;border-right-width:3px;border-color:rgba(var(--brand-rgb),.1)}
+.campaign-pres.nav-tabs .report-hero .cover-report-stack{gap:16px;padding:16px 24px}
+.campaign-pres.nav-tabs .report-hero .cover-report-client{font-size:clamp(2.4rem,5.6vw,4rem)}
+.campaign-pres.nav-tabs .report-hero .cover-report-logo{max-height:56px}
+.campaign-pres.nav-tabs .report-hero .partner-logo-img{height:22px}
+
+/* The closing tab: same content as the deck's sign-off, but dressed so it
+   doesn't read as an empty placeholder pane — corner brackets echoing the
+   hero (gold, the sign-off's identity), a stronger centre glow, and slightly
+   more presence for the logo, the client line and the URL. */
+.campaign-pres.nav-tabs .closing-slide-v2::before,
+.campaign-pres.nav-tabs .closing-slide-v2::after{content:'';position:absolute;width:64px;height:64px;pointer-events:none}
+.campaign-pres.nav-tabs .closing-slide-v2::before{top:24px;inset-inline-start:24px;border-top:3px solid rgba(232,193,90,.35);border-inline-start:3px solid rgba(232,193,90,.35)}
+.campaign-pres.nav-tabs .closing-slide-v2::after{bottom:24px;inset-inline-end:24px;border-bottom:3px solid rgba(232,193,90,.2);border-inline-end:3px solid rgba(232,193,90,.2)}
+.campaign-pres.nav-tabs .closing-glow-center{background:radial-gradient(circle, rgba(232,193,90,0.11) 0%, transparent 62%)}
+.campaign-pres.nav-tabs .closing-logo{height:78px;margin-bottom:40px}
+.campaign-pres.nav-tabs .closing-client{font-size:1.25rem;letter-spacing:.04em}
+.campaign-pres.nav-tabs .closing-url{font-size:.95rem;color:rgba(255,255,255,.55)}
 
 /* ── Presentation mode ──
    The source report's מצב מצגת: fullscreen, chrome hidden, one screen per
@@ -960,7 +987,10 @@
   .campaign-pres.nav-tabs .deck-tabs{padding:0 10px}
   .campaign-pres.nav-tabs .deck-tab{padding:14px 12px;font-size:0.78rem}
   .campaign-pres.nav-tabs .pres-header{padding:18px 14px 12px}
-  .campaign-pres.nav-tabs .pres-header .brand{font-size:1.1rem}
+  /* The one-line lockup is longer than a phone header — let it wrap instead of
+     sliding under the presentation-mode button. */
+  .campaign-pres.nav-tabs .pres-header .brand{font-size:0.95rem;white-space:normal;min-width:0}
+  .campaign-pres.nav-tabs .report-hero .cover-corner{width:40px;height:40px}
   .campaign-pres.nav-tabs .slide-title{font-size:1.5rem}
   .campaign-pres.nav-tabs .pres-main{padding-bottom:16px}
 }
@@ -1029,7 +1059,13 @@
   border-radius:10px;overflow:hidden;
   box-shadow:0 8px 32px rgba(0,0,0,.3),0 0 0 1px rgba(var(--brand-rgb),.15);
 }
-.campaign-pres .stats-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:28px 20px}
+/* The source's hero-banner is four across. Past six tiles the auto-fit row
+   wraps 6+2 and punches black holes in the ringed panel, so a fuller mosaic
+   drops to the source's fixed four columns — 8 KPIs become two clean rows. */
+.campaign-pres .stats-grid:has(> :nth-child(7)){grid-template-columns:repeat(4,1fr)}
+/* Top-aligned, not centred: cells with a sublabel otherwise floated their
+   label/value pair higher than their neighbours' and the row lost its line. */
+.campaign-pres .stats-tile{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;text-align:center;padding:26px 20px 22px}
 .campaign-pres .stats-tile:nth-child(odd){background:rgba(var(--brand-rgb),.08)}
 .campaign-pres .stats-tile:nth-child(even){background:rgba(255,255,255,.03)}
 .campaign-pres .stats-tile-label{font-size:0.78rem;font-weight:600;color:#888}
@@ -1056,9 +1092,10 @@
 .campaign-pres .stats-group-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px}
 .campaign-pres .stats-group-row{display:flex;flex-direction:column;gap:4px}
 .campaign-pres .stats-group-label{font-size:.75rem;color:#888;margin-bottom:4px}
-/* bidi-plaintext keeps "₪29,920" rendering left-to-right while the text still
-   aligns to the same start edge as its label above. */
-.campaign-pres .stats-group-value{font-size:1.1rem;font-weight:800;color:var(--text-primary);font-variant-numeric:tabular-nums;unicode-bidi:plaintext;text-align:start;white-space:nowrap}
+/* No direction override — the source report lets natural bidi render
+   "₪29,920" inside the RTL flow, so label and value share the same start
+   edge. Forcing LTR left-aligned every all-digit value away from its label. */
+.campaign-pres .stats-group-value{font-size:1.1rem;font-weight:800;color:var(--text-primary);font-variant-numeric:tabular-nums;text-align:start;white-space:nowrap}
 .campaign-pres .stats-group-row.highlight .stats-group-value{color:var(--brand-cyan)}
 
 /* Tables to the source report's spec: quiet dark wrap, sentence-case gray
@@ -1090,9 +1127,42 @@
 
 .campaign-pres .stats-note{font-size:0.78rem;color:var(--text-secondary);opacity:0.65;margin:0;text-align:center}
 
+/* ── Interactive metric chart (companion to the stats table) ── */
+.campaign-pres .stats-chart{background:rgba(255,255,255,.03);border-radius:12px;padding:24px 28px 20px;margin-bottom:24px}
+.campaign-pres .stats-chart-head{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:22px}
+.campaign-pres .stats-chart-chip{
+  padding:6px 14px;border-radius:7px;cursor:pointer;font-family:inherit;
+  border:1px solid rgba(255,255,255,.08);background:none;
+  font-size:.78rem;font-weight:700;color:#888;transition:color .2s,border-color .2s,background .2s;
+}
+.campaign-pres .stats-chart-chip:hover{color:var(--text-primary)}
+.campaign-pres .stats-chart-chip.on{color:var(--brand-cyan);border-color:rgba(var(--brand-rgb),.4);background:rgba(var(--brand-rgb),.08)}
+.campaign-pres .stats-chart-plot{display:flex;align-items:stretch;gap:18px;height:230px;padding:0 8px}
+.campaign-pres .stats-chart-col{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:default}
+.campaign-pres .stats-chart-value{font-weight:800;font-size:.95rem;color:var(--text-primary);font-variant-numeric:tabular-nums;white-space:nowrap;transition:opacity .2s}
+.campaign-pres .stats-chart-track{flex:1;width:100%;max-width:90px;display:flex;align-items:flex-end;justify-content:center}
+.campaign-pres .stats-chart-bar{
+  width:100%;border-radius:8px 8px 3px 3px;
+  background:linear-gradient(180deg,var(--brand-cyan),var(--brand-green));
+  transform-origin:bottom;animation:stats-bar-rise .55s cubic-bezier(.22,1,.36,1);
+  transition:filter .2s;
+}
+.campaign-pres .stats-chart-bar.hot{filter:brightness(1.18) drop-shadow(0 0 12px rgba(var(--brand-rgb),.35))}
+.campaign-pres .stats-chart-label{font-size:.78rem;font-weight:600;color:#888;white-space:nowrap}
+@keyframes stats-bar-rise{from{transform:scaleY(0)}}
 @media(max-width:768px){
-  /* The gap stays 2px on mobile — widening it re-creates the banded look. */
-  .campaign-pres .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .campaign-pres .stats-chart{padding:16px 12px 14px}
+  .campaign-pres .stats-chart-plot{height:170px;gap:8px}
+  .campaign-pres .stats-chart-value{font-size:.75rem}
+  .campaign-pres .stats-chart-label{font-size:.68rem}
+}
+
+@media(max-width:768px){
+  /* The gap stays 2px on mobile — widening it re-creates the banded look.
+     The :has() variant repeats here because its specificity outranks the bare
+     selector; without it, 8-tile mosaics would stay 4-across on a phone. */
+  .campaign-pres .stats-grid,
+  .campaign-pres .stats-grid:has(> :nth-child(7)){grid-template-columns:repeat(2,1fr)}
   .campaign-pres .stats-tile{padding:18px 10px}
   .campaign-pres .stats-tile-value{font-size:1.5rem}
   .campaign-pres .stats-groups{grid-template-columns:1fr}
