@@ -97,9 +97,19 @@ export default function StatsSlide({
             <tbody>
               {tableRows.map((row, ri) => (
                 <tr key={ri}>
-                  {b.table!.headers.map((_, ci) => (
-                    <td key={ci}>{row[ci]?.trim() || '—'}</td>
-                  ))}
+                  {b.table!.headers.map((_, ci) => {
+                    const raw = row[ci]?.trim() || '—'
+                    // Operator convention: a leading "!" flags the cell —
+                    // rendered in the caution colour, the mark itself hidden.
+                    // Lets a report call out an anomalous figure (a suspect
+                    // show-rate, an outlier month) without a schema field.
+                    const flagged = raw.startsWith('!')
+                    return (
+                      <td key={ci} className={flagged ? 'flagged' : undefined}>
+                        {flagged ? raw.slice(1).trim() : raw}
+                      </td>
+                    )
+                  })}
                 </tr>
               ))}
             </tbody>
