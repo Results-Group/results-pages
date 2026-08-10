@@ -68,12 +68,13 @@ interface CanvasProps {
   onAddVideo: () => void
 }
 
-function SortableAssetCard({ asset, section, clientName, clientLogoUrl, captionOverride, onUpdateAsset, onRemoveAsset, onReplaceAsset }: {
+function SortableAssetCard({ asset, section, clientName, clientLogoUrl, captionOverride, report, onUpdateAsset, onRemoveAsset, onReplaceAsset }: {
   asset: EditorAsset
   section: EditorSection
   clientName: string
   clientLogoUrl: string | null
   captionOverride?: string
+  report?: boolean
   onUpdateAsset: (assetId: string, patch: Partial<EditorAsset>) => void
   onRemoveAsset: (assetId: string) => void
   onReplaceAsset: (assetId: string, file: File) => void
@@ -112,7 +113,7 @@ function SortableAssetCard({ asset, section, clientName, clientLogoUrl, captionO
 
       {/* Asset card wrapper */}
       <div className="rounded-xl overflow-hidden transition-all duration-300" style={{ border: '1px solid var(--admin-border)', boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>
-        <CanvasAsset asset={asset} mockupType={section.mockup_type} clientName={clientName} clientLogoUrl={clientLogoUrl} captionOverride={captionOverride} />
+        <CanvasAsset asset={asset} mockupType={section.mockup_type} clientName={clientName} clientLogoUrl={clientLogoUrl} captionOverride={captionOverride} report={report} />
       </div>
 
       {section.mockup_type !== 'instagram_story' && (
@@ -294,7 +295,11 @@ export default function SlideCanvas({
             <div className="absolute top-0 right-0 w-12 h-12" style={{ borderTop: '2px solid rgba(64,225,211,0.2)', borderRight: '2px solid rgba(64,225,211,0.2)' }} />
             <div className="absolute bottom-0 left-0 w-12 h-12" style={{ borderBottom: '2px solid rgba(64,225,211,0.1)', borderLeft: '2px solid rgba(64,225,211,0.1)' }} />
             <LayoutTemplate className="w-8 h-8 mx-auto mb-3" style={{ color: '#40e1d3' }} />
-            <p className="text-sm font-semibold" style={{ color: 'var(--admin-text-muted)' }}>שקף ביניים — מציג כותרת וטקסט בלבד</p>
+            <p className="text-sm font-semibold" style={{ color: 'var(--admin-text-muted)' }}>
+              {report
+                ? 'שקף פתיחת לשונית — בדוח הוא מציג את הכותרת, הווידאו הראשי וכרטיסי מעבר לתתי־הלשוניות שאחריו'
+                : 'שקף ביניים — מציג כותרת וטקסט בלבד'}
+            </p>
           </div>
         ) : isLandingPage ? (
           <div className="space-y-6">
@@ -390,8 +395,10 @@ export default function SlideCanvas({
                   </button>
                 </div>
                 {asset.url && (
-                  <div className="mt-4 rounded-xl overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
-                    <CanvasAsset asset={asset} mockupType={section.mockup_type} clientName={clientName} clientLogoUrl={clientLogoUrl} captionOverride={activeCopyBody} />
+                  // The report showcase frame carries its own radius + glow, so
+                  // the card border/clip would swallow its shadow.
+                  <div className={report ? 'mt-4' : 'mt-4 rounded-xl overflow-hidden'} style={report ? undefined : { border: '1px solid var(--admin-border)' }}>
+                    <CanvasAsset asset={asset} mockupType={section.mockup_type} clientName={clientName} clientLogoUrl={clientLogoUrl} captionOverride={activeCopyBody} report={report} />
                   </div>
                 )}
               </div>
@@ -436,6 +443,7 @@ export default function SlideCanvas({
                                 clientName={clientName}
                                 clientLogoUrl={clientLogoUrl}
                                 captionOverride={activeCopyBody}
+                                report={report}
                                 onUpdateAsset={onUpdateAsset}
                                 onRemoveAsset={onRemoveAsset}
                                 onReplaceAsset={onReplaceAsset}

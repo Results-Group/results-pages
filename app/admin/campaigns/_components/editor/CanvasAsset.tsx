@@ -15,18 +15,39 @@ import type { EditorAsset, MockupType } from './types'
  * Renders a single asset with the exact same mockup components used by the
  * public presentation — so the editor canvas is true WYSIWYG.
  */
-export default function CanvasAsset({ asset, mockupType, clientName, clientLogoUrl, captionOverride }: {
+export default function CanvasAsset({ asset, mockupType, clientName, clientLogoUrl, captionOverride, report }: {
   asset: EditorAsset
   mockupType: MockupType
   clientName: string
   clientLogoUrl: string | null
   captionOverride?: string
+  /** Report decks drop the feed chrome — the deck shows the raw creative in a
+   *  showcase frame, so the canvas must too or the operator previews a mockup
+   *  the client will never see. */
+  report?: boolean
 }) {
   const imageUrl = asset.file_path
     ? assetProxyUrl(asset.file_path)
     : (asset.public_url || '')
   const videoInfo = asset.url ? parseVideoUrl(asset.url) : null
   const caption = captionOverride !== undefined ? captionOverride : (asset.caption || '')
+
+  if (report && mockupType !== 'carousel' && mockupType !== 'landing_page') {
+    // Mirrors the report showcase in the public deck (presentation.tsx,
+    // `plain` branch): videos in a bare 16:9 frame, graphics as the image
+    // itself — no Instagram/Facebook chrome.
+    if (mockupType === 'video' || mockupType === 'instagram_reels' || asset.url) {
+      return (
+        <div className="campaign-pres" style={{ minHeight: 0, background: 'transparent' }}>
+          <div className="showcase-frame is-video">
+            <VideoPlayer url={asset.url || ''} embedUrl={videoInfo?.embedUrl} platform={videoInfo?.platform || 'other'} />
+          </div>
+        </div>
+      )
+    }
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={imageUrl} alt={caption} className="w-full h-auto block" />
+  }
 
   switch (mockupType) {
     case 'instagram_feed':

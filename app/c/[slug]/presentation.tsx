@@ -728,7 +728,7 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
       {/* Report showcase: the creative itself, full width, caption as a small
           accent heading above — videos stacked one per row, graphics in a
           two-up grid. No feed chrome. */}
-      {assets.length > 0 && plain && !isCarousel && (
+      {assets.length > 0 && plain && !isCarousel && !isLanding && (
         <div className={slide.mockupType === 'video' || slide.mockupType === 'instagram_reels' ? 'showcase-stack' : 'showcase-grid'}>
           {assets.map((asset, i) => {
             const imageUrl = asset.file_path ? assetProxyUrl(asset.file_path) : (asset.public_url || '')
@@ -770,7 +770,9 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
       {/* One expansion state for the whole grid: the mockups sit side by side
           showing the same copy, and expanding one alone left the pair at
           different heights. */}
-      {assets.length > 0 && !isCarousel && !plain && (
+      {/* Landing pages keep the device mockup even in reports — a bare image
+          of a URL asset is nothing, the MacBook+iPhone pair is the content. */}
+      {assets.length > 0 && !isCarousel && (!plain || isLanding) && (
         <CaptionExpansionProvider>
         <div className={`assets-grid ${isStory ? 'story-grid' : isLanding ? 'landing-grid' : 'standard-grid'} count-${Math.min(assets.length, 4)}`}>
           {assets.map((asset, i) => (
