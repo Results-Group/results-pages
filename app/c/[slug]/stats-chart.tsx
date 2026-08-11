@@ -32,6 +32,13 @@ function isTotalsRow(row: string[]): boolean {
   return /סה.?"?כ|total/i.test(row[0] || '')
 }
 
+/** A "·"-prefixed label marks a sub-row of the row above (the budget matrix's
+ *  per-platform breakdown). Charting them beside their parents double-counts
+ *  every shekel and floods the axis — the chart keeps top-level rows only. */
+function isSubRow(row: string[]): boolean {
+  return /^[·\-–]\s/.test((row[0] || '').trim()) || (row[0] || '').trim().startsWith('·')
+}
+
 export default function StatsChart({ table, lang = 'he' }: { table: StatsTable; lang?: 'he' | 'en' }) {
   const [metricIdx, setMetricIdx] = useState<number | null>(null)
   const [hovered, setHovered] = useState<number | null>(null)

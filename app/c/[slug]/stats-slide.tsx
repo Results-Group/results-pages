@@ -101,23 +101,39 @@ export default function StatsSlide({
               </tr>
             </thead>
             <tbody>
-              {tableRows.map((row, ri) => (
-                <tr key={ri}>
-                  {b.table!.headers.map((_, ci) => {
-                    const raw = row[ci]?.trim() || '—'
-                    // Operator convention: a leading "!" flags the cell —
-                    // rendered in the caution colour, the mark itself hidden.
-                    // Lets a report call out an anomalous figure (a suspect
-                    // show-rate, an outlier month) without a schema field.
-                    const flagged = raw.startsWith('!')
-                    return (
-                      <td key={ci} className={flagged ? 'flagged' : undefined}>
-                        {flagged ? raw.slice(1).trim() : raw}
-                      </td>
-                    )
-                  })}
-                </tr>
-              ))}
+              {(() => {
+                // Operator convention: a first cell opening with "·" marks a
+                // sub-row of the row above (the budget matrix's per-platform
+                // split). When a table uses them, its plain rows become group
+                // headers — bold on a faint tint — and sub-rows indent and
+                // mute, so the hierarchy reads without a schema field.
+                const subRe = /^·\s*/
+                const hasSubRows = tableRows.some(r => subRe.test((r[0] || '').trim()))
+                return tableRows.map((row, ri) => {
+                  const isSub = subRe.test((row[ri === -1 ? 0 : 0] || '').trim())
+                  const isLast = ri === tableRows.length - 1
+                  const rowClass = hasSubRows && !isLast
+                    ? (isSub ? 'row-sub' : 'row-head')
+                    : undefined
+                  return (
+                    <tr key={ri} className={rowClass}>
+                      {b.table!.headers.map((_, ci) => {
+                        let raw = row[ci]?.trim() || '—'
+                        if (ci === 0 && isSub) raw = raw.replace(subRe, '')
+                        // A leading "!" flags the cell in the caution colour,
+                        // the mark itself hidden — see the note in the docs
+                        // above; lets a report own an anomalous figure.
+                        const flagged = raw.startsWith('!')
+                        return (
+                          <td key={ci} className={flagged ? 'flagged' : undefined}>
+                            {flagged ? raw.slice(1).trim() : raw}
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  )
+                })
+              })()}
             </tbody>
           </table>
         </div>
