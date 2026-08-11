@@ -1179,6 +1179,11 @@
 /* A "!"-flagged cell: the caution gold, bold — an anomalous figure the
    report chooses to own rather than hide. */
 .campaign-pres .stats-table td.flagged{color:var(--brand-yellow);font-weight:700}
+/* Hierarchical tables (the budget matrix): group rows bold on a faint tint,
+   sub-rows indented and muted so the two levels can't be confused. */
+.campaign-pres .stats-table tr.row-head td{font-weight:800;background:rgba(var(--brand-rgb),.05);color:var(--text-primary)}
+.campaign-pres .stats-table tr.row-sub td{color:var(--text-secondary);font-size:.85rem;font-weight:400}
+.campaign-pres .stats-table tr.row-sub td:first-child{padding-inline-start:36px}
 
 /* ── Interactive metric chart (companion to the stats table) ── */
 .campaign-pres .stats-chart{background:rgba(255,255,255,.03);border-radius:12px;padding:24px 28px 20px;margin-bottom:24px}

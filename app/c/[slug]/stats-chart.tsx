@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { StatsTable } from '@/lib/launch-stats'
 
 /**
@@ -39,13 +39,25 @@ function isSubRow(row: string[]): boolean {
   return /^[·\-–]\s/.test((row[0] || '').trim()) || (row[0] || '').trim().startsWith('·')
 }
 
-export default function StatsChart({ table, lang = 'he' }: { table: StatsTable; lang?: 'he' | 'en' }) {
-  const [metricIdx, setMetricIdx] = useState<number | null>(null)
+export default function StatsChart({ table, lang = 'he', activeCol, onActiveColChange }: {
+  table: StatsTable
+  lang?: 'he' | 'en'
+  /** Controlled column selection — lets the slide filter its table to the
+   *  chip the reader picked. Omit both for the self-contained behaviour. */
+  activeCol?: number | null
+  onActiveColChange?: (col: number) => void
+}) {
+  const [internalIdx, setInternalIdx] = useState<number | null>(null)
+  const metricIdx = activeCol !== undefined && activeCol !== null ? activeCol : internalIdx
+  const setMetricIdx = (col: number) => {
+    setInternalIdx(col)
+    onActiveColChange?.(col)
+  }
   const [hovered, setHovered] = useState<number | null>(null)
   const [mode, setMode] = useState<'bars' | 'line'>('bars')
 
   const model = useMemo(() => {
-    const rows = table.rows.filter(r => r.some(c => c.trim()) && !isTotalsRow(r))
+    const rows = table.rows.filter(r => r.some(c => c.trim()) && !isTotalsRow(r) && !isSubRow(r))
     if (rows.length < 2) return null
     // A column is chartable when every non-empty cell in it reads as a number.
     const metricColumns = table.headers
