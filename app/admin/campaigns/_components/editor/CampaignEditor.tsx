@@ -84,7 +84,25 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
   }, [])
 
   const activeSection = doc.sections.find(s => s.id === activeId) || null
-  const clientLogoUrl = doc.meta.logoPath ? assetProxyUrl(doc.meta.logoPath) : null
+
+  // The public page inherits the client's saved logo when the campaign has
+  // none — the canvas must preview the same, or the operator stares at a
+  // placeholder avatar the client will never see. Preview-only: nothing is
+  // written to the campaign, exactly like the inheritance at render time.
+  const [inheritedLogoUrl, setInheritedLogoUrl] = useState<string | null>(null)
+  useEffect(() => {
+    if (doc.meta.logoPath || !doc.meta.clientId) { setInheritedLogoUrl(null); return }
+    let alive = true
+    fetch(`/api/clients/${doc.meta.clientId}`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(client => {
+        if (!alive) return
+        setInheritedLogoUrl(client?.logo_path ? assetProxyUrl(client.logo_path) : (client?.logo_url || null))
+      })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [doc.meta.clientId, doc.meta.logoPath])
+  const clientLogoUrl = doc.meta.logoPath ? assetProxyUrl(doc.meta.logoPath) : inheritedLogoUrl
 
   // Load client approval feedback (edit mode only)
   useEffect(() => {
