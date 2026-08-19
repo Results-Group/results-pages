@@ -2,6 +2,13 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   trailingSlash: false,
+  // sharp must stay a real runtime require, not get bundled: the tree holds
+  // TWO sharps (ours 0.35 and Next's own 0.34) with different libvips native
+  // libraries, and bundling let the tracer pack the wrong .so — every route
+  // importing lib/campaigns then 500'd on Vercel with ERR_DLOPEN_FAILED
+  // (libvips-cpp.so.8.18.3 missing). Broke 2026-08-19 on a Vercel build-image
+  // update with an unchanged lockfile.
+  serverExternalPackages: ['sharp'],
   experimental: {
     serverActions: {
       bodySizeLimit: '50mb',
