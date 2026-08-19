@@ -1,6 +1,5 @@
 import { supabase } from './supabase'
 import bcrypt from 'bcryptjs'
-import sharp from 'sharp'
 import type { DistributionPlan } from './distribution'
 import type { StatsBlock, ProfileBlock } from './launch-stats'
 
@@ -289,6 +288,10 @@ export async function compressAndUploadImage(
 ): Promise<string> {
   const buffer = Buffer.from(await file.arrayBuffer())
 
+  // sharp loads lazily: its native binary failing to load (as it did on the
+  // 2026-08-19 Vercel build-image update) must break UPLOADS only — a static
+  // import at module top took down every route that touches campaigns.
+  const sharp = (await import('sharp')).default
   const resized = sharp(buffer).resize(1920, 1920, { fit: 'inside', withoutEnlargement: true })
 
   const [webpBuf, jpegBuf] = await Promise.all([

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import sharp from 'sharp'
 import { getAssetPublicUrl } from '@/lib/campaigns'
 import { rateLimit } from '@/lib/rate-limit'
 import { getSessionFromRequest } from '@/lib/auth'
@@ -67,11 +66,18 @@ export async function GET(
     const buffer = Buffer.from(await upstream.arrayBuffer())
 
     if (wantsJpeg) {
-      const jpeg = await sharp(buffer).jpeg({ quality: 88 }).toBuffer()
-      return new NextResponse(new Uint8Array(jpeg), {
-        status: 200,
-        headers: { 'Content-Type': 'image/jpeg', ...CACHE_HEADERS },
-      })
+      // Lazy: a broken sharp binary must degrade this route to serving the
+      // original format, not 500 every asset on the deck.
+      try {
+        const sharp = (await import('sharp')).default
+        const jpeg = await sharp(buffer).jpeg({ quality: 88 }).toBuffer()
+        return new NextResponse(new Uint8Array(jpeg), {
+          status: 200,
+          headers: { 'Content-Type': 'image/jpeg', ...CACHE_HEADERS },
+        })
+      } catch {
+        // fall through to the original bytes below
+      }
     }
 
     return new NextResponse(new Uint8Array(buffer), {
