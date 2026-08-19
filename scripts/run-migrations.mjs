@@ -42,6 +42,7 @@ const MIGRATIONS = [
   'migration-gbp.sql',
   'migration-backups.sql',
   'migration-strategy-docs.sql',
+  'migration-campaign-closing.sql',
 ]
 
 // ── Helpers ─────────────────────────────────────────────────────────────────

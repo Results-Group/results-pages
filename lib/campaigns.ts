@@ -26,6 +26,9 @@ export interface CampaignSection {
   stats?: StatsBlock
   /** Only for the cover mockups — the page/channel header this slide renders. */
   profile?: ProfileBlock
+  /** Only for 'divider' heading a report group: the first sub-tab's label
+   *  (falls back to the i18n "סקירה כללית" when empty). */
+  overviewLabel?: string
   /** Legacy boolean toggle — replaced by copyIds. Kept so old rows still load. */
   useCopies?: boolean
   /** IDs of the campaign copies to show on this slide. undefined = fall back to
@@ -58,6 +61,8 @@ export interface Campaign {
   publish_at: string | null
   expires_at: string | null
   password: string | null
+  /** Closing-slide title override; NULL = the default 'בהצלחה!'. */
+  closing_title?: string | null
   created_by: string | null
   workspace_id: string | null
   deleted_at: string | null
@@ -212,6 +217,7 @@ export async function updateCampaign(
   if (data.workspace_id !== undefined) updateData.workspace_id = data.workspace_id
   if (data.copies !== undefined) updateData.copies = data.copies
   if (data.is_template !== undefined) updateData.is_template = data.is_template
+  if (data.closing_title !== undefined) updateData.closing_title = data.closing_title
 
   // Optimistic concurrency: when the caller passes the updated_at it loaded,
   // only write if the row hasn't changed since — otherwise a second editor's

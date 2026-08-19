@@ -39,6 +39,9 @@ export interface EditorSection {
   stats?: StatsBlock
   /** Only for the cover mockups (facebook_cover / youtube_cover). */
   profile?: ProfileBlock
+  /** Only for 'divider' heading a report group: the first sub-tab's label.
+   *  Empty falls back to the i18n default ("סקירה כללית"). */
+  overviewLabel?: string
 }
 
 /** A single ad-text variation on the campaign. `label` is optional
@@ -63,6 +66,8 @@ export interface CampaignMeta {
   workspaceId: string | null
   publishAt: string | null
   expiresAt: string | null
+  /** Closing-slide title override; null/empty = the default "בהצלחה!". */
+  closingTitle: string | null
 }
 
 export interface CampaignDocument {
@@ -122,6 +127,7 @@ export function sectionFromApi(
     ...(raw.plan ? { plan: raw.plan } : {}),
     ...(raw.stats ? { stats: raw.stats } : {}),
     ...(raw.profile ? { profile: raw.profile } : {}),
+    ...(raw.overviewLabel ? { overviewLabel: raw.overviewLabel } : {}),
     assets: (raw.assets || []).map(a => ({
       id: a.id || crypto.randomUUID(),
       type: (a.type || 'image') as 'image' | 'video',
@@ -130,6 +136,27 @@ export function sectionFromApi(
       url: a.url || '',
       caption: a.caption || '',
     })),
+  }
+}
+
+/**
+ * The write side of the same contract: serializes an editor section back to
+ * the API shape. This is THE serializer — buildBody uses it, so a field added
+ * to sectionFromApi but forgotten here (or vice versa) fails the round-trip
+ * test instead of silently erasing operator data on the next autosave.
+ */
+export function sectionToApi(s: EditorSection) {
+  return {
+    id: s.id,
+    title: s.title,
+    mockup_type: s.mockup_type,
+    description: s.description,
+    copyIds: s.copyIds ?? [],
+    ...(s.plan ? { plan: s.plan } : {}),
+    ...(s.stats ? { stats: s.stats } : {}),
+    ...(s.profile ? { profile: s.profile } : {}),
+    ...(s.overviewLabel ? { overviewLabel: s.overviewLabel } : {}),
+    assets: s.assets.map(a => ({ id: a.id, type: a.type, file_path: a.file_path, url: a.url, caption: a.caption })),
   }
 }
 

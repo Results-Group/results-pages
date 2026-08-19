@@ -155,6 +155,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     clientLogoUrl,
     date: formattedDate,
     sections: (campaign.sections || []) as CampaignSection[],
+    closingTitle: campaign.closing_title,
   })
 
   return (

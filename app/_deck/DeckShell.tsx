@@ -53,7 +53,7 @@ export interface DeckShellProps {
    * reports' itab-nav) for the slides inside it. Indices must cover every
    * slide exactly once, in order. Without it, one tab per slide as before.
    */
-  groups?: { label: string; indices: number[] }[]
+  groups?: { label: string; indices: number[]; overviewLabel?: string }[]
   /** `navigate` jumps the deck to another slide — for in-slide links (the
    *  report overview's chips). Callers that don't need it just ignore it. */
   renderSlide: (index: number, navigate?: (n: number) => void) => React.ReactNode
@@ -324,7 +324,7 @@ export default function DeckShell({
                   onClick={() => goSlide(idx)}
                   aria-selected={idx === activeSlide}
                 >
-                  {k === 0 ? t('public.groupOverview') : slideName(idx)}
+                  {k === 0 ? (g.overviewLabel || t('public.groupOverview')) : slideName(idx)}
                 </button>
               ))}
             </nav>

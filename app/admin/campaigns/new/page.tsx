@@ -41,6 +41,7 @@ export default function NewCampaignPage() {
         workspaceId: getActiveWorkspace(),
         publishAt: null,
         expiresAt: null,
+        closingTitle: null,
       },
       sections,
     }

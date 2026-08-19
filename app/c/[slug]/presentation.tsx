@@ -256,7 +256,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   const groups = (() => {
     if (!isReport) return undefined
     const absorbable = (s: SlideData) => s.type === 'creatives' || s.type === 'cover_mockup'
-    const out: { label: string; indices: number[] }[] = []
+    const out: { label: string; indices: number[]; overviewLabel?: string }[] = []
     let i = 0
     while (i < deckSlides.length) {
       const s = deckSlides[i]
@@ -265,7 +265,11 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
         let j = i + 1
         while (j < deckSlides.length && absorbable(deckSlides[j])) { indices.push(j); j++ }
         if (indices.length > 1) {
-          out.push({ label: s.title || getSlideLabel(s), indices })
+          out.push({
+            label: s.title || getSlideLabel(s),
+            indices,
+            ...(s.overviewLabel ? { overviewLabel: s.overviewLabel } : {}),
+          })
           i = j
           continue
         }

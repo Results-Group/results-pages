@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { sectionFromApi } from '@/app/admin/campaigns/_components/editor/types'
+import { sectionFromApi, sectionToApi } from '@/app/admin/campaigns/_components/editor/types'
 import { newDistributionPlan } from '@/lib/distribution'
 
 /**
@@ -68,5 +68,49 @@ describe('sectionFromApi', () => {
     expect(section.mockup_type).toBe('general')
     expect(section.title).toBe('')
     expect(section.assets).toEqual([])
+  })
+})
+
+/**
+ * The structural closure of the wipe trap: load → serialize must return
+ * exactly what came from the API. A field added to sectionFromApi but
+ * forgotten in sectionToApi (or vice versa) fails HERE instead of silently
+ * erasing operator data on the next autosave. When adding a section field,
+ * add it to this fixture too.
+ */
+describe('sectionToApi round-trip (never drops data)', () => {
+  const fullSection = {
+    id: 's-full',
+    title: 'כותרת',
+    mockup_type: 'divider' as const,
+    description: 'תיאור',
+    copyIds: ['c1', 'c2'],
+    overviewLabel: 'סקירת השקה',
+    plan: { ...newDistributionPlan(), bullets: ['נקודה'], channels: [{ id: 'ch1', name: 'Meta', budget: 5000, percent: 50, formats: 'פיד', audience: 'Broad', start: '2026-08-01', end: '2026-08-31' }] },
+    stats: {
+      kpis: [{ id: 'k1', label: 'חשיפות', value: '1,000', sublabel: 'תת', highlight: true }],
+      groups: [{ id: 'g1', title: 'Meta', kpis: [{ id: 'k2', label: 'השקעה', value: '₪1' }] }],
+      funnel: { title: 'משפך', stages: [{ id: 'f1', label: 'לידים', value: '10', percent: '100%' }] },
+      table: { headers: ['א', 'ב'], rows: [['1', '2']] },
+      note: 'הערה',
+    },
+    profile: { name: 'Medera', handle: '@medera', coverPath: 'p/cover.webp', avatarPath: 'p/logo.webp', bio: 'ביו' },
+    assets: [{ id: 'a1', type: 'image' as const, file_path: 'p.webp', public_url: 'https://x/p.webp', url: 'https://youtu.be/x', caption: 'כיתוב' }],
+  }
+
+  it('api → editor → api returns the identical section', () => {
+    const roundTripped = sectionToApi(sectionFromApi(fullSection, []))
+    // public_url is editor-only (derived on load, never persisted) — everything
+    // else must survive byte for byte.
+    const { assets, ...rest } = fullSection
+    expect(roundTripped).toEqual({
+      ...rest,
+      assets: assets.map(({ public_url: _drop, ...a }) => a),
+    })
+  })
+
+  it('a sparse section round-trips without inventing fields', () => {
+    const sparse = { id: 's-min', title: '', mockup_type: 'general' as const, description: '', copyIds: [], assets: [] }
+    expect(sectionToApi(sectionFromApi(sparse, []))).toEqual(sparse)
   })
 })

@@ -17,7 +17,7 @@ import SlideFilmstrip from './SlideFilmstrip'
 import SlideCanvas from './SlideCanvas'
 import Inspector from './Inspector'
 import SmartUploadModal from './SmartUploadModal'
-import { maxAssetsFor } from './types'
+import { maxAssetsFor, sectionToApi } from './types'
 import type { CampaignDocument, EditorSection, MockupType } from './types'
 
 const CampaignPresentation = dynamic(() => import('@/app/c/[slug]/presentation'), { ssr: false })
@@ -158,22 +158,15 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
     // re-validate) the server's own generated slug.
     ...(slugDirty && slug ? { slug } : {}),
     logo_path: doc.meta.logoPath,
+    closing_title: doc.meta.closingTitle?.trim() || null,
     publish_at: doc.meta.publishAt ? new Date(doc.meta.publishAt).toISOString() : null,
     expires_at: doc.meta.expiresAt ? new Date(doc.meta.expiresAt).toISOString() : null,
     status: newStatus ?? status,
     workspace_id: doc.meta.workspaceId,
     base_updated_at: updatedAtRef.current ?? undefined,
-    sections: doc.sections.map(s => ({
-      id: s.id,
-      title: s.title,
-      mockup_type: s.mockup_type,
-      description: s.description,
-      copyIds: s.copyIds ?? [],
-      ...(s.plan ? { plan: s.plan } : {}),
-      ...(s.stats ? { stats: s.stats } : {}),
-      ...(s.profile ? { profile: s.profile } : {}),
-      assets: s.assets.map(a => ({ id: a.id, type: a.type, file_path: a.file_path, url: a.url, caption: a.caption })),
-    })),
+    // One serializer, shared with the round-trip tests — see sectionToApi's
+    // note on the autosave wipe trap.
+    sections: doc.sections.map(sectionToApi),
   }), [doc, status, passwordDirty, slug, slugDirty])
 
   // Sync server-resolved fields (slug, client_id) back into local state.
@@ -631,6 +624,7 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
       mockup_type: s.mockup_type,
       assets: s.assets.map(a => ({ ...a })),
     })) as unknown as CampaignSection[],
+    closingTitle: doc.meta.closingTitle,
   }), [doc, clientLogoUrl])
 
   return (

@@ -218,6 +218,24 @@ export default function Inspector({
                 </>
               )}
 
+              {/* A divider heading a report group is also the group's first
+                  sub-tab — this names it (defaults to "סקירה כללית"). */}
+              {section.mockup_type === 'divider' && (
+                <div>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>
+                    {t('campaigns.overviewLabel')}
+                  </label>
+                  <input
+                    type="text" dir="auto"
+                    value={section.overviewLabel ?? ''}
+                    onChange={e => onUpdateSection({ overviewLabel: e.target.value || undefined })}
+                    placeholder={t('campaigns.overviewLabelPlaceholder')}
+                    className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                    style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)' }}
+                  />
+                </div>
+              )}
+
               {/* AI copy generation */}
               {onGenerateCopy && (
                 <div>
@@ -611,6 +629,24 @@ export default function Inspector({
               />
               <p className="text-[10px] mt-2" style={{ color: 'var(--admin-text-muted)' }}>
                 {t('campaigns.expiryScheduleHint')}
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold mb-1.5 uppercase tracking-wide" style={{ color: 'var(--admin-text-muted)' }}>
+                {t('campaigns.closingTitle')}
+              </label>
+              <input
+                type="text" dir="auto"
+                value={meta.closingTitle ?? ''}
+                onChange={e => onUpdateMeta({ closingTitle: e.target.value || null })}
+                placeholder="בהצלחה!"
+                className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={fieldStyle}
+                onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
+              />
+              <p className="text-[10px] mt-2" style={{ color: 'var(--admin-text-muted)' }}>
+                {t('campaigns.closingTitleHint')}
               </p>
             </div>
           </>

@@ -26,6 +26,9 @@ export interface SlideData {
   stats?: StatsBlock
   /** Only on 'cover_mockup' slides. */
   profile?: ProfileBlock
+  /** Only on 'divider' slides heading a report group: overrides the first
+   *  sub-tab's "סקירה כללית" label. */
+  overviewLabel?: string
 }
 
 /** Creatives shown on one screen before the section pages onto the next.
@@ -124,8 +127,10 @@ export function buildCampaignSlides(opts: {
   clientLogoUrl: string | null
   date: string
   sections: CampaignSection[]
+  /** Closing-slide title override; empty falls back to the default. */
+  closingTitle?: string | null
 }): SlideData[] {
-  const { client, campaignName, concept, copies, clientLogoUrl, date, sections } = opts
+  const { client, campaignName, concept, copies, clientLogoUrl, date, sections, closingTitle } = opts
   const allCopies = copies || []
   const report = isReportSections(sections)
   const slides: SlideData[] = []
@@ -138,7 +143,10 @@ export function buildCampaignSlides(opts: {
 
   for (const section of sections) {
     if (section.mockup_type === 'divider') {
-      slides.push({ type: 'divider', key: section.id, title: section.title, content: section.description })
+      slides.push({
+        type: 'divider', key: section.id, title: section.title, content: section.description,
+        ...(section.overviewLabel ? { overviewLabel: section.overviewLabel } : {}),
+      })
     } else if (section.mockup_type === 'distribution') {
       // Assetless like the divider, so it needs its own branch — the creatives
       // branch below skips any section with an empty assets array.
@@ -203,6 +211,6 @@ export function buildCampaignSlides(opts: {
     }
   }
 
-  slides.push({ type: 'closing', title: 'בהצלחה!', subtitle: client })
+  slides.push({ type: 'closing', title: closingTitle?.trim() || 'בהצלחה!', subtitle: client })
   return slides
 }

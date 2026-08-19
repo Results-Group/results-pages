@@ -62,6 +62,7 @@ export default function EditCampaignPage() {
             workspaceId: data.workspace_id || null,
             publishAt: data.publish_at ? isoToLocalDatetimeInput(data.publish_at) || null : null,
             expiresAt: data.expires_at ? isoToLocalDatetimeInput(data.expires_at) || null : null,
+            closingTitle: data.closing_title || null,
           },
           sections,
         }
