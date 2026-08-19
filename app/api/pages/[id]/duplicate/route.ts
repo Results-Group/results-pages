@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest, requireResourcePermission } from '@/lib/auth'
 import { getPageById, createPage, downloadFile, uploadFile, getPageByClientSlug } from '@/lib/db'
 import { captureException } from '@/lib/logger'
+import { slugifyPath } from '@/lib/slug'
 
 interface Ctx { params: Promise<{ id: string }> }
 
@@ -18,13 +19,19 @@ export async function POST(req: NextRequest, { params }: Ctx) {
   const html = await downloadFile(page.file_path)
   if (!html) return NextResponse.json({ error: 'HTML file not found in storage' }, { status: 404 })
 
+  // Optional body: { title } — a renamed copy takes its URL from the new
+  // title, not from the source's slug with a -copy tail.
+  const body = await req.json().catch(() => ({} as { title?: string }))
+  const newTitle = (typeof body?.title === 'string' && body.title.trim()) || `${page.title} (עותק)`
+  const titledBase = typeof body?.title === 'string' ? slugifyPath(body.title, '') : ''
+
   // Find a free slug, including soft-deleted rows — the unique constraint and
   // the derived storage path both collide with trashed pages otherwise.
-  let newSlug = `${page.slug}-copy`
+  let newSlug = titledBase || `${page.slug}-copy`
   let attempt = 1
   while (await getPageByClientSlug(page.client, newSlug, { includeDeleted: true })) {
     attempt++
-    newSlug = `${page.slug}-copy-${attempt}`
+    newSlug = `${titledBase || `${page.slug}-copy`}-${attempt}`
   }
 
   const newFilePath = `${page.client}/${newSlug}.html`
@@ -35,7 +42,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     const newPage = await createPage({
       client: page.client,
       slug: newSlug,
-      title: `${page.title} (עותק)`,
+      title: newTitle,
       file_path: newFilePath,
       expires_at: page.expires_at,
       created_by: session?.userId && session.userId !== 'legacy' ? session.userId : undefined,

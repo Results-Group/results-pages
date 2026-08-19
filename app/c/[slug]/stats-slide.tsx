@@ -4,6 +4,7 @@
 // which renders this component directly, gets the same styles. The bundler
 // dedupes the second import.
 import './presentation.css'
+import { useState } from 'react'
 import { normalizeStats, funnelWidths, type StatsBlock, type StatsKpi, type StatsFunnel } from '@/lib/launch-stats'
 import StatsChart from './stats-chart'
 import he from '@/lib/i18n/he'
@@ -27,6 +28,11 @@ export default function StatsSlide({
 }) {
   const dict = lang === 'en' ? en : he
   const t = (key: keyof typeof he) => dict[key] ?? he[key] ?? key
+
+  // The chart's picked metric also filters the table below to that column —
+  // one focus, both views. Stays null (full table) when there is no chart.
+  const [activeCol, setActiveCol] = useState<number | null>(null)
+  const colVisible = (ci: number) => activeCol === null || ci === 0 || ci === activeCol
 
   const b = normalizeStats(stats)
   const kpis = b.kpis.filter(kpiVisible)
@@ -88,16 +94,14 @@ export default function StatsSlide({
 
       {/* Interactive companion to the table below — pick a metric, months
           redraw. Renders only when the table has enough numeric rows. */}
-      {showTable && <StatsChart table={b.table!} lang={lang} />}
+      {showTable && <StatsChart table={b.table!} lang={lang} activeCol={activeCol} onActiveColChange={setActiveCol} />}
 
       {showTable && (
         <div className="stats-table-wrap rp-anim rp-up rp-d3">
           <table className="stats-table">
             <thead>
               <tr>
-                {b.table!.headers.map((h, i) => (
-                  <th key={i}>{h}</th>
-                ))}
+                {b.table!.headers.map((h, i) => (colVisible(i) ? <th key={i}>{h}</th> : null))}
               </tr>
             </thead>
             <tbody>
@@ -118,6 +122,7 @@ export default function StatsSlide({
                   return (
                     <tr key={ri} className={rowClass}>
                       {b.table!.headers.map((_, ci) => {
+                        if (!colVisible(ci)) return null
                         let raw = row[ci]?.trim() || '—'
                         if (ci === 0 && isSub) raw = raw.replace(subRe, '')
                         // A leading "!" flags the cell in the caution colour,

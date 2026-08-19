@@ -17,10 +17,12 @@ const SMART_TYPES: { value: MockupType; label: string; icon: React.ReactNode }[]
   { value: 'general', label: 'כללי', icon: <ImageIcon className="w-4 h-4" /> },
 ]
 
-export default function SmartUploadModal({ open, onClose, onConfirm }: {
+export default function SmartUploadModal({ open, onClose, onConfirm, report = false }: {
   open: boolean
   onClose: () => void
   onConfirm: (files: File[], mockupType: MockupType) => void
+  /** Report decks show a whole section's graphics on one pane — no split. */
+  report?: boolean
 }) {
   const [mockupType, setMockupType] = useState<MockupType>('instagram_feed')
   const [files, setFiles] = useState<File[]>([])
@@ -42,8 +44,9 @@ export default function SmartUploadModal({ open, onClose, onConfirm }: {
   if (!open) return null
 
   // Capacity follows the chosen type — a carousel takes 10 per slide, not 4.
-  const perSlide = maxAssetsFor(mockupType)
-  const slideCount = Math.ceil(files.length / perSlide)
+  // In a report the whole set lands on one slide, so there is no split at all.
+  const perSlide = report ? Math.max(files.length, 1) : maxAssetsFor(mockupType)
+  const slideCount = report ? 1 : Math.ceil(files.length / perSlide)
 
   return (
     <div
@@ -68,7 +71,9 @@ export default function SmartUploadModal({ open, onClose, onConfirm }: {
         </div>
 
         <p className="text-xs mb-4" style={{ color: 'var(--admin-text-muted)' }}>
-          גרור את כל הקבצים בבת אחת — המערכת תסדר אותם אוטומטית ל-{perSlide} גרפיקות בכל שקף.
+          {report
+            ? 'גרור את כל הקבצים בבת אחת — בדוח כולם ייכנסו לשקף אחד שמציג את כל הגרפיקות יחד.'
+            : <>גרור את כל הקבצים בבת אחת — המערכת תסדר אותם אוטומטית ל-{perSlide} גרפיקות בכל שקף.</>}
         </p>
 
         {/* Mockup type — chosen once for all created slides */}
@@ -116,7 +121,9 @@ export default function SmartUploadModal({ open, onClose, onConfirm }: {
         {files.length > 0 && (
           <div className="mt-3 flex items-center justify-between text-xs">
             <span style={{ color: 'var(--admin-text-secondary)' }}>
-              נבחרו <b style={{ color: '#40e1d3' }}>{files.length}</b> קבצים → ייווצרו <b style={{ color: '#40e1d3' }}>{slideCount}</b> שקפים
+              {report
+                ? <>נבחרו <b style={{ color: '#40e1d3' }}>{files.length}</b> קבצים → שקף אחד עם כל הגרפיקות</>
+                : <>נבחרו <b style={{ color: '#40e1d3' }}>{files.length}</b> קבצים → ייווצרו <b style={{ color: '#40e1d3' }}>{slideCount}</b> שקפים</>}
             </span>
             <button onClick={reset} className="underline" style={{ color: 'var(--admin-text-muted)' }}>נקה</button>
           </div>

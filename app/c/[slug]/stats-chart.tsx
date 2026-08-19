@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { StatsTable } from '@/lib/launch-stats'
 
 /**
@@ -42,16 +42,20 @@ function isSubRow(row: string[]): boolean {
 export default function StatsChart({ table, lang = 'he', activeCol, onActiveColChange }: {
   table: StatsTable
   lang?: 'he' | 'en'
-  /** Controlled column selection — lets the slide filter its table to the
-   *  chip the reader picked. Omit both for the self-contained behaviour. */
+  /**
+   * Optional table-filter link: the slide passes its current filter and gets
+   * told on every chip click. Clicking the chip the table is already filtered
+   * to clears the filter (toggle), so the full table is always one click
+   * away. The chart itself keeps its own selection either way.
+   */
   activeCol?: number | null
-  onActiveColChange?: (col: number) => void
+  onActiveColChange?: (col: number | null) => void
 }) {
   const [internalIdx, setInternalIdx] = useState<number | null>(null)
-  const metricIdx = activeCol !== undefined && activeCol !== null ? activeCol : internalIdx
+  const metricIdx = internalIdx
   const setMetricIdx = (col: number) => {
     setInternalIdx(col)
-    onActiveColChange?.(col)
+    onActiveColChange?.(activeCol === col ? null : col)
   }
   const [hovered, setHovered] = useState<number | null>(null)
   const [mode, setMode] = useState<'bars' | 'line'>('bars')

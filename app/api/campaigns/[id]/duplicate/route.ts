@@ -6,6 +6,7 @@ import {
 } from '@/lib/campaigns'
 import { supabase } from '@/lib/supabase'
 import { logAudit } from '@/lib/audit'
+import { slugifyPath } from '@/lib/slug'
 import { captureException } from '@/lib/logger'
 
 interface Ctx { params: Promise<{ id: string }> }
@@ -48,8 +49,12 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       ? JSON.parse(source.sections)
       : source.sections || []) as CampaignSection[]
 
-    // Unique slug: reuse the base name with a fresh suffix
-    const base = source.slug.replace(/-[a-z0-9]{6}$/, '')
+    // Unique slug, derived from the duplicate's own name when one was given —
+    // a copy renamed "Winter Sale" should live at winter-sale-xxxxxx, not at
+    // the source's address with a random tail. A Hebrew-only name slugifies to
+    // nothing, so the source's base remains the fallback.
+    const namedBase = typeof body?.name === 'string' ? slugifyPath(body.name, '') : ''
+    const base = namedBase || source.slug.replace(/-[a-z0-9]{6}$/, '')
     let slug = `${base}-${crypto.randomUUID().slice(0, 6)}`
     while (await slugExists(slug)) {
       slug = `${base}-${crypto.randomUUID().slice(0, 6)}`

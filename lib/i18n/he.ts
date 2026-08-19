@@ -490,6 +490,8 @@ const he = {
   'public.stats.title': 'סיכום נתונים',
   'public.groupOverview': 'סקירה כללית',
   'public.presentMode': 'מצב מצגת',
+  'public.coverFallbackHeadline': 'קמפיין חדש',
+  'public.coverFallbackEyebrow': 'מצגת קריאייטיב',
   'public.presentExit': 'יציאה ממצב מצגת',
   'public.coverMockup.title': 'נכסים דיגיטליים',
   'public.creativePresentationFor': 'מצגת קריאייטיב עבור',

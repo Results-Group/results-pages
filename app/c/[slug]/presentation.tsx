@@ -320,8 +320,8 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
             <div className="report-hero">
               <CoverSlide
                 clientName={coverSlide.title}
-                headline={coverSlide.subtitle || 'New Creative'}
-                eyebrow={coverSlide.date || 'Creative Campaign'}
+                headline={coverSlide.subtitle || t('public.coverFallbackHeadline')}
+                eyebrow={coverSlide.date || t('public.coverFallbackEyebrow')}
                 logoUrl={coverSlide.logoUrl}
                 variant="report"
               />
@@ -330,8 +330,8 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
           {deckSlides[i].type === 'cover' && (
             <CoverSlide
               clientName={deckSlides[i].title}
-              headline={deckSlides[i].subtitle || 'New Creative'}
-              eyebrow={deckSlides[i].date || 'Creative Campaign'}
+              headline={deckSlides[i].subtitle || t('public.coverFallbackHeadline')}
+              eyebrow={deckSlides[i].date || t('public.coverFallbackEyebrow')}
               logoUrl={deckSlides[i].logoUrl}
               variant="default"
             />

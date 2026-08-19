@@ -17,13 +17,11 @@ import SlideFilmstrip from './SlideFilmstrip'
 import SlideCanvas from './SlideCanvas'
 import Inspector from './Inspector'
 import SmartUploadModal from './SmartUploadModal'
+import { validatePublishWindow } from '@/lib/campaign-schedule'
 import { maxAssetsFor, sectionToApi } from './types'
 import type { CampaignDocument, EditorSection, MockupType } from './types'
 
 const CampaignPresentation = dynamic(() => import('@/app/c/[slug]/presentation'), { ssr: false })
-
-/** Minimum campaign lifetime before it auto-archives. */
-const MIN_CAMPAIGN_MS = 28 * 24 * 60 * 60 * 1000 // 4 weeks
 
 /** Date → local "YYYY-MM-DDTHH:mm" for a datetime-local input. */
 function toDatetimeLocal(ms: number): string {
@@ -237,18 +235,20 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
     // Publishing requires an end date at least 4 weeks out; the campaign
     // auto-archives once it passes. Auto-fill a valid default and block so the
     // user reviews it, rather than publishing with no end date.
+    // The end-date rule lives in lib/campaign-schedule (with its tolerance
+    // story) so tests can hold it. A missing end date is no longer a wall:
+    // the default is filled in and publishing continues in the same click —
+    // only an end date the operator actually typed too early blocks.
+    let expiresOverride: string | null = null
     if (newStatus === 'published') {
-      const base = doc.meta.publishAt ? new Date(doc.meta.publishAt).getTime() : Date.now()
-      const minExpiry = base + MIN_CAMPAIGN_MS
-      const exp = doc.meta.expiresAt ? new Date(doc.meta.expiresAt).getTime() : NaN
-      // Tolerance matters: with no publish date the base is Date.now(), which
-      // advances between clicks. Comparing strictly against it rejected the very
-      // value this branch had just auto-filled, so publishing could never
-      // succeed. Allow a grace window and default a day past the minimum.
-      const GRACE_MS = 10 * 60_000
-      if (!doc.meta.expiresAt || Number.isNaN(exp) || exp < minExpiry - GRACE_MS) {
-        setMeta({ expiresAt: toDatetimeLocal(minExpiry + 24 * 60 * 60 * 1000) })
-        toast('חובה תאריך סיום של לפחות 4 שבועות (הקמפיין יעבור לארכיון אחריו). קבענו ברירת מחדל — בדקו ולחצו פרסום שוב.', 'error')
+      const window = validatePublishWindow(doc.meta.publishAt, doc.meta.expiresAt)
+      if (!window.ok && window.reason === 'missing') {
+        expiresOverride = toDatetimeLocal(window.suggestedExpiry)
+        setMeta({ expiresAt: expiresOverride })
+        toast(`נקבע תאריך סיום אוטומטי ל-${new Date(window.suggestedExpiry).toLocaleDateString('he-IL')} (4 שבועות; הקמפיין יעבור לארכיון אחריו)`, 'info')
+      } else if (!window.ok) {
+        setMeta({ expiresAt: toDatetimeLocal(window.suggestedExpiry) })
+        toast('תאריך הסיום שנקבע קצר מ-4 שבועות מהפרסום. עדכנו אותו — הוצעה ברירת מחדל.', 'error')
         return null
       }
     }
@@ -269,7 +269,12 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
         const res = await fetch(`/api/campaigns/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(buildBody(newStatus)),
+          // setMeta above is async React state — the auto-filled end date must
+          // ride on THIS request, not the next render's.
+          body: JSON.stringify({
+            ...buildBody(newStatus),
+            ...(expiresOverride ? { expires_at: new Date(expiresOverride).toISOString() } : {}),
+          }),
         })
         const data = await res.json()
         if (res.status === 409) {
@@ -400,7 +405,10 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
     const id = await ensureCampaignExists()
     if (!id) { toast('יש למלא שם לקוח ושם קמפיין לפני העלאת קבצים', 'error'); return }
 
-    const perSlide = maxAssetsFor(mockupType)
+    // A report renders ALL of a section's graphics on one pane, so splitting
+    // by 4 just manufactures redundant sub-tabs — one section takes them all.
+    const report = isReportSections(docRef.current.sections)
+    const perSlide = report ? valid.length : maxAssetsFor(mockupType)
     const groups: File[][] = []
     for (let i = 0; i < valid.length; i += perSlide) groups.push(valid.slice(i, i + perSlide))
     const sections: EditorSection[] = groups.map(() => ({
@@ -426,7 +434,9 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
         }
       }))
     }))
-    toast(`נוצרו ${sections.length} שקפים מ-${valid.length} קבצים`, 'success')
+    toast(sections.length === 1
+      ? `נוצר שקף אחד עם ${valid.length} גרפיקות`
+      : `נוצרו ${sections.length} שקפים מ-${valid.length} קבצים`, 'success')
   }, [ensureCampaignExists, addSections, initProgress, tickProgress, uploadOneFile, addAsset, toast])
 
   const uploadFiles = useCallback(async (files: FileList | File[]) => {
@@ -445,8 +455,13 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
 
     // Capacity depends on the slide type: a carousel holds 10 frames, other
     // mockups 4. More than one slide's worth in a single drop auto-routes to
-    // smart upload instead of hitting the wall.
-    const perSlide = maxAssetsFor(activeSection.mockup_type)
+    // smart upload instead of hitting the wall. In a report every graphic in
+    // the section shares one pane, so the 4-per-screen cap is meaningless —
+    // dropping many images just appends them all here.
+    const report = isReportSections(docRef.current.sections)
+    const perSlide = report && activeSection.mockup_type !== 'carousel'
+      ? Number.MAX_SAFE_INTEGER
+      : maxAssetsFor(activeSection.mockup_type)
     if (valid.length > perSlide) {
       toast(`התקבלו ${valid.length} תמונות — עוברים להעלאה חכמה (${perSlide} לשקף)`, 'info')
       await smartUpload(valid, activeSection.mockup_type)
@@ -881,7 +896,7 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
       )}
 
       {/* Smart bulk upload */}
-      <SmartUploadModal open={smartOpen} onClose={() => setSmartOpen(false)} onConfirm={smartUpload} />
+      <SmartUploadModal open={smartOpen} onClose={() => setSmartOpen(false)} onConfirm={smartUpload} report={isReportSections(doc.sections)} />
 
       {/* Toasts */}
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 items-center">
