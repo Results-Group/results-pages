@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { ConflictLatch, chainSerialized, nextToken } from '@/lib/save-protocol'
 
 /**
  * Debounced autosave for a document editor.
@@ -60,7 +61,9 @@ export function useAutosaveDocument<D>({
   useEffect(() => { docRef.current = doc })
 
   const updatedAtRef = useRef<string | null>(initialUpdatedAt ?? null)
-  const conflictRef = useRef(false)
+  // The protocol invariants (latch / queue / token) live in lib/save-protocol
+  // with their tests — this hook only wires them to React.
+  const latch = useRef(new ConflictLatch()).current
   const docIdRef = useRef<string | null>(id)
   useEffect(() => { docIdRef.current = docId }, [docId])
 
@@ -94,7 +97,7 @@ export function useAutosaveDocument<D>({
   }, [createUrl, buildCreateBody, onCreated])
 
   const save = useCallback(async (opts?: { silent?: boolean }) => {
-    if (conflictRef.current) return
+    if (latch.latched) return
     if (autosaveTimer.current) { clearTimeout(autosaveTimer.current); autosaveTimer.current = null }
 
     const invalid = validate?.(docRef.current)
@@ -104,7 +107,7 @@ export function useAutosaveDocument<D>({
     }
 
     const run = async () => {
-      if (conflictRef.current) return
+      if (latch.latched) return
       setSaveState('saving')
       try {
         const targetId = await ensureExists()
@@ -119,10 +122,9 @@ export function useAutosaveDocument<D>({
           }),
         })
 
-        if (res.status === 409) {
+        if (latch.noteHttpStatus(res.status)) {
           // Latched, not retried: the document moved under us, and anything we
           // send now either loses a colleague's work or loops.
-          conflictRef.current = true
           setConflict(true)
           setSaveState('error')
           return
@@ -130,7 +132,7 @@ export function useAutosaveDocument<D>({
         if (!res.ok) throw new Error(`save failed: ${res.status}`)
 
         const data = await res.json()
-        if (data.updated_at) updatedAtRef.current = data.updated_at
+        updatedAtRef.current = nextToken(updatedAtRef.current, data)
         setSaveState('saved')
         onSaved?.(data)
       } catch (err) {
@@ -139,8 +141,7 @@ export function useAutosaveDocument<D>({
       }
     }
 
-    // `.then(run, run)` so a rejected predecessor still lets this one run.
-    const result = saveQueue.current.then(run, run)
+    const result = chainSerialized(saveQueue.current, run)
     saveQueue.current = result
     return result
   }, [ensureExists, itemUrl, buildBody, validate, onSaved, onError])
@@ -154,7 +155,7 @@ export function useAutosaveDocument<D>({
   const firstRender = useRef(true)
   useEffect(() => {
     if (firstRender.current) { firstRender.current = false; return }
-    if (conflictRef.current) return
+    if (latch.latched) return
     autosaveTimer.current = setTimeout(() => {
       autosaveTimer.current = null
       saveRef.current({ silent: true })

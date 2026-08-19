@@ -9,17 +9,11 @@ import {
   deleteAsset,
 } from '@/lib/campaigns'
 import { captureException } from '@/lib/logger'
+import { rejectUpload } from '@/lib/image-accept'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-const ACCEPTED_MIME = new Set([
-  'image/jpeg', 'image/jpg', 'image/png', 'image/webp',
-  'image/gif', 'image/heic', 'image/heif', 'image/avif',
-  'image/tiff', 'image/bmp',
-])
-const ACCEPTED_EXT = new Set(['jpg','jpeg','png','webp','gif','heic','heif','avif','tiff','bmp'])
-const MAX_FILE_BYTES = 50 * 1024 * 1024 // 50 MB (client compresses first; this is a safety net)
 
 export async function POST(
   request: NextRequest,
@@ -44,15 +38,12 @@ export async function POST(
       return NextResponse.json({ error: 'לא נבחר קובץ' }, { status: 400 })
     }
 
-    // Size guard
-    if (file.size > MAX_FILE_BYTES) {
+    // Acceptance rules live in lib/image-accept so tests hold the exact rule.
+    const rejection = rejectUpload(file.name, file.type, file.size)
+    if (rejection === 'too-large') {
       return NextResponse.json({ error: 'הקובץ גדול מדי (מקסימום 50 MB)' }, { status: 413 })
     }
-
-    // MIME / extension guard
-    const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
-    const mime = file.type.toLowerCase()
-    if (!ACCEPTED_MIME.has(mime) && !ACCEPTED_EXT.has(ext)) {
+    if (rejection) {
       return NextResponse.json({ error: 'סוג קובץ לא נתמך — ניתן להעלות תמונות בלבד' }, { status: 415 })
     }
 
