@@ -56,5 +56,14 @@ export async function GET() {
     out.getPages = { ok: false, error: err instanceof Error ? `${err.name}: ${err.message}` : String(err) }
   }
 
+  // The upload path: can sharp actually run here?
+  try {
+    const sharp = (await import('sharp')).default
+    const png = await sharp({ create: { width: 4, height: 4, channels: 3, background: '#000' } }).png().toBuffer()
+    out.sharp = { ok: true, bytes: png.length }
+  } catch (err) {
+    out.sharp = { ok: false, error: err instanceof Error ? err.message.slice(0, 300) : String(err) }
+  }
+
   return NextResponse.json(out)
 }

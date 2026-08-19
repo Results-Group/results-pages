@@ -9,6 +9,13 @@ const nextConfig: NextConfig = {
   // (libvips-cpp.so.8.18.3 missing). Broke 2026-08-19 on a Vercel build-image
   // update with an unchanged lockfile.
   serverExternalPackages: ['sharp'],
+  // Belt to the braces above: file tracing missed sharp's native .so (dlopen'd
+  // at runtime, invisible to the require graph), so the function bundles
+  // shipped without libvips and uploads died with ERR_DLOPEN_FAILED. Force
+  // the whole @img tree into every function that might touch sharp.
+  outputFileTracingIncludes: {
+    '/**': ['node_modules/@img/**', 'node_modules/sharp/**'],
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: '50mb',
