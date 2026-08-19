@@ -168,7 +168,13 @@ export async function listBucket(bucket: string, prefix = '', depth = 0): Promis
 export async function listAllObjects(): Promise<StorageObject[]> {
   const all: StorageObject[] = []
   for (const bucket of SOURCE_BUCKETS) all.push(...(await listBucket(bucket)))
-  return all
+  // Offset pagination over a live bucket can list an entry twice (measured:
+  // 6 duplicates out of 2,919 objects). Deduped here so files_total is honest
+  // and no object is downloaded twice in one run; the manifest upsert dedupes
+  // again on its own key as the last line of defence.
+  const unique = new Map<string, StorageObject>()
+  for (const o of all) unique.set(`${o.bucket}/${o.path}`, o)
+  return [...unique.values()]
 }
 
 /**
@@ -237,13 +243,27 @@ export async function copyChangedFiles(
   // the copies themselves.
   if (done.length > 0) {
     const copiedAt = new Date().toISOString()
-    await supabase.from('backup_file_manifest').upsert(
-      done.map(o => ({
+    // Deduped by key first: storage listing can yield the same object twice
+    // (offset pagination over a bucket that changes mid-walk), and Postgres
+    // rejects an upsert that touches one key twice in a single statement —
+    // which threw away the WHOLE batch. With the error also swallowed below,
+    // the manifest stayed empty for weeks while every run reported green and
+    // recopied the same first COPY_BUDGET files; everything past them was
+    // never backed up at all.
+    const unique = new Map<string, StorageObject>()
+    for (const o of done) unique.set(`${o.bucket}/${o.path}`, o)
+    const { error: manifestError } = await supabase.from('backup_file_manifest').upsert(
+      [...unique.values()].map(o => ({
         target: targetId, bucket: o.bucket, path: o.path, size: o.size,
         source_updated_at: o.updated_at, copied_at: copiedAt,
       })),
       { onConflict: 'target,bucket,path' }
     )
+    // A failed manifest write means next run cannot know what was copied —
+    // that is a failed backup, not a green one. Surface it.
+    if (manifestError) {
+      throw new Error(`manifest write failed: ${manifestError.message}`)
+    }
   }
 
   const bytes = done.reduce((sum, o) => sum + o.size, 0)
