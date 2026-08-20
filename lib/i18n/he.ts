@@ -526,6 +526,11 @@ const he = {
   // Confirm dialog (shared)
   'confirm.confirm': 'אישור',
   'confirm.cancel': 'ביטול',
+
+  // Unsaved-changes guard
+  'unsaved.confirmLeave': 'יש שינויים שלא נשמרו. לעזוב בכל זאת?',
+  'unsaved.leave': 'עזיבה',
+  'unsaved.stay': 'הישארות',
 } as const
 
 export default he

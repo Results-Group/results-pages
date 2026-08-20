@@ -7,7 +7,7 @@ import type { ReportTab, ReportBlock, ReportBlockType, PerformanceReport } from 
 import { createStandardTemplate } from '@/lib/report-template'
 import BlockEditor from './BlockEditor'
 import { useT, useLocale } from '@/lib/i18n'
-import { useUnsavedChanges } from '@/lib/use-unsaved-changes'
+import { useRegisterUnsavedChanges } from '../../_components/unsaved-changes'
 import { useToast } from '../../_components/toast'
 import { useConfirm } from '../../_components/confirm-dialog'
 
@@ -64,7 +64,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
   const [status, setStatus] = useState(initial.status)
   const [dirty, setDirty] = useState(false)
 
-  useUnsavedChanges(dirty)
+  useRegisterUnsavedChanges(dirty)
   const [clients, setClients] = useState<Client[]>([])
   const [activeTabIdx, setActiveTabIdx] = useState(0)
 

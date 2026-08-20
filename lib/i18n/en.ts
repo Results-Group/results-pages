@@ -528,6 +528,11 @@ const en: Record<TranslationKey, string> = {
   // Confirm dialog (shared)
   'confirm.confirm': 'Confirm',
   'confirm.cancel': 'Cancel',
+
+  // Unsaved-changes guard
+  'unsaved.confirmLeave': 'You have unsaved changes. Leave anyway?',
+  'unsaved.leave': 'Leave',
+  'unsaved.stay': 'Stay',
 }
 
 export default en

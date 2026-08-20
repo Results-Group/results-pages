@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, use } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Upload, Plus, Trash2, Megaphone, FileText, Save, Sparkles, Loader2, FileCheck2, Files } from 'lucide-react'
-import { useUnsavedChanges } from '@/lib/use-unsaved-changes'
+import { useRegisterUnsavedChanges } from '../../_components/unsaved-changes'
 import { useToast } from '../../_components/toast'
 
 interface Contact { name?: string; role?: string; email?: string; phone?: string }
@@ -39,7 +39,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
   const { showToast } = useToast()
   const router = useRouter()
 
-  useUnsavedChanges(dirty)
+  useRegisterUnsavedChanges(dirty)
 
   const load = useCallback(async () => {
     setLoading(true)

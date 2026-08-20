@@ -7,7 +7,7 @@ import Link from 'next/link'
 import VisualEditor, { type VisualEditorRef } from './visual-editor'
 import ClientAutocomplete from '../../_components/client-autocomplete'
 import WorkspaceSelector from '../../_components/workspace-selector'
-import { useUnsavedChanges } from '@/lib/use-unsaved-changes'
+import { useRegisterUnsavedChanges } from '../../_components/unsaved-changes'
 import { useConfirm } from '../../_components/confirm-dialog'
 
 type UserRole = 'admin' | 'editor' | 'viewer'
@@ -93,7 +93,7 @@ export default function EditPage() {
   const [userRole, setUserRole] = useState<UserRole>('admin')
   const [dirty, setDirty] = useState(false)
 
-  useUnsavedChanges(dirty)
+  useRegisterUnsavedChanges(dirty)
 
   // Version history state
   const [showVersions, setShowVersions] = useState(false)

@@ -29,6 +29,7 @@ import heDict from '@/lib/i18n/he'
 import enDict from '@/lib/i18n/en'
 import { ToastProvider } from './_components/toast'
 import { ConfirmProvider } from './_components/confirm-dialog'
+import { UnsavedGuardBridge, hasUnsavedChanges, guardNavigation } from './_components/unsaved-changes'
 
 interface SessionUser {
   userId: string
@@ -181,8 +182,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   async function handleLogout() {
-    await fetch('/api/auth', { method: 'DELETE' })
-    router.push('/admin/login')
+    await guardNavigation(async () => {
+      await fetch('/api/auth', { method: 'DELETE' })
+      router.push('/admin/login')
+    })
   }
 
   function switchWorkspace(wsId: string) {
@@ -190,10 +193,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       setWsDropdownOpen(false)
       return
     }
-    setActiveWorkspace(wsId)
-    setWorkspaceCookie(wsId)
-    setWsDropdownOpen(false)
-    window.location.href = pathname || '/admin'
+    // The cookie must not flip if the user cancels over unsaved edits, so the
+    // whole switch (state + cookie + reload) sits inside the guard.
+    void guardNavigation(() => {
+      setActiveWorkspace(wsId)
+      setWorkspaceCookie(wsId)
+      setWsDropdownOpen(false)
+      window.location.href = pathname || '/admin'
+    })
   }
 
   const activeWs = workspaces.find(w => w.id === activeWorkspace)
@@ -295,6 +302,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link
               key={item.href}
               href={item.href}
+              onClick={e => {
+                if (hasUnsavedChanges()) {
+                  e.preventDefault()
+                  void guardNavigation(() => router.push(item.href))
+                }
+              }}
               className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors"
               style={active
                 ? { color: 'var(--sidebar-accent)', background: 'var(--sidebar-active-bg)' }
@@ -379,6 +392,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <I18nContext.Provider value={locale}>
     <ToastProvider>
     <ConfirmProvider>
+    <UnsavedGuardBridge />
     <div className="flex min-h-screen" dir={locale === 'en' ? 'ltr' : 'rtl'}>
       {/* Mobile hamburger */}
       <button
