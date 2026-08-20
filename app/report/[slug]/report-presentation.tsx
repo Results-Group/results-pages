@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import ShareButton from '@/app/_deck/ShareButton'
+import { resolveSwipe } from '@/lib/swipe'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
 import type { ReportTab, ReportBlock } from '@/lib/performance-reports'
 import he from '@/lib/i18n/he'
@@ -49,6 +50,37 @@ export default function ReportPresentation({ report, brandColor }: Props) {
     setActiveTab(prev => Math.min(Math.max(prev + dir, 0), activeTabs.length - 1))
   }
 
+  // Touch + keyboard navigation (the deck shell has both; the report had
+  // neither). Arrow direction follows the reading direction, like DeckShell.
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0]
+    touchStart.current = { x: t.clientX, y: t.clientY }
+  }
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const start = touchStart.current
+    touchStart.current = null
+    if (!start) return
+    // Horizontally scrollable tables own their horizontal drags.
+    if ((e.target as HTMLElement).closest?.('.rpt-table-container')) return
+    const t = e.changedTouches[0]
+    const action = resolveSwipe(t.clientX - start.x, t.clientY - start.y, lang === 'en' ? 'ltr' : 'rtl')
+    if (action === 'next') navigate(1)
+    else if (action === 'prev') navigate(-1)
+  }
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el?.isContentEditable) return
+      const rtl = lang !== 'en'
+      if (e.key === 'ArrowLeft') navigate(rtl ? 1 : -1)
+      if (e.key === 'ArrowRight') navigate(rtl ? -1 : 1)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang, activeTabs.length])
+
   // Print mode renders ALL tabs stacked; before it, the PDF button silently
   // exported only the active tab — a six-tab report became one page.
   const [printMode, setPrintMode] = useState(false)
@@ -66,7 +98,7 @@ export default function ReportPresentation({ report, brandColor }: Props) {
   }, [printMode])
 
   return (
-    <div className="report-pres" dir={lang === 'en' ? 'ltr' : 'rtl'}
+    <div className="report-pres" dir={lang === 'en' ? 'ltr' : 'rtl'} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}
       style={accent ? { '--brand-accent': accent, '--brand-accent-glow': `${accent}33` } as React.CSSProperties : undefined}>
 
       {/* Header */}
@@ -125,7 +157,12 @@ export default function ReportPresentation({ report, brandColor }: Props) {
               </button>
               <div className="report-dots">
                 {activeTabs.map((_, i) => (
-                  <div key={i} className={`report-dot${activeTab === i ? ' active' : ''}`} onClick={() => setActiveTab(i)} />
+                  <button key={i} type="button" className={`report-dot-btn${activeTab === i ? ' active' : ''}`}
+                    onClick={() => setActiveTab(i)}
+                    aria-label={`${(lang === 'en' ? en : he)['public.goToSlide']} ${i + 1}`}
+                    aria-current={activeTab === i ? 'true' : undefined}>
+                    <span className="report-dot" />
+                  </button>
                 ))}
               </div>
               <span className="report-slide-num">{activeTab + 1} / {activeTabs.length}</span>

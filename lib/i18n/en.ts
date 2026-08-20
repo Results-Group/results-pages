@@ -452,6 +452,7 @@ const en: Record<TranslationKey, string> = {
   'public.exportPdf': 'Export PDF',
   'public.previous': 'Previous',
   'public.next': 'Next',
+  'public.goToSlide': 'Go to slide',
   'public.approved': 'Approved',
   'public.needsChange': 'Needs Change',
   'public.comment': 'Comment',

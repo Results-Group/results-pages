@@ -118,14 +118,19 @@
 }
 .report-nav-btn:hover { background: var(--brand-accent-glow); border-color: var(--brand-accent); color: var(--brand-accent); }
 .report-nav-btn:disabled { opacity: 0.25; pointer-events: none; }
-.report-dots { display: flex; align-items: center; gap: 8px; }
+.report-dots { display: flex; align-items: center; gap: 0; }
+/* The visible dot stays 10px; the button around it supplies a 44px touch
+   target (10 + 2×17 vertical padding), per mobile hit-area guidelines. */
+.report-dot-btn {
+  background: none; border: none; margin: 0; padding: 17px 6px;
+  display: inline-flex; align-items: center; cursor: pointer;
+}
 .report-dot {
   width: 10px; height: 10px; border-radius: 50%;
   background: rgba(255,255,255,0.15);
   transition: all 0.3s;
-  cursor: pointer;
 }
-.report-dot.active {
+.report-dot-btn.active .report-dot {
   background: var(--brand-accent);
   box-shadow: 0 0 8px rgba(255, 220, 113, 0.5);
   width: 28px; border-radius: 5px;
@@ -238,7 +243,8 @@
 .rpt-idea-card p { color: var(--text-muted); line-height: 1.6; font-size: 0.95rem; }
 
 /* Footer */
-.report-footer { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--border-color); margin-top: 40px; }
+.report-footer { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--border-color); margin-top: 40px;   padding-bottom: calc(12px + env(safe-area-inset-bottom));
+}
 .report-footer a { color: var(--brand-accent); text-decoration: none; }
 
 /* Responsive */

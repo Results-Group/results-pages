@@ -450,6 +450,7 @@ const he = {
   'public.exportPdf': 'ייצוא PDF',
   'public.previous': 'הקודם',
   'public.next': 'הבא',
+  'public.goToSlide': 'מעבר לשקף',
   'public.approved': 'מאושר',
   'public.needsChange': 'דורש שינוי',
   'public.comment': 'הערה',
