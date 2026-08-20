@@ -46,6 +46,9 @@ export default function StrategyEditor({ initial }: { initial: StrategyEditorIni
   const [status, setStatus] = useState(initial.status)
   const [slug, setSlug] = useState(initial.slug)
   const [preview, setPreview] = useState(false)
+  // Below lg the three-pane grid can't fit — a segmented control shows one
+  // pane at a time. CSS `hidden` (not unmount) so field state survives switching.
+  const [pane, setPane] = useState<'slides' | 'canvas' | 'fields'>('canvas')
 
   const buildBody = useCallback((d: StrategyDocument) => ({
     client: d.meta.client,
@@ -196,13 +199,26 @@ export default function StrategyEditor({ initial }: { initial: StrategyEditorIni
         </button>
       </div>
 
-      {/* Three panes */}
-      <div className="flex-1 grid gap-3 min-h-0" style={{ gridTemplateColumns: '250px minmax(0,1fr) 320px' }}>
-        <div className="rounded-xl overflow-hidden min-h-0" style={panel}>
+      {/* Pane switcher — only below lg */}
+      <div className="lg:hidden flex gap-1 mb-2 p-1 rounded-xl" style={panel}>
+        {([['slides', 'שקפים'], ['canvas', 'שקף'], ['fields', 'עריכה']] as const).map(([key, label]) => (
+          <button key={key} type="button" onClick={() => setPane(key)}
+            className="flex-1 py-1.5 rounded-lg text-xs font-bold transition-colors"
+            style={pane === key
+              ? { background: 'rgba(64,225,211,0.15)', color: '#40e1d3' }
+              : { color: 'var(--admin-text-secondary)' }}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Three panes (one at a time below lg) */}
+      <div className="flex-1 grid gap-3 min-h-0 lg:[grid-template-columns:250px_minmax(0,1fr)_320px]">
+        <div className={`rounded-xl overflow-hidden min-h-0 ${pane === 'slides' ? '' : 'hidden'} lg:block`} style={panel}>
           <SlideFilmstrip
             sections={doc.sections}
             activeId={activeId}
-            onSelect={setActiveId}
+            onSelect={id => { setActiveId(id); setPane('canvas') }}
             onMove={moveSection}
             onRemove={removeSection}
             onDuplicate={duplicateSection}
@@ -210,14 +226,14 @@ export default function StrategyEditor({ initial }: { initial: StrategyEditorIni
           />
         </div>
 
-        <div className="rounded-xl overflow-y-auto min-h-0" style={panel}>
+        <div className={`rounded-xl overflow-y-auto min-h-0 ${pane === 'canvas' ? '' : 'hidden'} lg:block`} style={panel}>
           <SlideCanvas
             section={activeSection}
             onChange={patch => activeSection && updateSection(activeSection.id, patch)}
           />
         </div>
 
-        <div className="rounded-xl overflow-y-auto min-h-0 p-3" style={panel}>
+        <div className={`rounded-xl overflow-y-auto min-h-0 p-3 ${pane === 'fields' ? '' : 'hidden'} lg:block`} style={panel}>
           {activeSection ? (
             <SectionFields
               section={activeSection}
