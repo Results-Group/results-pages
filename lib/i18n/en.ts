@@ -530,6 +530,10 @@ const en: Record<TranslationKey, string> = {
   'confirm.confirm': 'Confirm',
   'confirm.cancel': 'Cancel',
 
+  // Deck view tracking
+  'views.count': 'views',
+  'views.lastViewed': 'Last viewed',
+
   // Unsaved-changes guard
   'unsaved.confirmLeave': 'You have unsaved changes. Leave anyway?',
   'unsaved.leave': 'Leave',

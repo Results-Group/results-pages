@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { Metadata } from 'next'
 import { getReportBySlug } from '@/lib/performance-reports'
 import { getClientById } from '@/lib/clients'
@@ -9,6 +9,7 @@ import ReportPresentation from './report-presentation'
 import PasswordGate from './password-gate'
 import MaintenancePage from '../../c/[slug]/maintenance'
 import ContentUnavailable from '../../_deck/unavailable'
+import { recordDeckView } from '@/lib/deck-views'
 import { databaseReachable, rebuildHold } from '@/lib/db-health'
 
 interface PageProps {
@@ -78,6 +79,17 @@ export default async function ReportPage({ params, searchParams }: PageProps) {
     if (!tokenValid) {
       return <PasswordGate slug={slug} clientName={report.client} />
     }
+  }
+
+  // Client view (all gates passed, no staff session) — fire-and-forget.
+  if (!session) {
+    const hdrs = await headers()
+    recordDeckView({
+      content_type: 'report',
+      content_id: report.id,
+      ip: hdrs.get('x-forwarded-for')?.split(',')[0]?.trim() || undefined,
+      user_agent: hdrs.get('user-agent') || undefined,
+    }).catch(() => {})
   }
 
   let brandColor: string | null = report.brand_color

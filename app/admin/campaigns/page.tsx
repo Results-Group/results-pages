@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, MessageCircle, Files, Image as ImageIcon, Calendar, LayoutTemplate, Bookmark, X, Loader2, Archive, CheckSquare, Square } from 'lucide-react'
+import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, MessageCircle, Files, Image as ImageIcon, Calendar, LayoutTemplate, Bookmark, X, Loader2, Archive, CheckSquare, Square, Eye } from 'lucide-react'
 import { whatsappShareUrl } from '@/lib/share'
 import { useT, useLocale } from '@/lib/i18n'
 import { useToast } from '../_components/toast'
@@ -21,6 +21,7 @@ interface Campaign {
   workspace_id: string | null
   created_by?: string | null
   feedback_counts?: { approved: number; rejected: number; pending: number }
+  view_stats?: { count: number; last_viewed: string } | null
 }
 
 interface Workspace {
@@ -506,6 +507,12 @@ export default function CampaignsListPage() {
                               <Calendar className="w-3 h-3" />
                               {new Date(c.created_at).toLocaleDateString(locale === 'en' ? 'en-US' : 'he-IL')}
                             </span>
+                            {c.view_stats && (
+                              <span className="flex items-center gap-1.5" title={`${t('views.lastViewed')}: ${new Date(c.view_stats.last_viewed).toLocaleString(locale === 'en' ? 'en-US' : 'he-IL')}`}>
+                                <Eye className="w-3 h-3" style={{ color: '#40e1d3' }} />
+                                <span className="font-semibold" style={{ color: 'var(--admin-text-secondary)' }}>{c.view_stats.count}</span> {t('views.count')}
+                              </span>
+                            )}
                             {(() => {
                               const ws = workspaces.find(w => w.id === c.workspace_id)
                               return ws ? (

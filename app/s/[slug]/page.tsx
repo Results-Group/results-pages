@@ -8,6 +8,8 @@ import { buildStrategySlides } from '@/lib/strategy/slides'
 import { databaseReachable, rebuildHold } from '@/lib/db-health'
 import MaintenancePage from '../../c/[slug]/maintenance'
 import ContentUnavailable from '../../_deck/unavailable'
+import { headers } from 'next/headers'
+import { recordDeckView } from '@/lib/deck-views'
 import StrategyPresentation from './presentation'
 
 /**
@@ -95,6 +97,17 @@ export default async function StrategyDocPage({ params, searchParams }: PageProp
     sections: doc.sections,
     date,
   })
+
+  // Client view (published, no staff session) — fire-and-forget.
+  if (!session) {
+    const hdrs = await headers()
+    recordDeckView({
+      content_type: 'strategy',
+      content_id: doc.id,
+      ip: hdrs.get('x-forwarded-for')?.split(',')[0]?.trim() || undefined,
+      user_agent: hdrs.get('user-agent') || undefined,
+    }).catch(() => {})
+  }
 
   return (
     <StrategyPresentation

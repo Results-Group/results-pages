@@ -4,6 +4,8 @@ import { getCampaigns, createCampaign } from '@/lib/campaigns'
 import { findOrCreateClient, getClientById } from '@/lib/clients'
 import { slugifyPath } from '@/lib/slug'
 import { supabase } from '@/lib/supabase'
+import { getDeckViewRows } from '@/lib/deck-views'
+import { summarizeDeckViews } from '@/lib/deck-view-stats'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
 
@@ -43,11 +45,15 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Client-view stats ride the same list payload as the feedback badge.
+    const viewStats = summarizeDeckViews(await getDeckViewRows('campaign', ids))
+
     const safe = campaigns.map(c => ({
       ...c,
       has_password: !!c.password,
       password: undefined,
       feedback_counts: counts[c.id] || { approved: 0, rejected: 0, pending: 0 },
+      view_stats: viewStats[c.id] || null,
     }))
     return NextResponse.json(safe)
   } catch (err) {

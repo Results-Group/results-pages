@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
-import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, Calendar, BarChart3 } from 'lucide-react'
+import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, Calendar, BarChart3, Eye } from 'lucide-react'
 import { useT, useLocale } from '@/lib/i18n'
 import { useToast } from '../_components/toast'
 import { useConfirm } from '../_components/confirm-dialog'
@@ -16,6 +16,7 @@ interface Report {
   status: 'draft' | 'published' | 'archived'
   created_at: string
   workspace_id: string | null
+  view_stats?: { count: number; last_viewed: string } | null
 }
 
 async function fetchUserRole(): Promise<string> {
@@ -190,6 +191,12 @@ export default function ReportsListPage() {
                               <Calendar className="w-3 h-3" />
                               {new Date(r.created_at).toLocaleDateString(locale === 'en' ? 'en-US' : 'he-IL')}
                             </span>
+                            {r.view_stats && (
+                              <span className="flex items-center gap-1.5" title={`${t('views.lastViewed')}: ${new Date(r.view_stats.last_viewed).toLocaleString(locale === 'en' ? 'en-US' : 'he-IL')}`}>
+                                <Eye className="w-3 h-3" style={{ color: '#40e1d3' }} />
+                                <span className="font-semibold" style={{ color: 'var(--admin-text-secondary)' }}>{r.view_stats.count}</span> {t('views.count')}
+                              </span>
+                            )}
                           </div>
                         </div>
 

@@ -4,6 +4,8 @@ import { getReports, createReport } from '@/lib/performance-reports'
 import { findOrCreateClient, getClientById } from '@/lib/clients'
 import { slugifyPath } from '@/lib/slug'
 import { supabase } from '@/lib/supabase'
+import { getDeckViewRows } from '@/lib/deck-views'
+import { summarizeDeckViews } from '@/lib/deck-view-stats'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
 
@@ -26,7 +28,9 @@ export async function GET(request: NextRequest) {
 
   try {
     const reports = await getReports({ search, status, workspace_id: workspaceId, deleted })
-    const safe = reports.map(r => ({ ...r, has_password: !!r.password, password: undefined }))
+    // Client-view stats so the list can answer "did they even open it?".
+    const viewStats = summarizeDeckViews(await getDeckViewRows('report', reports.map(r => r.id)))
+    const safe = reports.map(r => ({ ...r, has_password: !!r.password, password: undefined, view_stats: viewStats[r.id] || null }))
     return NextResponse.json(safe)
   } catch (err) {
     captureException(err, { route: 'GET /api/reports', workspaceId })

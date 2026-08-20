@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { Metadata } from 'next'
 import { getCampaignBySlug, enrichCampaignUrls, normalizeCopies } from '@/lib/campaigns'
 import type { CampaignSection } from '@/lib/campaigns'
@@ -13,6 +13,7 @@ import PasswordGate from './password-gate'
 import MaintenancePage from './maintenance'
 import ContentUnavailable from '@/app/_deck/unavailable'
 import { databaseReachable, rebuildHold } from '@/lib/db-health'
+import { recordDeckView } from '@/lib/deck-views'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -131,6 +132,18 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     if (!tokenValid) {
       return <PasswordGate slug={slug} clientName={rawCampaign.client} />
     }
+  }
+
+  // A real client view: every gate passed and there is no staff session.
+  // Fire-and-forget — tracking must never slow or break the render.
+  if (!session) {
+    const hdrs = await headers()
+    recordDeckView({
+      content_type: 'campaign',
+      content_id: rawCampaign.id,
+      ip: hdrs.get('x-forwarded-for')?.split(',')[0]?.trim() || undefined,
+      user_agent: hdrs.get('user-agent') || undefined,
+    }).catch(() => {})
   }
 
   const campaign = enrichCampaignUrls(rawCampaign)

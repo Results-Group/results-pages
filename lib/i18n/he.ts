@@ -528,6 +528,10 @@ const he = {
   'confirm.confirm': 'אישור',
   'confirm.cancel': 'ביטול',
 
+  // Deck view tracking
+  'views.count': 'צפיות',
+  'views.lastViewed': 'נצפה לאחרונה',
+
   // Unsaved-changes guard
   'unsaved.confirmLeave': 'יש שינויים שלא נשמרו. לעזוב בכל זאת?',
   'unsaved.leave': 'עזיבה',
