@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Plus, Search, Eye, ExternalLink, Pencil, ToggleLeft, ToggleRight, Trash2, Monitor, Smartphone, X, Copy, MessageCircle, Lock, CheckSquare, Square, FileDown, Loader2 } from 'lucide-react'
 import { whatsappShareUrl } from '@/lib/share'
 import { useT, useLocale } from '@/lib/i18n'
@@ -46,6 +47,7 @@ export default function AdminDashboard() {
   const locale = useLocale()
   const { showToast } = useToast()
   const confirmDialog = useConfirm()
+  const router = useRouter()
   const [pages, setPages] = useState<PageItem[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('')
@@ -393,12 +395,13 @@ export default function AdminDashboard() {
                 return (
                   <tr
                     key={page.id}
-                    className="transition-colors duration-150"
+                    className="transition-colors duration-150 cursor-pointer"
                     style={{ borderBottom: '1px solid var(--admin-border)' }}
                     onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    onClick={() => router.push(`/admin/pages/${page.id}`)}
                   >
-                    <td className="px-3 py-4 w-10">
+                    <td className="px-3 py-4 w-10" onClick={e => e.stopPropagation()}>
                       <button type="button" onClick={() => toggleSelect(page.id)} style={{ color: 'var(--admin-text-muted)' }} aria-label={t('pages.selectRow')}>
                         {selectedIds.has(page.id)
                           ? <CheckSquare className="w-4 h-4" style={{ color: 'var(--admin-accent)' }} />
@@ -466,7 +469,7 @@ export default function AdminDashboard() {
                         {page._count.views}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
                       <div className="flex items-center gap-3">
                         <a
                           href={`/pages/${page.client}/${page.slug}`}

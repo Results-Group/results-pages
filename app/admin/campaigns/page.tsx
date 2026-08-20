@@ -469,14 +469,14 @@ export default function CampaignsListPage() {
                         <button
                           type="button"
                           onClick={e => { e.stopPropagation(); toggleSelect(c.id) }}
-                          className={`shrink-0 p-1 rounded transition-opacity ${selectedIds.has(c.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus:opacity-100'}`}
+                          className={`shrink-0 p-1 rounded transition-opacity ${selectedIds.has(c.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus:opacity-100 pointer-coarse:opacity-100'}`}
                           style={{ color: selectedIds.has(c.id) ? '#40e1d3' : 'var(--admin-text-muted)' }}
                           aria-label={selectedIds.has(c.id) ? t('campaigns.deselect') : t('campaigns.select')}
                           title={selectedIds.has(c.id) ? t('campaigns.deselect') : t('campaigns.select')}
                         >
                           {selectedIds.has(c.id) ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
                         </button>
-                        <div className="flex-1 min-w-0">
+                        <Link href={`/admin/campaigns/${c.id}`} className="flex-1 min-w-0 block">
                           <div className="flex items-center gap-2.5 mb-2">
                             <span className="w-2 h-2 rounded-full shrink-0" style={{ background: dotColor, boxShadow: `0 0 8px ${dotColor}60` }} />
                             <h3 className="text-sm font-bold truncate" style={{ color: 'var(--admin-text-primary)' }}>{c.campaign_name}</h3>
@@ -515,10 +515,10 @@ export default function CampaignsListPage() {
                               ) : null
                             })()}
                           </div>
-                        </div>
+                        </Link>
 
                         {/* Actions */}
-                        <div className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1 opacity-60 group-hover:opacity-100 pointer-coarse:opacity-100 transition-opacity">
                           {c.status === 'published' && (
                             <>
                               <a
