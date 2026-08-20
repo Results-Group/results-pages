@@ -22,10 +22,12 @@ interface Props {
   html: string
   onSave: (html: string) => Promise<void>
   saving: boolean
+  /** Lifts the private dirty flag so the page-level unsaved guard sees it. */
+  onDirtyChange?: (dirty: boolean) => void
 }
 
 const VisualEditor = forwardRef<VisualEditorRef, Props>(function VisualEditor(
-  { html, onSave, saving },
+  { html, onSave, saving, onDirtyChange },
   ref,
 ) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
@@ -37,6 +39,8 @@ const VisualEditor = forwardRef<VisualEditorRef, Props>(function VisualEditor(
   const [fullscreen, setFullscreen] = useState(false)
   const [dirty, setDirty] = useState(false)
   const promptText = usePrompt()
+
+  useEffect(() => { onDirtyChange?.(dirty) }, [dirty, onDirtyChange])
 
   const getHtml = useCallback((): string => {
     const doc = iframeRef.current?.contentDocument

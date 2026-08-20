@@ -92,8 +92,12 @@ export default function EditPage() {
 
   const [userRole, setUserRole] = useState<UserRole>('admin')
   const [dirty, setDirty] = useState(false)
+  // The Code tab and the visual editor track their own dirtiness — separate
+  // flags so a child save can't clear a pending metadata edit (or vice versa).
+  const [codeDirty, setCodeDirty] = useState(false)
+  const [visualDirty, setVisualDirty] = useState(false)
 
-  useRegisterUnsavedChanges(dirty)
+  useRegisterUnsavedChanges(dirty || codeDirty || visualDirty)
 
   // Version history state
   const [showVersions, setShowVersions] = useState(false)
@@ -193,6 +197,7 @@ export default function EditPage() {
         body: JSON.stringify({ html: htmlContent }),
       })
       if (res.ok) {
+        setCodeDirty(false)
         setSuccessMsg('קוד ה-HTML נשמר בהצלחה!')
         setTimeout(() => setSuccessMsg(''), 4000)
       } else {
@@ -254,6 +259,7 @@ export default function EditPage() {
         const data = await res.json().catch(() => ({}))
         setError(data.error || 'שגיאה בשמירה')
       } else {
+        setDirty(false)
         router.push('/admin')
       }
     } catch {
@@ -509,6 +515,7 @@ export default function EditPage() {
                 html={htmlContent}
                 onSave={handleSaveVisualHtml}
                 saving={savingHtml}
+                onDirtyChange={setVisualDirty}
               />
             ) : (
               <div className="flex items-center justify-center py-16" style={{ color: 'var(--admin-text-muted)' }}>
@@ -537,7 +544,7 @@ export default function EditPage() {
                   </div>
                   <textarea
                     value={htmlContent}
-                    onChange={e => setHtmlContent(e.target.value)}
+                    onChange={e => { setHtmlContent(e.target.value); setCodeDirty(true) }}
                     dir="ltr"
                     spellCheck={false}
                     className="w-full outline-none resize-y text-sm leading-relaxed"
@@ -716,17 +723,17 @@ export default function EditPage() {
 
         <div>
           <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>לקוח</label>
-          <ClientAutocomplete value={client} onChange={setClient} workspaceId={workspaceId} placeholder="בחר לקוח או הקלד שם חדש" dir="ltr" />
+          <ClientAutocomplete value={client} onChange={v => { setClient(v); setDirty(true) }} workspaceId={workspaceId} placeholder="בחר לקוח או הקלד שם חדש" dir="ltr" />
         </div>
 
-        <WorkspaceSelector value={workspaceId} onChange={setWorkspaceId} />
+        <WorkspaceSelector value={workspaceId} onChange={v => { setWorkspaceId(v); setDirty(true) }} />
 
         <div>
           <label className="block text-sm font-medium mb-2" style={{ color: 'var(--admin-text-secondary)' }}>Slug</label>
           <input
             type="text"
             value={slug}
-            onChange={e => setSlug(e.target.value)}
+            onChange={e => { setSlug(e.target.value); setDirty(true) }}
             dir="ltr"
             className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
             style={inputStyle}
@@ -740,7 +747,7 @@ export default function EditPage() {
           <input
             type="datetime-local"
             value={publishAt}
-            onChange={e => setPublishAt(e.target.value)}
+            onChange={e => { setPublishAt(e.target.value); setDirty(true) }}
             dir="ltr"
             className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
             style={inputStyle}
@@ -755,7 +762,7 @@ export default function EditPage() {
           <input
             type="date"
             value={expiresAt}
-            onChange={e => setExpiresAt(e.target.value)}
+            onChange={e => { setExpiresAt(e.target.value); setDirty(true) }}
             dir="ltr"
             className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
             style={inputStyle}
@@ -797,7 +804,7 @@ export default function EditPage() {
           <input
             type="text"
             value={shortUrl}
-            onChange={e => setShortUrl(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+            onChange={e => { setShortUrl(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')); setDirty(true) }}
             placeholder="cycle-q1"
             dir="ltr"
             className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
@@ -815,7 +822,7 @@ export default function EditPage() {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => setActive(!active)}
+            onClick={() => { setActive(!active); setDirty(true) }}
             className="relative w-11 h-6 rounded-full transition-colors duration-200"
             style={{ background: active ? 'var(--admin-success)' : 'var(--admin-border-input)' }}
           >
