@@ -258,9 +258,17 @@
 }
 
 /* Print / PDF */
+/* Screen never shows the print-only title (it flashes in during print prep). */
+.report-print-title { display: none; }
+
 @media print {
   .report-header, .report-nav, .report-pdf-btn, .report-lang-btn { display: none !important; }
   .report-pres { background: #fff !important; color: #000 !important; }
   .report-content { box-shadow: none !important; border: none !important; padding: 20px !important; }
   .rpt-kpi-card, .rpt-source-card, .rpt-insight, .rpt-action-item, .rpt-idea-card { border-color: #ddd !important; }
+  .report-print-title { display: block; font-size: 20px; font-weight: 800; margin: 0 0 18px; }
+  /* Each tab starts a fresh page and doesn't get sliced mid-block. */
+  .report-tab { break-after: page; animation: none !important; }
+  .report-tab:last-child { break-after: auto; }
+  .rpt-kpi-card, .rpt-insight, .rpt-idea-card, .rpt-chart-container { break-inside: avoid; }
 }

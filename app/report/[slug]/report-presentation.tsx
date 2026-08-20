@@ -49,6 +49,22 @@ export default function ReportPresentation({ report, brandColor }: Props) {
     setActiveTab(prev => Math.min(Math.max(prev + dir, 0), activeTabs.length - 1))
   }
 
+  // Print mode renders ALL tabs stacked; before it, the PDF button silently
+  // exported only the active tab — a six-tab report became one page.
+  const [printMode, setPrintMode] = useState(false)
+  useEffect(() => {
+    if (!printMode) return
+    let cancelled = false
+    // Two frames + a beat so recharts' ResponsiveContainer lays the freshly
+    // mounted tabs out before the print snapshot is taken.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      setTimeout(() => { if (!cancelled) window.print() }, 250)
+    }))
+    const done = () => setPrintMode(false)
+    window.addEventListener('afterprint', done)
+    return () => { cancelled = true; window.removeEventListener('afterprint', done) }
+  }, [printMode])
+
   return (
     <div className="report-pres" dir={lang === 'en' ? 'ltr' : 'rtl'}
       style={accent ? { '--brand-accent': accent, '--brand-accent-glow': `${accent}33` } as React.CSSProperties : undefined}>
@@ -71,7 +87,7 @@ export default function ReportPresentation({ report, brandColor }: Props) {
           )}
           {report.periodLabel && <div className="report-date-badge">{report.periodLabel}</div>}
           <ShareButton title={`${report.client} — ${report.reportName}`} lang={lang} />
-          <button className="report-pdf-btn" onClick={() => window.print()}>
+          <button className="report-pdf-btn" onClick={() => setPrintMode(true)}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             PDF
           </button>
@@ -81,18 +97,25 @@ export default function ReportPresentation({ report, brandColor }: Props) {
       {/* Content */}
       <div className="report-container">
         <main className="report-content">
-          {tab && (
-            <div key={`${activeTab}-${lang}`} className="report-tab">
-              {tab.title && (
-                <h2 className="report-tab-title" dangerouslySetInnerHTML={{ __html: formatTitle(tab.title) }} />
+          {/* The print header replaces the hidden screen header so the PDF
+              carries the report's identity. Screen-hidden via CSS. */}
+          {printMode && (
+            <div className="report-print-title">
+              {report.client} — {report.reportName}{report.periodLabel ? ` · ${report.periodLabel}` : ''}
+            </div>
+          )}
+          {(printMode ? activeTabs : tab ? [tab] : []).map((t, i) => (
+            <div key={printMode ? `print-${i}-${lang}` : `${activeTab}-${lang}`} className="report-tab">
+              {t.title && (
+                <h2 className="report-tab-title" dangerouslySetInnerHTML={{ __html: formatTitle(t.title) }} />
               )}
-              {tab.subtitle && <p className="report-tab-subtitle">{tab.subtitle}</p>}
+              {t.subtitle && <p className="report-tab-subtitle">{t.subtitle}</p>}
 
-              {(tab.blocks || []).map(block => (
+              {(t.blocks || []).map(block => (
                 <BlockRenderer key={block.id} block={block} />
               ))}
             </div>
-          )}
+          ))}
 
           {/* Slide navigation */}
           {activeTabs.length > 1 && (
