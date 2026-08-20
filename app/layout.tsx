@@ -43,6 +43,15 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="he" dir="rtl" suppressHydrationWarning>
+      <head>
+        {/* Ping (~80KB/weight) is the face of every public deck — all three
+            weights are used (900 carries the slide titles). Preloading kills
+            the font-swap flash on first open; font-display:swap in the CSS
+            stays as the fallback behaviour. */}
+        <link rel="preload" href="/fonts/ping-regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/ping-bold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/ping-heavy.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+      </head>
       <body>
         {/* Theme applied before paint so a light-mode user never sees a dark
             flash. Via next/script (beforeInteractive) rather than a raw
