@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic'
 import {
   ArrowRight, Copy, Check, ExternalLink, Eye, EyeOff, Monitor, Smartphone,
   Undo2, Redo2, Save, Send, Loader2, CheckCircle2, MessageSquare, X,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, SlidersHorizontal, Plus,
 } from 'lucide-react'
 import { assetProxyUrl } from '@/lib/asset-url'
 import { compressImageClient, isImageFile, MAX_FILE_BYTES } from '@/lib/image-compress'
@@ -77,6 +77,9 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
   const [toasts, setToasts] = useState<Toast[]>([])
   const [feedback, setFeedback] = useState<Record<string, { status: 'approved' | 'rejected' | 'pending'; comment: string | null; author: string | null }>>({})
   const [showApprovals, setShowApprovals] = useState(false)
+  // Below lg the Inspector aside is display:none — this drawer is the only
+  // way to edit slide/campaign fields on a tablet.
+  const [inspectorOpen, setInspectorOpen] = useState(false)
   const [smartOpen, setSmartOpen] = useState(false)
 
   const toast = useCallback((message: string, kind: Toast['kind'] = 'info') => {
@@ -702,6 +705,12 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
           </button>
         </div>
 
+        {/* Tablet/phone: the Inspector aside is hidden below lg — open it as a drawer */}
+        <button onClick={() => setInspectorOpen(true)} className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
+          style={{ color: 'var(--admin-text-secondary)', border: '1px solid var(--admin-border)' }}>
+          <SlidersHorizontal className="w-3.5 h-3.5" /> מאפיינים
+        </button>
+
         <button onClick={() => setShowFullPreview(p => !p)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
           style={showFullPreview
             ? { color: '#40e1d3', background: 'rgba(64,225,211,0.1)', border: '1px solid rgba(64,225,211,0.3)' }
@@ -793,6 +802,26 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
               מלאו שם לקוח ושם קמפיין כדי שהשמירה האוטומטית תופעל — עד אז התוכן לא נשמר
             </div>
           )}
+          {/* Below md the filmstrip aside is display:none — this chip strip keeps
+              slide selection and adding available on phones. */}
+          {!showFullPreview && doc.sections.length > 0 && (
+            <div className="md:hidden flex items-center gap-1.5 px-3 py-2 overflow-x-auto shrink-0" style={{ borderBottom: '1px solid var(--admin-border)', background: 'var(--admin-bg-card)' }}>
+              {doc.sections.map((s, i) => (
+                <button key={s.id} type="button" onClick={() => setActiveId(s.id)}
+                  className="shrink-0 min-w-9 h-9 px-2 rounded-lg text-xs font-bold transition-colors"
+                  style={activeId === s.id
+                    ? { background: 'rgba(64,225,211,0.15)', color: '#40e1d3', border: '1px solid rgba(64,225,211,0.4)' }
+                    : { color: 'var(--admin-text-secondary)', border: '1px solid var(--admin-border)' }}
+                  aria-label={`שקף ${i + 1}`}>
+                  {i + 1}
+                </button>
+              ))}
+              <button type="button" onClick={() => addSection()} className="shrink-0 h-9 px-2 rounded-lg"
+                style={{ color: 'var(--admin-text-secondary)', border: '1px dashed var(--admin-border-input)' }} aria-label="הוסף שקף">
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+          )}
           {/* Always-available slide navigation — works even when the filmstrip is
               hidden (narrow screens) so you can always move between slides. */}
           {!showFullPreview && activeSection && doc.sections.length > 1 && (() => {
@@ -881,6 +910,41 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
           />
         </aside>
       </div>
+
+      {/* Inspector drawer for below-lg — the exact same props as the aside so
+          the save/409 protocol sees identical flows. Mounted only while open,
+          so the two instances never fight over focus. */}
+      {inspectorOpen && (
+        <div className="lg:hidden fixed inset-0 z-[70]" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={() => setInspectorOpen(false)}>
+          <div
+            className="fixed inset-y-0 left-0 w-[min(20rem,90vw)] overflow-y-auto p-4"
+            style={{ background: 'var(--admin-bg-card)', borderRight: '1px solid var(--admin-border)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-bold" style={{ color: 'var(--admin-text-primary)' }}>מאפיינים</span>
+              <button onClick={() => setInspectorOpen(false)} className="p-1.5 rounded-lg" style={{ color: 'var(--admin-text-muted)' }} aria-label="סגור">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <Inspector
+              section={activeSection}
+              meta={doc.meta}
+              onUpdateSection={patch => activeSection && updateSection(activeSection.id, patch)}
+              onUpdateMeta={setMeta}
+              onUploadLogo={uploadLogo}
+              uploadingLogo={uploadingLogo}
+              passwordDirty={passwordDirty}
+              onPasswordDirty={setPasswordDirty}
+              onGenerateCopy={generateCopy}
+              onApplyContentToAll={applyContentToAll}
+              slug={slug}
+              onSlugChange={v => { setSlug(v); setSlugDirty(true) }}
+              campaignId={campaignId}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Approvals panel */}
       {showApprovals && (
