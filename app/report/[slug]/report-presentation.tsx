@@ -55,7 +55,10 @@ export default function ReportPresentation({ report, brandColor }: Props) {
       {/* Header */}
       <header className="report-header">
         <div className="report-header-title">
-          <img src="https://static.wixstatic.com/media/515225_d7ed5ed1634e4012828342de92956ccf~mv2.png" alt="Results Digital" style={{ height: 36, filter: 'none' }} />
+          {/* Local asset, not the old Wix CDN URL — a third-party host on the
+              client's first paint, and corporate firewalls blocked it (the same
+              reason assetProxyUrl exists). */}
+          <img src="/logo.png" alt="Results Digital" style={{ height: 36, filter: 'none' }} />
           <h1>{report.client} — <span>{report.reportName}</span></h1>
         </div>
         <div className="report-header-right">

@@ -19,21 +19,37 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
   const report = await getReportBySlug(slug)
-  if (!report) return { title: 'הדף לא נמצא | Results Digital', robots: { index: false, follow: false } }
+  if (!report) {
+    // Outage, not absence: the link preview must not say "not found" while the
+    // database is down — clients re-share these links. Same rule as /c.
+    if (rebuildHold() || !(await databaseReachable())) {
+      return { title: 'הדוח בעדכון | Results Digital', robots: { index: false, follow: false } }
+    }
+    return { title: 'הדף לא נמצא | Results Digital', robots: { index: false, follow: false } }
+  }
 
-  if (report.status === 'draft' || report.password) {
-    return { title: 'Results Digital', robots: { index: false, follow: false } }
+  const shareImage = { url: '/og-image.png', width: 1200, height: 630, alt: 'Results Digital' }
+  const isScheduled = report.publish_at && new Date(report.publish_at) > new Date()
+  if (report.status === 'draft' || report.password || isScheduled) {
+    return {
+      title: 'Results Digital',
+      robots: { index: false, follow: false },
+      openGraph: { title: 'Results Digital', images: [shareImage] },
+      twitter: { card: 'summary_large_image', title: 'Results Digital', images: [shareImage.url] },
+    }
   }
 
   const title = `${report.client} – ${report.report_name}`
+  const description = `דוח ביצועים עבור ${report.client}`
   return {
     title: `${title} | Results Digital`,
-    description: `דוח ביצועים עבור ${report.client}`,
+    description,
     // Performance reports carry client budgets and ROI. Even a published,
     // unprotected report is meant for the recipient of the link only, never
     // for search indexes — the slug is not a secret.
     robots: { index: false, follow: false },
-    openGraph: { title, type: 'website', siteName: 'Results Digital' },
+    openGraph: { title, description, type: 'website', siteName: 'Results Digital', images: [shareImage] },
+    twitter: { card: 'summary_large_image', title, description, images: [shareImage.url] },
   }
 }
 

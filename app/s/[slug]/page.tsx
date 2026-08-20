@@ -49,6 +49,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       siteName: 'Results Digital',
       images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Results Digital' }],
     },
+    twitter: { card: 'summary_large_image', title, images: ['/og-image.png'] },
   }
 }
 
