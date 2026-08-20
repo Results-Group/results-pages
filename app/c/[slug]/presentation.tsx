@@ -19,6 +19,7 @@ import StatsSlide from './stats-slide'
 import SocialCover from './mockups/social-cover'
 import { parseVideoUrl } from '@/lib/video-utils'
 import { assetProxyUrl } from '@/lib/asset-url'
+import ShareButton from '@/app/_deck/ShareButton'
 import DeckShell from '@/app/_deck/DeckShell'
 import { CoverSlide, ClosingSlide } from '@/app/_deck/cover-slide'
 import he from '@/lib/i18n/he'
@@ -299,7 +300,9 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
       navLocked={!!lightboxAsset}
       // The closing slide carries its own sign-off.
       hideFooterOn={i => deckSlides[i].type === 'closing'}
-      headerExtra={showFeedback && feedbackSlides.length > 0 ? (
+      headerExtra={<>
+        <ShareButton title={`${clientName} — ${campaignName}`} lang={lang} />
+        {showFeedback && feedbackSlides.length > 0 ? (
         <div className={`approval-progress${allApproved ? ' complete' : ''}`}>
           <span className="approval-progress-count">
             {allApproved ? `✓ ${t('public.allApprovedShort')}` : `${t('public.approvedLabel')} ${approvedCount}/${feedbackSlides.length}`}
@@ -311,7 +314,8 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
             <button className="approve-all-btn" onClick={approveAllRemaining}>{t('public.approveAll')}</button>
           )}
         </div>
-      ) : undefined}
+        ) : null}
+      </>}
       renderSlide={(i, navigate) => (
         <>
           {/* Report: the hero lockup opens the first tab, numbers right under

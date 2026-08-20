@@ -1,5 +1,6 @@
 'use client'
 
+import ShareButton from '@/app/_deck/ShareButton'
 import DeckShell from '@/app/_deck/DeckShell'
 import { CoverSlide, ClosingSlide } from '@/app/_deck/cover-slide'
 import { SectionSlide } from './slides'
@@ -50,6 +51,7 @@ export default function StrategyPresentation({
       headerTitle={`${clientName} — ${docName}`}
       variantClass="pos-deck"
       lang={lang}
+      headerExtra={<ShareButton title={`${clientName} — ${docName}`} lang={lang} />}
       hideFooterOn={i => slides[i].type === 'closing'}
       renderSlide={i => {
         const slide = slides[i]
