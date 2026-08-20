@@ -8,6 +8,7 @@ import { verifyAccessToken } from '@/lib/content-access'
 import ReportPresentation from './report-presentation'
 import PasswordGate from './password-gate'
 import MaintenancePage from '../../c/[slug]/maintenance'
+import ContentUnavailable from '../../_deck/unavailable'
 import { databaseReachable, rebuildHold } from '@/lib/db-health'
 
 interface PageProps {
@@ -18,7 +19,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
   const report = await getReportBySlug(slug)
-  if (!report) return { title: 'Report Not Found' }
+  if (!report) return { title: 'הדף לא נמצא | Results Digital', robots: { index: false, follow: false } }
 
   if (report.status === 'draft' || report.password) {
     return { title: 'Results Digital', robots: { index: false, follow: false } }
@@ -51,8 +52,8 @@ export default async function ReportPage({ params, searchParams }: PageProps) {
   const isEditorOrAdmin = !!session && (session.role === 'admin' || session.role === 'editor')
   const isPreview = sp.preview === '1' && isEditorOrAdmin
 
-  if (report.status === 'draft' && !isPreview) notFound()
-  if (report.publish_at && new Date(report.publish_at) > new Date() && !isPreview) notFound()
+  if (report.status === 'draft' && !isPreview) return <ContentUnavailable variant="not_published" />
+  if (report.publish_at && new Date(report.publish_at) > new Date() && !isPreview) return <ContentUnavailable variant="not_published" />
 
   if (report.password && !isEditorOrAdmin) {
     const cookieStore = await cookies()

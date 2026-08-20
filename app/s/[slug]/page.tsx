@@ -7,6 +7,7 @@ import { assetProxyUrl } from '@/lib/asset-url'
 import { buildStrategySlides } from '@/lib/strategy/slides'
 import { databaseReachable, rebuildHold } from '@/lib/db-health'
 import MaintenancePage from '../../c/[slug]/maintenance'
+import ContentUnavailable from '../../_deck/unavailable'
 import StrategyPresentation from './presentation'
 
 /**
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     if (rebuildHold() || !(await databaseReachable())) {
       return { title: 'המסמך בעדכון | Results Digital', robots: { index: false, follow: false } }
     }
-    return { title: 'Document Not Found' }
+    return { title: 'הדף לא נמצא | Results Digital', robots: { index: false, follow: false } }
   }
 
   const title = `${doc.client} – ${doc.doc_name}`
@@ -67,7 +68,7 @@ export default async function StrategyDocPage({ params, searchParams }: PageProp
   const isStaff = !!session && (session.role === 'admin' || session.role === 'editor')
   const isPreview = sp.preview === '1' && isStaff
 
-  if (doc.status !== 'published' && !isPreview) notFound()
+  if (doc.status !== 'published' && !isPreview) return <ContentUnavailable variant="not_published" />
 
   // Branding: the document's own logo if one was uploaded, else the client's.
   let logoPath = doc.logo_path

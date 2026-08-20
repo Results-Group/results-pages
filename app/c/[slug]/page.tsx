@@ -11,6 +11,7 @@ import { buildCampaignSlides } from '@/lib/slides'
 import CampaignPresentation from './presentation'
 import PasswordGate from './password-gate'
 import MaintenancePage from './maintenance'
+import ContentUnavailable from '@/app/_deck/unavailable'
 import { databaseReachable, rebuildHold } from '@/lib/db-health'
 
 interface PageProps {
@@ -37,7 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     if (rebuildHold() || !(await databaseReachable())) {
       return { title: 'המצגת בעדכון | Results Digital', robots: { index: false, follow: false } }
     }
-    return { title: 'Campaign Not Found' }
+    return { title: 'הדף לא נמצא | Results Digital', robots: { index: false, follow: false } }
   }
 
   // Link previews always carry our own branded card. Using the client's logo
@@ -46,7 +47,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const shareImage = { url: '/og-image.png', width: 1200, height: 630, alt: 'Results Creative' }
 
   const isScheduled = campaign.publish_at && new Date(campaign.publish_at) > new Date()
-  if (campaign.status === 'draft' || campaign.password || isScheduled) {
+  const isExpiredMeta = (!!campaign.expires_at && new Date(campaign.expires_at) < new Date()) || campaign.status === 'archived'
+  // Expired/archived included: the deck itself is gone, so the share preview
+  // must stop leaking the client and campaign name too.
+  if (campaign.status === 'draft' || campaign.password || isScheduled || isExpiredMeta) {
     return {
       title: 'Results Creative',
       robots: { index: false, follow: false },
@@ -103,20 +107,21 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
   const isPreview = sp.preview === '1' && isEditorOrAdmin
 
   if (rawCampaign.status === 'draft' && !isPreview) {
-    notFound()
+    return <ContentUnavailable variant="not_published" />
   }
 
   // Scheduled publish: not yet available to the public (staff preview bypasses)
   if (rawCampaign.publish_at && new Date(rawCampaign.publish_at) > new Date() && !isPreview) {
-    notFound()
+    return <ContentUnavailable variant="not_published" />
   }
 
   // Past the end date (or already auto-archived): no longer public. The daily
   // cron flips the status to archived, but guard here too so it locks the moment
-  // the date passes, before the cron runs. Staff preview still works.
+  // the date passes, before the cron runs. Staff preview still works. A branded
+  // "expired" page, not notFound() — the client holds a link we sent them.
   const isExpired = !!rawCampaign.expires_at && new Date(rawCampaign.expires_at) < new Date()
   if ((isExpired || rawCampaign.status === 'archived') && !isPreview) {
-    notFound()
+    return <ContentUnavailable variant="expired" />
   }
 
   if (rawCampaign.password && !isEditorOrAdmin) {
