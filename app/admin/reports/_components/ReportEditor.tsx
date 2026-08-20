@@ -9,6 +9,7 @@ import BlockEditor from './BlockEditor'
 import { useT, useLocale } from '@/lib/i18n'
 import { useUnsavedChanges } from '@/lib/use-unsaved-changes'
 import { useToast } from '../../_components/toast'
+import { useConfirm } from '../../_components/confirm-dialog'
 
 interface Client {
   id: string
@@ -58,6 +59,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
   const t = useT()
   const locale = useLocale()
   const { showToast } = useToast()
+  const confirmDialog = useConfirm()
   const [saving, setSaving] = useState(false)
   const [status, setStatus] = useState(initial.status)
   const [dirty, setDirty] = useState(false)
@@ -122,8 +124,8 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
     setActiveTabIdx(tabs.length)
   }
 
-  const removeTab = (idx: number) => {
-    if (!confirm(t('reports.deleteTab'))) return
+  const removeTab = async (idx: number) => {
+    if (!(await confirmDialog({ message: t('reports.deleteTab'), variant: 'danger' }))) return
     markDirty()
     setTabs(prev => prev.filter((_, i) => i !== idx))
     if (activeTabIdx >= tabs.length - 1) setActiveTabIdx(Math.max(0, tabs.length - 2))
@@ -182,10 +184,10 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
   }
 
   // Load template
-  const loadTemplate = () => {
+  const loadTemplate = async () => {
     markDirty()
     if (tabs.length > 0 && tabs.some(tb => (tb.blocks || []).length > 0)) {
-      if (!confirm(t('reports.replaceConfirm'))) return
+      if (!(await confirmDialog({ message: t('reports.replaceConfirm'), variant: 'danger' }))) return
     }
     setTabs(createStandardTemplate())
     setActiveTabIdx(0)
@@ -234,7 +236,7 @@ export default function ReportEditor({ mode, initial, reportId }: Props) {
 
   const importExcel = useCallback(async (file: File) => {
     if (tabs.length > 0 && tabs.some(tb => tb.blocks.length > 0)) {
-      if (!confirm(t('reports.importConfirm'))) return
+      if (!(await confirmDialog({ message: t('reports.importConfirm'), variant: 'danger' }))) return
     }
     setImporting(true)
     try {

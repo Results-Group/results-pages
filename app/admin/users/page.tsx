@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Users, UserPlus, Shield, Pencil, Trash2, X, Check, Building, Star, ChevronDown, ChevronUp } from 'lucide-react'
 import { useT, useLocale } from '@/lib/i18n'
+import { useConfirm } from '../_components/confirm-dialog'
 
 interface WorkspaceMembership {
   workspace_id: string
@@ -55,6 +56,7 @@ async function fetchIsOwnerOrAdmin(): Promise<boolean> {
 export default function UsersPage() {
   const t = useT()
   const locale = useLocale()
+  const confirmDialog = useConfirm()
 
   const ROLE_LABELS: Record<string, string> = {
     admin: t('role.admin'),
@@ -192,7 +194,7 @@ export default function UsersPage() {
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(locale === 'en' ? `Delete user "${name}"?` : `למחוק את המשתמש "${name}"?`)) return
+    if (!(await confirmDialog({ message: locale === 'en' ? `Delete user "${name}"?` : `למחוק את המשתמש "${name}"?`, variant: 'danger' }))) return
     setError('')
     const res = await fetch('/api/users', {
       method: 'DELETE',

@@ -8,6 +8,7 @@ import VisualEditor, { type VisualEditorRef } from './visual-editor'
 import ClientAutocomplete from '../../_components/client-autocomplete'
 import WorkspaceSelector from '../../_components/workspace-selector'
 import { useUnsavedChanges } from '@/lib/use-unsaved-changes'
+import { useConfirm } from '../../_components/confirm-dialog'
 
 type UserRole = 'admin' | 'editor' | 'viewer'
 
@@ -55,6 +56,7 @@ interface Version {
 export default function EditPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
+  const confirmDialog = useConfirm()
   const [page, setPage] = useState<PageData | null>(null)
   const [title, setTitle] = useState('')
   const [client, setClient] = useState('')
@@ -264,7 +266,7 @@ export default function EditPage() {
   async function handleDelete() {
     // This is a soft-delete — the API only purges with ?purge=1. Claiming it was
     // irreversible made people hesitate over a safe, undoable action.
-    if (!confirm(`למחוק את "${page?.title}"? הדף יעבור לסל המיחזור וניתן לשחזר אותו.`)) return
+    if (!(await confirmDialog({ message: `למחוק את "${page?.title}"? הדף יעבור לסל המיחזור וניתן לשחזר אותו.`, variant: 'danger' }))) return
     try {
       const res = await fetch(`/api/pages/${id}`, { method: 'DELETE' })
       if (!res.ok) { setError('שגיאה במחיקת הדף'); return }
@@ -303,7 +305,7 @@ export default function EditPage() {
   }
 
   async function handleResetStats() {
-    if (!confirm('לאפס את כל הסטטיסטיקות של דף זה? פעולה זו בלתי הפיכה.')) return
+    if (!(await confirmDialog({ message: 'לאפס את כל הסטטיסטיקות של דף זה? פעולה זו בלתי הפיכה.', variant: 'danger' }))) return
     setResettingStats(true)
     setError('')
     setSuccessMsg('')
@@ -346,7 +348,7 @@ export default function EditPage() {
   }
 
   async function handleRestore(versionId: string) {
-    if (!confirm('לשחזר גרסה זו? הגרסה הנוכחית תישמר בהיסטוריה.')) return
+    if (!(await confirmDialog({ message: 'לשחזר גרסה זו? הגרסה הנוכחית תישמר בהיסטוריה.' }))) return
     setRestoringVersion(versionId)
     setError('')
     setSuccessMsg('')

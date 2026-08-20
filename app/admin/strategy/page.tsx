@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, Compass } from 'lucide-react'
 import { useT, useLocale } from '@/lib/i18n'
 import { useToast } from '../_components/toast'
+import { useConfirm } from '../_components/confirm-dialog'
 
 interface StrategyDocSummary {
   id: string
@@ -23,6 +24,7 @@ export default function StrategyListPage() {
   const t = useT()
   const locale = useLocale()
   const { showToast } = useToast()
+  const confirmDialog = useConfirm()
   const [docs, setDocs] = useState<StrategyDocSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -58,7 +60,7 @@ export default function StrategyListPage() {
   }
 
   const remove = async (doc: StrategyDocSummary) => {
-    if (!confirm(`${t('strategy.confirmDelete')} "${doc.doc_name}"?`)) return
+    if (!(await confirmDialog({ message: `${t('strategy.confirmDelete')} "${doc.doc_name}"?`, variant: 'danger' }))) return
     const res = await fetch(`/api/strategy-docs/${doc.id}`, { method: 'DELETE' })
     if (res.ok) {
       setDocs(prev => prev.filter(d => d.id !== doc.id))

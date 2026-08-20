@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, Users, X, Save, Building } from 'lucide-react'
 import { useT, useLocale } from '@/lib/i18n'
 import { useToast } from '../_components/toast'
+import { useConfirm } from '../_components/confirm-dialog'
 
 interface Workspace {
   id: string
@@ -22,6 +23,7 @@ export default function WorkspacesPage() {
   const t = useT()
   const locale = useLocale()
   const { showToast } = useToast()
+  const confirmDialog = useConfirm()
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
@@ -86,7 +88,11 @@ export default function WorkspacesPage() {
   }
 
   async function handleDelete(ws: Workspace) {
-    if (!confirm(locale === 'en' ? `Delete workspace "${ws.name}"? ${t('workspaces.deleteConfirm')}` : `למחוק את סביבת העבודה "${ws.name}"? ${t('workspaces.deleteConfirm')}`)) return
+    if (!(await confirmDialog({
+      title: locale === 'en' ? `Delete workspace "${ws.name}"?` : `למחוק את סביבת העבודה "${ws.name}"?`,
+      message: t('workspaces.deleteConfirm'),
+      variant: 'danger',
+    }))) return
     await fetch(`/api/workspaces/${ws.id}`, { method: 'DELETE' })
     fetchWorkspaces()
   }

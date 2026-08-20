@@ -12,6 +12,7 @@ import {
   Undo2, Redo2, Maximize2, Minimize2,
   Highlighter, Eraser,
 } from 'lucide-react'
+import { usePrompt } from '../../_components/confirm-dialog'
 
 export interface VisualEditorRef {
   getHtml: () => string
@@ -35,6 +36,7 @@ const VisualEditor = forwardRef<VisualEditorRef, Props>(function VisualEditor(
   const [ready, setReady] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
   const [dirty, setDirty] = useState(false)
+  const promptText = usePrompt()
 
   const getHtml = useCallback((): string => {
     const doc = iframeRef.current?.contentDocument
@@ -97,24 +99,33 @@ const VisualEditor = forwardRef<VisualEditorRef, Props>(function VisualEditor(
     }
   }, [])
 
-  const handleLink = useCallback(() => {
+  const handleLink = useCallback(async () => {
     const doc = iframeRef.current?.contentDocument
     if (!doc) return
     const sel = doc.getSelection()
     const node = sel?.anchorNode
     const el = node instanceof HTMLElement ? node : node?.parentElement
     const anchor = el?.closest?.('a')
+    // The dialog steals focus and can collapse the iframe selection — capture
+    // the range before awaiting and restore it after, or execCommand is a no-op.
+    const range = sel && sel.rangeCount > 0 ? sel.getRangeAt(0).cloneRange() : null
+    const restore = () => {
+      if (range && sel) { sel.removeAllRanges(); sel.addRange(range) }
+    }
     if (anchor) {
-      const url = prompt('ערוך כתובת קישור:', anchor.href)
+      const url = await promptText({ title: 'ערוך כתובת קישור', dir: 'ltr', defaultValue: anchor.href })
       if (url === null) return
+      restore()
       if (url === '') doc.execCommand('unlink')
       else anchor.href = url
     } else {
-      const url = prompt('הזן כתובת קישור:')
-      if (url) doc.execCommand('createLink', false, url)
+      const url = await promptText({ title: 'הזן כתובת קישור', dir: 'ltr', placeholder: 'https://' })
+      if (!url) return
+      restore()
+      doc.execCommand('createLink', false, url)
     }
     iframeRef.current?.contentWindow?.focus()
-  }, [])
+  }, [promptText])
 
   const handleSave = useCallback(async () => {
     await onSave(getHtml())

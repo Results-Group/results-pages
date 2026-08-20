@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Trash2, RotateCcw, FileText, Megaphone, AlertTriangle } from 'lucide-react'
 import { useT, useLocale } from '@/lib/i18n'
+import { usePrompt } from '../_components/confirm-dialog'
 
 interface TrashedPage {
   id: string
@@ -34,6 +35,7 @@ interface TrashedStrategyDoc {
 
 export default function TrashPage() {
   const t = useT()
+  const promptText = usePrompt()
 
   const [pages, setPages] = useState<TrashedPage[]>([])
   const [campaigns, setCampaigns] = useState<TrashedCampaign[]>([])
@@ -75,7 +77,7 @@ export default function TrashPage() {
   async function purge(kind: 'pages' | 'campaigns' | 'reports' | 'strategy-docs', id: string, label: string) {
     // Typing the name back is the guard against an accidental irreversible
     // delete — the server rejects anything else, so a slip is a 400, not a loss.
-    const typed = prompt(`${t('trash.purgeConfirm')}\n\n${label}`)
+    const typed = await promptText({ message: `${t('trash.purgeConfirm')}\n\n${label}`, confirmLabel: t('confirm.confirm') })
     if (typed === null) return
     setBusy(id)
     try {

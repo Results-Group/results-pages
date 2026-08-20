@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useT } from '@/lib/i18n'
 import { useToast } from '../_components/toast'
+import { useConfirm } from '../_components/confirm-dialog'
 import { Plus, Search, Contact, Trash2, X, RefreshCw, GitMerge, ArrowRight, CheckCircle, Megaphone, FileText, Pencil } from 'lucide-react'
 
 interface Client {
@@ -41,6 +42,7 @@ interface DuplicatePair { a: Client; b: Client; score: number }
 export default function ClientsPage() {
   const t = useT()
   const { showToast } = useToast()
+  const confirmDialog = useConfirm()
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -97,7 +99,7 @@ export default function ClientsPage() {
   const filtered = clients.filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()))
 
   async function handleDelete(id: string) {
-    if (!confirm(t('clients.deleteConfirm'))) return
+    if (!(await confirmDialog({ message: t('clients.deleteConfirm'), variant: 'danger' }))) return
     try {
       const res = await fetch(`/api/clients/${id}`, { method: 'DELETE' })
       if (!res.ok) { showToast(t('clients.deleteError')); return }
@@ -302,6 +304,7 @@ function ClientAvatar({ client }: { client: Client }) {
 
 function MergeModal({ clients, onClose, onMerged }: { clients: Client[]; onClose: () => void; onMerged: () => void }) {
   const t = useT()
+  const confirmDialog = useConfirm()
   const [merging, setMerging] = useState<string | null>(null)
   const [done, setDone] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
@@ -332,10 +335,11 @@ function MergeModal({ clients, onClose, onMerged }: { clients: Client[]; onClose
     // colour and positioning — is deleted, not merged. Name both sides.
     const deleteName = deleteId === p.a.id ? p.a.name : p.b.name
     const keepName = keepId === p.a.id ? p.a.name : p.b.name
-    if (!window.confirm(
-      `למזג את "${deleteName}" לתוך "${keepName}"?\n\n` +
-      `הקמפיינים, הדפים והדוחות יועברו ל"${keepName}", ו"${deleteName}" יימחק לצמיתות. לא ניתן לבטל.`
-    )) return
+    if (!(await confirmDialog({
+      title: `למזג את "${deleteName}" לתוך "${keepName}"?`,
+      message: `הקמפיינים, הדפים והדוחות יועברו ל"${keepName}", ו"${deleteName}" יימחק לצמיתות. לא ניתן לבטל.`,
+      variant: 'danger',
+    }))) return
     setMerging(pairKey(p))
     setError(null)
     try {

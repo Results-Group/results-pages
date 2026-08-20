@@ -6,6 +6,7 @@ import { Plus, Search, Eye, ExternalLink, Pencil, ToggleLeft, ToggleRight, Trash
 import { whatsappShareUrl } from '@/lib/share'
 import { useT, useLocale } from '@/lib/i18n'
 import { useToast } from './_components/toast'
+import { useConfirm } from './_components/confirm-dialog'
 
 interface PageItem {
   id: string
@@ -44,6 +45,7 @@ export default function AdminDashboard() {
   const t = useT()
   const locale = useLocale()
   const { showToast } = useToast()
+  const confirmDialog = useConfirm()
   const [pages, setPages] = useState<PageItem[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('')
@@ -88,7 +90,7 @@ export default function AdminDashboard() {
   }
 
   async function handleDelete(id: string, title: string) {
-    if (!confirm(locale === 'en' ? `Delete "${title}"?` : `למחוק את "${title}"?`)) return
+    if (!(await confirmDialog({ message: locale === 'en' ? `Delete "${title}"?` : `למחוק את "${title}"?`, variant: 'danger' }))) return
     const res = await fetch(`/api/pages/${id}`, { method: 'DELETE' })
     if (!res.ok) {
       showToast(locale === 'en' ? 'Delete failed' : 'שגיאה במחיקה')
@@ -98,7 +100,7 @@ export default function AdminDashboard() {
   }
 
   async function handleDuplicate(id: string, title: string) {
-    if (!confirm(locale === 'en' ? `Duplicate "${title}"?` : `לשכפל את "${title}"?`)) return
+    if (!(await confirmDialog({ message: locale === 'en' ? `Duplicate "${title}"?` : `לשכפל את "${title}"?` }))) return
     const res = await fetch(`/api/pages/${id}/duplicate`, { method: 'POST' })
     if (res.ok) {
       fetchPages()
@@ -216,7 +218,7 @@ export default function AdminDashboard() {
     const msg = locale === 'en'
       ? `Move ${n} page${n > 1 ? 's' : ''} to trash?`
       : `להעביר ${n} דפים לסל המחזור?`
-    if (!confirm(msg)) return
+    if (!(await confirmDialog({ message: msg, variant: 'danger' }))) return
     setBulkDeleting(true)
     // Soft-delete each in parallel — the DELETE route moves the row to the
     // recycle bin, so the action is fully reversible from /admin/trash.

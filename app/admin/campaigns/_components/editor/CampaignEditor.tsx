@@ -18,6 +18,7 @@ import SlideCanvas from './SlideCanvas'
 import Inspector from './Inspector'
 import SmartUploadModal from './SmartUploadModal'
 import { validatePublishWindow } from '@/lib/campaign-schedule'
+import { useConfirm } from '../../../_components/confirm-dialog'
 import { maxAssetsFor, sectionToApi } from './types'
 import type { CampaignDocument, EditorSection, MockupType } from './types'
 
@@ -43,6 +44,7 @@ type Toast = { id: number; message: string; kind: 'success' | 'error' | 'info' }
 export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; initial: EditorInitial }) {
   const { doc, canUndo, canRedo, setMeta, addSection, addSections, duplicateSection, removeSection, updateSection, moveSection, addAsset, updateAsset, removeAsset, moveAsset, undo, redo } = useCampaignDocument(initial.doc)
 
+  const confirmDialog = useConfirm()
   const [campaignId, setCampaignId] = useState<string | null>(initial.campaignId ?? null)
   const [slug, setSlug] = useState<string | null>(initial.slug ?? null)
   const [slugDirty, setSlugDirty] = useState(false)
@@ -522,15 +524,15 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
   }, [ensureCampaignExists, toast])
 
   /** Copy the active slide's title + description onto every other slide. */
-  const applyContentToAll = useCallback(() => {
+  const applyContentToAll = useCallback(async () => {
     if (!activeSection) return
     const others = doc.sections.filter(s => s.id !== activeSection.id)
     if (!others.length) { toast('אין שקפים נוספים להחיל עליהם', 'info'); return }
-    if (!window.confirm(`להחיל את הכותרת והתיאור של השקף הזה על עוד ${others.length} שקפים? התוכן הקיים בהם יוחלף.`)) return
+    if (!(await confirmDialog({ message: `להחיל את הכותרת והתיאור של השקף הזה על עוד ${others.length} שקפים? התוכן הקיים בהם יוחלף.` }))) return
     const { title, description } = activeSection
     for (const s of others) updateSection(s.id, { title, description })
     toast(`הוחל על ${others.length} שקפים`, 'success')
-  }, [activeSection, doc.sections, updateSection, toast])
+  }, [activeSection, doc.sections, updateSection, toast, confirmDialog])
 
   const replaceAsset = useCallback(async (assetId: string, file: File) => {
     if (!activeSection) return
@@ -763,7 +765,7 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
             onDuplicate={duplicateSection}
             onRemove={removeSection}
             onMove={moveSection}
-            onClearConcept={() => { if (confirm('למחוק את שקף הקונספט? תוכן הקונספט יימחק.')) setMeta({ concept: '' }) }}
+            onClearConcept={async () => { if (await confirmDialog({ message: 'למחוק את שקף הקונספט? תוכן הקונספט יימחק.', variant: 'danger' })) setMeta({ concept: '' }) }}
           />
         </aside>
 

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, Calendar, BarChart3 } from 'lucide-react'
 import { useT, useLocale } from '@/lib/i18n'
 import { useToast } from '../_components/toast'
+import { useConfirm } from '../_components/confirm-dialog'
 
 interface Report {
   id: string
@@ -32,6 +33,7 @@ export default function ReportsListPage() {
   const t = useT()
   const locale = useLocale()
   const { showToast } = useToast()
+  const confirmDialog = useConfirm()
   const [reports, setReports] = useState<Report[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -69,7 +71,7 @@ export default function ReportsListPage() {
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(locale === 'en' ? `Delete report "${name}"?` : `למחוק את הדוח "${name}"?`)) return
+    if (!(await confirmDialog({ message: locale === 'en' ? `Delete report "${name}"?` : `למחוק את הדוח "${name}"?`, variant: 'danger' }))) return
     try {
       const res = await fetch(`/api/reports/${id}`, { method: 'DELETE' })
       if (!res.ok) { showToast(locale === 'en' ? 'Error deleting report' : 'שגיאה במחיקת הדוח', 'error'); return }

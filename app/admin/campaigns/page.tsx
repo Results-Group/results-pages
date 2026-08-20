@@ -7,6 +7,7 @@ import { Plus, Search, ExternalLink, Copy, Trash2, Edit3, Check, MessageCircle, 
 import { whatsappShareUrl } from '@/lib/share'
 import { useT, useLocale } from '@/lib/i18n'
 import { useToast } from '../_components/toast'
+import { useConfirm } from '../_components/confirm-dialog'
 
 interface Campaign {
   id: string
@@ -47,6 +48,7 @@ export default function CampaignsListPage() {
   const t = useT()
   const locale = useLocale()
   const { showToast } = useToast()
+  const confirmDialog = useConfirm()
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -112,7 +114,7 @@ export default function CampaignsListPage() {
   }
 
   async function handleDuplicate(campaign: Campaign) {
-    if (!confirm(`לשכפל את "${campaign.campaign_name}"?`)) return
+    if (!(await confirmDialog({ message: `לשכפל את "${campaign.campaign_name}"?` }))) return
     setDuplicating(campaign.id)
     try {
       const res = await fetch(`/api/campaigns/${campaign.id}/duplicate`, { method: 'POST' })
@@ -129,7 +131,7 @@ export default function CampaignsListPage() {
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`למחוק את הקמפיין "${name}"?`)) return
+    if (!(await confirmDialog({ message: `למחוק את הקמפיין "${name}"?`, variant: 'danger' }))) return
     try {
       const res = await fetch(`/api/campaigns/${id}`, { method: 'DELETE' })
       if (!res.ok) { showToast('שגיאה במחיקת הקמפיין', 'error'); return }
@@ -150,7 +152,7 @@ export default function CampaignsListPage() {
   async function handleBulkDelete() {
     const n = selectedIds.size
     if (n === 0) return
-    if (!confirm(`להעביר ${n} קמפיינים לסל המחזור?`)) return
+    if (!(await confirmDialog({ message: `להעביר ${n} קמפיינים לסל המחזור?`, variant: 'danger' }))) return
     setBulkBusy('delete')
     const ids = [...selectedIds]
     const results = await Promise.all(ids.map(id =>
@@ -173,7 +175,7 @@ export default function CampaignsListPage() {
   async function handleBulkArchive() {
     const n = selectedIds.size
     if (n === 0) return
-    if (!confirm(`להעביר ${n} קמפיינים לארכיון?`)) return
+    if (!(await confirmDialog({ message: `להעביר ${n} קמפיינים לארכיון?` }))) return
     setBulkBusy('archive')
     const ids = [...selectedIds]
     const results = await Promise.all(ids.map(id =>
