@@ -44,7 +44,7 @@ export default function FacebookFeed({ imageUrl, clientName, logoUrl, caption, m
               style={{ background: logoNeedsDark ? '#1c1e21' : '#fff', border: `1px solid ${logoNeedsDark ? '#1c1e21' : '#e4e6eb'}` }}
             >
               {logoUrl ? (
-                <img src={logoUrl} alt={clientName} className="max-w-[70%] max-h-[70%] object-contain" />
+                <img src={logoUrl} alt={clientName} className="max-w-[70%] max-h-[70%] object-contain" loading="lazy" decoding="async" />
               ) : (
                 <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }} />
               )}

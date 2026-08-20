@@ -24,7 +24,7 @@ export function PartnerLogos() {
         // Normalized to monochrome white so the mixed light/dark badge lockups
         // read uniformly on the dark cover.
         // eslint-disable-next-line @next/next/no-img-element
-        <img key={p.src} src={p.src} alt={p.alt} className="partner-logo-img" />
+        <img key={p.src} src={p.src} alt={p.alt} className="partner-logo-img" decoding="async" />
       ))}
     </div>
   )
@@ -85,7 +85,7 @@ export function CoverSlide({
 
           {logoUrl && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt={clientName} className="cover-report-logo rp-anim rp-scale rp-d5" />
+            <img src={logoUrl} alt={clientName} className="cover-report-logo rp-anim rp-scale rp-d5" fetchPriority="high" decoding="async" />
           )}
 
           <div className="rp-anim rp-up rp-d6">
@@ -130,7 +130,7 @@ export function CoverSlide({
         <div className="cover-right rp-anim rp-scale rp-d2">
           {logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt={clientName} className="cover-client-logo" />
+            <img src={logoUrl} alt={clientName} className="cover-client-logo" fetchPriority="high" decoding="async" />
           ) : (
             <div className="cover-client-initials">
               {(clientName || '?').slice(0, 2).toUpperCase()}
@@ -150,7 +150,7 @@ export function ClosingSlide({ title, clientName }: { title: string; clientName?
 
       <div className="closing-stack">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="Results" className="closing-logo rp-anim rp-up rp-d1" />
+        <img src="/logo.png" alt="Results" className="closing-logo rp-anim rp-up rp-d1" loading="lazy" decoding="async" />
 
         <h1 className="closing-headline rp-anim rp-up rp-d3">{title}</h1>
 

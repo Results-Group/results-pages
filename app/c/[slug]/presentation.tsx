@@ -659,7 +659,7 @@ function PinnableImage({ asset, pins, canPin, reviewerName, onReviewerNameChange
         onClick={handleImageClick}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={asset.url} alt={asset.caption || ''} className="lightbox-img" draggable={false} />
+        <img src={asset.url} alt={asset.caption || ''} className="lightbox-img" draggable={false} decoding="async" />
 
         {/* Existing pins */}
         {pins.map((p, i) => (

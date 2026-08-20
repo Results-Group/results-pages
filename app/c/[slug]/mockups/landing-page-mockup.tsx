@@ -19,7 +19,7 @@ import { ExternalLink, Monitor, Smartphone } from 'lucide-react'
  * layout inside the laptop chrome, so the hero was cut mid-headline and the
  * sticky CTA covered a third of the screen.
  *
- * loading="lazy" keeps heavy pages off the deck's first paint, and the chrome
+ * loading="lazy" decoding="async" keeps heavy pages off the deck's first paint, and the chrome
  * carries an "open in a new tab" escape hatch for sites that refuse embedding
  * via X-Frame-Options.
  */

@@ -71,7 +71,7 @@ export default function InstagramReels({
     <div className="w-full h-full relative">
       {posterUrl && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={posterUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <img src={posterUrl} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
       )}
       {!posterUrl && (
         <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, #1a1d20, #0d1112)' }} />
@@ -122,7 +122,7 @@ export default function InstagramReels({
                 <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center" style={{ background: logoNeedsDark ? '#1c1e21' : '#fff' }}>
                   {logoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={logoUrl} alt={clientName} className="max-w-[70%] max-h-[70%] object-contain" />
+                    <img src={logoUrl} alt={clientName} className="max-w-[70%] max-h-[70%] object-contain" loading="lazy" decoding="async" />
                   ) : (
                     <div className="w-full h-full rounded-full" style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }} />
                   )}

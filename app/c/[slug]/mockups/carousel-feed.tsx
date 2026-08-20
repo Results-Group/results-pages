@@ -65,7 +65,7 @@ export default function CarouselFeed({
                 >
                   {logoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={logoUrl} alt={clientName} className="max-w-[70%] max-h-[70%] object-contain" />
+                    <img src={logoUrl} alt={clientName} className="max-w-[70%] max-h-[70%] object-contain" loading="lazy" decoding="async" />
                   ) : (
                     <div className="w-full h-full rounded-full" style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }} />
                   )}

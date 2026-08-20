@@ -38,7 +38,7 @@ export function FacebookCover({ profile }: { profile?: ProfileBlock | null }) {
       <div className="fbpage-cover">
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={cover} alt={p.name} className="fbpage-cover-img" />
+          <img src={cover} alt={p.name} className="fbpage-cover-img" loading="lazy" decoding="async" />
         ) : (
           <div className="fbpage-cover-empty">תמונת נושא · 820 × 312</div>
         )}
@@ -49,7 +49,7 @@ export function FacebookCover({ profile }: { profile?: ProfileBlock | null }) {
           <div className="fbpage-avatar">
             {avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatar} alt={p.name} className="fbpage-avatar-img" />
+              <img src={avatar} alt={p.name} className="fbpage-avatar-img" loading="lazy" decoding="async" />
             ) : (
               <Initials name={p.name} className="fbpage-avatar-initials" />
             )}
@@ -87,7 +87,7 @@ export function YouTubeCover({ profile }: { profile?: ProfileBlock | null }) {
       <div className="ytchan-banner">
         {banner ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={banner} alt={p.name} className="ytchan-banner-img" />
+          <img src={banner} alt={p.name} className="ytchan-banner-img" loading="lazy" decoding="async" />
         ) : (
           <div className="ytchan-banner-empty">באנר ערוץ · 2560 × 423</div>
         )}
@@ -97,7 +97,7 @@ export function YouTubeCover({ profile }: { profile?: ProfileBlock | null }) {
         <div className="ytchan-avatar">
           {avatar ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatar} alt={p.name} className="ytchan-avatar-img" />
+            <img src={avatar} alt={p.name} className="ytchan-avatar-img" loading="lazy" decoding="async" />
           ) : (
             <Initials name={p.name} className="ytchan-avatar-initials" />
           )}
