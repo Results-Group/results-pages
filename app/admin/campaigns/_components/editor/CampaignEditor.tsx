@@ -19,6 +19,8 @@ import Inspector from './Inspector'
 import SmartUploadModal from './SmartUploadModal'
 import { validatePublishWindow } from '@/lib/campaign-schedule'
 import { useConfirm } from '../../../_components/confirm-dialog'
+import { useRegisterUnsavedChanges } from '../../../_components/unsaved-changes'
+import { hasUnsavedNewWork } from '@/lib/campaign-dirty'
 import { maxAssetsFor, sectionToApi } from './types'
 import type { CampaignDocument, EditorSection, MockupType } from './types'
 
@@ -319,13 +321,18 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
   useEffect(() => { saveRef.current = save })
 
   // ── Debounced autosave (only after the campaign exists) ──
+  // While the debounce is armed the latest edits exist only in memory — the
+  // unsaved-changes guard treats that window as dirty.
+  const [autosavePending, setAutosavePending] = useState(false)
   const firstRender = useRef(true)
   useEffect(() => {
     if (firstRender.current) { firstRender.current = false; return }
     if (!campaignId) return
     if (conflictRef.current) return
+    setAutosavePending(true)
     autosaveTimer.current = setTimeout(() => {
       autosaveTimer.current = null
+      setAutosavePending(false)
       saveRef.current(undefined, { silent: true })
     }, 1500)
     return () => {
@@ -333,6 +340,14 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doc])
+
+  // Leaving loses work in exactly three cases: content built before the
+  // campaign row exists (new mode never autosaves), a save in flight, or an
+  // armed autosave debounce.
+  useRegisterUnsavedChanges(
+    hasUnsavedNewWork(doc, campaignId) || saveState === 'saving' || autosavePending,
+    'יש שינויים שעדיין לא נשמרו בקמפיין. לעזוב בכל זאת?'
+  )
 
   // ── Uploads ──
 
@@ -770,6 +785,14 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
         </aside>
 
         <main className="flex-1 min-w-0 relative flex flex-col">
+          {/* New mode holds content only in memory until client+name exist —
+              say so instead of letting the operator discover it the hard way. */}
+          {!campaignId && doc.sections.length > 0 && (!doc.meta.client.trim() || !doc.meta.campaignName.trim()) && (
+            <div className="px-4 py-2 text-xs font-medium shrink-0 text-center"
+              style={{ background: 'rgba(243,213,109,0.1)', borderBottom: '1px solid rgba(243,213,109,0.3)', color: 'var(--admin-accent)' }}>
+              מלאו שם לקוח ושם קמפיין כדי שהשמירה האוטומטית תופעל — עד אז התוכן לא נשמר
+            </div>
+          )}
           {/* Always-available slide navigation — works even when the filmstrip is
               hidden (narrow screens) so you can always move between slides. */}
           {!showFullPreview && activeSection && doc.sections.length > 1 && (() => {

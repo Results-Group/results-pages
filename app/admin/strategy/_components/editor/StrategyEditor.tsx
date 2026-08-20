@@ -12,6 +12,7 @@ import { SectionFields } from './fields'
 import SlideCanvas from './SlideCanvas'
 import { countStrategySlides } from '@/lib/strategy/slides'
 import { useToast } from '@/app/admin/_components/toast'
+import { useRegisterUnsavedChanges } from '@/app/admin/_components/unsaved-changes'
 import type { StrategyDocument } from '@/lib/strategy/types'
 
 /**
@@ -71,6 +72,13 @@ export default function StrategyEditor({ initial }: { initial: StrategyEditorIni
     },
     onError: message => showToast(message, 'error'),
   })
+
+  // New mode holds everything in memory until client+name exist; a save in
+  // flight is the other window where leaving loses the newest edits.
+  useRegisterUnsavedChanges(
+    saveState === 'saving' || (!docId && (doc.sections.length > 0 || doc.meta.client.trim() !== '' || doc.meta.docName.trim() !== '')),
+    'יש שינויים שעדיין לא נשמרו במסמך. לעזוב בכל זאת?'
+  )
 
   // Keep the selection valid when the slide it points at is deleted.
   useEffect(() => {
