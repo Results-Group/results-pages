@@ -28,6 +28,7 @@ import { I18nContext, getStoredLocale, setStoredLocale, type Locale } from '@/li
 import heDict from '@/lib/i18n/he'
 import enDict from '@/lib/i18n/en'
 import { ToastProvider } from './_components/toast'
+import { ConfirmProvider } from './_components/confirm-dialog'
 
 interface SessionUser {
   userId: string
@@ -377,6 +378,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <I18nContext.Provider value={locale}>
     <ToastProvider>
+    <ConfirmProvider>
     <div className="flex min-h-screen" dir={locale === 'en' ? 'ltr' : 'rtl'}>
       {/* Mobile hamburger */}
       <button
@@ -412,6 +414,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <AdminFooter />
       </main>
     </div>
+    </ConfirmProvider>
     </ToastProvider>
     </I18nContext.Provider>
   )

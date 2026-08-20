@@ -524,6 +524,10 @@ const en: Record<TranslationKey, string> = {
   'strategy.kind.brandLanguage': 'Brand language',
   'strategy.kind.heatGauges': 'Heat gauges',
   'trash.strategy': 'Strategy documents',
+
+  // Confirm dialog (shared)
+  'confirm.confirm': 'Confirm',
+  'confirm.cancel': 'Cancel',
 }
 
 export default en

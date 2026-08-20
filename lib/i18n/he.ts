@@ -522,6 +522,10 @@ const he = {
   'strategy.kind.brandLanguage': 'שפת מותג',
   'strategy.kind.heatGauges': 'מדדי חום',
   'trash.strategy': 'מסמכי אסטרטגיה',
+
+  // Confirm dialog (shared)
+  'confirm.confirm': 'אישור',
+  'confirm.cancel': 'ביטול',
 } as const
 
 export default he
