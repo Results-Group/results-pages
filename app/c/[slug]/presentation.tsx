@@ -5,18 +5,26 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { SlideData } from '@/lib/slides'
 import type { CampaignAsset } from '@/lib/campaigns'
-import InstagramFeedMockup from './mockups/instagram-feed'
-import InstagramStoryMockup from './mockups/instagram-story'
-import InstagramReelsMockup from './mockups/instagram-reels'
-import LandingPageMockup from './mockups/landing-page-mockup'
-import FacebookFeedMockup from './mockups/facebook-feed'
-import VideoPlayer from './mockups/VideoPlayer'
+import dynamic from 'next/dynamic'
+// Mockups and the video player never appear on the first slide (cover/hero),
+// so they load as separate chunks on demand — a deck without video no longer
+// ships the player. StatsSlide stays static: in report decks it IS the first
+// tab's content, and deferring it would delay exactly what the client came
+// to see. Fixed-height placeholders keep slides from jumping while a chunk
+// lands.
+const mockupLoading = () => <div style={{ minHeight: 320 }} />
+const InstagramFeedMockup = dynamic(() => import('./mockups/instagram-feed'), { loading: mockupLoading })
+const InstagramStoryMockup = dynamic(() => import('./mockups/instagram-story'), { loading: mockupLoading })
+const InstagramReelsMockup = dynamic(() => import('./mockups/instagram-reels'), { loading: mockupLoading })
+const LandingPageMockup = dynamic(() => import('./mockups/landing-page-mockup'), { loading: mockupLoading })
+const FacebookFeedMockup = dynamic(() => import('./mockups/facebook-feed'), { loading: mockupLoading })
+const VideoPlayer = dynamic(() => import('./mockups/VideoPlayer'), { loading: mockupLoading })
+const CarouselFeed = dynamic(() => import('./mockups/carousel-feed'), { loading: mockupLoading })
+const GeneralCard = dynamic(() => import('./mockups/general-card'), { loading: mockupLoading })
+const DistributionSlide = dynamic(() => import('./distribution-slide'), { loading: mockupLoading })
+const SocialCover = dynamic(() => import('./mockups/social-cover'), { loading: mockupLoading })
 import { CaptionExpansionProvider } from './mockups/AdCaption'
-import CarouselFeed from './mockups/carousel-feed'
-import GeneralCard from './mockups/general-card'
-import DistributionSlide from './distribution-slide'
 import StatsSlide from './stats-slide'
-import SocialCover from './mockups/social-cover'
 import { parseVideoUrl } from '@/lib/video-utils'
 import { assetProxyUrl } from '@/lib/asset-url'
 import ShareButton from '@/app/_deck/ShareButton'
