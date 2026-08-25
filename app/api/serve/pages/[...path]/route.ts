@@ -79,7 +79,11 @@ export async function GET(req: NextRequest, { params }: Ctx) {
     }
   }
 
-  const html = await downloadFile(page.file_path)
+  // ?lang=en serves the English render — only when one exists, and only via
+  // the explicit link staff share from the admin. A page with no translation
+  // behaves byte-for-byte as before; no toggle is ever injected for clients.
+  const wantsEnglish = req.nextUrl.searchParams.get('lang') === 'en' && !!page.en_file_path
+  const html = await downloadFile(wantsEnglish ? page.en_file_path! : page.file_path)
   if (!html) {
     return new NextResponse(expiredPage('הקובץ לא נמצא'), {
       status: 404,
@@ -190,7 +194,10 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     const cookieName = `page_access_${page.id}`
     const token = await signAccessToken(page.id, page.password)
     const baseUrl = `${req.nextUrl.protocol}//${req.nextUrl.host}`
-    const redirectUrl = `${baseUrl}/pages/${client}/${slug}`
+    // Preserve ?lang=en through the password gate — the English link the
+    // staff shared must land on the English render after unlock.
+    const langSuffix = req.nextUrl.searchParams.get('lang') === 'en' ? '?lang=en' : ''
+    const redirectUrl = `${baseUrl}/pages/${client}/${slug}${langSuffix}`
     const response = NextResponse.redirect(redirectUrl, 303)
     response.cookies.set(cookieName, token, {
       httpOnly: true,
