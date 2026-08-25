@@ -50,7 +50,9 @@ export async function middleware(req: NextRequest) {
   }
 
   if (pathname.startsWith('/pages/')) {
-    return NextResponse.rewrite(new URL(`/api/serve${pathname}`, req.url))
+    // Carry the query string through — new URL(path, base) drops it, which
+    // silently ate ?lang=en before it ever reached the serve route.
+    return NextResponse.rewrite(new URL(`/api/serve${pathname}${req.nextUrl.search}`, req.url))
   }
 
   return NextResponse.next()

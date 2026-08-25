@@ -96,8 +96,14 @@ export async function GET(req: NextRequest, { params }: Ctx) {
   const ogImageUrl = `${baseUrl}/og-image.png`
 
   const ogDescription = escapeHtml(page.client || 'Results Digital')
+  // English render: the admin title is Hebrew — use the translated file's own
+  // <title> for the tag and the share cards instead of overriding it back.
+  const displayTitle = wantsEnglish
+    ? (html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim() || page.title)
+    : page.title
+
   const ogTags = `
-    <meta property="og:title" content="${escapeHtml(page.title)}" />
+    <meta property="og:title" content="${escapeHtml(displayTitle)}" />
     <meta property="og:description" content="${ogDescription}" />
     <meta property="og:image" content="${escapeHtml(ogImageUrl)}" />
     <meta property="og:image:width" content="1200" />
@@ -106,12 +112,12 @@ export async function GET(req: NextRequest, { params }: Ctx) {
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Results Digital" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${escapeHtml(page.title)}" />
+    <meta name="twitter:title" content="${escapeHtml(displayTitle)}" />
     <meta name="twitter:description" content="${ogDescription}" />
     <meta name="twitter:image" content="${escapeHtml(ogImageUrl)}" />
   `
 
-  const enrichedHtml = injectOgTags(html, ogTags, page.title)
+  const enrichedHtml = injectOgTags(html, ogTags, displayTitle)
 
   // Password-protected pages must never be cached by the CDN — the cached
   // copy would be served to visitors who never passed the password gate.
