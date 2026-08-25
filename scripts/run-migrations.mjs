@@ -44,6 +44,7 @@ const MIGRATIONS = [
   'migration-strategy-docs.sql',
   'migration-campaign-closing.sql',
   'migration-deck-views.sql',
+  'migration-page-translation.sql',
 ]
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
