@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPageById, downloadFile, uploadFile, createVersion } from '@/lib/db'
+import { getPageById, downloadFile, uploadFile, createVersion, markPageTranslationStale } from '@/lib/db'
 import { requireResourcePermission } from '@/lib/auth'
 import { minifyHtml } from '@/lib/minify'
 import { parseJson, parseForm } from '@/lib/http'
@@ -80,6 +80,11 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
     uploadFile(page.file_path, Buffer.from(minifyHtml(htmlContent), 'utf-8')),
     uploadFile(sourcePath(page.file_path), Buffer.from(htmlContent, 'utf-8')),
   ])
+
+  // The Hebrew source just changed — an existing English render is now behind.
+  if (page.en_file_path) {
+    await markPageTranslationStale(page.id).catch(() => {})
+  }
 
   return NextResponse.json({ ok: true, filePath: page.file_path })
 }

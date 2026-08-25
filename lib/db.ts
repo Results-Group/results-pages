@@ -17,6 +17,11 @@ export interface LandingPage {
   deleted_at: string | null
   created_at: string
   updated_at: string
+  /** English render (X.en.html) served at ?lang=en; null = never translated. */
+  en_file_path: string | null
+  en_translated_at: string | null
+  /** Hebrew source edited after the last translation — re-translate on demand. */
+  en_stale: boolean
 }
 
 export interface LandingPageView {
@@ -138,6 +143,18 @@ export async function createPage(data: {
 
   if (error) throw error
   return page as LandingPage
+}
+
+/** Translation bookkeeping — separate from updatePage's field list on purpose. */
+export async function setPageTranslation(id: string, data: { en_file_path: string; en_translated_at: string; en_stale: boolean }) {
+  const { error } = await supabase.from('landing_pages').update(data).eq('id', id)
+  if (error) throw new Error(`setPageTranslation failed: ${error.message}`)
+}
+
+/** Called when the Hebrew source changes after a translation exists. */
+export async function markPageTranslationStale(id: string) {
+  const { error } = await supabase.from('landing_pages').update({ en_stale: true }).eq('id', id)
+  if (error) throw new Error(`markPageTranslationStale failed: ${error.message}`)
 }
 
 export async function updatePage(
