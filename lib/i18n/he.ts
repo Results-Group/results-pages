@@ -528,6 +528,17 @@ const he = {
   'confirm.confirm': 'אישור',
   'confirm.cancel': 'ביטול',
 
+  // Page translation
+  'pages.translate': 'תרגום לאנגלית',
+  'pages.translated': 'תורגם! לינק הגרסה האנגלית הועתק ללוח',
+  'pages.translateFailed': 'שגיאה בתרגום הדף',
+  'pages.enBadgeFresh': 'קיימת גרסה אנגלית — לחיצה פותחת אותה',
+  'pages.enBadgeStale': 'המקור עודכן מאז התרגום — כדאי לתרגם מחדש',
+  'pages.bulkTranslate': 'תרגום לאנגלית',
+  'pages.bulkTranslateNothing': 'לכל הדפים שנבחרו כבר יש תרגום עדכני',
+  'pages.bulkTranslateDone': 'התרגום הקבוצתי הסתיים',
+  'pages.bulkTranslateFailed': 'נכשלו',
+
   // Deck view tracking
   'views.count': 'צפיות',
   'views.lastViewed': 'נצפה לאחרונה',

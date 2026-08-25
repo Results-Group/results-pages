@@ -530,6 +530,17 @@ const en: Record<TranslationKey, string> = {
   'confirm.confirm': 'Confirm',
   'confirm.cancel': 'Cancel',
 
+  // Page translation
+  'pages.translate': 'Translate to English',
+  'pages.translated': 'Translated! English link copied to clipboard',
+  'pages.translateFailed': 'Page translation failed',
+  'pages.enBadgeFresh': 'English version exists — click to open',
+  'pages.enBadgeStale': 'Source changed since translation — consider re-translating',
+  'pages.bulkTranslate': 'Translate to English',
+  'pages.bulkTranslateNothing': 'All selected pages already have a fresh translation',
+  'pages.bulkTranslateDone': 'Bulk translation finished',
+  'pages.bulkTranslateFailed': 'failed',
+
   // Deck view tracking
   'views.count': 'views',
   'views.lastViewed': 'Last viewed',

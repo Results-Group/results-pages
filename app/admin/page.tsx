@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Plus, Search, Eye, ExternalLink, Pencil, ToggleLeft, ToggleRight, Trash2, Monitor, Smartphone, X, Copy, MessageCircle, Lock, CheckSquare, Square, FileDown, Loader2 } from 'lucide-react'
+import { Plus, Search, Eye, ExternalLink, Pencil, ToggleLeft, ToggleRight, Trash2, Monitor, Smartphone, X, Copy, MessageCircle, Lock, CheckSquare, Square, FileDown, Loader2, Languages } from 'lucide-react'
 import { whatsappShareUrl } from '@/lib/share'
 import { useT, useLocale } from '@/lib/i18n'
 import { useToast } from './_components/toast'
@@ -20,6 +20,8 @@ interface PageItem {
   short_url: string | null
   created_at: string
   workspace_id: string | null
+  en_file_path: string | null
+  en_stale: boolean
   _count: { views: number }
 }
 
@@ -62,6 +64,8 @@ export default function AdminDashboard() {
   const [moving, setMoving] = useState(false)
   const [bulkDeleting, setBulkDeleting] = useState(false)
   const [exportingPdfId, setExportingPdfId] = useState<string | null>(null)
+  const [translatingId, setTranslatingId] = useState<string | null>(null)
+  const [bulkTranslate, setBulkTranslate] = useState<{ done: number; total: number } | null>(null)
   const [pageIdx, setPageIdx] = useState(0)
   const PAGE_SIZE = 20
 
@@ -110,6 +114,50 @@ export default function AdminDashboard() {
       const err = await res.json()
       showToast(`${locale === 'en' ? 'Duplication error:' : 'שגיאה בשכפול:'} ${err.error || 'Unknown error'}`)
     }
+  }
+
+  function enUrl(page: PageItem) {
+    const base = typeof window !== 'undefined' ? window.location.origin : ''
+    return `${base}/pages/${page.client}/${page.slug}?lang=en`
+  }
+
+  async function handleTranslate(page: PageItem) {
+    setTranslatingId(page.id)
+    try {
+      const res = await fetch(`/api/pages/${page.id}/translate`, { method: 'POST' })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        showToast(err.error || t('pages.translateFailed'))
+        return
+      }
+      // Hand the operator the shareable EN link right away — this is the one
+      // deliberate channel through which the English version is distributed.
+      try { await navigator.clipboard.writeText(enUrl(page)) } catch { /* clipboard blocked */ }
+      showToast(t('pages.translated'), 'success')
+      fetchPages()
+    } finally {
+      setTranslatingId(null)
+    }
+  }
+
+  async function handleBulkTranslate() {
+    // Sequential on purpose: per-account rate limit + Gemini load. Skips pages
+    // whose translation is already fresh; a single failure doesn't stop the run.
+    const targets = pages.filter(p => selectedIds.has(p.id) && (!p.en_file_path || p.en_stale))
+    if (!targets.length) { showToast(t('pages.bulkTranslateNothing'), 'info'); return }
+    setBulkTranslate({ done: 0, total: targets.length })
+    let failed = 0
+    for (let i = 0; i < targets.length; i++) {
+      try {
+        const res = await fetch(`/api/pages/${targets[i].id}/translate`, { method: 'POST' })
+        if (!res.ok) failed++
+      } catch { failed++ }
+      setBulkTranslate({ done: i + 1, total: targets.length })
+    }
+    setBulkTranslate(null)
+    setSelectedIds(new Set())
+    showToast(failed ? `${t('pages.bulkTranslateDone')} (${failed} ${t('pages.bulkTranslateFailed')})` : t('pages.bulkTranslateDone'), failed ? 'error' : 'success')
+    fetchPages()
   }
 
   function handleWhatsApp(page: PageItem) {
@@ -310,6 +358,18 @@ export default function AdminDashboard() {
             {selectedIds.size} {t('pages.selectedPages')}
           </span>
 
+          {userRole !== 'viewer' && (
+            <button
+              onClick={handleBulkTranslate}
+              disabled={!!bulkTranslate}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-60"
+              style={{ border: '1px solid var(--admin-border-input)', color: 'var(--admin-text-secondary)' }}
+            >
+              {bulkTranslate ? <Loader2 className="w-4 h-4 animate-spin" /> : <Languages className="w-4 h-4" />}
+              {bulkTranslate ? `${bulkTranslate.done}/${bulkTranslate.total}` : t('pages.bulkTranslate')}
+            </button>
+          )}
+
           {workspaces.length > 1 && (
             <>
               <select
@@ -413,6 +473,21 @@ export default function AdminDashboard() {
                       <span className="flex items-center gap-1.5">
                         {page.title}
                         {page.has_password && <span title={t('pages.passwordProtected')}><Lock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--admin-accent)' }} /></span>}
+                        {page.en_file_path && (
+                          <a
+                            href={enUrl(page)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={e => e.stopPropagation()}
+                            className="text-[10px] px-1.5 py-0.5 rounded font-bold flex-shrink-0"
+                            style={page.en_stale
+                              ? { background: 'rgba(245,158,11,0.15)', color: '#f59e0b' }
+                              : { background: 'rgba(64,225,211,0.12)', color: '#40e1d3' }}
+                            title={page.en_stale ? t('pages.enBadgeStale') : t('pages.enBadgeFresh')}
+                          >
+                            EN
+                          </a>
+                        )}
                       </span>
                     </td>
                     {workspaces.length > 0 && (
@@ -528,6 +603,19 @@ export default function AdminDashboard() {
                             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                           >
                             <Copy className="w-4 h-4" />
+                          </button>
+                        )}
+                        {userRole !== 'viewer' && (
+                          <button
+                            onClick={() => handleTranslate(page)}
+                            disabled={translatingId === page.id}
+                            className="p-1.5 rounded-lg transition-colors"
+                            style={{ color: 'var(--admin-text-secondary)' }}
+                            title={t('pages.translate')}
+                            onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-hover-bg)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                          >
+                            {translatingId === page.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Languages className="w-4 h-4" />}
                           </button>
                         )}
                         <button
