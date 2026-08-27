@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifySessionToken } from '@/lib/auth'
 import { runWithBranch, listPizzaBranches } from '@/lib/pizza-house-db'
 import { fetchDayIdentities, recordDay, logLedgerRun } from '@/lib/pizza-house-ledger'
+import { fetchDailyStats, snapshotDailyStats } from '@/lib/pizza-house-snapshot'
 import { captureException, logger } from '@/lib/logger'
 
 /**
@@ -90,7 +91,25 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Daily sales snapshots: re-upsert the POS's whole remaining window (one
+  // query per branch, idempotent) so revenue/orders history outlives the
+  // ~5-week purge. Isolated from the ledger loop — one failing must not cost
+  // the other its night.
+  const todayIso = new Date().toISOString().slice(0, 10)
+  const snapshots: Record<string, unknown>[] = []
+  for (const branch of branches) {
+    try {
+      const stats = await runWithBranch(branch.id, () => fetchDailyStats())
+      const { days: snapDays } = await snapshotDailyStats(branch.id, stats, todayIso)
+      snapshots.push({ branch: branch.id, days: snapDays })
+    } catch (err) {
+      captureException(err, { route: 'GET /api/cron/pizza-ledger', branch: branch.id, phase: 'daily-stats' })
+      snapshots.push({ branch: branch.id, error: true })
+    }
+  }
+
   const failed = results.filter(r => r.error).length
-  logger.info(`Pizza ledger cron: ${results.length - failed}/${results.length} day-branch folds ok`)
-  return NextResponse.json({ ok: failed === 0, days, results })
+  const snapFailed = snapshots.filter(r => r.error).length
+  logger.info(`Pizza ledger cron: ${results.length - failed}/${results.length} day-branch folds ok; daily-stats ${snapshots.length - snapFailed}/${snapshots.length} branches ok`)
+  return NextResponse.json({ ok: failed === 0 && snapFailed === 0, days, results, snapshots })
 }
