@@ -16,7 +16,7 @@ describe('rowsForUpsert', () => {
   it('keeps every closed day and carries branch + values', () => {
     const rows = rowsForUpsert('main', stats, '2026-08-27')
     expect(rows).toHaveLength(3)
-    expect(rows[0]).toMatchObject({ branch_id: 'main', day: '2026-08-24', orders: 40, revenue: 3500.5 })
+    expect(rows[0]).toMatchObject({ branch_id: 'main', day: '2026-08-24', source: 'pos', orders: 40, revenue: 3500.5 })
   })
 
   it('drops malformed day strings instead of corrupting the table', () => {

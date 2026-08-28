@@ -46,6 +46,7 @@ const MIGRATIONS = [
   'migration-deck-views.sql',
   'migration-page-translation.sql',
   'migration-pizza-daily-stats.sql',
+  'migration-pizza-daily-stats-source.sql',
 ]
 
 // ── Helpers ─────────────────────────────────────────────────────────────────

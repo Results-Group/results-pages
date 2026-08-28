@@ -30,7 +30,7 @@ export async function snapshotDailyStats(branchId: string, stats: DailyStatRow[]
   if (!rows.length) return { days: 0 }
   const { error } = await supabase
     .from('pizza_daily_stats')
-    .upsert(rows, { onConflict: 'branch_id,day' })
+    .upsert(rows, { onConflict: 'branch_id,day,source' })
   // Loud, not swallowed — the backup manifest taught us what silent nightly
   // failures cost.
   if (error) throw new Error(`pizza_daily_stats upsert failed: ${error.message}`)

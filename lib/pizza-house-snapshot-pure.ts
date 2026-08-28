@@ -18,6 +18,9 @@ export function rowsForUpsert(branchId: string, stats: DailyStatRow[], todayIso:
     .map(s => ({
       branch_id: branchId,
       day: s.day,
+      // The nightly snapshot is always the whole till; 'online' rows come only
+      // from explicit channel imports and must never collide with these.
+      source: 'pos' as const,
       orders: s.orders,
       revenue: s.revenue,
       captured_at: new Date().toISOString(),
