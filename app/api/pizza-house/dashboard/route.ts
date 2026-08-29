@@ -17,6 +17,7 @@ import {
 import { runWithBranch, isPizzaBranch, listPizzaBranches } from '@/lib/pizza-house-db'
 import { aggregateBranches, type BranchData } from '@/lib/pizza-house-aggregate'
 import { captureException } from '@/lib/logger'
+import { rateLimit } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -25,6 +26,13 @@ const CACHE_TTL_MS = 60 * 60 * 1000 // 1 hour
 const cache = new Map<string, { data: unknown; at: number }>()
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+/**
+ * Ceiling on the requested span. Several of the queries behind this route
+ * (VIP customers, visit frequency, dead items) scan whole POS tables, and the
+ * range was previously unbounded — `from=1990-01-01` was a valid request
+ * against a live restaurant till. Two years covers every real comparison.
+ */
+const MAX_RANGE_DAYS = 800
 
 async function isAuthorized(req: NextRequest): Promise<boolean> {
   // The dedicated Pizza House session (from the shared dashboard password).
@@ -42,9 +50,18 @@ async function isAuthorized(req: NextRequest): Promise<boolean> {
   const rp = req.cookies.get('rp_session')?.value
   if (rp) {
     const session = await verifySessionToken(rp)
-    if (session && (session.isOwner || session.role === 'admin')) return true
+    // !session.scope, like every sibling gate: a scoped token must never pass
+    // as a platform admin, even though today's scoped tokens are all viewers.
+    if (session && !session.scope && (session.isOwner || session.role === 'admin')) return true
   }
   return false
+}
+
+async function isPlatformAdmin(req: NextRequest): Promise<boolean> {
+  const rp = req.cookies.get('rp_session')?.value
+  if (!rp) return false
+  const session = await verifySessionToken(rp)
+  return !!session && !session.scope && (session.isOwner || session.role === 'admin')
 }
 
 function addDays(dateStr: string, days: number): string {
@@ -73,11 +90,23 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  // The heavy queries below run against the restaurant's live till, and one
+  // shared password is all it takes to hold a reload loop open during dinner
+  // service. Keyed per IP: holders of the shared password are indistinguishable.
+  const rl = await rateLimit(req, { windowMs: 60_000, max: 20, prefix: 'ph-dash' })
+  if (rl) return rl
+
   const { searchParams } = req.nextUrl
   const from = searchParams.get('from') ?? ''
   const to = searchParams.get('to') ?? '' // inclusive calendar date
   if (!DATE_RE.test(from) || !DATE_RE.test(to) || from > to) {
     return NextResponse.json({ error: 'Invalid date range' }, { status: 400 })
+  }
+  // Date.parse guards the format; this guards the span. Also catches '0000-00-00',
+  // which passes DATE_RE and then threw a raw RangeError out of addDays.
+  const spanDays = daysBetween(from, to)
+  if (!Number.isFinite(spanDays) || spanDays < 0 || spanDays > MAX_RANGE_DAYS) {
+    return NextResponse.json({ error: 'טווח התאריכים גדול מדי' }, { status: 400 })
   }
 
   const available = listPizzaBranches()
@@ -99,7 +128,10 @@ export async function GET(req: NextRequest) {
   const isCurrentRange = to >= new Date().toISOString().slice(0, 10)
   // Ranges including today get a short TTL so fresh sales show up quickly
   const ttl = isCurrentRange ? 10 * 60 * 1000 : CACHE_TTL_MS
-  if (cached && Date.now() - cached.at < ttl && !searchParams.has('refresh')) {
+  // `refresh` bypasses the cache and re-runs every query against the till, so
+  // it is a staff lever, not something any password holder can hold down.
+  const forceRefresh = searchParams.has('refresh') && (await isPlatformAdmin(req))
+  if (cached && Date.now() - cached.at < ttl && !forceRefresh) {
     return NextResponse.json(cached.data)
   }
 

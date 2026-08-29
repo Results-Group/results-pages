@@ -37,6 +37,10 @@ const TABLES = [
   'slide_pins',
   'pizza_customer_ledger',
   'pizza_ledger_runs',
+  // Sales history older than the POS's ~5-week window exists nowhere else —
+  // the till purges it and cannot re-supply it. Missing from this list until
+  // 2026-08-29, which made the one irreplaceable table the one not backed up.
+  'pizza_daily_stats',
   'gbp_connections',
   'gbp_locations',
   'gbp_daily_metrics',
