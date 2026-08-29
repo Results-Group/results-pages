@@ -38,6 +38,13 @@ function ymd(d: Date) {
 async function isAuthorized(req: NextRequest): Promise<boolean> {
   const secret = process.env.CRON_SECRET
   if (secret && req.headers.get('authorization') === `Bearer ${secret}`) return true
+  // Sec-Fetch-Site is written by the browser, not the page, so a page cannot
+  // forge it. `cross-site` means something else navigated the admin here —
+  // rp_session is SameSite=Lax, which still rides a top-level navigation, so
+  // without this a link on any site would run the job. A typed or bookmarked
+  // URL sends `none` and a link inside the admin sends `same-origin`; both
+  // are the real manual-run flow and both still work.
+  if (req.headers.get('sec-fetch-site') === 'cross-site') return false
   const rp = req.cookies.get('rp_session')?.value
   if (rp) {
     const session = await verifySessionToken(rp)
