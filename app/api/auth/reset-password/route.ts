@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { invalidateAuthState } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { rateLimit } from '@/lib/rate-limit'
 import { verifyResetToken } from '@/lib/reset-token'
@@ -35,6 +36,10 @@ export async function POST(req: NextRequest) {
       .update({ password_hash })
       .eq('id', result.userId)
     if (error) throw error
+    // The new hash gives a new fingerprint, so every outstanding session for
+    // this account is already dead — drop the cache so it happens now, not in
+    // 30 seconds.
+    invalidateAuthState(result.userId)
 
     return NextResponse.json({ ok: true })
   } catch (err) {

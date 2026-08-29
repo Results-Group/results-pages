@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
-import { getSessionFromRequest } from '@/lib/auth'
+import { getSessionFromRequest, invalidateAuthState } from '@/lib/auth'
 import { hashPassword } from '@/lib/hash'
 import { addAdminToAllWorkspaces } from '@/lib/workspaces'
 import { parseJson } from '@/lib/http'
@@ -150,6 +150,10 @@ export async function PUT(req: NextRequest) {
     await addAdminToAllWorkspaces(user.id).catch(() => {})
   }
 
+  // A demotion or a password change must bite now, not when the 30s cache
+  // expires — and a password change also invalidates the account's tokens.
+  invalidateAuthState(id)
+
   return NextResponse.json(user)
 }
 
@@ -189,6 +193,10 @@ export async function DELETE(req: NextRequest) {
   if (error) {
     return NextResponse.json({ error: 'שגיאה במחיקת משתמש' }, { status: 500 })
   }
+
+  // The deleted account's cookie is still signed and unexpired; dropping the
+  // cache makes the next request find no row and reject it.
+  invalidateAuthState(id)
 
   return NextResponse.json({ ok: true })
 }

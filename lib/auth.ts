@@ -22,6 +22,13 @@ export interface SessionUser {
   scope?: 'pizza-house'
   /** Unix seconds. Tokens without a valid, unexpired `exp` are rejected. */
   exp?: number
+  /**
+   * Short HMAC of the account's password hash at mint time. Changing the
+   * password changes the fingerprint, which kills every outstanding token —
+   * the same trick lib/reset-token.ts uses. Platform tokens without it are
+   * rejected (they predate revocation), costing one re-login.
+   */
+  pwFp?: string
 }
 
 // ── HMAC signing (Web Crypto — works in Edge + Node) ──
@@ -96,13 +103,88 @@ async function decodeSession(token: string): Promise<SessionUser | null> {
   }
 }
 
+/**
+ * Server-side revocation.
+ *
+ * The token carries role/isOwner and lives for 7 days, so until now a fired
+ * employee, a demoted admin, or an account whose password was just reset kept
+ * full access until it expired: destroySession only clears the cookie, and
+ * rotating SESSION_SECRET is not an option — it is also the pizza ledger's
+ * pseudonymisation key, and rotating it would silently wipe that history.
+ *
+ * Authenticated requests now re-read the account and:
+ *   - reject the session if the account is gone, or the password changed
+ *   - take role/isOwner from the database rather than the token, so a
+ *     demotion applies at once instead of a week later
+ *
+ * Deliberately NOT wired into decodeSession: middleware runs that on the Edge
+ * on every request, and it must stay a pure signature check with no database.
+ * Fails OPEN on a database error (a hiccup must not log the team out) and
+ * CLOSED on a real mismatch.
+ */
+const AUTH_STATE_TTL_MS = 30_000
+const authStateCache = new Map<string, { fp: string; role: UserRole; isOwner: boolean; until: number }>()
+
+/** Short HMAC of a password hash — the value stored in the token as `pwFp`. */
+export async function passwordFingerprint(passwordHash: string): Promise<string> {
+  return (await hmacSign(`pwfp:${passwordHash}`)).slice(0, 16)
+}
+
+/** Drops the cached state so a role change or reset takes effect immediately. */
+export function invalidateAuthState(userId: string): void {
+  authStateCache.delete(userId)
+}
+
+type AuthState = { fp: string; role: UserRole; isOwner: boolean; until: number }
+
+async function currentAuthState(userId: string): Promise<AuthState | null | 'error'> {
+  const cached = authStateCache.get(userId)
+  if (cached && cached.until > Date.now()) return cached
+
+  const { supabase } = await import('./supabase')
+  try {
+    const { data, error } = await supabase
+      .from('admin_users')
+      .select('password_hash, role, is_owner')
+      .eq('id', userId)
+      .limit(1)
+    if (error) return 'error'
+    const row = data?.[0]
+    if (!row) return null
+    const state: AuthState = {
+      fp: await passwordFingerprint(row.password_hash),
+      role: row.role as UserRole,
+      isOwner: !!row.is_owner,
+      until: Date.now() + AUTH_STATE_TTL_MS,
+    }
+    authStateCache.set(userId, state)
+    return state
+  } catch {
+    return 'error'
+  }
+}
+
+/** Applies revocation + fresh privileges to a decoded platform session. */
+async function liveSession(session: SessionUser | null): Promise<SessionUser | null> {
+  if (!session) return null
+  // The Pizza House token has no admin_users row to check against.
+  if (session.scope) return session
+  if (!session.pwFp) return null
+
+  const state = await currentAuthState(session.userId)
+  if (state === 'error') return session
+  if (!state) return null
+  if (state.fp !== session.pwFp) return null
+  return { ...session, role: state.role, isOwner: state.isOwner }
+}
+
 // ── Public API ──
 
 export async function getSession(): Promise<SessionUser | null> {
   const cookieStore = await cookies()
   const token = cookieStore.get(SESSION_COOKIE)?.value
   if (!token) return null
-  return platformSession(await decodeSession(token))
+  return liveSession(platformSession(await decodeSession(token)))
 }
 
 /** A surface-scoped token is never a valid platform session. */
@@ -122,7 +204,7 @@ export async function destroySession(): Promise<void> {
 export async function getSessionFromRequest(request: NextRequest): Promise<SessionUser | null> {
   const token = request.cookies.get(SESSION_COOKIE)?.value
   if (!token) return null
-  return platformSession(await decodeSession(token))
+  return liveSession(platformSession(await decodeSession(token)))
 }
 
 export async function requireAuth(request: NextRequest): Promise<NextResponse | null> {

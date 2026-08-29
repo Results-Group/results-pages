@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { verifyPassword, hashPassword, isLegacyHash } from '@/lib/hash'
-import { destroySession, createSessionCookie, type SessionUser } from '@/lib/auth'
+import { destroySession, createSessionCookie, passwordFingerprint, type SessionUser } from '@/lib/auth'
 import { rateLimit } from '@/lib/rate-limit'
 import { parseJson } from '@/lib/http'
 
@@ -44,9 +44,10 @@ export async function POST(req: NextRequest) {
   }
 
   // Upgrade legacy SHA-256 hash to bcrypt on successful login
+  let currentHash = user.password_hash
   if (isLegacyHash(user.password_hash)) {
-    const newHash = await hashPassword(password)
-    await supabase.from('admin_users').update({ password_hash: newHash }).eq('id', user.id)
+    currentHash = await hashPassword(password)
+    await supabase.from('admin_users').update({ password_hash: currentHash }).eq('id', user.id)
   }
 
   await supabase
@@ -60,6 +61,8 @@ export async function POST(req: NextRequest) {
     role: user.role,
     name: user.name,
     isOwner: user.is_owner || false,
+    // Ties the token to this exact password. Any later reset invalidates it.
+    pwFp: await passwordFingerprint(currentHash),
   }
 
   const cookie = await createSessionCookie(sessionUser)

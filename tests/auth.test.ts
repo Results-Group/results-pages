@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createSessionCookie, verifySessionToken, type SessionUser } from '@/lib/auth'
+import { createSessionCookie, verifySessionToken, passwordFingerprint, type SessionUser } from '@/lib/auth'
 
 const user: SessionUser = {
   userId: 'u-1',
@@ -59,5 +59,51 @@ describe('session tokens', () => {
     const scoped: SessionUser = { ...user, scope: 'pizza-house' }
     expect((await verifySessionToken(await tokenFor(scoped)))?.scope).toBe('pizza-house')
     expect((await verifySessionToken(await tokenFor(user)))?.scope).toBeUndefined()
+  })
+})
+
+// ── Revocation (2026-08-29) ────────────────────────────────────────────────
+// The token carries role/isOwner for 7 days, so without a server-side check a
+// fired employee, a demoted admin, or an account whose password was just reset
+// keeps full access until it expires. The fingerprint is what ties a token to
+// one specific password.
+describe('password fingerprint', () => {
+  it('changes when the password hash changes — which is what kills old tokens', async () => {
+    const a = await passwordFingerprint('$2a$12$aaaaaaaaaaaaaaaaaaaaaa')
+    const b = await passwordFingerprint('$2a$12$bbbbbbbbbbbbbbbbbbbbbb')
+    expect(a).not.toBe(b)
+  })
+
+  it('is stable for the same hash, so a normal session survives', async () => {
+    const hash = '$2a$12$cccccccccccccccccccccc'
+    expect(await passwordFingerprint(hash)).toBe(await passwordFingerprint(hash))
+  })
+
+  it('is short enough to sit in a cookie payload', async () => {
+    expect((await passwordFingerprint('$2a$12$dddddddddddddddddddddd')).length).toBe(16)
+  })
+
+  it('does not leak the hash it was derived from', async () => {
+    const hash = '$2a$12$eeeeeeeeeeeeeeeeeeeeee'
+    const fp = await passwordFingerprint(hash)
+    expect(hash).not.toContain(fp)
+    expect(fp).not.toContain('$2a$12$')
+  })
+})
+
+describe('token still carries what revocation needs', () => {
+  it('keeps pwFp through a sign/verify round-trip', async () => {
+    const fp = await passwordFingerprint('$2a$12$ffffffffffffffffffffff')
+    const session = await verifySessionToken(await tokenFor({ ...user, pwFp: fp }))
+    expect(session?.pwFp).toBe(fp)
+  })
+
+  it('a tampered pwFp fails the signature', async () => {
+    const token = await tokenFor({ ...user, pwFp: await passwordFingerprint('$2a$12$gggggggggggggggggggggg') })
+    const [payload, sig] = [token.slice(0, token.lastIndexOf('.')), token.slice(token.lastIndexOf('.') + 1)]
+    const forged = Buffer.from(
+      JSON.stringify({ ...JSON.parse(Buffer.from(payload, 'base64').toString('utf8')), pwFp: 'x'.repeat(16) })
+    ).toString('base64')
+    expect(await verifySessionToken(`${forged}.${sig}`)).toBeNull()
   })
 })
