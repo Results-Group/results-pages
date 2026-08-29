@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { escapeOrFilterValue } from './pg-filter'
 import { deleteAsset } from './campaigns'
 import { assetProxyUrl } from './asset-url'
 import { normalizeSections, serializeSections } from './strategy/normalize'
@@ -58,7 +59,10 @@ export async function getStrategyDocs(filters?: {
   let query = supabase.from('strategy_docs').select('*').order('updated_at', { ascending: false })
   query = filters?.deleted ? query.not('deleted_at', 'is', null) : query.is('deleted_at', null)
   if (filters?.workspaceId) query = query.eq('workspace_id', filters.workspaceId)
-  if (filters?.search) query = query.or(`doc_name.ilike.%${filters.search}%,client.ilike.%${filters.search}%`)
+  if (filters?.search) {
+    const s = escapeOrFilterValue(filters.search)
+    query = query.or(`doc_name.ilike.%${s}%,client.ilike.%${s}%`)
+  }
   const { data, error } = await query
   if (error) throw error
   return (data || []).map(r => enrich(r as Row))

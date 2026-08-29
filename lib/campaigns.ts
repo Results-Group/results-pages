@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { escapeOrFilterValue } from './pg-filter'
 import { assetProxyUrl } from './asset-url'
 import bcrypt from 'bcryptjs'
 import type { DistributionPlan } from './distribution'
@@ -99,7 +100,7 @@ export async function getCampaigns(filters?: { search?: string; status?: string;
   }
 
   if (filters?.search) {
-    const s = filters.search.replace(/[%_\\]/g, c => `\\${c}`)
+    const s = escapeOrFilterValue(filters.search)
     query = query.or(`campaign_name.ilike.%${s}%,client.ilike.%${s}%`)
   }
   if (filters?.status) {

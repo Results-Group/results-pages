@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { escapeOrFilterValue } from './pg-filter'
 import bcrypt from 'bcryptjs'
 
 // ── Block types ──
@@ -158,7 +159,7 @@ export async function getReports(filters?: {
   if (filters?.workspace_id) query = query.eq('workspace_id', filters.workspace_id)
 
   if (filters?.search) {
-    const s = filters.search.replace(/[%_\\]/g, c => `\\${c}`)
+    const s = escapeOrFilterValue(filters.search)
     query = query.or(`report_name.ilike.%${s}%,client.ilike.%${s}%`)
   }
   if (filters?.status) query = query.eq('status', filters.status)
