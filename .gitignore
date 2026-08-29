@@ -16,3 +16,8 @@ dme-backup/
 
 # Supabase service-role key for the DME import — never commit
 dme-migration/.env
+
+# Base44 card dumps pulled for the DME migration — real customer emails and
+# phone numbers. Debris from a debugging session, never referenced by code.
+/cards.json
+/card_tomoren.json
