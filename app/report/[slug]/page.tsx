@@ -3,7 +3,7 @@ import { cookies, headers } from 'next/headers'
 import { Metadata } from 'next'
 import { getReportBySlug } from '@/lib/performance-reports'
 import { getClientById } from '@/lib/clients'
-import { getSession } from '@/lib/auth'
+import { getSession, canStaffViewResource } from '@/lib/auth'
 import { verifyAccessToken } from '@/lib/content-access'
 import ReportPresentation from './report-presentation'
 import PasswordGate from './password-gate'
@@ -66,7 +66,9 @@ export default async function ReportPage({ params, searchParams }: PageProps) {
   }
 
   const session = await getSession()
-  const isEditorOrAdmin = !!session && (session.role === 'admin' || session.role === 'editor')
+  // Scoped to the report's workspace — see the note in app/c/[slug]/page.tsx.
+  // Reports carry client budgets and ROI, so this one matters most.
+  const isEditorOrAdmin = await canStaffViewResource(report.workspace_id)
   const isPreview = sp.preview === '1' && isEditorOrAdmin
 
   if (report.status === 'draft' && !isPreview) return <ContentUnavailable variant="not_published" />

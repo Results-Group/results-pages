@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { getStrategyDocBySlug } from '@/lib/strategy-docs'
 import { getClientById } from '@/lib/clients'
-import { getSession } from '@/lib/auth'
+import { getSession, canStaffViewResource } from '@/lib/auth'
 import { assetProxyUrl } from '@/lib/asset-url'
 import { buildStrategySlides } from '@/lib/strategy/slides'
 import { databaseReachable, rebuildHold } from '@/lib/db-health'
@@ -68,7 +68,9 @@ export default async function StrategyDocPage({ params, searchParams }: PageProp
   }
 
   const session = await getSession()
-  const isStaff = !!session && (session.role === 'admin' || session.role === 'editor')
+  // Scoped to the document's workspace — see the note in app/c/[slug]/page.tsx.
+  // A positioning document is a brand's confidential strategy.
+  const isStaff = await canStaffViewResource(doc.workspace_id)
   const isPreview = sp.preview === '1' && isStaff
 
   if (doc.status !== 'published' && !isPreview) return <ContentUnavailable variant="not_published" />

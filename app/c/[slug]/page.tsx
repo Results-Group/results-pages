@@ -4,7 +4,7 @@ import { Metadata } from 'next'
 import { getCampaignBySlug, enrichCampaignUrls, normalizeCopies } from '@/lib/campaigns'
 import type { CampaignSection } from '@/lib/campaigns'
 import { getClientById } from '@/lib/clients'
-import { getSession } from '@/lib/auth'
+import { getSession, canStaffViewResource } from '@/lib/auth'
 import { verifyAccessToken } from '@/lib/content-access'
 import { assetProxyUrl } from '@/lib/asset-url'
 import { buildCampaignSlides } from '@/lib/slides'
@@ -104,7 +104,10 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
   }
 
   const session = await getSession()
-  const isEditorOrAdmin = !!session && (session.role === 'admin' || session.role === 'editor')
+  // Staff access is scoped to the campaign's own workspace — a global 'editor'
+  // role is NOT enough, or an editor in workspace A reads workspace B's
+  // password-protected decks and drafts.
+  const isEditorOrAdmin = await canStaffViewResource(rawCampaign.workspace_id)
   const isPreview = sp.preview === '1' && isEditorOrAdmin
 
   if (rawCampaign.status === 'draft' && !isPreview) {

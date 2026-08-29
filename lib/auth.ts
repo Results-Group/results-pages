@@ -233,6 +233,34 @@ export async function requireWorkspacePermission(
   return null
 }
 
+/**
+ * Boolean counterpart to requireResourcePermission, for server COMPONENTS —
+ * the public deck pages, which have no NextRequest and must render something
+ * rather than return a 403.
+ *
+ * The public pages used to gate staff access on `session.role === 'editor'`
+ * alone, with no reference to the object's workspace. That let any editor open
+ * a password-protected deck belonging to a client in a workspace they are not a
+ * member of, and `?preview=1` showed them unpublished drafts too — exactly the
+ * cross-workspace hole the pins route had already closed and documented on the
+ * API side. Slugs are noindex but explicitly not secret, and they travel over
+ * WhatsApp.
+ */
+export async function canStaffViewResource(
+  workspaceId: string | null | undefined,
+): Promise<boolean> {
+  const session = await getSession()
+  if (!session) return false
+  if (session.isOwner || session.role === 'admin') return true
+  // An orphan resource is admin/owner territory, same rule as the API.
+  if (!workspaceId) return false
+
+  const { getWorkspaceMembership, resolvePermission } = await import('./workspaces')
+  const membership = await getWorkspaceMembership(session.userId, workspaceId)
+  if (!membership) return false
+  return resolvePermission(membership.role, membership.permissions, 'view')
+}
+
 export async function getActiveWorkspaceId(request: NextRequest): Promise<string | null> {
   return request.cookies.get('rp_workspace')?.value || null
 }
