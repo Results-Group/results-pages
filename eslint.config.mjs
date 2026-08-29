@@ -11,6 +11,10 @@ const eslintConfig = [
       'next-env.d.ts',
       'public/**',
       'supabase/**',
+      // Agent worktrees are checkouts of other branches living inside the repo.
+      // Linting them double-reports every finding and resurrects issues already
+      // fixed on main.
+      '.claude/worktrees/**',
     ],
   },
   ...coreWebVitals,
