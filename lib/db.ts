@@ -236,12 +236,15 @@ export async function purgePage(id: string) {
   }
 }
 
+/** Same as recordDeckView: `ip` is dropped, never stored. No reader exists. */
 export async function createPageView(data: {
   page_id: string
   ip?: string
   user_agent?: string
 }) {
-  await supabase.from('landing_page_views').insert(data)
+  const { ip: _ip, ...row } = data
+  void _ip
+  await supabase.from('landing_page_views').insert(row)
 }
 
 export async function resetPageViews(pageId: string) {

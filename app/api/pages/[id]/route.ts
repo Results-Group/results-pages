@@ -43,7 +43,13 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
   // client + slug are the ASCII storage key / public URL path — transliterate
   // Hebrew and strip specials so the move never hits an "Invalid key" (same
   // hardening as /api/upload). The client ENTITY keeps its raw display name.
+  // Every other slugifyPath call site supplies a fallback. Here an empty
+  // result (a name that is all punctuation, say) became an empty path
+  // segment, and the page's public URL turned into /pages//<slug>.
   const client = rawClient !== undefined ? slugifyPath(rawClient, '') : undefined
+  if (client === '') {
+    return NextResponse.json({ error: 'שם הלקוח חייב להכיל אותיות או ספרות' }, { status: 400 })
+  }
   const slug = body.slug !== undefined ? slugifyPath(String(body.slug).replace(/\.html$/i, ''), '') : undefined
   const shortUrl = body.shortUrl !== undefined
     ? (() => {

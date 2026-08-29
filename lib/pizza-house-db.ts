@@ -68,7 +68,12 @@ export async function pizzaHouseQuery<T = Record<string, unknown>>(
   sql: string,
   params: unknown[] = []
 ): Promise<T[]> {
-  const branchId = branchContext.getStore() ?? 'main'
+  // No default. Falling back to 'main' meant a query added outside
+  // runWithBranch() silently returned Givat Ze'ev's numbers under whatever
+  // branch the caller thought it was reading — the exact failure mode that
+  // made the month-over-month figures wrong before the branch registry.
+  const branchId = branchContext.getStore()
+  if (!branchId) throw new Error('pizzaHouseQuery called outside runWithBranch()')
   const [rows] = await getPizzaHousePool(branchId).query(sql, params)
   return rows as T[]
 }

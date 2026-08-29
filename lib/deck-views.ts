@@ -9,13 +9,22 @@ import { supabase } from './supabase'
  */
 export type DeckContentType = 'campaign' | 'report' | 'strategy'
 
+/**
+ * `ip` is accepted and deliberately dropped. Nothing has ever read the column
+ * back — the only reads are getDeckViewRows (content_id, viewed_at) and a
+ * head count — so it was write-only personal data accumulating forever, and
+ * riding into every nightly backup. Callers keep passing it so the signature
+ * stays honest about what they hold; it just stops being stored.
+ */
 export async function recordDeckView(data: {
   content_type: DeckContentType
   content_id: string
   ip?: string
   user_agent?: string
 }) {
-  await supabase.from('deck_views').insert(data)
+  const { ip: _ip, ...row } = data
+  void _ip
+  await supabase.from('deck_views').insert(row)
 }
 
 export interface DeckViewRow {
