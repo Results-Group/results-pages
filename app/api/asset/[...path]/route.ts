@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAssetPublicUrl } from '@/lib/campaigns'
+import { downloadAsset } from '@/lib/campaigns'
+import { CLIENT_DOCS_BUCKET } from '@/lib/clients'
 import { rateLimit } from '@/lib/rate-limit'
 import { getSessionFromRequest } from '@/lib/auth'
 
@@ -9,6 +10,15 @@ const CACHE_HEADERS = {
   'Cache-Control': 'public, max-age=31536000, immutable',
   Vary: 'Accept',
 }
+
+// A response that only got through because the caller held a staff session must
+// never sit in a shared cache — `public, max-age` would let an edge or proxy
+// serve it to the next anonymous requester without re-running the check.
+const PRIVATE_CACHE_HEADERS = {
+  'Cache-Control': 'private, no-store',
+}
+
+const POSITIONING_RE = /(^|\/)positioning\.[a-z0-9]+$/i
 
 export async function GET(
   request: NextRequest,
@@ -29,14 +39,23 @@ export async function GET(
     return new NextResponse('Not found', { status: 404 })
   }
 
-  // Client logos live under clients/ and must stay public — the client-facing
+  // Client logos live under clients/ and must stay reachable — the client-facing
   // deck renders them. The positioning PDF sits under the same prefix at a
   // guessable path (clients/<uuid>/positioning.pdf) but is a confidential brand
-  // document, so it requires a staff session. 404 rather than 401 so the
-  // response doesn't confirm the file exists.
-  if (/(^|\/)positioning\.[a-z0-9]+$/i.test(filePath)) {
+  // document: it requires a staff session AND lives in a private bucket, so the
+  // check below is the only door rather than one of two. 404 rather than 401 so
+  // the response doesn't confirm the file exists.
+  const isPositioning = POSITIONING_RE.test(filePath)
+  if (isPositioning) {
     const session = await getSessionFromRequest(request)
     if (!session) return new NextResponse('Not found', { status: 404 })
+
+    const doc = await downloadAsset(filePath, CLIENT_DOCS_BUCKET)
+    if (!doc) return new NextResponse('Not found', { status: 404 })
+    return new NextResponse(new Uint8Array(doc.buffer), {
+      status: 200,
+      headers: { 'Content-Type': doc.contentType || 'application/pdf', ...PRIVATE_CACHE_HEADERS },
+    })
   }
 
   const forceJpeg = request.nextUrl.searchParams.get('format') === 'jpeg'
@@ -48,30 +67,27 @@ export async function GET(
     if (wantsJpeg) {
       // Try the pre-generated JPEG first to avoid runtime sharp conversion
       const jpegPath = filePath.replace(/\.webp$/, '.jpeg')
-      const jpegRes = await fetch(getAssetPublicUrl(jpegPath))
-      if (jpegRes.ok) {
-        const buf = new Uint8Array(await jpegRes.arrayBuffer())
-        return new NextResponse(buf, {
+      const jpeg = await downloadAsset(jpegPath)
+      if (jpeg) {
+        return new NextResponse(new Uint8Array(jpeg.buffer), {
           status: 200,
           headers: { 'Content-Type': 'image/jpeg', ...CACHE_HEADERS },
         })
       }
     }
 
-    const upstream = await fetch(getAssetPublicUrl(filePath))
-    if (!upstream.ok) {
+    const asset = await downloadAsset(filePath)
+    if (!asset) {
       return new NextResponse('Not found', { status: 404 })
     }
-
-    const buffer = Buffer.from(await upstream.arrayBuffer())
 
     if (wantsJpeg) {
       // Lazy: a broken sharp binary must degrade this route to serving the
       // original format, not 500 every asset on the deck.
       try {
         const sharp = (await import('sharp')).default
-        const jpeg = await sharp(buffer).jpeg({ quality: 88 }).toBuffer()
-        return new NextResponse(new Uint8Array(jpeg), {
+        const converted = await sharp(asset.buffer).jpeg({ quality: 88 }).toBuffer()
+        return new NextResponse(new Uint8Array(converted), {
           status: 200,
           headers: { 'Content-Type': 'image/jpeg', ...CACHE_HEADERS },
         })
@@ -80,10 +96,10 @@ export async function GET(
       }
     }
 
-    return new NextResponse(new Uint8Array(buffer), {
+    return new NextResponse(new Uint8Array(asset.buffer), {
       status: 200,
       headers: {
-        'Content-Type': upstream.headers.get('content-type') || 'image/webp',
+        'Content-Type': asset.contentType || 'image/webp',
         ...CACHE_HEADERS,
       },
     })

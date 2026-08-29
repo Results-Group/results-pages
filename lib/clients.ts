@@ -180,11 +180,20 @@ export async function uploadClientLogo(file: File | Blob, clientId: string): Pro
   return compressAndUploadImage(file, storagePath)
 }
 
+/**
+ * The positioning PDF is the client's confidential brand strategy, and its
+ * path is fully predictable (`clients/<uuid>/positioning.pdf`) from a client id
+ * that every public deck prints in its logo URL. It therefore lives in a
+ * PRIVATE bucket — in the public one, the staff-session check on the asset
+ * proxy was only one of two doors, and the CDN was the other.
+ */
+export const CLIENT_DOCS_BUCKET = 'client-docs'
+
 /** Upload the raw positioning source PDF to storage (overwrites any previous one). */
 export async function uploadClientPositioningPdf(file: File | Blob, clientId: string): Promise<string> {
   const storagePath = `clients/${clientId}/positioning.pdf`
   const { error } = await supabase.storage
-    .from('campaign-assets')
+    .from(CLIENT_DOCS_BUCKET)
     .upload(storagePath, file, { contentType: 'application/pdf', upsert: true })
   if (error) throw error
   return storagePath

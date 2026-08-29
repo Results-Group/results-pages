@@ -282,6 +282,25 @@ export function getAssetPublicUrl(filePath: string): string {
   return data.publicUrl
 }
 
+/**
+ * Reads an asset with the service-role client instead of over the bucket's
+ * public URL. The proxy used to fetch its own public URL, which quietly made
+ * "is this bucket public?" a load-bearing dependency: locking the bucket down
+ * would have 404'd every image on every deck. Going through the API keeps the
+ * proxy working whatever the bucket's visibility is.
+ */
+export async function downloadAsset(
+  filePath: string,
+  bucket: string = ASSETS_BUCKET,
+): Promise<{ buffer: Buffer; contentType: string } | null> {
+  const { data, error } = await supabase.storage.from(bucket).download(filePath)
+  if (error || !data) return null
+  return {
+    buffer: Buffer.from(await data.arrayBuffer()),
+    contentType: data.type || 'application/octet-stream',
+  }
+}
+
 export async function compressAndUploadImage(
   file: File | Blob,
   storagePath: string
