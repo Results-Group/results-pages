@@ -36,6 +36,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: 'הדף לא נמצא | Results Digital', robots: { index: false, follow: false } }
   }
 
+  // The body already blocks anything unpublished, but the <title> and the
+  // og/twitter tags on that same blocked response still carried the client and
+  // document name — enough to confirm a named brand is a client and reveal a
+  // strategy project months before anything is public. /c and /report both
+  // return a neutral card in this state.
+  if (doc.status !== 'published') {
+    return {
+      title: 'Results Digital',
+      robots: { index: false, follow: false },
+      openGraph: { title: 'Results Digital', images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Results Digital' }] },
+      twitter: { card: 'summary_large_image', title: 'Results Digital', images: ['/og-image.png'] },
+    }
+  }
+
   const title = `${doc.client} – ${doc.doc_name}`
   return {
     title: `${title} | Results Digital`,

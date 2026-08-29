@@ -31,7 +31,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const shareImage = { url: '/og-image.png', width: 1200, height: 630, alt: 'Results Digital' }
   const isScheduled = report.publish_at && new Date(report.publish_at) > new Date()
-  if (report.status === 'draft' || report.password || isScheduled) {
+  // Archived included: the report is off the air, so the preview must stop
+  // naming the client too. /c has had this branch since the expiry work.
+  if (report.status === 'draft' || report.password || isScheduled || report.status === 'archived') {
     return {
       title: 'Results Digital',
       robots: { index: false, follow: false },
@@ -73,6 +75,12 @@ export default async function ReportPage({ params, searchParams }: PageProps) {
 
   if (report.status === 'draft' && !isPreview) return <ContentUnavailable variant="not_published" />
   if (report.publish_at && new Date(report.publish_at) > new Date() && !isPreview) return <ContentUnavailable variant="not_published" />
+  // Archiving a report is how an operator retires it — the admin list shows it
+  // as "ארכיון" and out of circulation. Without this gate the link kept working
+  // for anyone still holding it (a former contact, a forwarded message), with
+  // no way to revoke access short of deleting the report. Reports have no
+  // expires_at, so status is the only lever. /c gates both.
+  if (report.status === 'archived' && !isPreview) return <ContentUnavailable variant="expired" />
 
   if (report.password && !isEditorOrAdmin) {
     const cookieStore = await cookies()
