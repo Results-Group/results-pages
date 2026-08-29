@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest, requireResourcePermission } from '@/lib/auth'
 import { getPageById, downloadFile, uploadFile, setPageTranslation } from '@/lib/db'
-import { extractSegments, restoreSegments, flipDirection, chunkSegments } from '@/lib/html-translate'
+import { extractSegments, restoreSegments, flipDirection, chunkSegments, segmentTexts } from '@/lib/html-translate'
 import { geminiGenerateJson, isAiConfigured } from '@/lib/ai'
 import { minifyHtml } from '@/lib/minify'
 import { logAudit } from '@/lib/audit'
@@ -51,7 +51,7 @@ export async function POST(
     }
 
     const translated: string[] = []
-    for (const batch of chunkSegments(segments)) {
+    for (const batch of chunkSegments(segmentTexts(segments))) {
       const prompt = `You are a professional translator for a digital marketing agency. Translate the following Hebrew text segments to English.
 
 IMPORTANT RULES:
@@ -59,7 +59,7 @@ IMPORTANT RULES:
 - Return ONLY a valid JSON array of strings with EXACTLY ${batch.length} items, translated in the same order
 - Keep numbers, percentages, currency symbols (₪), dates, URLs and brand names (Google, Meta, TikTok, etc.) EXACTLY as they are
 - Professional performance-marketing terminology (ROAS, CPA, conversion rate, media spend, leads, funnel)
-- Segments may contain HTML entities or inline tags like <b> — keep them intact around the translated text
+- Return PLAIN TEXT only: never add HTML tags, quotes around the whole value, or markup of any kind (the segments are text extracted from a page; anything tag-like is escaped on the way back and would show up literally)
 - Maintain the tone: professional, data-driven, concise
 
 Input JSON:
@@ -76,7 +76,7 @@ ${JSON.stringify(batch)}`
       translated.push(...out.map(String))
     }
 
-    const englishHtml = flipDirection(restoreSegments(masked, translated))
+    const englishHtml = flipDirection(restoreSegments(masked, segments, translated))
 
     const enPath = page.file_path.replace(/\.html$/, '.en.html')
     await uploadFile(enPath, Buffer.from(minifyHtml(englishHtml), 'utf-8'))
