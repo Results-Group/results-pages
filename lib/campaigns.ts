@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { assetProxyUrl } from './asset-url'
 import bcrypt from 'bcryptjs'
 import type { DistributionPlan } from './distribution'
 import type { StatsBlock, ProfileBlock } from './launch-stats'
@@ -277,11 +278,6 @@ export async function purgeCampaign(id: string) {
 
 const ASSETS_BUCKET = 'campaign-assets'
 
-export function getAssetPublicUrl(filePath: string): string {
-  const { data } = supabase.storage.from(ASSETS_BUCKET).getPublicUrl(filePath)
-  return data.publicUrl
-}
-
 /**
  * Reads an asset with the service-role client instead of over the bucket's
  * public URL. The proxy used to fetch its own public URL, which quietly made
@@ -404,12 +400,12 @@ export function enrichCampaignUrls(campaign: Campaign): Campaign {
 
   return {
     ...campaign,
-    logo_url: campaign.logo_path ? getAssetPublicUrl(campaign.logo_path) : undefined,
+    logo_url: campaign.logo_path ? assetProxyUrl(campaign.logo_path) : undefined,
     sections: sections.map(s => ({
       ...s,
       assets: (s.assets || []).map(a => ({
         ...a,
-        public_url: a.file_path ? getAssetPublicUrl(a.file_path) : undefined,
+        public_url: a.file_path ? assetProxyUrl(a.file_path) : undefined,
       })),
     })),
   } as Campaign

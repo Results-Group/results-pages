@@ -5,11 +5,11 @@ import {
   setCampaignLogoPath,
   compressAndUploadImage,
   uploadLogoImage,
-  getAssetPublicUrl,
   deleteAsset,
 } from '@/lib/campaigns'
 import { captureException } from '@/lib/logger'
 import { rejectUpload } from '@/lib/image-accept'
+import { assetProxyUrl } from '@/lib/asset-url'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -60,7 +60,7 @@ export async function POST(
 
     return NextResponse.json({
       file_path: filePath,
-      public_url: getAssetPublicUrl(filePath),
+      public_url: assetProxyUrl(filePath),
     }, { status: 201 })
   } catch (error) {
     captureException(error, { route: 'POST /api/campaigns/[id]/assets', id })

@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
-import { compressAndUploadImage, getAssetPublicUrl } from './campaigns'
+import { compressAndUploadImage } from './campaigns'
+import { assetProxyUrl } from './asset-url'
 import { clientNameKey } from './client-name'
 export { clientNameKey } from './client-name'
 
@@ -32,7 +33,7 @@ function enrich(row: Client): Client {
   return {
     ...row,
     contacts: Array.isArray(row.contacts) ? row.contacts : [],
-    logo_url: row.logo_path ? getAssetPublicUrl(row.logo_path) : undefined,
+    logo_url: row.logo_path ? assetProxyUrl(row.logo_path) : undefined,
   }
 }
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireResourcePermission } from '@/lib/auth'
-import { compressAndUploadImage, getAssetPublicUrl, deleteAsset } from '@/lib/campaigns'
+import { compressAndUploadImage, deleteAsset } from '@/lib/campaigns'
+import { assetProxyUrl } from '@/lib/asset-url'
 import { getStrategyDocById, setStrategyDocLogoPath } from '@/lib/strategy-docs'
 import { parseForm, parseJson } from '@/lib/http'
 import { captureException } from '@/lib/logger'
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest, { params }: Ctx) {
     // Logo writes bypass updated_at on purpose — see setStrategyDocLogoPath.
     if (type === 'logo') await setStrategyDocLogoPath(id, filePath)
 
-    return NextResponse.json({ file_path: filePath, public_url: getAssetPublicUrl(filePath) }, { status: 201 })
+    return NextResponse.json({ file_path: filePath, public_url: assetProxyUrl(filePath) }, { status: 201 })
   } catch (err) {
     captureException(err, { route: 'POST /api/strategy-docs/[id]/assets', id })
     return NextResponse.json({ error: 'שגיאה בהעלאת הקובץ' }, { status: 500 })

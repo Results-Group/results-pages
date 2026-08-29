@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
-import { getAssetPublicUrl, deleteAsset } from './campaigns'
+import { deleteAsset } from './campaigns'
+import { assetProxyUrl } from './asset-url'
 import { normalizeSections, serializeSections } from './strategy/normalize'
 import type { AnySection } from './strategy/types'
 
@@ -45,7 +46,7 @@ function enrich(row: Row): StrategyDoc {
     // Every read goes through the normalizer, so a renderer never meets a
     // half-written section — and a section from a newer deploy survives.
     sections: normalizeSections(row.sections),
-    logo_url: row.logo_path ? getAssetPublicUrl(row.logo_path) : undefined,
+    logo_url: row.logo_path ? assetProxyUrl(row.logo_path) : undefined,
   }
 }
 
