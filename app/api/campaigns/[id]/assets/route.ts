@@ -10,6 +10,7 @@ import {
 import { captureException } from '@/lib/logger'
 import { rejectUpload } from '@/lib/image-accept'
 import { assetProxyUrl } from '@/lib/asset-url'
+import { parseJson } from '@/lib/http'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -86,7 +87,8 @@ export async function DELETE(
     const permErr = await requireResourcePermission(request, campaign.workspace_id, 'edit')
     if (permErr) return permErr
 
-    const body = await request.json()
+    const { data: body, error: parseError } = await parseJson<{ file_path?: string }>(request)
+    if (parseError) return parseError
     const { file_path } = body
 
     if (!file_path) {

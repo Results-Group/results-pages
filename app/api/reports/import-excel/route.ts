@@ -5,8 +5,13 @@ import type { ReportTab } from '@/lib/performance-reports'
 import { captureException } from '@/lib/logger'
 import { rateLimit } from '@/lib/rate-limit'
 import * as XLSX from 'xlsx'
+import { parseForm } from '@/lib/http'
 
 export const runtime = 'nodejs'
+
+// XLSX.read parses the whole workbook into memory before anything is
+// validated, so an oversized upload is an OOM, not a slow request.
+const MAX_EXCEL_BYTES = 10 * 1024 * 1024 // 10MB
 
 export async function POST(request: NextRequest) {
   const authErr = await requireAuth(request)
@@ -21,11 +26,15 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const formData = await request.formData()
+    const { data: formData, error: formError } = await parseForm(request)
+    if (formError) return formError
     const file = formData.get('file') as File | null
 
     if (!file) {
       return NextResponse.json({ error: 'לא צורף קובץ' }, { status: 400 })
+    }
+    if (file.size > MAX_EXCEL_BYTES) {
+      return NextResponse.json({ error: 'הקובץ גדול מדי — עד 10MB' }, { status: 413 })
     }
 
     const ext = file.name.split('.').pop()?.toLowerCase()

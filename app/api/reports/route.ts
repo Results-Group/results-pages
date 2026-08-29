@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest, getActiveWorkspaceId, requireWorkspacePermission } from '@/lib/auth'
-import { getReports, createReport } from '@/lib/performance-reports'
+import { getReports, createReport, type PerformanceReport } from '@/lib/performance-reports'
 import { findOrCreateClient, getClientById } from '@/lib/clients'
 import { slugifyPath } from '@/lib/slug'
 import { supabase } from '@/lib/supabase'
@@ -8,6 +8,7 @@ import { getDeckViewRows } from '@/lib/deck-views'
 import { summarizeDeckViews } from '@/lib/deck-view-stats'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
+import { parseJson } from '@/lib/http'
 
 export async function GET(request: NextRequest) {
   const session = await getSessionFromRequest(request)
@@ -43,7 +44,8 @@ export async function POST(request: NextRequest) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const body = await request.json()
+    const { data: body, error: parseError } = await parseJson<Partial<Omit<PerformanceReport, 'id' | 'created_at'>>>(request)
+    if (parseError) return parseError
     const { client, report_name, period_label, status, password, tabs, tabs_en, logo_path, publish_at, brand_color } = body
 
     const workspaceId: string | null = body.workspace_id ?? await getActiveWorkspaceId(request)

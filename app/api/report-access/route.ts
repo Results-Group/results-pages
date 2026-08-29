@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import { getReportBySlug } from '@/lib/performance-reports'
 import { signAccessToken, CONTENT_ACCESS_MAX_AGE } from '@/lib/content-access'
 import { rateLimit } from '@/lib/rate-limit'
+import { parseJson } from '@/lib/http'
 
 export const runtime = 'nodejs'
 
@@ -11,7 +12,9 @@ export async function POST(request: NextRequest) {
   if (rl) return rl
 
   try {
-    const { slug, password } = await request.json()
+    const { data: body, error: parseError } = await parseJson<{ slug?: string; password?: string }>(request)
+    if (parseError) return parseError
+    const { slug, password } = body
 
     if (!slug || typeof password !== 'string') {
       return NextResponse.json({ error: 'בקשה לא תקינה' }, { status: 400 })

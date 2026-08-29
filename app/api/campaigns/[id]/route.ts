@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest, requireResourcePermission } from '@/lib/auth'
 import { requirePurgeConfirmation } from '@/lib/purge-guard'
-import { getCampaignById, updateCampaign, deleteCampaign, purgeCampaign, enrichCampaignUrls } from '@/lib/campaigns'
+import { getCampaignById, updateCampaign, deleteCampaign, purgeCampaign, enrichCampaignUrls, type Campaign } from '@/lib/campaigns'
 import { findOrCreateClient, validateClientForWorkspace } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
 import { slugifyPath } from '@/lib/slug'
 import { supabase } from '@/lib/supabase'
+import { parseJson } from '@/lib/http'
 
 export async function GET(
   request: NextRequest,
@@ -46,7 +47,8 @@ export async function PUT(
     const permErr = await requireResourcePermission(request, existing.workspace_id, 'edit')
     if (permErr) return permErr
 
-    const body = await request.json()
+    const { data: body, error: parseError } = await parseJson<Partial<Omit<Campaign, 'id' | 'created_at'>> & { base_updated_at?: string }>(request)
+    if (parseError) return parseError
 
     // Custom campaign URL. The slug is the public link, so it must be
     // ASCII-safe and unique; a clash is reported as 409 rather than surfacing

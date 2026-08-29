@@ -4,13 +4,16 @@ import { rateLimit } from '@/lib/rate-limit'
 import { createResetToken } from '@/lib/reset-token'
 import { sendEmail, passwordResetEmail } from '@/lib/email'
 import { captureException } from '@/lib/logger'
+import { parseJson } from '@/lib/http'
 
 export async function POST(req: NextRequest) {
   const rl = await rateLimit(req, { windowMs: 60_000, max: 5, prefix: 'forgot-pw' })
   if (rl) return rl
 
   try {
-    const { email } = await req.json()
+    const { data: body, error: parseError } = await parseJson<{ email?: string }>(req)
+    if (parseError) return parseError
+    const { email } = body
     if (!email || typeof email !== 'string') {
       return NextResponse.json({ error: 'יש להזין אימייל' }, { status: 400 })
     }

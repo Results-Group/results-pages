@@ -5,6 +5,7 @@ import type { ReportTab } from '@/lib/performance-reports'
 import { geminiGenerateJson, isAiConfigured } from '@/lib/ai'
 import { captureException } from '@/lib/logger'
 import { rateLimit } from '@/lib/rate-limit'
+import { parseJson } from '@/lib/http'
 
 export async function POST(
   request: NextRequest,
@@ -29,7 +30,8 @@ export async function POST(
     const permErr = await requireResourcePermission(request, report.workspace_id, 'edit')
     if (permErr) return permErr
 
-    const body = await request.json()
+    const { data: body, error: parseError } = await parseJson<{ direction?: 'he-to-en' | 'en-to-he' }>(request)
+    if (parseError) return parseError
     const direction: 'he-to-en' | 'en-to-he' = body.direction || 'he-to-en'
 
     // Guard the destructive direction: en-to-he overwrites `tabs`, the primary

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest, requireResourcePermission } from '@/lib/auth'
 import { requirePurgeConfirmation } from '@/lib/purge-guard'
-import { getReportById, updateReport, deleteReport, purgeReport } from '@/lib/performance-reports'
+import { getReportById, updateReport, deleteReport, purgeReport, type PerformanceReport } from '@/lib/performance-reports'
 import { findOrCreateClient, validateClientForWorkspace } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
+import { parseJson } from '@/lib/http'
 
 export async function GET(
   request: NextRequest,
@@ -43,7 +44,8 @@ export async function PUT(
     const permErr = await requireResourcePermission(request, existing.workspace_id, 'edit')
     if (permErr) return permErr
 
-    const body = await request.json()
+    const { data: body, error: parseError } = await parseJson<Partial<Omit<PerformanceReport, 'id' | 'created_at'>>>(request)
+    if (parseError) return parseError
 
     // `!== undefined`, not truthiness: `workspace_id: null` is falsy, so the
     // old guard let any editor detach a record from its workspace with no check

@@ -5,6 +5,7 @@ import { rateLimit } from '@/lib/rate-limit'
 import { verifyResetToken } from '@/lib/reset-token'
 import { hashPassword } from '@/lib/hash'
 import { captureException } from '@/lib/logger'
+import { parseJson } from '@/lib/http'
 
 async function lookupPasswordHash(userId: string): Promise<string | null> {
   const { data } = await supabase
@@ -20,7 +21,9 @@ export async function POST(req: NextRequest) {
   if (rl) return rl
 
   try {
-    const { token, password } = await req.json()
+    const { data: body, error: parseError } = await parseJson<{ token?: string; password?: string }>(req)
+    if (parseError) return parseError
+    const { token, password } = body
     if (!token || !password || typeof password !== 'string' || password.length < 8) {
       return NextResponse.json({ error: 'הסיסמה חייבת להכיל לפחות 8 תווים' }, { status: 400 })
     }

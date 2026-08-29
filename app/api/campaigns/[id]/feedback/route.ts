@@ -6,6 +6,7 @@ import { verifyAccessToken } from '@/lib/content-access'
 import { getSessionFromRequest, requireWorkspacePermission } from '@/lib/auth'
 import { rateLimit } from '@/lib/rate-limit'
 import { captureException } from '@/lib/logger'
+import { parseJson } from '@/lib/http'
 
 const STATUS_HE: Record<FeedbackStatus, string> = { approved: 'אישר', rejected: 'ביקש שינוי ב', pending: 'סימן כממתין' }
 
@@ -119,7 +120,8 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     const { ok, isClient } = await authorize(req, campaign, 'edit')
     if (!ok) return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
 
-    const body = await req.json()
+    const { data: body, error: parseError } = await parseJson<{ bulk?: unknown; slide_key?: unknown; status?: unknown; comment?: unknown; author?: unknown }>(req)
+    if (parseError) return parseError
     const sections = parseSections(campaign)
     const sectionIds = new Set(sections.map(s => s.id))
 

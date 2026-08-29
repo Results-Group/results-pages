@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest, getActiveWorkspaceId, requireWorkspacePermission } from '@/lib/auth'
-import { getClients, createClient, getClientByName } from '@/lib/clients'
+import { getClients, createClient, getClientByName, type Client } from '@/lib/clients'
 import { supabase } from '@/lib/supabase'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
+import { parseJson } from '@/lib/http'
 
 const BRAND_COLOR_RE = /^#[0-9a-fA-F]{6}$/
 
@@ -68,7 +69,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const body = await req.json()
+    const { data: body, error: parseError } =
+      await parseJson<Partial<Pick<Client, 'name' | 'brand_color' | 'contacts' | 'notes'>>>(req)
+    if (parseError) return parseError
     const name = (body.name || '').trim()
     if (!name) return NextResponse.json({ error: 'שם לקוח הוא שדה חובה' }, { status: 400 })
     if (body.brand_color !== undefined && body.brand_color !== null && !BRAND_COLOR_RE.test(String(body.brand_color))) {

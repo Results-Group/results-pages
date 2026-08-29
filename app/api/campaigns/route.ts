@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest, getActiveWorkspaceId, requireWorkspacePermission } from '@/lib/auth'
-import { getCampaigns, createCampaign } from '@/lib/campaigns'
+import { getCampaigns, createCampaign, type Campaign } from '@/lib/campaigns'
 import { findOrCreateClient, getClientById } from '@/lib/clients'
 import { slugifyPath } from '@/lib/slug'
 import { supabase } from '@/lib/supabase'
@@ -8,6 +8,7 @@ import { getDeckViewRows } from '@/lib/deck-views'
 import { summarizeDeckViews } from '@/lib/deck-view-stats'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
+import { parseJson } from '@/lib/http'
 
 export async function GET(request: NextRequest) {
   const session = await getSessionFromRequest(request)
@@ -67,7 +68,8 @@ export async function POST(request: NextRequest) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const body = await request.json()
+    const { data: body, error: parseError } = await parseJson<Partial<Omit<Campaign, 'id' | 'created_at'>>>(request)
+    if (parseError) return parseError
     const { client, campaign_name, concept, status, password, sections, logo_path, publish_at } = body
 
     // Honor an explicit workspace from the body, falling back to the active-workspace cookie

@@ -87,10 +87,19 @@ export async function createWorkspace(name: string, slug: string, color?: string
   return data as Workspace
 }
 
+/**
+ * The parameter type is compile-time only — the route hands this whatever
+ * JSON arrived, so the columns are picked here, at runtime, or a stray
+ * `id`/`created_at` in the body would be written straight to the row.
+ */
 export async function updateWorkspace(id: string, updates: Partial<Pick<Workspace, 'name' | 'slug' | 'color' | 'icon'>>): Promise<Workspace> {
+  const fields: Record<string, unknown> = {}
+  for (const k of ['name', 'slug', 'color', 'icon'] as const) {
+    if (updates[k] !== undefined) fields[k] = updates[k]
+  }
   const { data, error } = await supabase
     .from('workspaces')
-    .update(updates)
+    .update(fields)
     .eq('id', id)
     .select()
     .single()
@@ -132,9 +141,13 @@ export async function updateWorkspaceMember(
   userId: string,
   updates: { role?: UserRole; permissions?: Record<string, boolean> },
 ): Promise<WorkspaceMember> {
+  // Same reason as updateWorkspace: pick the columns at runtime.
+  const fields: Record<string, unknown> = {}
+  if (updates.role !== undefined) fields.role = updates.role
+  if (updates.permissions !== undefined) fields.permissions = updates.permissions
   const { data, error } = await supabase
     .from('workspace_members')
-    .update(updates)
+    .update(fields)
     .eq('workspace_id', workspaceId)
     .eq('user_id', userId)
     .select()

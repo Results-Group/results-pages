@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest, requireWorkspacePermission, requireResourcePermission, type SessionUser } from '@/lib/auth'
-import { getClientById, updateClient, deleteClient, uploadClientLogo, type ClientContact } from '@/lib/clients'
+import { getClientById, updateClient, deleteClient, uploadClientLogo, type ClientContact, type Client } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
+import { parseJson } from '@/lib/http'
 
 interface Ctx { params: Promise<{ id: string }> }
 
@@ -81,7 +82,10 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
     }
 
     // JSON metadata update
-    const body = await req.json()
+    const { data: body, error: parseError } = await parseJson<
+      Partial<Pick<Client, 'name' | 'brand_color' | 'contacts' | 'notes' | 'logo_path' | 'positioning' | 'workspace_id'>>
+    >(req)
+    if (parseError) return parseError
     if (body.brand_color !== undefined && body.brand_color !== null && !BRAND_COLOR_RE.test(String(body.brand_color))) {
       return NextResponse.json({ error: 'צבע מותג לא תקין' }, { status: 400 })
     }

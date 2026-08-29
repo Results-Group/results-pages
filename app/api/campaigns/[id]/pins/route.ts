@@ -5,6 +5,7 @@ import { verifyAccessToken } from '@/lib/content-access'
 import { getSessionFromRequest, requireWorkspacePermission } from '@/lib/auth'
 import { rateLimit } from '@/lib/rate-limit'
 import { captureException } from '@/lib/logger'
+import { parseJson } from '@/lib/http'
 
 interface Ctx { params: Promise<{ id: string }> }
 
@@ -66,7 +67,8 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     if (!campaign || campaign.deleted_at) return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
     if (!(await authorize(req, campaign, 'edit'))) return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
 
-    const body = await req.json()
+    const { data: body, error: parseError } = await parseJson<{ slide_key?: unknown; x?: unknown; y?: unknown; asset_id?: unknown; comment?: unknown; author?: unknown }>(req)
+    if (parseError) return parseError
     const slideKey = String(body.slide_key || '').trim()
     const x = Number(body.x)
     const y = Number(body.y)
@@ -99,7 +101,8 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     const campaign = await getCampaignById(id)
     if (!campaign || campaign.deleted_at) return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
     if (!(await authorize(req, campaign, 'edit'))) return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
-    const body = await req.json()
+    const { data: body, error: parseError } = await parseJson<{ id?: unknown; resolved?: unknown }>(req)
+    if (parseError) return parseError
     const pinId = String(body.id || '').trim()
     if (!pinId) return NextResponse.json({ error: 'נתונים חסרים' }, { status: 400 })
     await setPinResolved(pinId, id, !!body.resolved)
@@ -118,7 +121,8 @@ export async function DELETE(req: NextRequest, { params }: Ctx) {
     const campaign = await getCampaignById(id)
     if (!campaign || campaign.deleted_at) return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
     if (!(await authorize(req, campaign, 'edit'))) return NextResponse.json({ error: 'אין הרשאה' }, { status: 403 })
-    const body = await req.json()
+    const { data: body, error: parseError } = await parseJson<{ id?: unknown }>(req)
+    if (parseError) return parseError
     const pinId = String(body.id || '').trim()
     if (!pinId) return NextResponse.json({ error: 'נתונים חסרים' }, { status: 400 })
     await deletePin(pinId, id)
