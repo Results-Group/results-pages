@@ -7,6 +7,14 @@ import { parseJson } from '@/lib/http'
 
 const TOO_MANY = 'יותר מדי ניסיונות התחברות. המתינו כדקה ונסו שוב.'
 
+/**
+ * A real bcrypt hash of a random string, compared against when the email
+ * doesn't exist. Without it the miss returned in ~1ms while a wrong password
+ * cost a full bcrypt round, and the gap alone told an attacker which
+ * addresses have accounts here.
+ */
+const TIMING_DECOY_HASH = '$2b$12$juWUoWiuZGl9vJ8bu5OtJOUK3.DaaUxXTC2SjDsYTzSObHrjoP0B6'
+
 export async function POST(req: NextRequest) {
   // Generous per-IP cap: a whole office often shares one NAT IP, so this only
   // guards infra from abuse — the real per-account brute-force guard is below.
@@ -35,6 +43,7 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error || !user) {
+    await verifyPassword(password, TIMING_DECOY_HASH)
     return NextResponse.json({ error: 'אימייל או סיסמה שגויים' }, { status: 401 })
   }
 

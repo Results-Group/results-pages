@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createSessionCookie, verifySessionToken, passwordFingerprint, type SessionUser } from '@/lib/auth'
+import { createSessionCookie, verifySessionToken, passwordFingerprint, roleLevel, type SessionUser } from '@/lib/auth'
 
 const user: SessionUser = {
   userId: 'u-1',
@@ -105,5 +105,22 @@ describe('token still carries what revocation needs', () => {
       JSON.stringify({ ...JSON.parse(Buffer.from(payload, 'base64').toString('utf8')), pwFp: 'x'.repeat(16) })
     ).toString('base64')
     expect(await verifySessionToken(`${forged}.${sig}`)).toBeNull()
+  })
+})
+
+// requireRole compares roleLevel(session.role) against roleLevel(minimum).
+// The old direct lookup returned undefined for an unrecognised role, and
+// `undefined < 2` is false — so an unexpected value in the role column passed
+// every check instead of failing them all.
+describe('role ranking fails closed', () => {
+  it('ranks the three real roles in order', () => {
+    expect(roleLevel('viewer')).toBeLessThan(roleLevel('editor'))
+    expect(roleLevel('editor')).toBeLessThan(roleLevel('admin'))
+  })
+
+  it('an unknown role outranks nothing — not even viewer', () => {
+    for (const bogus of ['superadmin', 'owner', 'ADMIN', '', 'toString', '__proto__']) {
+      expect(roleLevel(bogus)).toBeLessThan(roleLevel('viewer'))
+    }
   })
 })

@@ -7,7 +7,10 @@ import { captureException } from '@/lib/logger'
 import { parseJson } from '@/lib/http'
 
 export async function POST(req: NextRequest) {
-  const rl = await rateLimit(req, { windowMs: 60_000, max: 5, prefix: 'forgot-pw' })
+  // Generous per-IP cap: the whole team shares one office NAT address, so a
+  // tight per-IP limit here locked everyone out after one person's reset.
+  // The meaningful bucket is per-account, below.
+  const rl = await rateLimit(req, { windowMs: 60_000, max: 30, prefix: 'forgot-pw' })
   if (rl) return rl
 
   try {
@@ -17,6 +20,13 @@ export async function POST(req: NextRequest) {
     if (!email || typeof email !== 'string') {
       return NextResponse.json({ error: 'יש להזין אימייל' }, { status: 400 })
     }
+
+    // Caps reset mails to one address — a mailbox-flood guard, and it also
+    // stops one account's token being ground down by repeated issuance.
+    const emailRl = await rateLimit(req, {
+      windowMs: 60_000, max: 3, prefix: 'forgot-pw-acct', key: email.toLowerCase().trim(),
+    })
+    if (emailRl) return emailRl
 
     const { data: user } = await supabase
       .from('admin_users')

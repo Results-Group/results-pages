@@ -217,12 +217,24 @@ export async function requireAuth(request: NextRequest): Promise<NextResponse | 
 
 const ROLE_LEVEL: Record<UserRole, number> = { viewer: 0, editor: 1, admin: 2 }
 
+/**
+ * -1 for anything not in the table. The direct lookup returned undefined for
+ * an unrecognised role, and `undefined < 2` is false — so a row whose `role`
+ * column ever held an unexpected value passed every requireRole check
+ * instead of failing them all.
+ */
+export function roleLevel(role: string): number {
+  // Object.hasOwn, not `in`: `in` walks the prototype chain, so 'toString'
+  // would have "matched" and handed back a function to compare against.
+  return Object.hasOwn(ROLE_LEVEL, role) ? ROLE_LEVEL[role as UserRole] : -1
+}
+
 export async function requireRole(request: NextRequest, minimumRole: UserRole): Promise<NextResponse | null> {
   const session = await getSessionFromRequest(request)
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  if (ROLE_LEVEL[session.role] < ROLE_LEVEL[minimumRole]) {
+  if (roleLevel(session.role) < roleLevel(minimumRole)) {
     return NextResponse.json({ error: 'אין הרשאה לפעולה זו' }, { status: 403 })
   }
   return null
