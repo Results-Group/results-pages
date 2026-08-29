@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionFromRequest, requireWorkspacePermission } from '@/lib/auth'
+import { getSessionFromRequest, requireResourcePermission } from '@/lib/auth'
 import { getClientById, updateClient, uploadClientPositioningPdf } from '@/lib/clients'
 import { distillPositioning } from '@/lib/positioning'
 import { isAiConfigured } from '@/lib/ai'
@@ -19,12 +19,8 @@ async function guard(req: NextRequest, id: string) {
   if (!session) return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }), client: null, session: null }
   const client = await getClientById(id)
   if (!client) return { error: NextResponse.json({ error: 'לקוח לא נמצא' }, { status: 404 }), client: null, session: null }
-  if (client.workspace_id) {
-    const permErr = await requireWorkspacePermission(req, client.workspace_id, 'edit')
-    if (permErr) return { error: permErr, client: null, session: null }
-  } else if (!session.isOwner && session.role === 'viewer') {
-    return { error: NextResponse.json({ error: 'אין הרשאה לפעולה זו' }, { status: 403 }), client: null, session: null }
-  }
+  const permErr = await requireResourcePermission(req, client.workspace_id, 'edit')
+  if (permErr) return { error: permErr, client: null, session: null }
   return { error: null, client, session }
 }
 

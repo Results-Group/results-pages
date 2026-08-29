@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionFromRequest, requireWorkspacePermission } from '@/lib/auth'
+import { getSessionFromRequest, requireResourcePermission } from '@/lib/auth'
 import {
   getCampaignById, createCampaign, updateCampaign, copyAsset, deleteCampaignAssets,
   type CampaignSection,
@@ -31,10 +31,10 @@ export async function POST(req: NextRequest, { params }: Ctx) {
   const source = await getCampaignById(id)
   if (!source || source.deleted_at) return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
 
-  if (source.workspace_id) {
-    const permErr = await requireWorkspacePermission(req, source.workspace_id, 'create')
-    if (permErr) return permErr
-  }
+  // Orphan campaigns went through unchecked, and the 201 body carries the
+  // source's whole `sections` payload — every slide, concept and copy line.
+  const permErr = await requireResourcePermission(req, source.workspace_id, 'create')
+  if (permErr) return permErr
 
   // Optional body: { asTemplate?: boolean, name?: string }
   const body = await req.json().catch(() => ({} as { asTemplate?: boolean; name?: string }))

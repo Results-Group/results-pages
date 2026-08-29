@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionFromRequest, requireWorkspacePermission, requireResourcePermission } from '@/lib/auth'
+import { getSessionFromRequest, requireResourcePermission } from '@/lib/auth'
 import { requirePurgeConfirmation } from '@/lib/purge-guard'
 import { getReportById, updateReport, deleteReport, purgeReport } from '@/lib/performance-reports'
-import { findOrCreateClient } from '@/lib/clients'
+import { findOrCreateClient, validateClientForWorkspace } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
 
@@ -45,12 +45,22 @@ export async function PUT(
 
     const body = await request.json()
 
-    if (body.workspace_id && body.workspace_id !== existing.workspace_id) {
-      const permErr = await requireWorkspacePermission(request, body.workspace_id, 'edit')
+    // `!== undefined`, not truthiness: `workspace_id: null` is falsy, so the
+    // old guard let any editor detach a record from its workspace with no check
+    // on the target — the row then vanished from every teammate's filtered list
+    // and became owner/admin-only. requireResourcePermission covers the null
+    // case properly. app/api/pages/[id] already did it this way.
+    if (body.workspace_id !== undefined && body.workspace_id !== existing.workspace_id) {
+      const permErr = await requireResourcePermission(request, body.workspace_id, 'edit')
       if (permErr) return permErr
     }
 
     const targetWorkspaceId = body.workspace_id !== undefined ? body.workspace_id : existing.workspace_id
+    // A client_id from the body must belong to the target workspace, or an
+    // editor can attach another workspace's client and read its positioning
+    // back through generate-copy. The create route already checked this.
+    const clientErr = await validateClientForWorkspace(body.client_id, targetWorkspaceId)
+    if (clientErr) return NextResponse.json({ error: clientErr }, { status: 400 })
     if (typeof body.client === 'string' && body.client.trim() && (body.client_id === undefined || body.client_id === null)) {
       try {
         const c = await findOrCreateClient(body.client, targetWorkspaceId)

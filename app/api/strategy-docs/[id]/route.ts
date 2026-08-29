@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import {
-  getSessionFromRequest, requireResourcePermission, requireWorkspacePermission,
+  getSessionFromRequest, requireResourcePermission,
 } from '@/lib/auth'
 import {
   getStrategyDocById, updateStrategyDoc, deleteStrategyDoc, purgeStrategyDoc,
   StrategyDocConflictError,
 } from '@/lib/strategy-docs'
 import { normalizeSections } from '@/lib/strategy/normalize'
-import { findOrCreateClient } from '@/lib/clients'
+import { findOrCreateClient, validateClientForWorkspace } from '@/lib/clients'
 import { requirePurgeConfirmation } from '@/lib/purge-guard'
 import { slugifyPath } from '@/lib/slug'
 import { parseJson } from '@/lib/http'
@@ -55,8 +55,13 @@ export async function PUT(request: NextRequest, { params }: Ctx) {
 
   // Moving a document into another workspace needs edit rights on the target
   // too, not just on the one it is leaving.
-  if (body.workspace_id && body.workspace_id !== existing.workspace_id) {
-    const targetErr = await requireWorkspacePermission(request, body.workspace_id, 'edit')
+  // `!== undefined`, not truthiness: `workspace_id: null` is falsy, so the
+  // old guard let any editor detach a record from its workspace with no check
+  // on the target — the row then vanished from every teammate's filtered list
+  // and became owner/admin-only. requireResourcePermission covers the null
+  // case properly. app/api/pages/[id] already did it this way.
+  if (body.workspace_id !== undefined && body.workspace_id !== existing.workspace_id) {
+    const targetErr = await requireResourcePermission(request, body.workspace_id, 'edit')
     if (targetErr) return targetErr
   }
 
@@ -72,6 +77,9 @@ export async function PUT(request: NextRequest, { params }: Ctx) {
   if (body.sections !== undefined) patch.sections = normalizeSections(body.sections)
 
   if (body.client_id !== undefined) {
+    const targetWs = body.workspace_id !== undefined ? body.workspace_id : existing.workspace_id
+    const clientErr = await validateClientForWorkspace(body.client_id, targetWs)
+    if (clientErr) return NextResponse.json({ error: clientErr }, { status: 400 })
     patch.client_id = body.client_id
   } else if (body.client && !existing.client_id) {
     // Self-heal the link the same way the campaigns route does.

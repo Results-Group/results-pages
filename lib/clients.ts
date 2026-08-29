@@ -131,6 +131,28 @@ export async function findOrCreateClient(name: string, workspaceId?: string | nu
   }
 }
 
+/**
+ * Guards a client_id arriving from a request body. Without it an editor could
+ * attach ANY client uuid to a record they own — and generate-copy then feeds
+ * that client's confidential positioning document into the prompt and hands
+ * the text back as copy. The create routes checked this; the update routes
+ * passed the id straight through.
+ *
+ * Returns an error message (Hebrew, ready to return as 400) or null.
+ */
+export async function validateClientForWorkspace(
+  clientId: string | null | undefined,
+  workspaceId: string | null | undefined,
+): Promise<string | null> {
+  if (!clientId) return null
+  const client = await getClientById(clientId)
+  if (!client) return 'הלקוח שנבחר לא נמצא'
+  if (client.workspace_id && client.workspace_id !== workspaceId) {
+    return 'הלקוח שנבחר אינו שייך לסביבת העבודה שנבחרה'
+  }
+  return null
+}
+
 export async function updateClient(
   id: string,
   data: Partial<Pick<Client, 'name' | 'logo_path' | 'brand_color' | 'contacts' | 'notes' | 'workspace_id' | 'monday_item_id' | 'positioning_pdf_path' | 'positioning'>>,

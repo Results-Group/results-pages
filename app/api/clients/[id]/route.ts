@@ -28,12 +28,12 @@ async function ensurePermission(
 ): Promise<{ session: SessionUser; error: null } | { session: null; error: NextResponse }> {
   const session = await getSessionFromRequest(req)
   if (!session) return { session: null, error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
-  if (workspaceId) {
-    const permErr = await requireWorkspacePermission(req, workspaceId, action)
-    if (permErr) return { session: null, error: permErr }
-  } else if (!session.isOwner && session.role === 'viewer') {
-    return { session: null, error: NextResponse.json({ error: 'אין הרשאה לפעולה זו' }, { status: 403 }) }
-  }
+  // requireResourcePermission, not an inline `if (workspaceId)` — the skipped
+  // branch let any non-viewer edit an orphan client and read the whole row
+  // back: positioning, contacts, notes. GET on the same object returned 403.
+  // Same bug the merge route documents one file over.
+  const permErr = await requireResourcePermission(req, workspaceId, action)
+  if (permErr) return { session: null, error: permErr }
   return { session, error: null }
 }
 

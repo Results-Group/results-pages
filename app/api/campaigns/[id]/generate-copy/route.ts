@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionFromRequest, requireWorkspacePermission } from '@/lib/auth'
+import { getSessionFromRequest, requireResourcePermission } from '@/lib/auth'
 import { getCampaignById } from '@/lib/campaigns'
 import { getClientById } from '@/lib/clients'
 import { geminiGenerateJson, isAiConfigured } from '@/lib/ai'
@@ -20,12 +20,8 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 
   const campaign = await getCampaignById(id)
   if (!campaign) return NextResponse.json({ error: 'קמפיין לא נמצא' }, { status: 404 })
-  if (campaign.workspace_id) {
-    const permErr = await requireWorkspacePermission(req, campaign.workspace_id, 'edit')
-    if (permErr) return permErr
-  } else if (!session.isOwner && session.role === 'viewer') {
-    return NextResponse.json({ error: 'אין הרשאה לפעולה זו' }, { status: 403 })
-  }
+  const permErr = await requireResourcePermission(req, campaign.workspace_id, 'edit')
+  if (permErr) return permErr
 
   const rl = await rateLimit(req, { windowMs: 60_000, max: 15, prefix: 'ai-copy' })
   if (rl) return rl
