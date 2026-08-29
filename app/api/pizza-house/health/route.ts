@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifySessionToken } from '@/lib/auth'
-import { pizzaHouseQuery } from '@/lib/pizza-house-db'
+import { pizzaHouseQuery, runWithBranch, isPizzaBranch, listPizzaBranches } from '@/lib/pizza-house-db'
 import { captureException } from '@/lib/logger'
 
 export const dynamic = 'force-dynamic'
@@ -30,20 +30,34 @@ export async function GET(req: NextRequest) {
   if (!(await isAuthorized(req))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+  // This ran with no branch context at all, which meant it always probed the
+  // first branch's credentials while reporting as if it spoke for the whole
+  // POS — a Mevaseret operator got Givat Ze'ev's health. ?branch= picks one;
+  // the default is the first configured branch, same as it effectively was.
+  const requested = req.nextUrl.searchParams.get('branch')
+  const branches = listPizzaBranches()
+  if (!branches.length) {
+    return NextResponse.json({ ok: false, error: 'לא מוגדר אף סניף' }, { status: 503 })
+  }
+  const branchId = requested && isPizzaBranch(requested) ? requested : branches[0].id
+
   const startedAt = Date.now()
   try {
-    const rows = await pizzaHouseQuery<{ total: number; last_deal: string }>(
-      'SELECT COUNT(*) as total, MAX(tm_open) as last_deal FROM deals'
+    const rows = await runWithBranch(branchId, () =>
+      pizzaHouseQuery<{ total: number; last_deal: string }>(
+        'SELECT COUNT(*) as total, MAX(tm_open) as last_deal FROM deals'
+      )
     )
     return NextResponse.json({
       ok: true,
+      branch: branchId,
       latency_ms: Date.now() - startedAt,
       total_deals: rows[0]?.total ?? null,
       last_deal: rows[0]?.last_deal ?? null,
     })
   } catch (err) {
     // The real error goes to Sentry, never to the caller.
-    captureException(err, { route: 'GET /api/pizza-house/health' })
+    captureException(err, { route: 'GET /api/pizza-house/health', branchId })
     return NextResponse.json(
       { ok: false, latency_ms: Date.now() - startedAt, error: 'הקופה אינה זמינה' },
       { status: 500 },
