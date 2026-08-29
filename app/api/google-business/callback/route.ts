@@ -24,7 +24,23 @@ import { captureException } from '@/lib/logger'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
-function page(title: string, body: string, ok = true): NextResponse {
+/**
+ * `body` is HTML we author (a couple of pages use <strong>/<br>), so it cannot
+ * be escaped wholesale — every VALUE interpolated into it goes through h().
+ * Google's `error` query param used to land here raw: reflected XSS on a route
+ * that only an owner/admin session can reach, one crafted link away.
+ */
+function h(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function page(rawTitle: string, body: string, ok = true): NextResponse {
+  const title = h(rawTitle)
   return new NextResponse(
     `<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="UTF-8">
 <title>${title}</title></head>
@@ -49,7 +65,7 @@ export async function GET(req: NextRequest) {
   const url = req.nextUrl
   const error = url.searchParams.get('error')
   if (error) {
-    return page('החיבור בוטל', `Google החזיר: ${error}`, false)
+    return page('החיבור בוטל', `Google החזיר: ${h(error)}`, false)
   }
 
   const code = url.searchParams.get('code')
@@ -140,14 +156,14 @@ export async function GET(req: NextRequest) {
     const res = discoveryError
       ? page(
           'ההרשאה נשמרה — אבל לא הצלחנו לקרוא את הסניפים',
-          `חשבון <strong>${email}</strong> חובר, וההרשאה שמורה — <strong>אין צורך לאשר שוב</strong>.<br><br>
-           גוגל החזירה: <code style="color:#f3d56d">${discoveryError.slice(0, 200)}</code><br><br>
+          `חשבון <strong>${h(email)}</strong> חובר, וההרשאה שמורה — <strong>אין צורך לאשר שוב</strong>.<br><br>
+           גוגל החזירה: <code style="color:#f3d56d">${h(discoveryError.slice(0, 200))}</code><br><br>
            אם זה API שעדיין לא הופעל — להפעיל אותו ואז לרענן את הסניפים, בלי לחזור על האישור.`,
           false
         )
       : page(
           'החיבור הושלם',
-          `חשבון <strong>${email}</strong> חובר בהצלחה.<br>נמצאו <strong>${locationRows}</strong> סניפים ב-Business Profile.<br><br>
+          `חשבון <strong>${h(email)}</strong> חובר בהצלחה.<br>נמצאו <strong>${locationRows}</strong> סניפים ב-Business Profile.<br><br>
            אפשר לסגור את החלון — הסנכרון הלילי יתחיל מעצמו.`
         )
     res.cookies.delete('gbp_oauth_state')
@@ -156,7 +172,7 @@ export async function GET(req: NextRequest) {
     captureException(err, { route: 'GET /api/google-business/callback' })
     return page(
       'החיבור נכשל',
-      `אירעה שגיאה מול Google: ${err instanceof Error ? err.message.slice(0, 200) : 'לא ידוע'}`,
+      `אירעה שגיאה מול Google: ${h(err instanceof Error ? err.message.slice(0, 200) : 'לא ידוע')}`,
       false
     )
   }

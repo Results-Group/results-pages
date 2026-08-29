@@ -234,7 +234,11 @@ const TITLE_TAG_RE = /<title[^>]*>[\s\S]*?<\/title>/i
  * never the browser tab — the one place the client actually looks.
  */
 function injectOgTags(html: string, ogTags: string, title: string): string {
-  const titleTag = `<title>${escapeHtml(title)}</title>`
+  // Every other public surface sets robots:noindex through Next metadata;
+  // these pages are raw HTML and were the exception, so a password-protected
+  // landing page could be indexed if its URL ever leaked into a crawl.
+  const robotsTag = '<meta name="robots" content="noindex, nofollow" />'
+  const titleTag = `<title>${escapeHtml(title)}</title>${robotsTag}`
   const hasTitle = TITLE_TAG_RE.test(html)
   const body = hasTitle ? html.replace(TITLE_TAG_RE, titleTag) : html
 
