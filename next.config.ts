@@ -19,7 +19,11 @@ const SERVED_PAGE_CSP = [
   "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net https://my-fonts-bucket-results.s3.eu-north-1.amazonaws.com data:",
   // Deliberately no 'self' — see the note above.
   "connect-src https://api.frankfurter.app https://api.binance.com https://hooks.zapier.com https://api.ipify.org https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://www.googletagmanager.com https://connect.facebook.net https://*.clarity.ms https://*.hotjar.com https://*.hotjar.io",
-  "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://maps.google.com https://www.google.com https://drive.google.com",
+  // Campaign pages embed the client's own live landing page next to the
+  // creative, so each such client site is named here. The allowlist was
+  // derived from the stored pages at the time it was written; a new page with
+  // a new embed needs its host added or the frame renders blank.
+  "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://maps.google.com https://www.google.com https://drive.google.com https://netiv-hachesed.vercel.app",
   "object-src 'none'",
   "base-uri 'self'",
   // Blocks exfiltration by auto-submitted form. Every stored page posts to '#'.
