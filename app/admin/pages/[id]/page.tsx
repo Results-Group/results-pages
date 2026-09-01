@@ -170,7 +170,9 @@ export default function EditPage() {
       const res = await fetch(`/api/pages/${id}/html`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ html }),
+        // Only the visual editor asks for this. The code editor below edits
+        // structure on purpose and must stay free to remove things.
+        body: JSON.stringify({ html, guardStructure: true }),
       })
       if (res.ok) {
         setSuccessMsg('השינויים נשמרו בהצלחה!')
@@ -178,7 +180,11 @@ export default function EditPage() {
         setTimeout(() => setSuccessMsg(''), 4000)
       } else {
         const data = await res.json()
-        setError(data.error || 'שגיאה בשמירה')
+        // 409 carries the list of what the edit would have destroyed — say
+        // exactly what, or the operator has no idea what to undo.
+        setError(Array.isArray(data.lost) && data.lost.length
+          ? `${data.error}\n${data.lost.map((l: string) => `• ${l}`).join('\n')}`
+          : data.error || 'שגיאה בשמירה')
       }
     } catch {
       setError('שגיאה בשמירה')
@@ -836,7 +842,9 @@ export default function EditPage() {
           </span>
         </div>
 
-        {error && <p className="text-sm" style={{ color: 'var(--admin-danger)' }}>{error}</p>}
+        {/* pre-line: the structure guard returns a bulleted list of what an
+            edit would have deleted, and a plain <p> collapses it to one line. */}
+        {error && <p className="text-sm" style={{ color: 'var(--admin-danger)', whiteSpace: 'pre-line' }}>{error}</p>}
 
         <div className="flex gap-3 pt-2">
           <button

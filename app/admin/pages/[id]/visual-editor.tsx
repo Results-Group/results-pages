@@ -26,6 +26,37 @@ interface Props {
   onDirtyChange?: (dirty: boolean) => void
 }
 
+/**
+ * Elements a caret must not be able to eat. designMode makes the whole document
+ * editable, so a backspace beside a slider arrow removes the arrow — the page
+ * still renders, so nothing announces the loss. Marking these non-editable
+ * makes each one an atomic island that ordinary typing cannot dissolve.
+ *
+ * <a> is deliberately absent: its text is legitimate copy to edit. Deleting a
+ * whole link is caught server-side instead, where every path is covered.
+ */
+const LOCKED = 'button, img, svg, iframe, video, audio, canvas, input, select, textarea, object, embed'
+
+/** Lock the structure. The marker attribute records what we added, so export
+ *  can strip exactly those and never a contenteditable the page shipped with. */
+function lockStructure(doc: Document) {
+  doc.querySelectorAll(LOCKED).forEach(el => {
+    if (el.hasAttribute('contenteditable')) return
+    el.setAttribute('contenteditable', 'false')
+    el.setAttribute('data-rp-locked', '')
+  })
+}
+
+/** Undo lockStructure on a clone, so the attributes never reach the live page. */
+function unlockClone(doc: Document): string {
+  const clone = doc.documentElement.cloneNode(true) as HTMLElement
+  clone.querySelectorAll('[data-rp-locked]').forEach(el => {
+    el.removeAttribute('contenteditable')
+    el.removeAttribute('data-rp-locked')
+  })
+  return clone.outerHTML
+}
+
 const VisualEditor = forwardRef<VisualEditorRef, Props>(function VisualEditor(
   { html, onSave, saving, onDirtyChange },
   ref,
@@ -45,7 +76,9 @@ const VisualEditor = forwardRef<VisualEditorRef, Props>(function VisualEditor(
   const getHtml = useCallback((): string => {
     const doc = iframeRef.current?.contentDocument
     if (!doc || !ready) return html
-    return '<!DOCTYPE html>\n' + doc.documentElement.outerHTML
+    // Never doc.documentElement.outerHTML directly — that would ship our own
+    // contenteditable="false" markers into the page the client sees.
+    return '<!DOCTYPE html>\n' + unlockClone(doc)
   }, [html, ready])
 
   useImperativeHandle(ref, () => ({ getHtml }), [getHtml])
@@ -63,6 +96,7 @@ const VisualEditor = forwardRef<VisualEditorRef, Props>(function VisualEditor(
     setTimeout(() => {
       doc.designMode = 'on'
       try { doc.execCommand('styleWithCSS', false, 'true') } catch { /* noop */ }
+      lockStructure(doc)
       doc.addEventListener('input', () => setDirty(true))
       doc.addEventListener('paste', () => setDirty(true))
       setReady(true)

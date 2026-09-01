@@ -3,6 +3,7 @@ import { getPageById, downloadFile, uploadFile, createVersion, markPageTranslati
 import { requireResourcePermission } from '@/lib/auth'
 import { minifyHtml } from '@/lib/minify'
 import { parseJson, parseForm } from '@/lib/http'
+import { readStructure, describeStructureLoss } from '@/lib/html-structure'
 
 interface Ctx { params: Promise<{ id: string }> }
 
@@ -54,12 +55,32 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
     }
     htmlContent = await file.text()
   } else {
-    const { data: body, error: parseError } = await parseJson<{ html?: string }>(req)
+    const { data: body, error: parseError } = await parseJson<{ html?: string; guardStructure?: boolean }>(req)
     if (parseError) return parseError
     if (!body.html || typeof body.html !== 'string') {
       return NextResponse.json({ error: 'No HTML content provided' }, { status: 400 })
     }
     htmlContent = body.html
+
+    // The visual editor asks for this; the code editor and the file-replace
+    // path deliberately do not. designMode makes the whole document editable,
+    // so a caret beside a slider arrow deletes the arrow as readily as a
+    // letter — and the page still renders, so nothing says anything is wrong.
+    // A save that would drop part of the page's machinery is refused here
+    // rather than discovered by the client weeks later.
+    if (body.guardStructure) {
+      const current = (await downloadFile(sourcePath(page.file_path)))
+        ?? (await downloadFile(page.file_path))
+      if (current) {
+        const lost = describeStructureLoss(readStructure(current), readStructure(htmlContent))
+        if (lost.length) {
+          return NextResponse.json(
+            { error: 'השמירה נעצרה — העריכה הייתה מוחקת חלקים מהדף', lost },
+            { status: 409 },
+          )
+        }
+      }
+    }
   }
 
   // Save current served file as a version before overwriting
