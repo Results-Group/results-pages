@@ -47,12 +47,40 @@ function lockStructure(doc: Document) {
   })
 }
 
+/**
+ * Remember every class attribute as the document arrived.
+ *
+ * The export is documentElement.outerHTML, which is the DOM as it stands right
+ * then — and an uploaded page's own scripts toggle classes as you look around
+ * it. Save while viewing the fourth tab and that tab is what the file now
+ * opens on: the Netiv HaChesed deck spent a day opening on its billboard
+ * section instead of its cover, because a caption was edited from there.
+ *
+ * The snapshot rides on the element itself rather than on an index, so it
+ * survives text edits adding or removing nodes around it.
+ */
+function snapshotClasses(doc: Document) {
+  doc.querySelectorAll('[class]').forEach(el => {
+    el.setAttribute('data-rp-class', el.getAttribute('class') || '')
+  })
+}
+
 /** Undo lockStructure on a clone, so the attributes never reach the live page. */
 function unlockClone(doc: Document): string {
   const clone = doc.documentElement.cloneNode(true) as HTMLElement
   clone.querySelectorAll('[data-rp-locked]').forEach(el => {
     el.removeAttribute('contenteditable')
     el.removeAttribute('data-rp-locked')
+  })
+  // Put every class back the way the file had it, undoing whatever the page's
+  // own navigation toggled while the operator was reading. Elements the
+  // toolbar created carry no snapshot and keep what they have — formatting
+  // runs with styleWithCSS, so it writes inline styles, never classes.
+  clone.querySelectorAll('[data-rp-class]').forEach(el => {
+    const original = el.getAttribute('data-rp-class') || ''
+    el.removeAttribute('data-rp-class')
+    if (original) el.setAttribute('class', original)
+    else el.removeAttribute('class')
   })
   return clone.outerHTML
 }
@@ -97,6 +125,7 @@ const VisualEditor = forwardRef<VisualEditorRef, Props>(function VisualEditor(
       doc.designMode = 'on'
       try { doc.execCommand('styleWithCSS', false, 'true') } catch { /* noop */ }
       lockStructure(doc)
+      snapshotClasses(doc)
       doc.addEventListener('input', () => setDirty(true))
       doc.addEventListener('paste', () => setDirty(true))
       setReady(true)
