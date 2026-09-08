@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { downloadAsset } from '@/lib/campaigns'
+import { needsJpegFallback, contentTypeFor } from '@/lib/asset-format'
 import { CLIENT_DOCS_BUCKET } from '@/lib/clients'
 import { rateLimit } from '@/lib/rate-limit'
 import { getSessionFromRequest } from '@/lib/auth'
@@ -61,7 +62,11 @@ export async function GET(
   const forceJpeg = request.nextUrl.searchParams.get('format') === 'jpeg'
   const accept = request.headers.get('accept') || ''
   const supportsWebp = accept.includes('image/webp')
-  const wantsJpeg = forceJpeg || !supportsWebp
+  // Only webp assets have a jpeg sibling worth reaching for. See
+  // lib/asset-format.ts — applied to a stored png this branch re-fetched the
+  // same file and mislabelled it, and the sharp path below would have
+  // flattened its transparency onto black.
+  const wantsJpeg = needsJpegFallback(filePath, { forceJpeg, supportsWebp })
 
   try {
     if (wantsJpeg) {
@@ -99,7 +104,7 @@ export async function GET(
     return new NextResponse(new Uint8Array(asset.buffer), {
       status: 200,
       headers: {
-        'Content-Type': asset.contentType || 'image/webp',
+        'Content-Type': asset.contentType || contentTypeFor(filePath) || 'application/octet-stream',
         ...CACHE_HEADERS,
       },
     })
