@@ -23,7 +23,7 @@ const SERVED_PAGE_CSP = [
   // creative, so each such client site is named here. The allowlist was
   // derived from the stored pages at the time it was written; a new page with
   // a new embed needs its host added or the frame renders blank.
-  "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://maps.google.com https://www.google.com https://drive.google.com https://netiv-hachesed.vercel.app",
+  "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://maps.google.com https://www.google.com https://drive.google.com https://netiv-hachesed.vercel.app https://relaxgroup.co.il",
   "object-src 'none'",
   "base-uri 'self'",
   // Blocks exfiltration by auto-submitted form. Every stored page posts to '#'.
