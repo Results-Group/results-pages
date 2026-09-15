@@ -25,6 +25,20 @@ export const maxDuration = 120
 
 const EMPTY = "('','---','0','0000000','---------','-')"
 
+/**
+ * The 26 tables both branches had when every one was enumerated on 2026-08-05
+ * (see the note in lib/pizza-house-queries.ts). Anything outside this set is
+ * something Aviv added since — which is exactly where an order↔customer link
+ * would live if they built one, since deals.client_id is still empty.
+ */
+const BASELINE = new Set([
+  'advanced_pay', 'auto_item', 'cheque', 'clients', 'credit', 'credit_realize',
+  'creditcard', 'dc_deals', 'deal_change', 'deals', 'debts', 'departments',
+  'family', 'groups', 'item_status', 'items', 'items_drag', 'items_sale',
+  'payment', 'paymentitm', 'suppliers', 'tips', 'vauch', 'worker',
+  'worker_hours', 'z_info',
+])
+
 export async function GET(req: NextRequest) {
   const session = await getSessionFromRequest(req)
   // `!session.scope`: the shared Pizza House password mints a scoped session in
@@ -65,6 +79,46 @@ export async function GET(req: NextRequest) {
             with_phone: await one(`SELECT COUNT(*) FROM clients WHERE TRIM(COALESCE(phone,'')) NOT IN ${EMPTY}`),
           },
         }
+
+        // Every table by name and row count — names only, never contents.
+        const tables = await pizzaHouseQuery<{ name: string }>(
+          `SELECT TABLE_NAME AS name FROM information_schema.tables
+           WHERE table_schema = DATABASE() ORDER BY TABLE_NAME`,
+        )
+        const inventory: Record<string, number | string> = {}
+        const added: Record<string, unknown> = {}
+        for (const { name } of tables) {
+          let rows: number | string
+          try {
+            rows = Number(await one(`SELECT COUNT(*) FROM \`${name}\``))
+          } catch {
+            rows = 'לא קריא'
+          }
+          inventory[name] = rows
+          if (BASELINE.has(name)) continue
+          // A table Aviv added: show its column names, and whether it is shaped
+          // like a link — something pointing at an order AND at a customer.
+          const cols = (await pizzaHouseQuery<{ c: string }>(
+            `SELECT COLUMN_NAME AS c FROM information_schema.columns
+             WHERE table_schema = DATABASE() AND table_name = '${name}' ORDER BY ORDINAL_POSITION`,
+          )).map(r => r.c)
+          // Only id-shaped columns count as a reference. A loose /deal/ matched
+          // client_delivery.next_deal_memo — a free-text note — and reported
+          // the customer list as an order link, which is the opposite of true.
+          const refsOrder = cols.filter(c => /^(id_?(deal|receipt|docum|order)|(deal|receipt|docum|order)_?id)$/i.test(c))
+          const refsCustomer = cols.filter(c => /^(id_?(client|customer|delivery)|(client|customer|delivery)_?id)$/i.test(c))
+          const entry: Record<string, unknown> = {
+            rows, columns: cols,
+            looks_like_order_customer_link: refsOrder.length > 0 && refsCustomer.length > 0,
+          }
+          if (refsOrder.includes('id_deal') && typeof rows === 'number' && rows > 0) {
+            entry.rows_matching_an_order = await one(
+              `SELECT COUNT(*) FROM \`${name}\` x JOIN deals d ON d.id_deal = x.id_deal`,
+            )
+          }
+          added[name] = entry
+        }
+        result.tables = { baseline: BASELINE.size, now: tables.length, added_since_aug_5: added, all: inventory }
 
         if (hasDelivery) {
           result.delivery_customers = {
