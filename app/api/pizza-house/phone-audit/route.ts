@@ -133,6 +133,45 @@ export async function GET(req: NextRequest) {
               'SELECT COUNT(*) FROM deals d JOIN client_delivery c ON c.id = d.client_id WHERE d.client_id <> 0',
             ),
           }
+
+          // By 2026-09-24 Aviv linked the other way round: deals.client_id is
+          // still empty, but each customer row now carries its most recent
+          // order — last_deal_id / _date / _sum. Only the LAST order, so it
+          // can attribute at most one POS order per customer; the consistency
+          // checks below decide whether the link is trustworthy at all.
+          const cdCols = (await pizzaHouseQuery<{ c: string }>(
+            `SELECT COLUMN_NAME AS c FROM information_schema.columns
+             WHERE table_schema = DATABASE() AND table_name = 'client_delivery' ORDER BY ORDINAL_POSITION`,
+          )).map(r => r.c)
+          const delivery = result.delivery_customers as Record<string, unknown>
+          delivery.columns = cdCols
+
+          if (cdCols.includes('last_deal_id')) {
+            const recency = await pizzaHouseQuery<{ bucket: string; n: number }>(
+              `SELECT CASE
+                 WHEN last_deal_date IS NULL OR last_deal_date < '2000-01-01' THEN '0_none'
+                 WHEN last_deal_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)  THEN '1_up_to_30d'
+                 WHEN last_deal_date >= DATE_SUB(NOW(), INTERVAL 90 DAY)  THEN '2_30_to_90d'
+                 WHEN last_deal_date >= DATE_SUB(NOW(), INTERVAL 180 DAY) THEN '3_90_to_180d'
+                 WHEN last_deal_date >= DATE_SUB(NOW(), INTERVAL 365 DAY) THEN '4_180_to_365d'
+                 ELSE '5_over_365d' END AS bucket, COUNT(*) AS n
+               FROM client_delivery GROUP BY bucket ORDER BY bucket`,
+            )
+            delivery.last_deal = {
+              filled: await one('SELECT COUNT(*) FROM client_delivery WHERE last_deal_id IS NOT NULL AND last_deal_id <> 0'),
+              unique: await one('SELECT COUNT(DISTINCT last_deal_id) FROM client_delivery WHERE last_deal_id IS NOT NULL AND last_deal_id <> 0'),
+              found_in_pos: await one('SELECT COUNT(*) FROM client_delivery c JOIN deals d ON d.id_deal = c.last_deal_id'),
+              date_matches_pos: await one('SELECT COUNT(*) FROM client_delivery c JOIN deals d ON d.id_deal = c.last_deal_id WHERE DATE(c.last_deal_date) = DATE(d.tm_open)'),
+              sum_matches_pos: await one('SELECT COUNT(*) FROM client_delivery c JOIN deals d ON d.id_deal = c.last_deal_id WHERE ABS(c.last_deal_sum - d.sum) < 0.01'),
+              earliest: await one("SELECT MIN(last_deal_date) FROM client_delivery WHERE last_deal_date > '2000-01-01'"),
+              latest: await one('SELECT MAX(last_deal_date) FROM client_delivery'),
+              recency: Object.fromEntries(recency.map(r => [r.bucket.slice(2), Number(r.n)])),
+              pos_orders_in_window: await one('SELECT COUNT(*) FROM deals'),
+              pos_orders_attributable: await one('SELECT COUNT(DISTINCT d.id_deal) FROM deals d JOIN client_delivery c ON c.last_deal_id = d.id_deal'),
+            }
+          } else {
+            delivery.last_deal = 'העמודות last_deal_* עדיין לא קיימות בסניף הזה'
+          }
         }
         return result
       })
