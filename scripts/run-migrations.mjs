@@ -85,11 +85,20 @@ function splitStatements (sql) {
   // Split on semicolons that terminate a statement, skipping comment-only lines.
   const stmts = []
   let buf = ''
+  // Inside a dollar-quoted body ($$ … $$ / $tag$ … $tag$) a semicolon ends a
+  // line of the function, not the statement. Without tracking this, the
+  // `DO $$ BEGIN … END $$;` block in migration-reports.sql was cut mid-body
+  // and every migration after it never ran.
+  let inDollar = false
   for (const line of sql.split('\n')) {
     const trimmed = line.trim()
     // Keep comment lines in context (Postgres needs them stripped for multi-stmt)
-    if (!trimmed.startsWith('--')) buf += line + '\n'
-    if (trimmed.endsWith(';')) {
+    if (!trimmed.startsWith('--')) {
+      buf += line + '\n'
+      const marks = (line.match(/\$[A-Za-z_]*\$/g) || []).length
+      if (marks % 2 === 1) inDollar = !inDollar
+    }
+    if (!inDollar && trimmed.endsWith(';')) {
       const s = buf.trim()
       if (s) stmts.push(s)
       buf = ''
