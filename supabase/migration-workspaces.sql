@@ -51,7 +51,12 @@ UPDATE campaigns SET workspace_id = '00000000-0000-0000-0000-000000000001' WHERE
 -- Make the first admin user an owner
 UPDATE admin_users SET is_owner = true WHERE email = 'info@resultsdigital.org';
 
--- Add all existing users as members of the default workspace with their current role
+-- Add all existing users as members of the default workspace with their current role.
+-- A one-time bootstrap: it runs only while there are no memberships at all.
+-- Unguarded, every re-run of the migrations granted the default workspace to
+-- any user who was not in it — on 2026-09-26 it added an account created two
+-- days earlier. Membership is decided in the admin, never by a migration.
 INSERT INTO workspace_members (workspace_id, user_id, role)
 SELECT '00000000-0000-0000-0000-000000000001', id, role FROM admin_users
+WHERE NOT EXISTS (SELECT 1 FROM workspace_members)
 ON CONFLICT (workspace_id, user_id) DO NOTHING;

@@ -34,12 +34,18 @@ ALTER TABLE campaigns     ADD COLUMN IF NOT EXISTS client_id UUID REFERENCES cli
 -- NOT EXISTS guard keeps the insert idempotent for NULL-workspace rows too
 -- (ON CONFLICT (workspace_id, name) never fires for NULLs); the targetless
 -- ON CONFLICT DO NOTHING covers races against either unique constraint.
+--
+-- Only rows that have no client yet. Without `client_id IS NULL` every re-run
+-- of the migrations minted a client from each landing page's `client` — which
+-- is the ASCII URL slug (relax, pizza-house, dr-vksnh-nyyzvb), not a display
+-- name — beside the real one: 19 on 2026-08-19, 9 more on 2026-09-26. The
+-- exact-name NOT EXISTS below cannot see that "relax" is "Relax".
 INSERT INTO clients (workspace_id, name)
 SELECT DISTINCT src.workspace_id, src.client
 FROM (
-  SELECT workspace_id, client FROM landing_pages WHERE client IS NOT NULL AND client <> ''
+  SELECT workspace_id, client FROM landing_pages WHERE client IS NOT NULL AND client <> '' AND client_id IS NULL
   UNION
-  SELECT workspace_id, client FROM campaigns WHERE client IS NOT NULL AND client <> ''
+  SELECT workspace_id, client FROM campaigns WHERE client IS NOT NULL AND client <> '' AND client_id IS NULL
 ) src
 WHERE NOT EXISTS (
   SELECT 1 FROM clients c
