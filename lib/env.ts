@@ -18,6 +18,9 @@ const envSchema = z.object({
   PIZZAHOUSE_DB_NAME: z.string().optional(),
   PIZZAHOUSE_DB_PORT: z.string().optional(),
   PIZZAHOUSE_DASHBOARD_PASSWORD: z.string().optional(),
+  // Keys the HMAC of customer phone numbers in pizza_phone_orders. Separate
+  // from SESSION_SECRET on purpose: rotating sessions must not orphan history.
+  PIZZAHOUSE_PHONE_KEY: z.string().min(32, 'PIZZAHOUSE_PHONE_KEY must be at least 32 characters').optional(),
   // Monday.com integration (Results Digital workspace only)
   MONDAY_API_TOKEN: z.string().optional(),
   MONDAY_BOARD_ID: z.string().optional(),
