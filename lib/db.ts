@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { isLikelyPerson } from './deck-view-stats'
 import bcrypt from 'bcryptjs'
 
 export interface LandingPage {
@@ -242,6 +243,10 @@ export async function createPageView(data: {
   ip?: string
   user_agent?: string
 }) {
+  // As in recordDeckView: local dev writes to the production database, so
+  // only production visits are counted.
+  if (process.env.NODE_ENV !== 'production') return
+  if (!isLikelyPerson(data.user_agent)) return
   const { ip: _ip, ...row } = data
   void _ip
   await supabase.from('landing_page_views').insert(row)

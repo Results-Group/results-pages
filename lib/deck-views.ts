@@ -1,5 +1,6 @@
 import 'server-only'
 import { supabase } from './supabase'
+import { isLikelyPerson } from './deck-view-stats'
 
 /**
  * View tracking for public decks/reports/strategy docs. Inserts are
@@ -22,6 +23,12 @@ export async function recordDeckView(data: {
   ip?: string
   user_agent?: string
 }) {
+  // Local development runs against the production database, so every deck
+  // opened on `npm run dev` was stored as a client view — testing a mockup
+  // on localhost inflated that client's numbers. Only production counts.
+  if (process.env.NODE_ENV !== 'production') return
+  // A link preview or a script is not a client opening the deck.
+  if (!isLikelyPerson(data.user_agent)) return
   const { ip: _ip, ...row } = data
   void _ip
   await supabase.from('deck_views').insert(row)
@@ -46,14 +53,17 @@ export async function getDeckViewRows(contentType: DeckContentType, ids: string[
   for (let from = 0; ; from += PAGE) {
     const { data, error } = await supabase
       .from('deck_views')
-      .select('content_id, viewed_at')
+      .select('content_id, viewed_at, user_agent')
       .eq('content_type', contentType)
       .in('content_id', ids)
       // A stable order, or pages can overlap and skip rows.
       .order('id')
       .range(from, from + PAGE - 1)
     if (error || !data) break
-    rows.push(...(data as DeckViewRow[]))
+    // Rows recorded before bots were filtered at write time are dropped here.
+    for (const r of data as (DeckViewRow & { user_agent: string | null })[]) {
+      if (isLikelyPerson(r.user_agent)) rows.push({ content_id: r.content_id, viewed_at: r.viewed_at })
+    }
     if (data.length < PAGE) break
   }
   return rows

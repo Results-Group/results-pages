@@ -21,3 +21,19 @@ export function summarizeDeckViews(rows: { content_id: string; viewed_at: string
   }
   return out
 }
+
+/**
+ * Whether a recorded view came from a person rather than something fetching
+ * the link. By 2026-09-27 a fifth of all deck "views" were not people: 224
+ * WhatsApp link previews (WhatsApp fetches the page the moment the team
+ * sends the link), 71 Facebook/Meta previews, 26 scripts and uptime checks —
+ * and 9 campaigns showed as opened when only a preview bot had ever loaded
+ * them. Used both when recording and when counting, so history is filtered
+ * too without deleting anything.
+ */
+const NOT_A_PERSON = /WhatsApp|facebookexternalhit|Facebot|meta-externalagent|TelegramBot|Slackbot|Discordbot|LinkedInBot|Twitterbot|Googlebot|bingbot|Applebot|bot\b|crawler|spider|preview|curl|wget|python-requests|node-fetch|axios|Go-http|HeadlessChrome|vercel/i
+
+export function isLikelyPerson(userAgent: string | null | undefined): boolean {
+  if (!userAgent?.trim()) return false
+  return !NOT_A_PERSON.test(userAgent)
+}
