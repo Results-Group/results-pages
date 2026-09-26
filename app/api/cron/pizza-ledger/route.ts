@@ -3,6 +3,7 @@ import { verifySessionToken } from '@/lib/auth'
 import { runWithBranch, listPizzaBranches } from '@/lib/pizza-house-db'
 import { fetchDayIdentities, recordDay, logLedgerRun } from '@/lib/pizza-house-ledger'
 import { fetchDailyStats, snapshotDailyStats } from '@/lib/pizza-house-snapshot'
+import { snapshotPhoneOrders } from '@/lib/pizza-house-phone'
 import { captureException, logger } from '@/lib/logger'
 
 /**
@@ -115,8 +116,28 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Phone-linked orders: each branch's whole client_delivery snapshot,
+  // re-upserted nightly (idempotent) so the per-customer history outlives
+  // both the POS purge and a missed night. A branch Aviv has not linked yet
+  // is skipped, not failed. Isolated from the two loops above like they are
+  // from each other.
+  if (!process.env.PIZZAHOUSE_PHONE_KEY) {
+    logger.error('PIZZAHOUSE_PHONE_KEY is not set — phone-linked orders are not being collected')
+  }
+  const phones: Record<string, unknown>[] = []
+  for (const branch of branches) {
+    try {
+      const result = await runWithBranch(branch.id, () => snapshotPhoneOrders(branch.id))
+      phones.push({ branch: branch.id, ...result })
+    } catch (err) {
+      captureException(err, { route: 'GET /api/cron/pizza-ledger', branch: branch.id, phase: 'phone-orders' })
+      phones.push({ branch: branch.id, error: true })
+    }
+  }
+
   const failed = results.filter(r => r.error).length
   const snapFailed = snapshots.filter(r => r.error).length
-  logger.info(`Pizza ledger cron: ${results.length - failed}/${results.length} day-branch folds ok; daily-stats ${snapshots.length - snapFailed}/${snapshots.length} branches ok`)
-  return NextResponse.json({ ok: failed === 0 && snapFailed === 0, days, results, snapshots })
+  const phoneFailed = phones.filter(r => r.error).length
+  logger.info(`Pizza ledger cron: ${results.length - failed}/${results.length} day-branch folds ok; daily-stats ${snapshots.length - snapFailed}/${snapshots.length} branches ok; phone-orders ${phones.length - phoneFailed}/${phones.length} branches ok`)
+  return NextResponse.json({ ok: failed === 0 && snapFailed === 0 && phoneFailed === 0, days, results, snapshots, phones })
 }
