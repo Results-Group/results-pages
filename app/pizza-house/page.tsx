@@ -86,7 +86,25 @@ interface DashboardData {
   /** Our phone-based customer ledger; null until a branch has phone data. */
   phoneCustomers?: PhoneCustomers | null
   identity_source?: 'phone' | 'card'
+  /** How far back each kind of figure reaches (lib/pizza-house-history-pure.ts). */
+  coverage?: {
+    detail_from: string | null
+    totals_from: string | null
+    range_detail_partial: boolean
+    prev_detail_partial: boolean
+    range_totals_partial: boolean
+    prev_totals_partial: boolean
+  }
 }
+
+/**
+ * Secondary KPIs that are counts or sums. When the previous period reaches
+ * past what the till still holds, their previous value is truncated and the
+ * delta would show growth that never happened — so it shows "—" instead.
+ * Ratios (delivery %, items per order, returning %) stay comparable.
+ */
+const COUNT_KPIS = new Set(['counter_sales', 'unique_customers', 'discounts', 'refunds', 'items_sold'])
+const dm = (d: string) => `${Number(d.slice(8, 10))}.${Number(d.slice(5, 7))}`
 
 // ── Dual-theme palettes ──
 
@@ -406,6 +424,14 @@ export default function PizzaHouseDashboard() {
             השוואה מול התקופה הקודמת: {data.prev_range.from} — {data.prev_range.to}
           </div>
         )}
+        {data?.coverage && (data.coverage.range_detail_partial || data.coverage.prev_detail_partial) && data.coverage.detail_from && (
+          <div className="max-w-7xl mx-auto mt-1 text-[11px] leading-snug" style={{ color: pal.textMuted }}>
+            {data.coverage.range_detail_partial
+              ? `הכנסות, הזמנות וסל ממוצע — לכל הטווח. משלוחים, לקוחות ומוצרים — מ-${dm(data.coverage.detail_from)} (הקופה שומרת כ-5 שבועות).`
+              : 'התקופה הקודמת חלקית בקופה — ההשוואה מוצגת בהכנסות, בהזמנות ובאחוזים בלבד.'}
+            {data.coverage.range_totals_partial && data.coverage.totals_from && ` נתוני מכירות שמורים מ-${dm(data.coverage.totals_from)}.`}
+          </div>
+        )}
       </div>
 
       <main className="px-4 sm:px-6 max-w-7xl mx-auto">
@@ -468,7 +494,10 @@ export default function PizzaHouseDashboard() {
                     </div>
                     <div className="text-3xl sm:text-4xl font-black leading-none tabular-nums" style={{ color: kpi.color }}>{kpi.val}</div>
                     <div className="mt-2 flex items-center gap-2">
-                      <Delta current={s[kpi.k]} previous={p[kpi.k]} pal={pal} pill />
+                      {/* Revenue/orders against a previous period our history does not
+                          fully reach would show growth that never happened. The average
+                          basket is a ratio and stays comparable. */}
+                      <Delta current={s[kpi.k]} previous={data.coverage?.prev_totals_partial && kpi.k !== 'avg_order' ? 0 : p[kpi.k]} pal={pal} pill />
                       <span className="text-[10px] sm:text-xs" style={{ color: pal.textMuted }}>מול תקופה קודמת</span>
                     </div>
                   </Card>
@@ -492,7 +521,7 @@ export default function PizzaHouseDashboard() {
                 <Card key={kpi.k} pal={pal}>
                   <div className="text-[10px] sm:text-xs mb-1" style={{ color: pal.textMuted }}>{kpi.label}</div>
                   <div className="text-lg sm:text-2xl font-black leading-tight tabular-nums" style={{ color: kpi.color }}>{kpi.val}</div>
-                  <div className="mt-1"><Delta current={s[kpi.k]} previous={p[kpi.k]} invert={kpi.invert} pal={pal} /></div>
+                  <div className="mt-1"><Delta current={s[kpi.k]} previous={data.coverage?.prev_detail_partial && COUNT_KPIS.has(kpi.k) ? 0 : p[kpi.k]} invert={kpi.invert} pal={pal} /></div>
                   {kpi.note && (
                     <div className="text-[9px] sm:text-[10px] mt-1 leading-snug" style={{ color: pal.textMuted }}>{kpi.note}</div>
                   )}

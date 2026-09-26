@@ -17,6 +17,10 @@ import {
 import { runWithBranch, isPizzaBranch, listPizzaBranches } from '@/lib/pizza-house-db'
 import { aggregateBranches, type BranchData } from '@/lib/pizza-house-aggregate'
 import { fetchPhoneCustomers } from '@/lib/pizza-house-phone'
+import { fetchStoredDailyTotals, fetchStoredFirstDay } from '@/lib/pizza-house-snapshot'
+import {
+  historicalTotals, withHistory, mergeTimeseries, coverageFor, combineCoverage, type Coverage,
+} from '@/lib/pizza-house-history-pure'
 import { mergePhoneIntoPayload } from '@/lib/pizza-house-phone-pure'
 import { captureException } from '@/lib/logger'
 import { rateLimit } from '@/lib/rate-limit'
@@ -76,15 +80,51 @@ function daysBetween(from: string, to: string): number {
   return Math.round((Date.parse(to) - Date.parse(from)) / 86_400_000)
 }
 
-/** All 12 datasets for the current AsyncLocalStorage branch context. */
-async function fetchBranchData(range: DateRange, prevRange: DateRange, rangeDays: number): Promise<BranchData> {
+interface Days { from: string; to: string; prevFrom: string; prevTo: string }
+
+/**
+ * All 12 datasets for the current AsyncLocalStorage branch context, with
+ * orders/revenue completed from our stored history for any days the till has
+ * already purged (see lib/pizza-house-history-pure.ts). When the previous
+ * period lies inside the till window — every range up to 7 days — nothing is
+ * read from the history and the payload is exactly the till's.
+ */
+async function fetchBranchData(branchId: string, range: DateRange, prevRange: DateRange, rangeDays: number, days: Days): Promise<BranchData & { coverage: Coverage }> {
   const [summary, prev_summary, timeseries, heatmap, weekdays, customers, products, channels, payments, orderTiming, deadItems, freshness] =
     await Promise.all([
       fetchSummary(range), fetchSummary(prevRange), fetchTimeseries(range, rangeDays), fetchHeatmap(range),
       fetchWeekdays(range), fetchCustomers(range), fetchProducts(range, prevRange), fetchChannels(range),
       fetchPayments(range), fetchOrderTiming(range), fetchDeadItems(range), fetchFreshness(),
     ])
-  return { summary, prev_summary, timeseries, heatmap, weekdays, customers, products, channels, payments, orderTiming, deadItems, freshness } as unknown as BranchData
+  const data = { summary, prev_summary, timeseries, heatmap, weekdays, customers, products, channels, payments, orderTiming, deadItems, freshness } as unknown as BranchData
+
+  const posFirstDay = freshness.first_deal ? String(freshness.first_deal).slice(0, 10) : null
+  // The previous period always starts first, so it decides whether any
+  // history is needed at all.
+  if (!posFirstDay || days.prevFrom >= posFirstDay) {
+    return { ...data, coverage: coverageFor(days.from, days.prevFrom, posFirstDay, null) }
+  }
+  try {
+    const [stored, storedFirst] = await Promise.all([
+      fetchStoredDailyTotals(branchId, days.prevFrom, days.to),
+      fetchStoredFirstDay(branchId),
+    ])
+    return {
+      ...data,
+      summary: withHistory(data.summary, historicalTotals(stored, days.from, days.to, posFirstDay)),
+      prev_summary: withHistory(data.prev_summary, historicalTotals(stored, days.prevFrom, days.prevTo, posFirstDay)),
+      timeseries: {
+        ...data.timeseries,
+        points: mergeTimeseries(data.timeseries.points, stored, days.from, days.to, posFirstDay, data.timeseries.granularity),
+      },
+      coverage: coverageFor(days.from, days.prevFrom, posFirstDay, storedFirst),
+    }
+  } catch (err) {
+    // The history makes long ranges complete; without it they fall back to
+    // exactly what the till holds, as before — never a failed dashboard.
+    captureException(err, { route: 'GET /api/pizza-house/dashboard', branch: branchId, phase: 'history' })
+    return { ...data, coverage: coverageFor(days.from, days.prevFrom, posFirstDay, null) }
+  }
 }
 
 export async function GET(req: NextRequest) {
@@ -141,23 +181,28 @@ export async function GET(req: NextRequest) {
   const range: DateRange = { from: `${from} 00:00:00`, to: `${addDays(to, 1)} 00:00:00` }
   const prevFrom = addDays(from, -rangeDays)
   const prevRange: DateRange = { from: `${prevFrom} 00:00:00`, to: `${from} 00:00:00` }
+  const days: Days = { from, to, prevFrom, prevTo: addDays(from, -1) }
 
   try {
     let payload: BranchData
+    let coverage: Coverage
     let perBranch: { id: string; label: string; summary: unknown; prev_summary: unknown }[] | null = null
 
     if (branch === 'all') {
       // Fetch every branch in parallel, then aggregate + keep a per-branch breakdown.
       const perBranchData = await Promise.all(
-        available.map(b => runWithBranch(b.id, () => fetchBranchData(range, prevRange, rangeDays))),
+        available.map(b => runWithBranch(b.id, () => fetchBranchData(b.id, range, prevRange, rangeDays, days))),
       )
       payload = aggregateBranches(perBranchData)
+      coverage = combineCoverage(perBranchData.map(d => d.coverage))
       perBranch = available.map((b, i) => ({
         id: b.id, label: b.label,
         summary: perBranchData[i].summary, prev_summary: perBranchData[i].prev_summary,
       }))
     } else {
-      payload = await runWithBranch(branch, () => fetchBranchData(range, prevRange, rangeDays))
+      const { coverage: c, ...one } = await runWithBranch(branch, () => fetchBranchData(branch, range, prevRange, rangeDays, days))
+      payload = one
+      coverage = c
     }
 
     // Phone-based customer figures come from our own ledger (Supabase), not
@@ -182,6 +227,7 @@ export async function GET(req: NextRequest) {
       ...merged.payload,
       phoneCustomers,
       identity_source: merged.identity_source,
+      coverage,
       generated_at: new Date().toISOString(),
     }
 

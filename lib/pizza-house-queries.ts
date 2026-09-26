@@ -541,10 +541,13 @@ export async function fetchDeadItems(r: DateRange) {
 // ── Data freshness ──
 
 export async function fetchFreshness() {
-  const [row] = await pizzaHouseQuery<{ last_deal: string | null; last_z_update: string | null }>(
+  // first_deal: where the till's purge currently cuts off. The dashboard
+  // route completes orders/revenue before that day from our stored history.
+  const [row] = await pizzaHouseQuery<{ last_deal: string | null; last_z_update: string | null; first_deal: string | null }>(
     `SELECT
        (SELECT MAX(tm_open) FROM deals) as last_deal,
-       (SELECT MAX(date_z_update) FROM z_info) as last_z_update`
+       (SELECT MAX(date_z_update) FROM z_info) as last_z_update,
+       (SELECT MIN(tm_open) FROM deals) as first_deal`
   )
-  return row ?? { last_deal: null, last_z_update: null }
+  return row ?? { last_deal: null, last_z_update: null, first_deal: null }
 }
