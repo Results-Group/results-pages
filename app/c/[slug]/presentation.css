@@ -1236,3 +1236,34 @@
   .campaign-pres .stats-funnel-label{flex-basis:78px;font-size:0.8rem}
   .campaign-pres .stats-funnel-value{flex-basis:88px;font-size:0.82rem}
 }
+
+/* ── "Ad 1 of 2 · more below" (phones only) ──
+   Phones stack the creatives, and one feed mockup is taller than the screen,
+   so the second ad sat below the fixed footer nav with nothing to say it
+   existed — clients reported seeing "only one ad". The pill sits above the
+   footer nav, names the count, jumps to the next card on tap, and leaves once
+   the last card is reached (app/c/[slug]/more-below-cue.tsx). */
+.campaign-pres .more-below-cue{display:none}
+@media(max-width:768px){
+  .campaign-pres .more-below-cue{
+    display:inline-flex;align-items:center;gap:8px;
+    position:fixed;left:50%;transform:translateX(-50%);
+    bottom:calc(64px + env(safe-area-inset-bottom));z-index:999;
+    padding:9px 16px;border-radius:999px;white-space:nowrap;
+    font-family:'Ping',sans-serif;font-size:0.8rem;font-weight:700;color:#fff;
+    background:rgba(9,12,14,0.92);backdrop-filter:blur(16px);
+    border:1px solid rgba(var(--brand-rgb),0.55);
+    box-shadow:0 8px 24px rgba(0,0,0,0.4),0 0 0 3px rgba(var(--brand-rgb),0.12);
+    cursor:pointer;
+  }
+  .campaign-pres .more-below-cue svg{color:var(--brand-cyan);animation:cue-bob 1.4s ease-in-out infinite}
+  /* Report-style decks hide the footer nav, so the pill sits at the bottom edge. */
+  .campaign-pres.nav-tabs .more-below-cue{bottom:calc(16px + env(safe-area-inset-bottom))}
+  /* Peek: a tighter stack, so the next card's top edge shows under the first
+     one on most phone heights — a hint that needs no words. */
+  .campaign-pres .assets-grid.standard-grid{gap:14px}
+}
+@keyframes cue-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+@media (prefers-reduced-motion: reduce){.campaign-pres .more-below-cue svg{animation:none}}
+@media print{.campaign-pres .more-below-cue{display:none}}
+body.printing-all-slides .campaign-pres .more-below-cue{display:none}

@@ -449,6 +449,7 @@ const he = {
   'public.checking': 'בודק...',
   'public.enter': 'כניסה',
   'public.partOf': 'מתוך',
+  'public.moreBelowCue': 'מודעה {n} מתוך {total} · עוד למטה',
   'public.allSlides': 'כל השקפים',
   'public.slide': 'שקף',
   'public.copyVersion': 'נוסח',

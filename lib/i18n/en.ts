@@ -451,6 +451,7 @@ const en: Record<TranslationKey, string> = {
   'public.checking': 'Checking...',
   'public.enter': 'Enter',
   'public.partOf': 'of',
+  'public.moreBelowCue': 'Ad {n} of {total} · more below',
   'public.allSlides': 'All slides',
   'public.slide': 'Slide',
   'public.copyVersion': 'Version',

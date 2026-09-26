@@ -25,6 +25,7 @@ const DistributionSlide = dynamic(() => import('./distribution-slide'), { loadin
 const SocialCover = dynamic(() => import('./mockups/social-cover'), { loading: mockupLoading })
 import { CaptionExpansionProvider } from './mockups/AdCaption'
 import StatsSlide from './stats-slide'
+import MoreBelowCue from './more-below-cue'
 import { parseVideoUrl } from '@/lib/video-utils'
 import { assetProxyUrl } from '@/lib/asset-url'
 import ShareButton from '@/app/_deck/ShareButton'
@@ -775,6 +776,7 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
   // activeCopy is set only when this slide has at least one copy targeted.
   const activeCopy = copies.length > 0 ? (copies[activeCopyIdx] ?? copies[0]) : undefined
   const activeCopyBody = activeCopy?.body
+  const gridRef = useRef<HTMLDivElement>(null)
 
   return (
     <div>
@@ -877,7 +879,7 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
           of a URL asset is nothing, the MacBook+iPhone pair is the content. */}
       {assets.length > 0 && !isCarousel && (!plain || isLanding) && (
         <CaptionExpansionProvider>
-        <div className={`assets-grid ${isStory ? 'story-grid' : isLanding ? 'landing-grid' : 'standard-grid'} count-${Math.min(assets.length, 4)}`}>
+        <div ref={gridRef} className={`assets-grid ${isStory ? 'story-grid' : isLanding ? 'landing-grid' : 'standard-grid'} count-${Math.min(assets.length, 4)}`}>
           {assets.map((asset, i) => (
             <div
               key={asset.id}
@@ -903,6 +905,14 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
             </div>
           ))}
         </div>
+        {/* Stories sit two-up even on phones; only a vertical stack needs the cue. */}
+        {assets.length > 1 && !isStory && (
+          <MoreBelowCue
+            gridRef={gridRef}
+            count={assets.length}
+            label={reached => t('public.moreBelowCue').replace('{n}', String(reached)).replace('{total}', String(assets.length))}
+          />
+        )}
         </CaptionExpansionProvider>
       )}
     </div>
