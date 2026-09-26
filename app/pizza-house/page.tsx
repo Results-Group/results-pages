@@ -17,7 +17,8 @@ import {
   BarChart,
   CartesianGrid,
 } from 'recharts'
-import { RefreshCw, LogOut, TrendingUp, TrendingDown, Minus, Truck, Store, Sun, Moon, Clock, PackageX, Wallet, Receipt, ShoppingBag } from 'lucide-react'
+import { RefreshCw, LogOut, TrendingUp, TrendingDown, Minus, Truck, Store, Sun, Moon, Clock, PackageX, Wallet, Receipt, ShoppingBag, Users, UserCheck, UserX } from 'lucide-react'
+import type { PhoneCustomers } from '@/lib/pizza-house-phone-pure'
 import GoogleProfilePanel from './GoogleProfilePanel'
 
 // ── Types ──
@@ -47,6 +48,8 @@ interface Summary {
   identity_coverage_pct: number
   returning_customers: number
   returning_pct: number
+  /** Which pool the customer figures above come from (see mergePhoneIntoPayload). */
+  identity_source?: 'phone' | 'card'
 }
 
 interface DashboardData {
@@ -80,6 +83,9 @@ interface DashboardData {
   freshness: { last_deal: string | null; last_z_update: string | null }
   orderTiming?: { avg_minutes: number; byHour: { hour: number; avg_minutes: number; orders: number }[] }
   deadItems?: { name: string; sale_price: number; category: string }[]
+  /** Our phone-based customer ledger; null until a branch has phone data. */
+  phoneCustomers?: PhoneCustomers | null
+  identity_source?: 'phone' | 'card'
 }
 
 // ── Dual-theme palettes ──
@@ -477,8 +483,8 @@ export default function PizzaHouseDashboard() {
                 { label: 'משלוחים — מההזמנות', val: s.delivery_pct + '%', color: pal.text, k: 'delivery_pct' as const, invert: false, note: `${num(s.delivery_orders)} מתוך ${num(s.order_count)} הזמנות` },
                 { label: 'משלוחים — מההכנסות', val: s.delivery_revenue_pct + '%', color: pal.text, k: 'delivery_revenue_pct' as const, invert: false, note: money(s.delivery_revenue) },
                 { label: 'מכירות דלפק', val: num(s.counter_sales), color: pal.textMuted, k: 'counter_sales' as const, invert: false, note: `עד ₪${s.counter_sale_max} · ${money(s.counter_sales_revenue)} · לא נספרות כהזמנות` },
-                { label: 'לקוחות מזוהים', val: num(s.unique_customers), color: pal.cyan, k: 'unique_customers' as const, invert: false, note: `${num(s.unique_by_card)} אשראי + ${num(s.unique_by_meal_card)} סועד · ${s.identity_coverage_pct}% מהתשלומים` },
-                { label: 'לקוחות חוזרים', val: s.returning_pct + '%', color: pal.cyan, k: 'returning_pct' as const, invert: false, note: 'מתוך משלמי אשראי בלבד' },
+                { label: 'לקוחות מזוהים', val: num(s.unique_customers), color: pal.cyan, k: 'unique_customers' as const, invert: false, note: s.identity_source === 'phone' ? `לפי טלפון · ${s.identity_coverage_pct}% מההזמנות` : `${num(s.unique_by_card)} אשראי + ${num(s.unique_by_meal_card)} סועד · ${s.identity_coverage_pct}% מהתשלומים` },
+                { label: 'לקוחות חוזרים', val: s.returning_pct + '%', color: pal.cyan, k: 'returning_pct' as const, invert: false, note: s.identity_source === 'phone' ? 'לפי טלפון' : 'מתוך משלמי אשראי בלבד' },
                 { label: 'הנחות שניתנו', val: money(s.discounts), color: pal.yellow, k: 'discounts' as const, invert: true, note: '' },
                 { label: 'זיכויים / החזרות', val: money(s.refunds), color: pal.danger, k: 'refunds' as const, invert: true, note: '' },
                 { label: 'פריטים שנמכרו', val: num(s.items_sold), color: pal.text, k: 'items_sold' as const, invert: false, note: '' },
@@ -685,10 +691,79 @@ export default function PizzaHouseDashboard() {
               </Card>
             </div>
 
+            {/* ── Customer base — from our phone ledger, not the till ── */}
+            {data.phoneCustomers && (() => {
+              const pc = data.phoneCustomers
+              const share = (n: number) => (pc.base > 0 ? Math.round((n / pc.base) * 100) : 0)
+              const coverage = s.orders > 0 ? Math.round((pc.in_range.orders / s.orders) * 100) : 0
+              // Fresh → cold, by each customer's LAST order. The whole base, once.
+              const buckets = [
+                { key: 'up_to_30d', label: 'עד חודש', value: pc.recency.up_to_30d, color: pal.success },
+                { key: 'd30_90', label: '1–3 חודשים', value: pc.recency.d30_90, color: pal.cyan },
+                { key: 'd90_180', label: '3–6 חודשים', value: pc.recency.d90_180, color: pal.yellow },
+                { key: 'd180_365', label: '6–12 חודשים', value: pc.recency.d180_365, color: pal.chartColors[3] },
+                { key: 'over_365', label: 'שנה ומעלה', value: pc.recency.over_365, color: pal.danger },
+              ]
+              const realBranches = data.branches.filter(b => b.id !== 'all')
+              const partial = data.branch === 'all' && realBranches.some(b => !pc.branches_with_data.includes(b.id))
+              const updated = pc.last_captured_at
+                ? new Date(pc.last_captured_at).toLocaleString('he-IL', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jerusalem' })
+                : ''
+              const cards = [
+                { label: 'בסיס לקוחות', val: num(pc.base), icon: Users, color: pal.text, note: 'אנשים שונים שהזמינו אי־פעם' },
+                { label: 'פעילים — 30 יום', val: num(pc.active_30d), icon: UserCheck, color: pal.success, note: `${share(pc.active_30d)}% מהבסיס` },
+                { label: 'פעילים — 90 יום', val: num(pc.active_90d), icon: UserCheck, color: pal.cyan, note: `${share(pc.active_90d)}% מהבסיס` },
+                { label: 'נרדמים — 180+ יום', val: num(pc.dormant_180d), icon: UserX, color: pal.yellow, note: `${share(pc.dormant_180d)}% מהבסיס · קהל לקמפיין החזרה` },
+              ]
+              return (
+                <>
+                  <SectionTitle pal={pal}>בסיס הלקוחות (לפי טלפון)</SectionTitle>
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+                    {cards.map(c => {
+                      const Icon = c.icon
+                      return (
+                        <Card key={c.label} pal={pal}>
+                          <div className="flex items-center justify-between mb-1 sm:mb-2">
+                            <span className="text-[10px] sm:text-xs" style={{ color: pal.textMuted }}>{c.label}</span>
+                            <Icon className="w-4 h-4 flex-shrink-0" style={{ color: c.color }} />
+                          </div>
+                          <div className="text-lg sm:text-2xl font-black leading-tight tabular-nums" style={{ color: c.color }}>{c.val}</div>
+                          <div className="text-[9px] sm:text-[10px] mt-1 leading-snug" style={{ color: pal.textMuted }}>{c.note}</div>
+                        </Card>
+                      )
+                    })}
+                  </div>
+                  <Card className="mt-2 sm:mt-4" pal={pal}>
+                    <CardTitle pal={pal} hint="לפי ההזמנה האחרונה של כל לקוח">מתי הזמינו לאחרונה</CardTitle>
+                    <div className="flex h-4 sm:h-5 rounded-full overflow-hidden" style={{ background: pal.bgElevated }}>
+                      {buckets.filter(b => b.value > 0).map(b => (
+                        <div key={b.key} title={`${b.label}: ${num(b.value)}`} style={{ width: `${(b.value / pc.base) * 100}%`, background: b.color }} />
+                      ))}
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 sm:grid-cols-5 gap-x-3 gap-y-2">
+                      {buckets.map(b => (
+                        <div key={b.key} className="flex items-center gap-2 text-xs min-w-0">
+                          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: b.color }} />
+                          <span className="truncate" style={{ color: pal.textSecondary }}>{b.label}</span>
+                          <span className="font-bold tabular-nums mr-auto" style={{ color: pal.text }}>{num(b.value)}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-3 text-[10px] sm:text-[11px] leading-snug" style={{ color: pal.textMuted }}>
+                      {coverage}% מההזמנות בטווח משויכות ללקוח · עודכן {updated}
+                      {partial && ` · נתוני טלפון קיימים כרגע ב: ${realBranches.filter(b => pc.branches_with_data.includes(b.id)).map(b => b.label).join(', ')}`}
+                    </div>
+                  </Card>
+                </>
+              )
+            })()}
+
             {/* ── Customers ── */}
-            <SectionTitle pal={pal}>לקוחות (זיהוי לפי כרטיס אשראי)</SectionTitle>
+            <SectionTitle pal={pal}>{data.identity_source === 'phone' ? 'לקוחות (זיהוי לפי טלפון)' : 'לקוחות (זיהוי לפי כרטיס אשראי)'}</SectionTitle>
             <div className="mb-4 p-3 rounded-xl text-xs" style={{ color: pal.yellow, background: pal.yellowSubtle, border: `1px solid ${pal.yellow}33` }}>
-              מועדון הלקוחות בקופה אינו פעיל, ולכן הזיהוי מבוסס על כרטיסי אשראי בלבד (משלמי מזומן אינם נספרים). המלצה שיווקית: להתחיל לאסוף לקוחות למועדון בקופה.
+              {data.identity_source === 'phone'
+                ? 'הזיהוי לפי טלפון מרשומות המשלוחים בקופה. הזמנות בלי רשומת לקוח (דלפק, חלק מהאיסופים) לא נספרות — לכן מוצג אחוז השיוך. רשימת ה-VIP וכרטיסי הסועד עדיין לפי כרטיס.'
+                : 'מועדון הלקוחות בקופה אינו פעיל, ולכן הזיהוי מבוסס על כרטיסי אשראי בלבד (משלמי מזומן אינם נספרים). המלצה שיווקית: להתחיל לאסוף לקוחות למועדון בקופה.'}
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
               <Card pal={pal}>
@@ -704,9 +779,9 @@ export default function PizzaHouseDashboard() {
                 </ResponsiveContainer></div>
               </Card>
               <Card pal={pal}>
-                <CardTitle pal={pal} hint="כל הזמנים">תדירות ביקורים</CardTitle>
+                <CardTitle pal={pal} hint="כל הזמנים">{data.identity_source === 'phone' ? 'תדירות הזמנות' : 'תדירות ביקורים'}</CardTitle>
                 <div className="h-[180px] sm:h-[220px]"><ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data.customers.frequency.map(f => ({ ...f, name: f.bucket + ' ביקורים' }))}>
+                  <BarChart data={data.customers.frequency.map(f => ({ ...f, name: f.bucket + (data.identity_source === 'phone' ? ' הזמנות' : ' ביקורים') }))}>
                     <defs>
                       <linearGradient id="gradInfo" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor={pal.info} stopOpacity={0.9} />
