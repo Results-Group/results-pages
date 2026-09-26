@@ -1,5 +1,6 @@
 'use client'
 
+import { conflictBadge, type ConflictInfo } from '@/lib/campaign-conflict'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
@@ -73,6 +74,8 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
   const [activeCopyIdx, setActiveCopyIdx] = useState(0)
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [conflict, setConflict] = useState(false)
+  // Who saved over us and when, from the 409 — shown on the reload button.
+  const [conflictInfo, setConflictInfo] = useState<ConflictInfo | null>(null)
   const [copied, setCopied] = useState(false)
   const [toasts, setToasts] = useState<Toast[]>([])
   const [feedback, setFeedback] = useState<Record<string, { status: 'approved' | 'rejected' | 'pending'; comment: string | null; author: string | null }>>({})
@@ -289,6 +292,7 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
           // don't clobber their changes, and tell the user to reload.
           conflictRef.current = true
           setConflict(true)
+          setConflictInfo(data.conflict ?? null)
           setSaveState('error')
           toast(data.error || 'הקמפיין עודכן במקום אחר. רעננו את הדף.', 'error')
           return null
@@ -733,7 +737,7 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
         {conflict && (
           <button onClick={() => window.location.reload()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
             style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.4)', color: '#ef4444' }}>
-            עודכן במקום אחר — רענן
+            {conflictBadge(conflictInfo)}
           </button>
         )}
 

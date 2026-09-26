@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import type { ConflictInfo } from './campaign-conflict'
 import { escapeOrFilterValue } from './pg-filter'
 import { assetProxyUrl } from './asset-url'
 import bcrypt from 'bcryptjs'
@@ -233,6 +234,40 @@ export async function updateCampaign(
     throw new Error('Campaign not found')
   }
   return campaign as Campaign
+}
+
+/**
+ * Who wrote the campaign after `baseUpdatedAt` — for the 409 an editor gets
+ * when its save loses the race. Every save through the API is in audit_log
+ * (user id + time); the name comes from admin_users. A save the log cannot
+ * attribute (the nightly archive writes updated_at with no actor) returns
+ * by: null, and the message falls back to "updated elsewhere".
+ */
+export async function describeCampaignConflict(id: string, baseUpdatedAt: string | undefined, viewerId: string): Promise<ConflictInfo> {
+  const { data: row } = await supabase.from('campaigns').select('updated_at').eq('id', id).maybeSingle()
+  const at: string | null = row?.updated_at ?? null
+
+  const { data: last } = await supabase
+    .from('audit_log')
+    .select('user_id,user_email,created_at')
+    .eq('entity_type', 'campaign')
+    .eq('entity_id', id)
+    .in('action', ['create', 'update', 'publish', 'restore'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+  const entry = last?.[0]
+  // Only an entry written after the editor loaded explains this conflict;
+  // an older one is somebody's earlier save. The log is written just after
+  // the update, so a few seconds of slack covers the ordering.
+  const base = baseUpdatedAt ? new Date(baseUpdatedAt).getTime() - 5_000 : 0
+  if (!entry?.user_id || new Date(entry.created_at).getTime() < base) return { at, by: null, self: false }
+
+  const { data: user } = await supabase.from('admin_users').select('name,email').eq('id', entry.user_id).maybeSingle()
+  return {
+    at,
+    by: user?.name?.trim() || user?.email || entry.user_email || null,
+    self: entry.user_id === viewerId,
+  }
 }
 
 /** Persist an uploaded logo path. Deliberately does NOT touch updated_at: the

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest, requireResourcePermission } from '@/lib/auth'
 import { requirePurgeConfirmation } from '@/lib/purge-guard'
-import { getCampaignById, updateCampaign, deleteCampaign, purgeCampaign, enrichCampaignUrls, type Campaign } from '@/lib/campaigns'
+import { getCampaignById, updateCampaign, deleteCampaign, purgeCampaign, enrichCampaignUrls, type Campaign, describeCampaignConflict } from '@/lib/campaigns'
+import { conflictMessage } from '@/lib/campaign-conflict'
 import { findOrCreateClient, validateClientForWorkspace } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
@@ -38,6 +39,9 @@ export async function PUT(
 
   const { id } = await params
 
+  // Hoisted so the conflict branch below can say what the editor had loaded.
+  let baseUpdatedAt: string | undefined
+
   try {
     const existing = await getCampaignById(id)
     if (!existing) {
@@ -49,6 +53,7 @@ export async function PUT(
 
     const { data: body, error: parseError } = await parseJson<Partial<Omit<Campaign, 'id' | 'created_at'>> & { base_updated_at?: string }>(request)
     if (parseError) return parseError
+    baseUpdatedAt = body.base_updated_at
 
     // Custom campaign URL. The slug is the public link, so it must be
     // ASCII-safe and unique; a clash is reported as 409 rather than surfacing
@@ -104,7 +109,10 @@ export async function PUT(
     return NextResponse.json({ ...campaign, has_password: !!campaign.password, password: undefined })
   } catch (err) {
     if ((err as { code?: string })?.code === 'CONFLICT') {
-      return NextResponse.json({ error: 'הקמפיין עודכן במקום אחר. רעננו את הדף כדי לא לדרוס שינויים.' }, { status: 409 })
+      // Say who saved and when, so nobody has to ask the room. Best-effort:
+      // if the lookup fails the editor still gets the generic 409.
+      const conflict = await describeCampaignConflict(id, baseUpdatedAt, session.userId).catch(() => null)
+      return NextResponse.json({ error: conflictMessage(conflict), conflict }, { status: 409 })
     }
     captureException(err, { route: 'PUT /api/campaigns/[id]', id })
     return NextResponse.json({ error: 'שגיאה בעדכון קמפיין' }, { status: 500 })
