@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { matchesStatus, sortCampaigns, groupByClient, clientNames } from '@/lib/campaign-list'
+import { matchesStatus, sortCampaigns, groupByClient, clientNames, awaitingFirstView } from '@/lib/campaign-list'
 
 const c = (client: string, created: string, updated?: string, status: 'draft' | 'published' | 'archived' = 'published') =>
   ({ client, created_at: created, updated_at: updated, status })
@@ -59,5 +59,31 @@ describe('groupByClient', () => {
 describe('clientNames', () => {
   it('lists each client once, sorted, without the empty name', () => {
     expect(clientNames([...list, c('BDO', '2026-01-01T00:00:00Z')], 'en')).toEqual(['BDO', 'Medera', 'Relax'])
+  })
+})
+
+describe('awaitingFirstView', () => {
+  const NOW = new Date('2026-09-27T12:00:00Z').getTime()
+  const pub = (over: Record<string, unknown> = {}) => ({ status: 'published', created_at: '2026-09-25T09:00:00Z', view_stats: null, ...over })
+
+  it('flags a campaign published over a day ago that nobody outside the team opened', () => {
+    expect(awaitingFirstView(pub(), NOW)).toBe(true)
+  })
+
+  it('stays quiet once the client opened it', () => {
+    expect(awaitingFirstView(pub({ view_stats: { count: 3 } }), NOW)).toBe(false)
+  })
+
+  it('gives a fresh campaign its first day', () => {
+    expect(awaitingFirstView(pub({ created_at: '2026-09-27T01:00:00Z' }), NOW)).toBe(false)
+  })
+
+  it('counts from a scheduled publish date, not from creation', () => {
+    expect(awaitingFirstView(pub({ publish_at: '2026-09-27T08:00:00Z' }), NOW)).toBe(false)
+  })
+
+  it('never flags drafts or the archive', () => {
+    expect(awaitingFirstView(pub({ status: 'draft' }), NOW)).toBe(false)
+    expect(awaitingFirstView(pub({ status: 'archived' }), NOW)).toBe(false)
   })
 })

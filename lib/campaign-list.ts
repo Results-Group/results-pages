@@ -54,3 +54,23 @@ export function groupByClient<T extends ListableCampaign>(list: T[], noClientLab
 export function clientNames(list: ListableCampaign[], locale = 'he'): string[] {
   return [...new Set(list.map(clientKey).filter(Boolean))].sort((a, b) => a.localeCompare(b, locale))
 }
+
+/** How long a published campaign may go unopened before the list flags it. */
+export const UNOPENED_AFTER_MS = 24 * 60 * 60 * 1000
+
+/**
+ * Published over a day ago and never opened outside the team (deck_views only
+ * records viewers without an admin session). Half of all campaigns are opened
+ * within six minutes of publishing, so a day of silence usually means the
+ * link never reached the client. `publish_at` when scheduled, else created_at:
+ * the median campaign is published a minute after it is created.
+ */
+export function awaitingFirstView(
+  c: { status: string; created_at: string; publish_at?: string | null; view_stats?: { count: number } | null },
+  now: number,
+): boolean {
+  if (c.status !== 'published') return false
+  if (c.view_stats && c.view_stats.count > 0) return false
+  const since = new Date(c.publish_at || c.created_at).getTime()
+  return Number.isFinite(since) && now - since > UNOPENED_AFTER_MS
+}

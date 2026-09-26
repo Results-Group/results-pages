@@ -8,7 +8,7 @@ import { whatsappShareUrl } from '@/lib/share'
 import { useT, useLocale } from '@/lib/i18n'
 import { useToast } from '../_components/toast'
 import { useConfirm } from '../_components/confirm-dialog'
-import { matchesStatus, sortCampaigns, groupByClient, clientNames, type CampaignSort, type CampaignStatusFilter } from '@/lib/campaign-list'
+import { matchesStatus, sortCampaigns, groupByClient, clientNames, awaitingFirstView, type CampaignSort, type CampaignStatusFilter } from '@/lib/campaign-list'
 
 interface Campaign {
   id: string
@@ -20,6 +20,7 @@ interface Campaign {
   asset_count?: number
   created_at: string
   updated_at?: string
+  publish_at?: string | null
   workspace_id: string | null
   created_by?: string | null
   feedback_counts?: { approved: number; rejected: number; pending: number }
@@ -65,6 +66,9 @@ export default function CampaignsListPage() {
   const [statusFilter, setStatusFilter] = useState<CampaignStatusFilter>('active')
   const [sort, setSort] = useState<CampaignSort>('created')
   const [clientFilter, setClientFilter] = useState('')
+  const [unopenedOnly, setUnopenedOnly] = useState(false)
+  // Stamped when the list arrives, not read during render — the clock is impure.
+  const [now, setNow] = useState(0)
   const [mineOnly, setMineOnly] = useState(false)
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [templatesOpen, setTemplatesOpen] = useState(false)
@@ -97,7 +101,7 @@ export default function CampaignsListPage() {
           return r.json()
         })
         .then(data => {
-          if (Array.isArray(data)) setCampaigns(data)
+          if (Array.isArray(data)) { setCampaigns(data); setNow(Date.now()) }
           setLoading(false)
         })
         .catch(() => setLoading(false))
@@ -257,6 +261,7 @@ export default function CampaignsListPage() {
     campaigns.filter(c =>
       matchesStatus(c.status, statusFilter) &&
       (!clientFilter || c.client?.trim() === clientFilter) &&
+      (!unopenedOnly || awaitingFirstView(c, now)) &&
       (!mineOnly || (myId != null && c.created_by === myId))
     ),
     sort,
@@ -272,6 +277,7 @@ export default function CampaignsListPage() {
 
   const totalCampaigns = campaigns.length
   const publishedCount = campaigns.filter(c => c.status === 'published').length
+  const unopenedCount = now ? campaigns.filter(c => awaitingFirstView(c, now)).length : 0
   const clientCount = clientNames(filteredCampaigns).length + (filteredCampaigns.some(c => !c.client?.trim()) ? 1 : 0)
 
   return (
@@ -386,9 +392,21 @@ export default function CampaignsListPage() {
           <option value="">{t('campaigns.allClients')}</option>
           {clientOptions.map(name => <option key={name} value={name}>{name}</option>)}
         </select>
+        {(unopenedCount > 0 || unopenedOnly) && (
+          <button
+            onClick={() => setUnopenedOnly(u => !u)}
+            title={t('campaigns.unopenedTitle')}
+            className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all ms-auto"
+            style={unopenedOnly
+              ? { background: 'rgba(245,158,11,0.14)', border: '1px solid rgba(245,158,11,0.45)', color: '#f59e0b' }
+              : { background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', color: '#f59e0b' }}
+          >
+            {t('campaigns.unopenedFilter')} ({unopenedCount})
+          </button>
+        )}
         <button
           onClick={() => setMineOnly(m => !m)}
-          className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all ms-auto"
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${unopenedCount > 0 || unopenedOnly ? '' : 'ms-auto'}`}
           style={mineOnly
             ? { background: 'rgba(64,225,211,0.14)', border: '1px solid rgba(64,225,211,0.4)', color: '#40e1d3' }
             : { background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-muted)' }}
@@ -526,6 +544,15 @@ export default function CampaignsListPage() {
                             >
                               {STATUS_LABELS[c.status]}
                             </span>
+                            {awaitingFirstView(c, now) && (
+                              <span
+                                className="text-[10px] px-2 py-0.5 rounded font-semibold shrink-0"
+                                style={{ color: '#f59e0b', background: 'rgba(245,158,11,0.12)' }}
+                                title={t('campaigns.unopenedTitle')}
+                              >
+                                {t('campaigns.unopened')}
+                              </span>
+                            )}
                             {c.feedback_counts && (c.feedback_counts.approved + c.feedback_counts.rejected + c.feedback_counts.pending) > 0 && (
                               <span className="flex items-center gap-1.5 text-[10px] font-bold shrink-0" title="משוב לקוח">
                                 {c.feedback_counts.approved > 0 && <span style={{ color: '#40e1d3' }}>✓{c.feedback_counts.approved}</span>}
