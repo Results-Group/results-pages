@@ -9,6 +9,8 @@ import { captureException } from '@/lib/logger'
 import { slugifyPath } from '@/lib/slug'
 import { supabase } from '@/lib/supabase'
 import { parseJson } from '@/lib/http'
+import { getDeckViewRows } from '@/lib/deck-views'
+import { summarizeDeckViews } from '@/lib/deck-view-stats'
 
 export async function GET(
   request: NextRequest,
@@ -24,7 +26,12 @@ export async function GET(
     const permErr = await requireResourcePermission(request, campaign.workspace_id, 'view')
     if (permErr) return permErr
     const enriched = enrichCampaignUrls(campaign)
-    return NextResponse.json({ ...enriched, has_password: !!enriched.password, password: undefined })
+    // Views from outside the team, so the editor knows the client has seen
+    // this campaign. Best-effort: a failed read just means no update prompt.
+    const viewStats = await getDeckViewRows('campaign', [id])
+      .then(rows => summarizeDeckViews(rows)[id] ?? null)
+      .catch(() => null)
+    return NextResponse.json({ ...enriched, has_password: !!enriched.password, password: undefined, view_stats: viewStats })
   } catch {
     return NextResponse.json({ error: 'שגיאה בטעינת קמפיין' }, { status: 500 })
   }

@@ -1,6 +1,7 @@
 'use client'
 
 import { conflictBadge, type ConflictInfo } from '@/lib/campaign-conflict'
+import { whatsappUpdateUrl } from '@/lib/share'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
@@ -40,6 +41,8 @@ export interface EditorInitial {
   slug?: string | null
   status?: 'draft' | 'published' | 'archived'
   updatedAt?: string | null
+  /** Outside (non-team) views of the public deck, from GET /api/campaigns/[id]. */
+  viewStats?: { count: number; last_viewed: string } | null
 }
 
 type Toast = { id: number; message: string; kind: 'success' | 'error' | 'info' }
@@ -76,6 +79,11 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
   const [conflict, setConflict] = useState(false)
   // Who saved over us and when, from the 409 — shown on the reload button.
   const [conflictInfo, setConflictInfo] = useState<ConflictInfo | null>(null)
+  // Set on the first save in this session. With a published campaign the
+  // client has already opened, that is when a "we updated it" message makes
+  // sense — the deck marks the changed slides for them.
+  const [savedThisSession, setSavedThisSession] = useState(false)
+  const clientHasSeen = (initial.viewStats?.count ?? 0) > 0
   const [copied, setCopied] = useState(false)
   const [toasts, setToasts] = useState<Toast[]>([])
   const [feedback, setFeedback] = useState<Record<string, { status: 'approved' | 'rejected' | 'pending'; comment: string | null; author: string | null }>>({})
@@ -298,6 +306,7 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
           return null
         }
         if (!res.ok) throw new Error(data.error || 'שגיאה בשמירה')
+        setSavedThisSession(true)
         if (data.id) setCampaignId(data.id)
         if (data.updated_at) updatedAtRef.current = data.updated_at
         syncFromServer(data)
@@ -748,6 +757,18 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
           {saveState === 'error' && !conflict && <span style={{ color: '#ef4444' }}>שגיאת שמירה</span>}
         </span>
 
+        {slug && status === 'published' && clientHasSeen && savedThisSession && !conflict && (
+          <a
+            href={whatsappUpdateUrl({ title: doc.meta.campaignName.trim() || 'הקמפיין', url: `${typeof window !== 'undefined' ? window.location.origin : ''}/c/${slug}` })}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="הלקוח כבר צפה בקמפיין. השינויים מופיעים אצלו מיד, והשקפים שהשתנו מסומנים אצלו כ'עודכן'."
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
+            style={{ background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.35)', color: '#25d366' }}
+          >
+            <MessageSquare className="w-3.5 h-3.5" /> הלקוח כבר צפה — שלח עדכון
+          </a>
+        )}
         {slug && (
           <button onClick={copyLink} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
             style={{ background: copied ? 'rgba(64,225,211,0.1)' : 'var(--admin-hover-bg)', border: `1px solid ${copied ? 'rgba(64,225,211,0.3)' : 'var(--admin-border)'}`, color: copied ? '#40e1d3' : 'var(--admin-text-secondary)' }}>

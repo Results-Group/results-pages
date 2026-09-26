@@ -32,3 +32,16 @@ export function buildShareMessage({ title, client, url, description }: SharePara
 export function whatsappShareUrl(params: ShareParams): string {
   return `https://wa.me/?text=${encodeURIComponent(buildShareMessage(params))}`
 }
+
+/**
+ * The message for "we updated the campaign you already saw". Sent from the
+ * editor once the client has opened the campaign and the team saves changes;
+ * the deck itself marks the changed slides "updated" for that client.
+ */
+export function buildUpdateMessage({ title, url }: Pick<ShareParams, 'title' | 'url'>): string {
+  return [`היי! עדכנו את "${title}" — השקפים שהשתנו מסומנים ב"עודכן" 👇`, '', url].join('\n')
+}
+
+export function whatsappUpdateUrl(params: Pick<ShareParams, 'title' | 'url'>): string {
+  return `https://wa.me/?text=${encodeURIComponent(buildUpdateMessage(params))}`
+}

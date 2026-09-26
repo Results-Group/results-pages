@@ -26,6 +26,7 @@ const SocialCover = dynamic(() => import('./mockups/social-cover'), { loading: m
 import { CaptionExpansionProvider } from './mockups/AdCaption'
 import StatsSlide from './stats-slide'
 import MoreBelowCue from './more-below-cue'
+import { deckSnapshot, changedSlides, slideIdentity, seenStorageKey, parseSnapshot } from '@/lib/deck-changes'
 import { parseVideoUrl } from '@/lib/video-utils'
 import { assetProxyUrl } from '@/lib/asset-url'
 import ShareButton from '@/app/_deck/ShareButton'
@@ -84,6 +85,28 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
    */
   const coverSlide = slides.find(s => s.type === 'cover')
   const deckSlides = isReport ? slides.filter(s => s.type !== 'cover') : slides
+
+  // "Updated since your last visit" (lib/deck-changes.ts). Computed once per
+  // visit against the snapshot this browser stored last time, then the new
+  // snapshot is stored — so the marks hold for this whole visit and clear on
+  // the next. The ref keeps React's dev double-effect from comparing the deck
+  // with the snapshot it wrote a moment earlier.
+  const [changedIds, setChangedIds] = useState<Set<string>>(() => new Set())
+  const [changesDismissed, setChangesDismissed] = useState(false)
+  const snapshotDone = useRef(false)
+  useEffect(() => {
+    if (!campaignId || snapshotDone.current) return
+    snapshotDone.current = true
+    const current = deckSnapshot(deckSlides)
+    try {
+      const key = seenStorageKey(campaignId)
+      const changed = changedSlides(parseSnapshot(localStorage.getItem(key)), current)
+      if (changed.size) setChangedIds(changed)
+      localStorage.setItem(key, JSON.stringify({ at: new Date().toISOString(), slides: current }))
+    } catch { /* private mode / blocked storage: simply no marks */ }
+  }, [campaignId, deckSlides])
+  const changedIdx = deckSlides.map((s, i) => (changedIds.has(slideIdentity(s, i)) ? i : -1)).filter(i => i >= 0)
+  const isChanged = (i: number) => changedIds.has(slideIdentity(deckSlides[i], i))
 
   // Remember the reviewer's name locally so they type it once, ever
   const reviewerKey = campaignId ? `rp_reviewer_${campaignId}` : ''
@@ -298,7 +321,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   return (
     <DeckShell
       count={deckSlides.length}
-      labelFor={i => getSlideLabel(deckSlides[i])}
+      labelFor={i => { const l = getSlideLabel(deckSlides[i]); return isChanged(i) ? `${l || `${t('public.slide')} ${i + 1}`} · ${t('public.updatedMark')}` : l }}
       headerTitle={`${clientName} — ${campaignName}`}
       brandColor={brandColor}
       lang={lang}
@@ -327,6 +350,19 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
       </>}
       renderSlide={(i, navigate) => (
         <>
+          {changedIdx.length > 0 && !changesDismissed && (() => {
+            const next = changedIdx.find(idx => idx > i) ?? (changedIdx[0] !== i ? changedIdx[0] : undefined)
+            return (
+              <div className="deck-updated-banner" role="status">
+                <span>{changedIdx.length === 1 ? t('public.updatedBannerOne') : t('public.updatedBanner').replace('{n}', String(changedIdx.length))}</span>
+                {next !== undefined && navigate && (
+                  <button type="button" className="deck-updated-next" onClick={() => navigate(next)}>{t('public.updatedNext')}</button>
+                )}
+                <button type="button" className="deck-updated-close" onClick={() => setChangesDismissed(true)} aria-label={t('public.updatedDismiss')}>×</button>
+              </div>
+            )
+          })()}
+          {isChanged(i) && <div className="deck-updated-pill">{t('public.updatedSinceVisit')}</div>}
           {/* Report: the hero lockup opens the first tab, numbers right under
               it — the cover is not a tab of its own (source-report shape). */}
           {isReport && i === 0 && coverSlide && (

@@ -1267,3 +1267,33 @@
 @media (prefers-reduced-motion: reduce){.campaign-pres .more-below-cue svg{animation:none}}
 @media print{.campaign-pres .more-below-cue{display:none}}
 body.printing-all-slides .campaign-pres .more-below-cue{display:none}
+
+
+/* ── "Updated since your last visit" (lib/deck-changes.ts) ──
+   A slim status line above the slide and a tag on each changed slide. Uses
+   the brand accent so it reads as part of the deck, not a system alert. */
+.campaign-pres .deck-updated-banner{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  margin:0 auto 14px;max-width:880px;padding:9px 12px 9px 14px;border-radius:12px;
+  background:rgba(var(--brand-rgb),0.08);border:1px solid rgba(var(--brand-rgb),0.28);
+  color:var(--text-primary,#fff);font-family:'Ping',sans-serif;font-size:0.84rem;font-weight:600;
+}
+.campaign-pres .deck-updated-banner > span{flex:1;min-width:0}
+.campaign-pres .deck-updated-next{
+  border:0;border-radius:999px;padding:6px 12px;cursor:pointer;white-space:nowrap;
+  background:rgba(var(--brand-rgb),0.18);color:var(--brand-cyan);font:inherit;font-weight:700;
+}
+.campaign-pres .deck-updated-close{
+  border:0;background:none;color:var(--text-secondary);cursor:pointer;font-size:1.1rem;line-height:1;padding:4px 6px;
+}
+.campaign-pres .deck-updated-next:focus-visible,.campaign-pres .deck-updated-close:focus-visible{outline:2px solid var(--brand-cyan);outline-offset:2px}
+.campaign-pres .deck-updated-pill{
+  display:table;margin:0 auto 12px;padding:4px 12px;border-radius:999px;
+  background:var(--brand-cyan);color:#062024;font-family:'Ping',sans-serif;font-size:0.74rem;font-weight:800;letter-spacing:0.2px;
+}
+@media(max-width:768px){
+  .campaign-pres .deck-updated-banner{font-size:0.8rem;margin-bottom:12px}
+  .campaign-pres .deck-updated-next{min-height:36px}
+}
+@media print{.campaign-pres .deck-updated-banner,.campaign-pres .deck-updated-pill{display:none}}
+body.printing-all-slides .campaign-pres .deck-updated-banner,body.printing-all-slides .campaign-pres .deck-updated-pill{display:none}
