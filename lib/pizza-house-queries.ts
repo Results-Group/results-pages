@@ -134,34 +134,27 @@ export async function fetchSummary(r: DateRange) {
   const realOrders = deliveryOrders + pickupOrders
   const realOrderRevenue = deliveryRevenue + pickupRevenue
 
-  // Customer identity = card fingerprint (id_card + validto).
+  // Customer identity here = card fingerprint (id_card + validto).
   //
-  // Ideally this would be phone-based, since a real person keeps their number
-  // across card renewals and multi-card use. This POS holds no phone to use,
-  // and that is not a guess about where to look: on 2026-08-05 every one of
-  // the 26 tables in the interface database was enumerated on both branches,
-  // and every column named like a customer, an address or a delivery was
-  // counted. The complete result:
+  // Until 2026-09-24 this POS held no phone to use, and that was verified,
+  // not guessed: on 2026-08-05 every table in the interface database was
+  // enumerated on both branches — clients (the club table) had 2 rows,
+  // creditcard.phone was "---" on every row, deals.client_id was 0 on every
+  // row. Since 2026-09-15 there is a client_delivery table (delivery
+  // customers with phones), and since 2026-09-24 each of its rows carries the
+  // customer's LAST order (last_deal_id/_date/_sum) — Mevaseret first, Giv'at
+  // Ze'ev once Aviv repeats the change. deals.client_id is still 0 everywhere,
+  // so an order still cannot be joined to a customer from the till side.
   //
-  //   clients            the customer-club table — 2 rows (Mevaseret: 1)
-  //   clients.address    empty even on those rows
-  //   creditcard.phone   0 of 2180 rows — all the literal "---"
-  //   deals.client_id    0 of 3926 rows
+  // Phone-based figures therefore come from our own ledger, not from here:
+  // the nightly cron folds those last-order rows into pizza_phone_orders
+  // (lib/pizza-house-phone.ts), and the dashboard route swaps the card-based
+  // numbers below for phone-based ones once a branch has history
+  // (mergePhoneIntoPayload). This query stays the fallback for branches and
+  // periods the phone ledger cannot yet answer for honestly.
   //
-  // There is no delivery-address table and no order-customer table; `deals`
-  // is id_deal, tm_open, tm_close, sum, paydesk, client_id, tax*, id_z and
-  // nothing else. The Aviv spec documents a full club record — phone, mobile,
-  // address, delivery discount — and the table is there with those exact
-  // columns. The branch simply never enrolls anyone. A delivery order arrives
-  // as a plain deal with no customer attached, which is also why the delivery
-  // split has to key off a line item rather than an order type.
-  //
-  // So the card fingerprint is the best identity this DB actually holds. Real
-  // per-person identity would have to come from whatever takes the delivery
-  // orders, not from the till. Don't re-litigate this from the spec — the
-  // fields exist and are empty.
-  //
-  // Known limitation: a card renewal (new validto) counts as a new customer.
+  // Known limitation of the card pool: a card renewal (new validto) counts as
+  // a new customer.
   const [customers] = await pizzaHouseQuery<{ unique_customers: number }>(
     `SELECT COUNT(DISTINCT CONCAT(id_card, '|', validto)) as unique_customers
      FROM creditcard
@@ -306,8 +299,9 @@ export async function fetchWeekdays(r: DateRange) {
 // ── Customers ──
 
 export async function fetchCustomers(r: DateRange) {
-  // New vs returning within range — identity = card fingerprint (see the
-  // long note on `customers` above for why phone-based dedup isn't possible).
+  // New vs returning within range — identity = card fingerprint. The phone
+  // ledger replaces these two datasets when it can (see the note on
+  // `customers` in fetchSummary and mergePhoneIntoPayload).
   const newVsReturning = await pizzaHouseQuery<{ kind: string; customers: number; revenue: number }>(
     `SELECT
        CASE WHEN first_seen >= ? THEN 'new' ELSE 'returning' END as kind,

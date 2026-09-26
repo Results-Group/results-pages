@@ -16,6 +16,8 @@ import {
 } from '@/lib/pizza-house-queries'
 import { runWithBranch, isPizzaBranch, listPizzaBranches } from '@/lib/pizza-house-db'
 import { aggregateBranches, type BranchData } from '@/lib/pizza-house-aggregate'
+import { fetchPhoneCustomers } from '@/lib/pizza-house-phone'
+import { mergePhoneIntoPayload } from '@/lib/pizza-house-phone-pure'
 import { captureException } from '@/lib/logger'
 import { rateLimit } from '@/lib/rate-limit'
 
@@ -158,13 +160,28 @@ export async function GET(req: NextRequest) {
       payload = await runWithBranch(branch, () => fetchBranchData(range, prevRange, rangeDays))
     }
 
+    // Phone-based customer figures come from our own ledger (Supabase), not
+    // the till. Losing them costs the customer-base block, never the
+    // dashboard — so a failure here is reported and swallowed. The merge
+    // only swaps the card-based numbers when every branch on screen has
+    // phone data and both periods are past the collection start.
+    const branchIds = branch === 'all' ? available.map(b => b.id) : [branch]
+    const phoneCustomers = await fetchPhoneCustomers(branchIds, range, prevRange, from, prevFrom)
+      .catch(err => {
+        captureException(err, { route: 'GET /api/pizza-house/dashboard', phase: 'phone-customers' })
+        return null
+      })
+    const merged = mergePhoneIntoPayload(payload, phoneCustomers, branchIds)
+
     const data = {
       branch,
       branches: branchesForUi,
       perBranch,
       range: { from, to, days: rangeDays },
       prev_range: { from: prevFrom, to: addDays(from, -1) },
-      ...payload,
+      ...merged.payload,
+      phoneCustomers,
+      identity_source: merged.identity_source,
       generated_at: new Date().toISOString(),
     }
 
