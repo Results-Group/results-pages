@@ -32,12 +32,29 @@ export interface DeckViewRow {
   viewed_at: string
 }
 
+/**
+ * Every view row for these ids, page by page. PostgREST returns at most 1,000
+ * rows per request; this read had no paging, so once campaign views passed
+ * 1,000 (1,602 by 2026-09-27) the list's view counts were silently cut short
+ * and campaigns the client had opened showed as never opened.
+ */
+const PAGE = 1000
+
 export async function getDeckViewRows(contentType: DeckContentType, ids: string[]): Promise<DeckViewRow[]> {
   if (!ids.length) return []
-  const { data } = await supabase
-    .from('deck_views')
-    .select('content_id, viewed_at')
-    .eq('content_type', contentType)
-    .in('content_id', ids)
-  return (data as DeckViewRow[]) || []
+  const rows: DeckViewRow[] = []
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase
+      .from('deck_views')
+      .select('content_id, viewed_at')
+      .eq('content_type', contentType)
+      .in('content_id', ids)
+      // A stable order, or pages can overlap and skip rows.
+      .order('id')
+      .range(from, from + PAGE - 1)
+    if (error || !data) break
+    rows.push(...(data as DeckViewRow[]))
+    if (data.length < PAGE) break
+  }
+  return rows
 }
