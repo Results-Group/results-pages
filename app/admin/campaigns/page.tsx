@@ -8,6 +8,7 @@ import { whatsappShareUrl } from '@/lib/share'
 import { useT, useLocale } from '@/lib/i18n'
 import { useToast } from '../_components/toast'
 import { useConfirm } from '../_components/confirm-dialog'
+import { matchesStatus, sortCampaigns, groupByClient, clientNames, type CampaignSort, type CampaignStatusFilter } from '@/lib/campaign-list'
 
 interface Campaign {
   id: string
@@ -18,6 +19,7 @@ interface Campaign {
   section_count?: number
   asset_count?: number
   created_at: string
+  updated_at?: string
   workspace_id: string | null
   created_by?: string | null
   feedback_counts?: { approved: number; rejected: number; pending: number }
@@ -57,7 +59,12 @@ export default function CampaignsListPage() {
   const [duplicating, setDuplicating] = useState<string | null>(null)
   const [userRole, setUserRole] = useState('admin')
   const [myId, setMyId] = useState<string | null>(null)
-  const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published' | 'archived'>('all')
+  // 'active' by default: the archive kept every expired campaign in view with
+  // only a grey dot to tell it apart, so nobody could see that auto-archive
+  // was working at all.
+  const [statusFilter, setStatusFilter] = useState<CampaignStatusFilter>('active')
+  const [sort, setSort] = useState<CampaignSort>('created')
+  const [clientFilter, setClientFilter] = useState('')
   const [mineOnly, setMineOnly] = useState(false)
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [templatesOpen, setTemplatesOpen] = useState(false)
@@ -246,23 +253,26 @@ export default function CampaignsListPage() {
   const totalAssets = (c: Campaign) => c.asset_count ?? 0
   const totalSections = (c: Campaign) => c.section_count ?? 0
 
-  const filteredCampaigns = campaigns.filter(c =>
-    (statusFilter === 'all' || c.status === statusFilter) &&
-    (!mineOnly || (myId != null && c.created_by === myId))
+  const filteredCampaigns = sortCampaigns(
+    campaigns.filter(c =>
+      matchesStatus(c.status, statusFilter) &&
+      (!clientFilter || c.client?.trim() === clientFilter) &&
+      (!mineOnly || (myId != null && c.created_by === myId))
+    ),
+    sort,
+    locale === 'en' ? 'en' : 'he',
   )
 
-  const groupedByClient = (() => {
-    const groups = new Map<string, Campaign[]>()
-    for (const c of filteredCampaigns) {
-      const key = c.client?.trim() || (locale === 'en' ? 'No client' : 'ללא לקוח')
-      if (!groups.has(key)) groups.set(key, [])
-      groups.get(key)!.push(c)
-    }
-    return Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0], 'he'))
-  })()
+  // Grouped under client headers only when sorting by client; a date-sorted
+  // list is flat (one nameless group) and names the client on each card.
+  const noClientLabel = t('campaigns.noClient')
+  const groupedByClient: [string | null, Campaign[]][] =
+    sort === 'client' ? groupByClient(filteredCampaigns, noClientLabel) : [[null, filteredCampaigns]]
+  const clientOptions = clientNames(campaigns, locale === 'en' ? 'en' : 'he')
 
   const totalCampaigns = campaigns.length
   const publishedCount = campaigns.filter(c => c.status === 'published').length
+  const clientCount = clientNames(filteredCampaigns).length + (filteredCampaigns.some(c => !c.client?.trim()) ? 1 : 0)
 
   return (
     <div className="max-w-6xl">
@@ -305,7 +315,7 @@ export default function CampaignsListPage() {
           {[
             { label: t('campaigns.total'), value: totalCampaigns },
             { label: t('common.published'), value: publishedCount },
-            { label: t('nav.clients'), value: groupedByClient.length },
+            { label: t('nav.clients'), value: clientCount },
           ].map(kpi => (
             <div
               key={kpi.label}
@@ -343,7 +353,7 @@ export default function CampaignsListPage() {
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2 mb-6">
-        {(['all', 'draft', 'published', 'archived'] as const).map(s => (
+        {(['active', 'draft', 'published', 'archived', 'all'] as const).map(s => (
           <button
             key={s}
             onClick={() => setStatusFilter(s)}
@@ -352,9 +362,30 @@ export default function CampaignsListPage() {
               ? { background: 'rgba(64,225,211,0.14)', border: '1px solid rgba(64,225,211,0.4)', color: '#40e1d3' }
               : { background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-muted)' }}
           >
-            {s === 'all' ? t('common.all') : STATUS_LABELS[s]}
+            {s === 'all' ? t('common.all') : s === 'active' ? t('campaigns.filterActive') : STATUS_LABELS[s]}
           </button>
         ))}
+        <select
+          value={sort}
+          onChange={e => setSort(e.target.value as CampaignSort)}
+          aria-label={t('campaigns.sortLabel')}
+          className="px-3 py-1.5 rounded-lg text-xs font-bold outline-none"
+          style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-secondary)' }}
+        >
+          <option value="created">{t('campaigns.sortCreated')}</option>
+          <option value="updated">{t('campaigns.sortUpdated')}</option>
+          <option value="client">{t('campaigns.sortClient')}</option>
+        </select>
+        <select
+          value={clientFilter}
+          onChange={e => setClientFilter(e.target.value)}
+          aria-label={t('nav.clients')}
+          className="px-3 py-1.5 rounded-lg text-xs font-bold outline-none max-w-[200px]"
+          style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', color: clientFilter ? '#40e1d3' : 'var(--admin-text-secondary)' }}
+        >
+          <option value="">{t('campaigns.allClients')}</option>
+          {clientOptions.map(name => <option key={name} value={name}>{name}</option>)}
+        </select>
         <button
           onClick={() => setMineOnly(m => !m)}
           className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all ms-auto"
@@ -429,9 +460,13 @@ export default function CampaignsListPage() {
         </div>
       ) : (
         <div className="space-y-10">
+          {filteredCampaigns.length === 0 && (
+            <p className="text-sm py-10 text-center" style={{ color: 'var(--admin-text-muted)' }}>{t('common.noResults')}</p>
+          )}
           {groupedByClient.map(([clientName, clientCampaigns]) => (
-            <div key={clientName}>
-              {/* Client group header */}
+            <div key={clientName ?? '__flat'}>
+              {/* Client group header — only in the client-sorted view. */}
+              {clientName !== null && (
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#40e1d3', boxShadow: '0 0 8px rgba(64,225,211,0.5)' }} />
                 <h3 className="text-sm font-bold tracking-wide" style={{ color: '#40e1d3' }}>{clientName}</h3>
@@ -440,6 +475,7 @@ export default function CampaignsListPage() {
                 </span>
                 <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, rgba(64,225,211,0.15), transparent)' }} />
               </div>
+              )}
 
               <div className="space-y-3">
                 {clientCampaigns.map(c => {
@@ -480,6 +516,9 @@ export default function CampaignsListPage() {
                         <Link href={`/admin/campaigns/${c.id}`} className="flex-1 min-w-0 block">
                           <div className="flex items-center gap-2.5 mb-2">
                             <span className="w-2 h-2 rounded-full shrink-0" style={{ background: dotColor, boxShadow: `0 0 8px ${dotColor}60` }} />
+                            {clientName === null && (
+                              <span className="text-xs font-bold shrink-0 max-w-[40%] truncate" style={{ color: '#40e1d3' }}>{c.client?.trim() || noClientLabel}</span>
+                            )}
                             <h3 className="text-sm font-bold truncate" style={{ color: 'var(--admin-text-primary)' }}>{c.campaign_name}</h3>
                             <span
                               className="text-[10px] px-2 py-0.5 rounded font-semibold shrink-0"
