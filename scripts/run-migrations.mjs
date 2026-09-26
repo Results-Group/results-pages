@@ -94,11 +94,13 @@ function splitStatements (sql) {
   for (const line of sql.split('\n')) {
     const trimmed = line.trim()
     // Keep comment lines in context (Postgres needs them stripped for multi-stmt)
-    if (!trimmed.startsWith('--')) {
-      buf += line + '\n'
-      const marks = (line.match(/\$[A-Za-z_]*\$/g) || []).length
-      if (marks % 2 === 1) inDollar = !inDollar
-    }
+    // A comment line is dropped from the buffer and can never end a
+    // statement: a comment inside CREATE TABLE that happened to end in ';'
+    // used to cut the statement in half (migration-pizza-sync-alerts.sql).
+    if (trimmed.startsWith('--')) continue
+    buf += line + '\n'
+    const marks = (line.match(/\$[A-Za-z_]*\$/g) || []).length
+    if (marks % 2 === 1) inDollar = !inDollar
     if (!inDollar && trimmed.endsWith(';')) {
       const s = buf.trim()
       if (s) stmts.push(s)
