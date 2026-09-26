@@ -4,6 +4,7 @@ import { runWithBranch, listPizzaBranches } from '@/lib/pizza-house-db'
 import { fetchDayIdentities, recordDay, logLedgerRun } from '@/lib/pizza-house-ledger'
 import { fetchDailyStats, snapshotDailyStats } from '@/lib/pizza-house-snapshot'
 import { snapshotPhoneOrders } from '@/lib/pizza-house-phone'
+import { watchQuietDays } from '@/lib/pizza-house-sync-watch'
 import { captureException, logger } from '@/lib/logger'
 
 /**
@@ -135,9 +136,22 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Quiet-day watch: a branch that normally trades on this weekday but sent
+  // (almost) nothing. Reads the daily stats just upserted above, so a branch
+  // whose snapshot failed this run is left out — its "missing" day would be
+  // our failure, not the till's, and that failure is already reported.
+  let watch: Record<string, unknown>
+  try {
+    const snapshotOk = branches.filter(b => snapshots.some(s => s.branch === b.id && !s.error))
+    watch = await watchQuietDays(snapshotOk)
+  } catch (err) {
+    captureException(err, { route: 'GET /api/cron/pizza-ledger', phase: 'quiet-day-watch' })
+    watch = { error: true }
+  }
+
   const failed = results.filter(r => r.error).length
   const snapFailed = snapshots.filter(r => r.error).length
   const phoneFailed = phones.filter(r => r.error).length
-  logger.info(`Pizza ledger cron: ${results.length - failed}/${results.length} day-branch folds ok; daily-stats ${snapshots.length - snapFailed}/${snapshots.length} branches ok; phone-orders ${phones.length - phoneFailed}/${phones.length} branches ok`)
-  return NextResponse.json({ ok: failed === 0 && snapFailed === 0 && phoneFailed === 0, days, results, snapshots, phones })
+  logger.info(`Pizza ledger cron: ${results.length - failed}/${results.length} day-branch folds ok; daily-stats ${snapshots.length - snapFailed}/${snapshots.length} branches ok; phone-orders ${phones.length - phoneFailed}/${phones.length} branches ok; quiet-day watch ${watch.error ? 'failed' : 'ok'}`)
+  return NextResponse.json({ ok: failed === 0 && snapFailed === 0 && phoneFailed === 0 && !watch.error, days, results, snapshots, phones, watch })
 }

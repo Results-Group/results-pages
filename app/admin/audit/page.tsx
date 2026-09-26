@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { ScrollText, Megaphone, FileText, Contact, Users, Building } from 'lucide-react'
 import { useT, useLocale } from '@/lib/i18n'
 import BackupStatus from '../_components/BackupStatus'
+import PizzaSyncStatus from '../_components/PizzaSyncStatus'
 
 interface AuditEntry {
   id: string
@@ -77,6 +78,7 @@ export default function AuditPage() {
       </div>
 
       <BackupStatus />
+      <PizzaSyncStatus />
 
       <div className="flex gap-2 mb-5 flex-wrap">
         <select value={entityFilter} onChange={e => setEntityFilter(e.target.value)} className="px-3 py-2 rounded-lg text-sm outline-none" style={selectStyle}>

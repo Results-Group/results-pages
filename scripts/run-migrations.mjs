@@ -49,6 +49,7 @@ const MIGRATIONS = [
   'migration-pizza-daily-stats-source.sql',
   'migration-view-ip-purge.sql',
   'migration-pizza-phone-orders.sql',
+  'migration-pizza-sync-alerts.sql',
 ]
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
