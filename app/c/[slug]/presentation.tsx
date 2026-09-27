@@ -27,6 +27,7 @@ import { CaptionExpansionProvider } from './mockups/AdCaption'
 import StatsSlide from './stats-slide'
 import MoreBelowCue from './more-below-cue'
 import { deckSnapshot, changedSlides, slideIdentity, seenStorageKey, parseSnapshot } from '@/lib/deck-changes'
+import { untitledCreativeLabels } from '@/lib/slide-labels'
 import { parseVideoUrl } from '@/lib/video-utils'
 import { assetProxyUrl } from '@/lib/asset-url'
 import ShareButton from '@/app/_deck/ShareButton'
@@ -105,6 +106,11 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
       localStorage.setItem(key, JSON.stringify({ at: new Date().toISOString(), slides: current }))
     } catch { /* private mode / blocked storage: simply no marks */ }
   }, [campaignId, deckSlides])
+  // Untitled creative slides named by chapter + ad kind (lib/slide-labels.ts).
+  // Story decks only: report decks already show the chapter as the tab.
+  const storyLabels = isReport
+    ? []
+    : untitledCreativeLabels(deckSlides, m => (dict as Record<string, string>)[`public.slideKind.${m}`] ?? '', t('public.partOf'))
   const changedIdx = deckSlides.map((s, i) => (changedIds.has(slideIdentity(s, i)) ? i : -1)).filter(i => i >= 0)
   const isChanged = (i: number) => changedIds.has(slideIdentity(deckSlides[i], i))
 
@@ -321,7 +327,8 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   return (
     <DeckShell
       count={deckSlides.length}
-      labelFor={i => { const l = getSlideLabel(deckSlides[i]); return isChanged(i) ? `${l || `${t('public.slide')} ${i + 1}`} · ${t('public.updatedMark')}` : l }}
+      labelFor={i => { const l = storyLabels[i] || getSlideLabel(deckSlides[i]); return isChanged(i) ? `${l || `${t('public.slide')} ${i + 1}`} · ${t('public.updatedMark')}` : l }}
+      isChapter={i => !isReport && deckSlides[i].type === 'divider' && !!deckSlides[i].title}
       headerTitle={`${clientName} — ${campaignName}`}
       brandColor={brandColor}
       lang={lang}

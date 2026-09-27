@@ -1310,3 +1310,11 @@ body.printing-all-slides .campaign-pres .deck-updated-banner,body.printing-all-s
 .campaign-pres a,
 .campaign-pres .slide-footer-nav,
 .campaign-pres .story-progress{touch-action:manipulation}
+
+
+/* Slide list as a table of contents: a chapter (divider) reads as a heading
+   and the slides after it sit under it — the list was a flat run of "שקף 3",
+   "שקף 4" … that nobody could navigate on a phone. */
+.campaign-pres .slide-index-item.is-chapter{margin-top:6px;border-top:1px solid rgba(255,255,255,0.06);padding-top:12px}
+.campaign-pres .slide-index-item.is-chapter:first-child{margin-top:0;border-top:0;padding-top:8px}
+.campaign-pres .slide-index-item.is-chapter .slide-index-name{font-weight:800;color:var(--brand-cyan);letter-spacing:0.3px}

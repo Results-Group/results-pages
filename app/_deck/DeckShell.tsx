@@ -67,6 +67,8 @@ export interface DeckShellProps {
   hideFooterOn?: (index: number) => boolean
   /** True while a modal owns the interaction; suppresses keys and swipe. */
   navLocked?: boolean
+  /** Slides that open a chapter — shown as headings in the slide list. */
+  isChapter?: (index: number) => boolean
   onSlideChange?: (index: number) => void
 }
 
@@ -88,6 +90,7 @@ export default function DeckShell({
   overlays,
   hideFooterOn,
   navLocked = false,
+  isChapter,
   onSlideChange,
 }: DeckShellProps) {
   const dict = lang === 'en' ? en : he
@@ -352,7 +355,7 @@ export default function DeckShell({
               {indices.map(i => (
                 <button
                   key={i}
-                  className={`slide-index-item${i === activeSlide ? ' active' : ''}`}
+                  className={`slide-index-item${i === activeSlide ? ' active' : ''}${isChapter?.(i) ? ' is-chapter' : ''}`}
                   onClick={() => { goSlide(i); setShowIndex(false) }}
                 >
                   <span className="slide-index-num">{i + 1}</span>
