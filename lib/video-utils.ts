@@ -75,3 +75,38 @@ export function getYouTubeFallbackThumbnail(url: string): string | null {
   const { platform, videoId } = parseVideoUrl(url)
   return platform === 'youtube' && videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null
 }
+
+/** YouTube Shorts are vertical by definition — the URL says so before any poster loads. */
+export function isYouTubeShort(url: string): boolean {
+  return /youtube\.com\/shorts\//i.test(url)
+}
+
+/**
+ * The player frame's aspect ratio — the same before and after play.
+ *
+ * It used to switch to 16:9 the moment the viewer pressed play. For the
+ * square and vertical creatives most social video ads are, that collapsed a
+ * 345x345 phone slot to 345x194: the video shrank into a pillarbox, and
+ * Google Drive's player, which does not fit a frame that short, drew its
+ * control panel half outside it (client report, Xtra, 2026-09-27). The
+ * frame now keeps the video's own shape: an explicit ratio (Reels), a
+ * Shorts URL, the poster's measured ratio, and 16:9 only when nothing is
+ * known yet.
+ */
+export function videoFrameRatio(url: string, opts: { forced?: string; posterRatio?: number | null }): string | number {
+  if (opts.forced) return opts.forced
+  if (isYouTubeShort(url)) return '9 / 16'
+  return opts.posterRatio ?? 16 / 9
+}
+
+/**
+ * Drive's embedded player lays its controls out for a frame of at least this
+ * height; below it the volume/settings panel is clipped. A landscape Drive
+ * video on a phone (345 wide → 194 tall) gets this floor once it plays, and
+ * Drive letterboxes the picture inside.
+ */
+export const DRIVE_PLAYER_MIN_HEIGHT = 260
+
+export function isDriveVideo(url: string): boolean {
+  return /drive\.google\.com/i.test(url)
+}

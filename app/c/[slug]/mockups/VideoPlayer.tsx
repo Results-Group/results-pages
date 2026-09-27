@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getVideoThumbnail, getYouTubeFallbackThumbnail } from '@/lib/video-utils'
+import { getVideoThumbnail, getYouTubeFallbackThumbnail, videoFrameRatio, isDriveVideo, DRIVE_PLAYER_MIN_HEIGHT } from '@/lib/video-utils'
 
 /**
  * The poster → play → embed surface of a video, with no card chrome around it.
@@ -46,9 +46,10 @@ export default function VideoPlayer({
       className={`relative w-full overflow-hidden ${rounded ? 'rounded-lg' : ''}`}
       style={{
         background: 'linear-gradient(135deg, #141e20, #0d1112)',
-        // An explicit aspectRatio prop (Reels = 9/16) wins over both the
-        // poster-derived ratio and the default 16:9 embed frame.
-        aspectRatio: aspectRatio ?? (showEmbed ? '16 / 9' : (posterRatio ?? 16 / 9)),
+        // One shape before and after play — see videoFrameRatio for the
+        // clipped-player report that switching to 16:9 on play caused.
+        aspectRatio: videoFrameRatio(url, { forced: aspectRatio, posterRatio }),
+        minHeight: showEmbed && isDriveVideo(url) ? DRIVE_PLAYER_MIN_HEIGHT : undefined,
       }}
     >
       {showEmbed && embedUrl ? (

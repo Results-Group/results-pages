@@ -82,3 +82,32 @@ describe('thumbnails', () => {
     expect(getYouTubeFallbackThumbnail('https://vimeo.com/76979871')).toBeNull()
   })
 })
+
+import { videoFrameRatio, isYouTubeShort, isDriveVideo } from '@/lib/video-utils'
+
+describe('videoFrameRatio', () => {
+  const drive = 'https://drive.google.com/file/d/abcdefghijklmnop/view?usp=sharing'
+
+  it('keeps a square Drive video square — the frame no longer collapses to 16:9 on play', () => {
+    expect(videoFrameRatio(drive, { posterRatio: 1 })).toBe(1)
+  })
+
+  it('treats a Shorts URL as vertical before any poster is measured', () => {
+    expect(isYouTubeShort('https://youtube.com/shorts/lUuLgSc_yUA?feature=share')).toBe(true)
+    expect(videoFrameRatio('https://youtube.com/shorts/lUuLgSc_yUA?feature=share', { posterRatio: 16 / 9 })).toBe('9 / 16')
+  })
+
+  it('lets an explicit ratio win (the Reels mockup passes 9 / 16)', () => {
+    expect(videoFrameRatio(drive, { forced: '9 / 16', posterRatio: 1 })).toBe('9 / 16')
+  })
+
+  it('falls back to 16:9 only when nothing is known yet', () => {
+    expect(videoFrameRatio('https://vimeo.com/123456', { posterRatio: null })).toBeCloseTo(16 / 9)
+    expect(videoFrameRatio('https://www.youtube.com/watch?v=dQw4w9WgXcQ', { posterRatio: 16 / 9 })).toBeCloseTo(16 / 9)
+  })
+
+  it('recognises Drive links for the player height floor', () => {
+    expect(isDriveVideo(drive)).toBe(true)
+    expect(isDriveVideo('https://youtu.be/dQw4w9WgXcQ')).toBe(false)
+  })
+})
