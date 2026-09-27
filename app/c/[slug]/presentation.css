@@ -1304,12 +1304,12 @@ body.printing-all-slides .campaign-pres .deck-updated-banner,body.printing-all-s
 /* iOS reads two quick taps on the same spot as double-tap-to-zoom. Tapping
    "next" twice to skip a slide zoomed the whole deck in instead, and ate
    one of the taps (found on the iPhone simulator, 2026-09-27). manipulation
-   keeps taps, panning and pinch-zoom, and drops only the double-tap zoom —
-   on the controls, where a double tap always means "twice". */
-.campaign-pres button,
-.campaign-pres a,
-.campaign-pres .slide-footer-nav,
-.campaign-pres .story-progress{touch-action:manipulation}
+   keeps taps, panning and pinch-zoom, and drops only the double-tap zoom.
+   On the whole deck, not just the controls: when a tap changes the slide,
+   the next tap can land on the page beside the button, and the first fix
+   (buttons only) still zoomed there. Effective touch-action intersects down
+   the tree, so the root covers every descendant. */
+.campaign-pres{touch-action:manipulation}
 
 
 /* Slide list as a table of contents: a chapter (divider) reads as a heading
