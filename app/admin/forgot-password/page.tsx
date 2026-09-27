@@ -27,7 +27,7 @@ export default function ForgotPasswordPage() {
         <div className="rounded-xl p-7" style={{ background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)' }}>
           <div className="flex justify-center mb-5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Results" className="h-9 w-auto" />
+            <img src="/logo.webp" alt="Results" className="h-9 w-auto" />
           </div>
 
           {sent ? (

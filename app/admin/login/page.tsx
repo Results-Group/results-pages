@@ -44,7 +44,7 @@ export default function LoginPage() {
         >
           <div className="flex justify-center mb-5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Results" className="h-9 w-auto" />
+            <img src="/logo.webp" alt="Results" className="h-9 w-auto" />
           </div>
 
           <h1 className="text-lg font-semibold text-center mb-1" style={{ color: 'var(--admin-text-primary)' }}>

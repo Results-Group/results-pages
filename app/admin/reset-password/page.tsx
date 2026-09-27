@@ -102,7 +102,7 @@ export default function ResetPasswordPage() {
         <div className="rounded-xl p-7" style={{ background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)' }}>
           <div className="flex justify-center mb-5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Results" className="h-9 w-auto" />
+            <img src="/logo.webp" alt="Results" className="h-9 w-auto" />
           </div>
           <Suspense fallback={<p className="text-sm text-center" style={{ color: 'var(--admin-text-muted)' }}>טוען...</p>}>
             <ResetForm />

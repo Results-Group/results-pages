@@ -11,10 +11,13 @@
  */
 
 const PARTNER_LOGOS = [
-  { src: '/partners/google.png', alt: 'Google Partner' },
-  { src: '/partners/meta.png', alt: 'Meta Business Partner' },
-  { src: '/partners/tiktok.png', alt: 'TikTok Marketing Partners' },
-  { src: '/partners/wix.png', alt: 'Wix Partner' },
+  // WebP at 3x the largest on-screen height (retina). The source PNGs were
+  // 300–1560px wide for a badge drawn 24–28px tall: 256KB of the ~1MB a
+  // client downloaded before seeing the first slide on a phone.
+  { src: '/partners/google.webp', alt: 'Google Partner' },
+  { src: '/partners/meta.webp', alt: 'Meta Business Partner' },
+  { src: '/partners/tiktok.webp', alt: 'TikTok Marketing Partners' },
+  { src: '/partners/wix.webp', alt: 'Wix Partner' },
 ]
 
 export function PartnerLogos() {
@@ -32,9 +35,9 @@ export function PartnerLogos() {
 
 export function ResultsLogo() {
   // The real brand logo (yellow bars + arrow + "Results" wordmark) served from
-  // /logo.png, instead of a hand-drawn imitation.
+  // /logo.webp (a retina-sized copy of /logo.png), instead of a hand-drawn imitation.
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src="/logo.png" alt="Results" className="results-logo-img" />
+  return <img src="/logo.webp" alt="Results" className="results-logo-img" />
 }
 
 export function CoverSlide({
@@ -150,7 +153,7 @@ export function ClosingSlide({ title, clientName }: { title: string; clientName?
 
       <div className="closing-stack">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="Results" className="closing-logo rp-anim rp-up rp-d1" loading="lazy" decoding="async" />
+        <img src="/logo.webp" alt="Results" className="closing-logo rp-anim rp-up rp-d1" loading="lazy" decoding="async" />
 
         <h1 className="closing-headline rp-anim rp-up rp-d3">{title}</h1>
 
