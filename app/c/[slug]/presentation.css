@@ -1245,18 +1245,21 @@
    the last card is reached (app/c/[slug]/more-below-cue.tsx). */
 .campaign-pres .more-below-cue{display:none}
 @media(max-width:768px){
+  /* Compact and tucked against the footer nav: the first version sat over
+     the caption line under the creative — the copy the client is there to
+     review (Instagram feed, 2026-09-27). */
   .campaign-pres .more-below-cue{
-    display:inline-flex;align-items:center;gap:8px;
+    display:inline-flex;align-items:center;gap:6px;
     position:fixed;left:50%;transform:translateX(-50%);
-    bottom:calc(64px + env(safe-area-inset-bottom));z-index:999;
-    padding:9px 16px;border-radius:999px;white-space:nowrap;
-    font-family:'Ping',sans-serif;font-size:0.8rem;font-weight:700;color:#fff;
-    background:rgba(9,12,14,0.92);backdrop-filter:blur(16px);
-    border:1px solid rgba(var(--brand-rgb),0.55);
-    box-shadow:0 8px 24px rgba(0,0,0,0.4),0 0 0 3px rgba(var(--brand-rgb),0.12);
+    bottom:calc(58px + env(safe-area-inset-bottom));z-index:999;
+    padding:5px 12px;border-radius:999px;white-space:nowrap;
+    font-family:'Ping',sans-serif;font-size:0.72rem;font-weight:700;color:#fff;
+    background:rgba(9,12,14,0.82);backdrop-filter:blur(12px);
+    border:1px solid rgba(var(--brand-rgb),0.5);
+    box-shadow:0 4px 14px rgba(0,0,0,0.35);
     cursor:pointer;
   }
-  .campaign-pres .more-below-cue svg{color:var(--brand-cyan);animation:cue-bob 1.4s ease-in-out infinite}
+  .campaign-pres .more-below-cue svg{width:12px;height:12px;color:var(--brand-cyan);animation:cue-bob 1.4s ease-in-out infinite}
   /* Report-style decks hide the footer nav, so the pill sits at the bottom edge. */
   .campaign-pres.nav-tabs .more-below-cue{bottom:calc(16px + env(safe-area-inset-bottom))}
   /* Peek: a tighter stack, so the next card's top edge shows under the first

@@ -466,7 +466,7 @@ const he = {
   'public.updatedDismiss': 'סגירה',
   'public.updatedSinceVisit': 'עודכן מאז הביקור הקודם',
   'public.updatedMark': 'עודכן',
-  'public.moreBelowCue': 'מודעה {n} מתוך {total} · עוד למטה',
+  'public.moreBelowCue': 'מודעה {n}/{total} · עוד למטה',
   'public.allSlides': 'כל השקפים',
   'public.slide': 'שקף',
   'public.copyVersion': 'נוסח',

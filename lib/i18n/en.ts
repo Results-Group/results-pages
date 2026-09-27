@@ -468,7 +468,7 @@ const en: Record<TranslationKey, string> = {
   'public.updatedDismiss': 'Dismiss',
   'public.updatedSinceVisit': 'Updated since your last visit',
   'public.updatedMark': 'updated',
-  'public.moreBelowCue': 'Ad {n} of {total} · more below',
+  'public.moreBelowCue': 'Ad {n}/{total} · more below',
   'public.allSlides': 'All slides',
   'public.slide': 'Slide',
   'public.copyVersion': 'Version',
