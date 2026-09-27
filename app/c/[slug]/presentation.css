@@ -1297,3 +1297,13 @@ body.printing-all-slides .campaign-pres .more-below-cue{display:none}
 }
 @media print{.campaign-pres .deck-updated-banner,.campaign-pres .deck-updated-pill{display:none}}
 body.printing-all-slides .campaign-pres .deck-updated-banner,body.printing-all-slides .campaign-pres .deck-updated-pill{display:none}
+
+/* iOS reads two quick taps on the same spot as double-tap-to-zoom. Tapping
+   "next" twice to skip a slide zoomed the whole deck in instead, and ate
+   one of the taps (found on the iPhone simulator, 2026-09-27). manipulation
+   keeps taps, panning and pinch-zoom, and drops only the double-tap zoom —
+   on the controls, where a double tap always means "twice". */
+.campaign-pres button,
+.campaign-pres a,
+.campaign-pres .slide-footer-nav,
+.campaign-pres .story-progress{touch-action:manipulation}
