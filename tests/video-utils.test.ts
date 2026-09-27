@@ -29,16 +29,16 @@ describe('parseVideoUrl — the URL shapes people actually paste', () => {
 })
 
 /**
- * A bare /embed/<id> URL renders YouTube's own title, channel name and
- * "More videos" grid on top of the creative — inside an ad mockup that reads
- * as part of the ad. `controls=0` is what removes the title (it is drawn as
- * part of the control chrome; `showinfo` was withdrawn in 2018).
+ * The embed keeps the control bar: without it an iPhone viewer, whose
+ * autoplay is blocked, got a black frame with no play button (2026-09-27).
+ * Related videos and annotations are still suppressed.
  */
-describe('parseVideoUrl — embed chrome is suppressed', () => {
+describe('parseVideoUrl — embed player settings', () => {
   const yt = parseVideoUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ').embedUrl!
 
-  it('hides the title by disabling the player chrome', () => {
-    expect(yt).toContain('controls=0')
+  it('keeps the control bar so the viewer can always play, mute and seek', () => {
+    expect(yt).toContain('controls=1')
+    expect(yt).not.toContain('controls=0')
   })
 
   it('keeps related videos on the same channel and drops annotations', () => {

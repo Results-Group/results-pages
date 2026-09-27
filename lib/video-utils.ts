@@ -1,19 +1,21 @@
 /**
  * Player parameters for the YouTube embed.
  *
- * A bare /embed/<id> URL renders YouTube's full chrome — the video title and
- * channel name across the top, the watermark, and a "More videos" grid on
- * pause. Inside an ad mockup that reads as part of the creative, which it
- * isn't, and clients asked about it.
+ * The control bar is ON. It used to be off (`controls=0`) to hide the video
+ * title that YouTube draws with it — clients had asked about the title. On
+ * iPhones that left a worse problem (simulator, 2026-09-27): iOS blocks
+ * autoplay with sound inside an embedded player, so after our play button
+ * the viewer got a black frame with no button at all, and no way to pause,
+ * mute, seek or go full screen. A title that shows for a moment is the
+ * smaller cost. (Shorts draw their own channel/title/like overlay whatever
+ * these parameters say — upload a regular video to avoid it.)
  *
- * `controls=0` is what removes the title: it is drawn as part of the control
- * chrome, and `showinfo` (which used to hide it on its own) was withdrawn by
- * YouTube in 2018. `autoplay=1` is safe and wanted here — the embed is only
- * mounted after the viewer clicks our own play button, so it follows a real
- * user gesture rather than starting on its own.
+ * `autoplay=1` still starts playback on desktop and Android, where the click
+ * on our own play button counts as the gesture; on iOS the player now shows
+ * its own play button instead of a black box.
  */
 const YT_PLAYER_PARAMS = [
-  'controls=0',        // no control bar — and no title overlay
+  'controls=1',        // play/pause, seek, mute, full screen
   'rel=0',             // end screen stays on this channel
   'modestbranding=1',  // deprecated but still honoured by older players
   'iv_load_policy=3',  // no annotations
