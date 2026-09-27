@@ -285,6 +285,7 @@ const he = {
   'campaigns.useTemplate': 'צור מתבנית זו',
   'campaigns.creating': 'יוצר...',
   'campaigns.mineOnly': 'הקמפיינים שלי',
+  'campaigns.driveVideoHint': 'קישור מגוגל דרייב: באייפון הנגן של דרייב מציג שני סטים של כפתורים אחד על השני. לנגן נקי אצל הלקוח, העלו את הסרטון ליוטיוב כ"לא-רשום" והדביקו את הקישור משם.',
   'clients.addAsNew': 'הוסף "{name}" כלקוח חדש',
   'clients.createMessage': 'ליצור לקוח חדש בשם "{name}"?',
   'clients.createSimilar': 'אולי התכוונת ל: {names}',

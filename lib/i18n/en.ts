@@ -287,6 +287,7 @@ const en: Record<TranslationKey, string> = {
   'campaigns.useTemplate': 'Create from this template',
   'campaigns.creating': 'Creating...',
   'campaigns.mineOnly': 'My campaigns',
+  'campaigns.driveVideoHint': 'Google Drive link: on iPhones the Drive player shows two sets of controls on top of each other. For a clean player, upload the video to YouTube as "unlisted" and paste that link instead.',
   'clients.addAsNew': 'Add "{name}" as a new client',
   'clients.createMessage': 'Create a new client named "{name}"?',
   'clients.createSimilar': 'Did you mean: {names}',

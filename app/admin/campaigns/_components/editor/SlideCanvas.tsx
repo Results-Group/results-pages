@@ -17,6 +17,8 @@ import StatsSlide from '@/app/c/[slug]/stats-slide'
 import SocialCover from '@/app/c/[slug]/mockups/social-cover'
 import type { EditorAsset, EditorSection, Copy } from './types'
 import { isImageFile, MAX_FILE_MB } from '@/lib/image-compress'
+import { isDriveVideo } from '@/lib/video-utils'
+import { useT } from '@/lib/i18n'
 import { creativesPerScreen, pageAssets } from '@/lib/slides'
 import { maxAssetsFor } from './types'
 
@@ -142,6 +144,7 @@ export default function SlideCanvas({
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
+  const t = useT()
   const [isDragOver, setIsDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -379,6 +382,12 @@ export default function SlideCanvas({
                       onFocus={e => { e.currentTarget.style.borderColor = 'rgba(64,225,211,0.3)' }}
                       onBlur={e => { e.currentTarget.style.borderColor = 'var(--admin-border)' }}
                     />
+                    {/* Staff-only: the client never sees this. On iPhones Drive's
+                        embed draws its own controls over Safari's, and nothing on
+                        our side can change what happens inside Google's player. */}
+                    {isDriveVideo(asset.url || '') && (
+                      <p className="text-xs leading-snug px-1" style={{ color: '#f59e0b' }}>{t('campaigns.driveVideoHint')}</p>
+                    )}
                     <input type="text" value={asset.caption} onChange={e => onUpdateAsset(asset.id, { caption: e.target.value })}
                       placeholder="כיתוב" dir="auto"
                       className="w-full px-3 py-2.5 rounded-lg text-sm outline-none transition-all duration-200" style={videoFieldStyle}
