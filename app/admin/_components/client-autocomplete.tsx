@@ -2,6 +2,10 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { ChevronDown, Plus, User } from 'lucide-react'
+import { filterClients, resolveTypedClient } from '@/lib/client-match'
+import { clientNameKey } from '@/lib/client-name'
+import { useConfirm } from './confirm-dialog'
+import { useT } from '@/lib/i18n'
 
 export interface ClientOption {
   id: string
@@ -30,6 +34,8 @@ export default function ClientAutocomplete({
   dir = 'ltr',
   inputStyle = {},
 }: ClientAutocompleteProps) {
+  const t = useT()
+  const confirm = useConfirm()
   const [clients, setClients] = useState<ClientOption[]>([])
   const [open, setOpen] = useState(false)
   const [filter, setFilter] = useState('')
@@ -45,27 +51,54 @@ export default function ClientAutocomplete({
       .catch(() => {})
   }, [workspaceId])
 
+  const emit = useCallback((name: string, clientId: string | null) => {
+    onChange(name)
+    onClientChange?.(name, clientId)
+  }, [onChange, onClientChange])
+
+  /**
+   * Commit what was typed — on Enter or a click outside. Typing itself never
+   * reaches the parent: the campaign editor autosaves, and the server turned
+   * each half-typed name into a new client ("או", "HAR" on 2026-09-08). A
+   * name that already exists in any spelling selects that client; a new one
+   * needs a yes (lib/client-match.ts).
+   */
+  const commitTyped = useCallback(async () => {
+    setOpen(false)
+    const r = resolveTypedClient(filter, value, clients)
+    setFilter('')
+    if (r.kind === 'unchanged') return
+    if (r.kind === 'clear') { emit('', null); return }
+    if (r.kind === 'existing') { emit(r.client.name, r.client.id); return }
+    const similar = r.similar.length ? ' ' + t('clients.createSimilar').replace('{names}', r.similar.map(c => c.name).join(' · ')) : ''
+    const ok = await confirm({
+      title: t('clients.createTitle'),
+      message: t('clients.createMessage').replace('{name}', r.name) + similar,
+      confirmLabel: t('clients.createOk'),
+    })
+    if (ok) emit(r.name, null)
+  }, [filter, value, clients, emit, confirm, t])
+
+  const commitRef = useRef(commitTyped)
+  useEffect(() => { commitRef.current = commitTyped }, [commitTyped])
+  const openRef = useRef(open)
+  useEffect(() => { openRef.current = open }, [open])
+
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false)
+      if (openRef.current && containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        void commitRef.current()
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const emit = useCallback((name: string, clientId: string | null) => {
-    onChange(name)
-    onClientChange?.(name, clientId)
-  }, [onChange, onClientChange])
-
   const inputValue = open ? filter : value
-  const filtered = clients.filter(c =>
-    !filter || c.name.toLowerCase().includes(filter.toLowerCase())
-  )
+  const filtered = filterClients(filter, clients)
   const trimmed = filter.trim()
-  const showAddNew = trimmed && !clients.some(c => c.name.toLowerCase() === trimmed.toLowerCase())
+  // Hidden when an existing client matches in any spelling — pick that one.
+  const showAddNew = trimmed && !clients.some(c => clientNameKey(c.name) === clientNameKey(trimmed) || c.name === trimmed)
 
   function handleSelect(c: ClientOption) {
     emit(c.name, c.id)
@@ -73,6 +106,7 @@ export default function ClientAutocomplete({
     setOpen(false)
   }
 
+  // The explicit "add as new client" row is itself the confirmation.
   function handleAddNew() {
     emit(trimmed, null)
     setFilter('')
@@ -80,10 +114,20 @@ export default function ClientAutocomplete({
   }
 
   function handleInputChange(val: string) {
+    // Filter only — see commitTyped for why typing is never emitted.
     setFilter(val)
-    // Free typing → clear the resolved id; backend will find-or-create on save
-    emit(val, null)
     if (!open) setOpen(true)
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      if (filtered.length === 1 && trimmed) handleSelect(filtered[0])
+      else void commitTyped()
+    } else if (e.key === 'Escape') {
+      setFilter('')
+      setOpen(false)
+    }
   }
 
   function handleFocus() {
@@ -110,6 +154,7 @@ export default function ClientAutocomplete({
           type="text"
           value={inputValue}
           onChange={e => handleInputChange(e.target.value)}
+          onKeyDown={handleKeyDown}
           onFocus={handleFocus}
           onBlur={handleBlurBorder}
           placeholder={placeholder}
@@ -173,7 +218,7 @@ export default function ClientAutocomplete({
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
             >
               <Plus className="w-3.5 h-3.5 flex-shrink-0" />
-              <span className="font-medium">הוסף &quot;{trimmed}&quot; כלקוח חדש</span>
+              <span className="font-medium">{t('clients.addAsNew').replace('{name}', trimmed)}</span>
             </button>
           )}
         </div>
