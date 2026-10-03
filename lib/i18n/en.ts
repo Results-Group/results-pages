@@ -378,6 +378,7 @@ const en: Record<TranslationKey, string> = {
   'campaigns.urlSection': 'Campaign URL',
   'campaigns.urlLabel': 'URL',
   'campaigns.urlHint': 'The public link sent to the client. Changing it breaks links already shared.',
+  'campaigns.urlFollowsName': 'Until publishing, the URL follows the campaign name. Edit it here and it stays as you typed it.',
   'campaigns.schedulingSection': 'Scheduling',
   'campaigns.publishSchedule': 'Publish Schedule',
   'campaigns.publishScheduleHint': 'The presentation will not be available to the client until this date.',

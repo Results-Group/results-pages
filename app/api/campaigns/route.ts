@@ -133,6 +133,8 @@ export async function POST(request: NextRequest) {
       created_by: session.userId,
       workspace_id: workspaceId || undefined,
       client_id: clientId,
+      // A URL derived from the name keeps following it while this is a draft.
+      slug_auto: !body.slug && (status || 'draft') === 'draft',
     })
 
     await logAudit({ actor: session, action: 'create', entity_type: 'campaign', entity_id: campaign.id, entity_label: campaign.campaign_name, workspace_id: workspaceId })

@@ -376,6 +376,7 @@ const he = {
   'campaigns.urlSection': 'כתובת הקמפיין',
   'campaigns.urlLabel': 'כתובת (URL)',
   'campaigns.urlHint': 'הכתובת הציבורית שתישלח ללקוח. שינוי הכתובת ישבור לינקים שכבר נשלחו.',
+  'campaigns.urlFollowsName': 'עד הפרסום הכתובת מתעדכנת לפי שם הקמפיין. אם תשנו אותה כאן, היא תישאר כמו שהקלדתם.',
   'campaigns.schedulingSection': 'תזמון',
   'campaigns.publishSchedule': 'תזמון פרסום',
   'campaigns.publishScheduleHint': 'המצגת לא תהיה זמינה ללקוח עד למועד זה.',

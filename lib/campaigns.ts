@@ -69,6 +69,8 @@ export interface Campaign {
   workspace_id: string | null
   deleted_at: string | null
   is_template?: boolean
+  /** The URL still follows the name: nobody typed it and it was never published. See lib/campaign-slug. */
+  slug_auto?: boolean
   monday_feedback_item_id?: string | null
   created_at: string
   updated_at: string
@@ -162,6 +164,7 @@ export async function createCampaign(data: {
   workspace_id?: string
   client_id?: string | null
   is_template?: boolean
+  slug_auto?: boolean
 }): Promise<Campaign> {
   const hashedPw = data.password ? await bcrypt.hash(data.password, 12) : null
   const insertData: Record<string, unknown> = {
@@ -177,6 +180,7 @@ export async function createCampaign(data: {
     password: hashedPw,
   }
   if (data.is_template) insertData.is_template = true
+  if (data.slug_auto) insertData.slug_auto = true
   if (data.created_by) insertData.created_by = data.created_by
   if (data.workspace_id) insertData.workspace_id = data.workspace_id
   if (data.client_id !== undefined) insertData.client_id = data.client_id
@@ -220,6 +224,7 @@ export async function updateCampaign(
   if (data.copies !== undefined) updateData.copies = data.copies
   if (data.is_template !== undefined) updateData.is_template = data.is_template
   if (data.closing_title !== undefined) updateData.closing_title = data.closing_title
+  if (data.slug_auto !== undefined) updateData.slug_auto = data.slug_auto
 
   // Optimistic concurrency: when the caller passes the updated_at it loaded,
   // only write if the row hasn't changed since — otherwise a second editor's

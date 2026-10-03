@@ -66,7 +66,7 @@ export default function EditCampaignPage() {
           },
           sections,
         }
-        setInitial({ campaignId, doc, slug: data.slug || null, status: data.status || 'draft', updatedAt: data.updated_at || null, viewStats: data.view_stats || null })
+        setInitial({ campaignId, doc, slug: data.slug || null, slugAuto: !!data.slug_auto, status: data.status || 'draft', updatedAt: data.updated_at || null, viewStats: data.view_stats || null })
         setLoading(false)
       })
       .catch(() => { setError('שגיאה בטעינת הקמפיין'); setLoading(false) })

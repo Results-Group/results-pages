@@ -7,6 +7,7 @@ import { findOrCreateClient, validateClientForWorkspace } from '@/lib/clients'
 import { logAudit } from '@/lib/audit'
 import { captureException } from '@/lib/logger'
 import { slugifyPath } from '@/lib/slug'
+import { slugForName, urlFollowsName } from '@/lib/campaign-slug'
 import { supabase } from '@/lib/supabase'
 import { parseJson } from '@/lib/http'
 import { getDeckViewRows } from '@/lib/deck-views'
@@ -61,6 +62,9 @@ export async function PUT(
     const { data: body, error: parseError } = await parseJson<Partial<Omit<Campaign, 'id' | 'created_at'>> & { base_updated_at?: string }>(request)
     if (parseError) return parseError
     baseUpdatedAt = body.base_updated_at
+    // Server-owned: a client that sent slug_auto: true could make a published
+    // campaign's link follow its next rename.
+    delete body.slug_auto
 
     // Custom campaign URL. The slug is the public link, so it must be
     // ASCII-safe and unique; a clash is reported as 409 rather than surfacing
@@ -78,11 +82,29 @@ export async function PUT(
           .neq('id', id)
           .maybeSingle()
         if (taken) {
-          return NextResponse.json({ error: `הכתובת "${desired}" כבר תפוסה בקמפיין אחר` }, { status: 409 })
+          // `code` tells the editor this 409 is not a concurrent edit — that one
+          // locks the editor until a reload, which a taken URL must not do.
+          return NextResponse.json({ error: `הכתובת "${desired}" כבר תפוסה בקמפיין אחר`, code: 'slug_taken' }, { status: 409 })
         }
       }
       body.slug = desired
+      // Typed by hand, so it stops following the name.
+      if (existing.slug_auto) body.slug_auto = false
+    } else if (urlFollowsName(existing, body)) {
+      // Nobody typed this URL and the campaign is still a draft, so it follows
+      // the name (lib/campaign-slug). Same tail, new base; a clash only re-rolls
+      // the tail, so an autosave never fails over a URL nobody chose.
+      const randomTail = () => crypto.randomUUID().slice(0, 6)
+      let next = slugForName(existing.slug, body.campaign_name as string, randomTail)
+      for (let i = 0; next && i < 5; i++) {
+        // No deleted_at filter: the UNIQUE constraint covers soft-deleted rows.
+        const { data: taken } = await supabase.from('campaigns').select('id').eq('slug', next).neq('id', id).limit(1)
+        if (!taken?.length) { body.slug = next; break }
+        next = next.replace(/[a-z0-9]{6}$/, randomTail())
+      }
     }
+    // Publishing fixes the URL: from here on it may be in the client's hands.
+    if (body.status === 'published' && existing.slug_auto) body.slug_auto = false
 
     // Moving the campaign to another workspace requires permission there too
     // `!== undefined`, not truthiness: `workspace_id: null` is falsy, so the

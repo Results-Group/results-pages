@@ -72,6 +72,9 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       workspace_id: source.workspace_id || undefined,
       client_id: source.client_id,
       is_template: asTemplate,
+      // The copy starts at its source's address; renaming it moves the URL
+      // (lib/campaign-slug), the same as a campaign created from scratch.
+      slug_auto: true,
     })
 
     try {

@@ -39,6 +39,8 @@ export interface EditorInitial {
   campaignId?: string | null
   doc: CampaignDocument
   slug?: string | null
+  /** The URL still follows the campaign name (server-owned; see lib/campaign-slug). */
+  slugAuto?: boolean
   status?: 'draft' | 'published' | 'archived'
   updatedAt?: string | null
   /** Outside (non-team) views of the public deck, from GET /api/campaigns/[id]. */
@@ -54,6 +56,7 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
   const [campaignId, setCampaignId] = useState<string | null>(initial.campaignId ?? null)
   const [slug, setSlug] = useState<string | null>(initial.slug ?? null)
   const [slugDirty, setSlugDirty] = useState(false)
+  const [slugAuto, setSlugAuto] = useState(!!initial.slugAuto)
   const [status, setStatus] = useState<'draft' | 'published' | 'archived'>(initial.status ?? 'draft')
   const [activeId, setActiveId] = useState<string | null>(initial.doc.sections[0]?.id ?? null)
   const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop')
@@ -188,8 +191,9 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
   // Sync server-resolved fields (slug, client_id) back into local state.
   // clientId is compared against the latest doc before dispatch so an
   // identical value doesn't dirty the document and re-trigger the autosave.
-  const syncFromServer = useCallback((data: { slug?: string | null; client_id?: string | null }) => {
+  const syncFromServer = useCallback((data: { slug?: string | null; slug_auto?: boolean; client_id?: string | null }) => {
     if (data.slug) { setSlug(data.slug); setSlugDirty(false) }
+    if (typeof data.slug_auto === 'boolean') setSlugAuto(data.slug_auto)
     const serverClientId = data.client_id ?? null
     if (serverClientId && serverClientId !== docRef.current.meta.clientId) {
       setMeta({ clientId: serverClientId })
@@ -295,7 +299,9 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
           }),
         })
         const data = await res.json()
-        if (res.status === 409) {
+        // A taken URL is a 409 too, but not a concurrent edit: it falls through
+        // to the ordinary error below instead of locking the editor.
+        if (res.status === 409 && data.code !== 'slug_taken') {
           // Another tab/editor saved since we loaded — stop autosaving so we
           // don't clobber their changes, and tell the user to reload.
           conflictRef.current = true
@@ -930,7 +936,8 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
             onGenerateCopy={generateCopy}
             onApplyContentToAll={applyContentToAll}
             slug={slug}
-            onSlugChange={v => { setSlug(v); setSlugDirty(true) }}
+            slugFollowsName={slugAuto && status === 'draft'}
+            onSlugChange={v => { setSlug(v); setSlugDirty(true); setSlugAuto(false) }}
             campaignId={campaignId}
           />
         </aside>
@@ -964,7 +971,8 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
               onGenerateCopy={generateCopy}
               onApplyContentToAll={applyContentToAll}
               slug={slug}
-              onSlugChange={v => { setSlug(v); setSlugDirty(true) }}
+              slugFollowsName={slugAuto && status === 'draft'}
+              onSlugChange={v => { setSlug(v); setSlugDirty(true); setSlugAuto(false) }}
               campaignId={campaignId}
             />
           </div>

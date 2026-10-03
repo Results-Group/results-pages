@@ -30,7 +30,7 @@ function SectionDivider({ label }: { label?: string }) {
 }
 
 export default function Inspector({
-  section, meta, onUpdateSection, onUpdateMeta, onUploadLogo, uploadingLogo, passwordDirty, onPasswordDirty, onGenerateCopy, onApplyContentToAll, slug, onSlugChange, campaignId,
+  section, meta, onUpdateSection, onUpdateMeta, onUploadLogo, uploadingLogo, passwordDirty, onPasswordDirty, onGenerateCopy, onApplyContentToAll, slug, slugFollowsName, onSlugChange, campaignId,
 }: {
   section: EditorSection | null
   meta: CampaignMeta
@@ -43,6 +43,8 @@ export default function Inspector({
   onGenerateCopy?: (section: EditorSection) => Promise<{ captions: string[]; titles: string[]; grounded: boolean } | null>
   onApplyContentToAll?: () => void
   slug?: string | null
+  /** Draft whose URL nobody typed: renaming the campaign moves it. */
+  slugFollowsName?: boolean
   onSlugChange?: (slug: string) => void
   /** Needed to upload the cover mockup images; null while the draft is unsaved. */
   campaignId?: string | null
@@ -586,6 +588,11 @@ export default function Inspector({
                   {slug && (
                     <p className="text-[10px] mt-2 break-all" dir="ltr" style={{ color: 'rgba(64,225,211,0.65)' }}>
                       /c/{slug}
+                    </p>
+                  )}
+                  {slugFollowsName && (
+                    <p className="text-[10px] mt-1.5" style={{ color: 'var(--admin-text-muted)' }}>
+                      {t('campaigns.urlFollowsName')}
                     </p>
                   )}
                   <p className="text-[10px] mt-1.5" style={{ color: 'var(--admin-text-muted)' }}>
