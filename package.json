@@ -27,7 +27,6 @@
     "lucide-react": "^1.21.0",
     "mysql2": "^3.22.5",
     "next": "^16.2.12",
-    "pdf-lib": "^1.17.1",
     "postcss": "^8.5.25",
     "puppeteer-core": "^24.43.1",
     "react": "19.2.7",

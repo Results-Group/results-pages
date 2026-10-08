@@ -1,10 +1,15 @@
 // PDF export of a campaign deck, for the client (deck header) and the team
 // (editor). Headless Chrome opens the deck in its stacked PDF render
-// (/c/<slug>?pdf=<token> → app/_deck/PdfDeck), every slide is screenshotted on
-// its own at DPR 2, and pdf-lib binds the shots into one page per slide — so
-// the file looks exactly like the deck on screen, whatever browser or phone
-// asked for it. window.print() could not promise that: each browser lays out
-// print differently, and mockups sized to the window broke across pages.
+// (/c/<slug>?pdf=<token> → app/_deck/PdfDeck) and prints it — one page per
+// slide, each page as tall as its slide, so nothing is cut or shrunk. The file
+// looks like the deck on screen whatever browser or phone asked for it, which
+// window.print() could not promise: each browser lays out print its own way,
+// and mockups sized to the window broke across pages.
+//
+// Printed, not screenshotted: text stays vector (sharp at any zoom, selectable)
+// and links stay clickable on their own. Screenshots were tried first and were
+// sharp locally, but on Vercel — software rendering, no GPU — each one took
+// ~9s, and a 21-slide deck ran out of time at slide 12 (2026-10-08).
 //
 // The file is cached in Storage under a fingerprint of everything the reader
 // sees (lib/deck-pdf.ts:deckPdfFingerprint): a second download of the same
@@ -13,7 +18,6 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import type { Browser } from 'puppeteer-core'
-import { PDFDocument, PDFName, PDFString } from 'pdf-lib'
 import { launchBrowser } from '@/lib/pdf-browser'
 import { getCampaignById, downloadAsset, saveDeckPdf, pruneDeckPdfs } from '@/lib/campaigns'
 import { buildDeckForCampaign } from '@/lib/campaign-deck'
@@ -23,24 +27,20 @@ import { verifyAccessToken, signRenderToken } from '@/lib/content-access'
 import { rateLimit } from '@/lib/rate-limit'
 import { captureException, logger } from '@/lib/logger'
 import {
-  PDF_DPR, PDF_VIEWPORT, deckExportAccess, deckPdfFingerprint, deckPdfPath,
-  deckPdfFileName, pdfContentDisposition, pageSizePt, linkRectToPdf, type LinkBox,
+  PDF_VIEWPORT, PDF_IMAGE_SCALE, PDF_JPEG_QUALITY, deckExportAccess, deckPdfFingerprint,
+  deckPdfPath, deckPdfFileName, pdfContentDisposition, printPageCss,
 } from '@/lib/deck-pdf'
 
 export const runtime = 'nodejs'
-// A cold start pays ~5s for the Chromium pack, then the deck loads once and
-// each slide takes a fraction of a second to capture. Measured locally: a
-// 61-slide deck (Helga, 27 ads) took 22s — Vercel's CPU is slower, so the
-// limit leaves twice that and more.
+// Measured locally with Vercel's software rendering: a 61-slide deck (Helga,
+// 27 ads) in 23s. Vercel's CPU is slower than a laptop's, so the limit leaves
+// several times that.
 export const maxDuration = 120
 
 /** Give up before Vercel kills the function, so the user gets a message, not a dropped connection. */
 const RENDER_BUDGET_MS = 110_000
 /** A third-party landing page that never loads must not hold the whole export. */
 const IFRAME_WAIT_MS = 8_000
-// 85 at DPR 2 is indistinguishable from 90 on screen and in print, and keeps a
-// 60-slide deck near 25MB instead of 31.
-const JPEG_QUALITY = 85
 
 interface Ctx { params: Promise<{ id: string }> }
 
@@ -105,7 +105,8 @@ export async function GET(req: NextRequest, { params }: Ctx) {
     browser = await launchBrowser()
     mark('launch')
     const page = await browser.newPage()
-    await page.setViewport({ ...PDF_VIEWPORT, deviceScaleFactor: PDF_DPR })
+    await page.setViewport({ ...PDF_VIEWPORT, deviceScaleFactor: 1 })
+    // Screen styles in print: the deck's own look, not a print stylesheet.
     await page.emulateMediaType('screen')
     await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }])
 
@@ -141,67 +142,69 @@ export async function GET(req: NextRequest, { params }: Ctx) {
     }, IFRAME_WAIT_MS)
     mark('ready')
 
-    // Every page's link areas, in CSS px from that page's top-left.
-    const links = await page.evaluate(() => {
-      return Array.from(document.querySelectorAll<HTMLElement>('[data-pdf-slide]')).map(section => {
-        const s = section.getBoundingClientRect()
-        return Array.from(section.querySelectorAll<HTMLAnchorElement>('a[data-pdf-link]'))
-          .filter(a => /^https?:\/\//i.test(a.href))
-          .map(a => {
-            const r = a.getBoundingClientRect()
-            return { href: a.href, box: { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height } }
-          })
-      })
-    }) as { href: string; box: LinkBox }[][]
-
-    const sections = await page.$$('[data-pdf-slide]')
-    if (sections.length === 0) throw new Error('Deck rendered no slides')
-
-    const pdf = await PDFDocument.create()
-    pdf.setTitle(`${campaign.client} - ${campaign.campaign_name}`)
-    pdf.setAuthor('Results Digital')
-    pdf.setCreator('Results Digital')
-
-    for (let i = 0; i < sections.length; i++) {
-      if (Date.now() - started > RENDER_BUDGET_MS) {
-        throw new Error(`Deck PDF over budget at slide ${i + 1}/${sections.length} (${JSON.stringify(marks)})`)
+    // Chrome's PDF writer embeds a JPEG as it is but every other image —
+    // our WebP creatives — as raw, losslessly packed pixels: a 21-slide deck
+    // came out at 62MB. So each opaque image is re-encoded as JPEG at twice
+    // its displayed size (still retina-sharp; 9.7MB). Images with
+    // transparency (logos) stay as they are — a JPEG would give them a box.
+    const images = await page.evaluate(async (scaleFactor: number, quality: number) => {
+      const out = { jpeg: 0, kept: 0 }
+      for (const img of Array.from(document.images)) {
+        if (!img.naturalWidth || /\.jpe?g(\?|$)/i.test(img.currentSrc)) { out.kept++; continue }
+        const r = img.getBoundingClientRect()
+        if (r.width < 2 || r.height < 2) { out.kept++; continue }
+        const scale = Math.min(1, (r.width * scaleFactor) / img.naturalWidth)
+        const w = Math.max(1, Math.round(img.naturalWidth * scale))
+        const h = Math.max(1, Math.round(img.naturalHeight * scale))
+        try {
+          const canvas = document.createElement('canvas')
+          canvas.width = w
+          canvas.height = h
+          const ctx = canvas.getContext('2d')
+          if (!ctx) { out.kept++; continue }
+          ctx.drawImage(img, 0, 0, w, h)
+          const px = ctx.getImageData(0, 0, w, h).data
+          let opaque = true
+          for (let i = 3; i < px.length; i += 16) if (px[i] < 250) { opaque = false; break }
+          if (!opaque) { out.kept++; continue }
+          const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, 'image/jpeg', quality))
+          if (!blob) { out.kept++; continue }
+          img.removeAttribute('srcset')
+          img.src = URL.createObjectURL(blob)
+          await img.decode().catch(() => {})
+          out.jpeg++
+        } catch {
+          // A cross-origin image (no CORS) can't be read back: printed as it is.
+          out.kept++
+        }
       }
-      // Only this slide on the page while it is shot. A shot of an element
-      // below the fold makes Chrome rasterise the whole document, and on
-      // Vercel — software rendering, no GPU — a 21-slide deck's page took
-      // ~9s a shot and ran out of time at slide 12 (2026-10-08). Two frames
-      // let the mockups' resize observers settle after the swap.
-      await page.evaluate((idx: number) => new Promise<void>(resolve => {
-        document.querySelectorAll<HTMLElement>('[data-pdf-slide]').forEach((el, k) => {
-          el.style.display = k === idx ? '' : 'none'
-        })
-        window.scrollTo(0, 0)
-        requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 50)))
-      }), i)
-      const shot = await sections[i].screenshot({ type: 'jpeg', quality: JPEG_QUALITY })
-      const image = await pdf.embedJpg(shot)
-      const size = pageSizePt(image.width, image.height)
-      const pdfPage = pdf.addPage([size.width, size.height])
-      pdfPage.drawImage(image, { x: 0, y: 0, width: size.width, height: size.height })
+      return out
+    }, PDF_IMAGE_SCALE, PDF_JPEG_QUALITY)
+    mark('images')
 
-      const annots = (links[i] || []).flatMap(({ href, box }) => {
-        const rect = linkRectToPdf(box, size)
-        if (!rect) return []
-        return [pdf.context.register(pdf.context.obj({
-          Type: 'Annot',
-          Subtype: 'Link',
-          Rect: rect,
-          Border: [0, 0, 0],
-          A: { Type: 'Action', S: 'URI', URI: PDFString.of(href) },
-        }))]
+    // A page per slide, sized to the slide (named @page rules), and the slide
+    // pinned to that height so a print-time reflow can't spill onto a page of
+    // its own.
+    const pages = await page.evaluate((title: string) => {
+      const sections = Array.from(document.querySelectorAll<HTMLElement>('[data-pdf-slide]'))
+      const heights = sections.map(s => Math.ceil(s.getBoundingClientRect().height))
+      sections.forEach((s, i) => {
+        s.style.setProperty('page', `slide-${i}`)
+        s.style.height = `${heights[i]}px`
+        s.style.minHeight = '0'
       })
-      if (annots.length) pdfPage.node.set(PDFName.of('Annots'), pdf.context.obj(annots))
-    }
+      document.title = title
+      return heights
+    }, `${campaign.client} - ${campaign.campaign_name}`)
+    if (pages.length === 0) throw new Error('Deck rendered no slides')
+    await page.addStyleTag({ content: printPageCss(PDF_VIEWPORT.width, pages) })
 
-    mark('shots')
-    const bytes = await pdf.save()
+    const remaining = RENDER_BUDGET_MS - (Date.now() - started)
+    if (remaining < 5_000) throw new Error(`Deck PDF over budget before printing (${JSON.stringify(marks)})`)
+    const bytes = await page.pdf({ printBackground: true, preferCSSPageSize: true, timeout: remaining })
+    mark('print')
     logger.info('deck pdf rendered', {
-      campaignId: campaign.id, pages: sections.length, bytes: bytes.length, ms: Date.now() - started, ...marks,
+      campaignId: campaign.id, pages: pages.length, bytes: bytes.length, ...images, ...marks,
     })
 
     // The cache is an optimisation: a failed upload still hands over the file.

@@ -26,8 +26,8 @@ export default function VideoPlayer({
   aspectRatio?: string
 }) {
   const [showEmbed, setShowEmbed] = useState(false)
-  // PDF export: no embed to play, so the poster links to the video instead
-  // (data-pdf-link turns it into a clickable area of the page).
+  // PDF export: no embed to play, so the poster links to the video instead —
+  // the printed PDF keeps it a clickable link.
   const { pdf } = useDeckRenderMode()
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(() => getVideoThumbnail(url))
   // Social video ads are often square or vertical. Forcing 16:9 cropped ~44% off
@@ -91,7 +91,7 @@ export default function VideoPlayer({
               <PlayButton />
             </button>
           ) : url ? (
-            <a href={url} target="_blank" rel="noopener noreferrer" data-pdf-link className="absolute inset-0 flex items-center justify-center group">
+            <a href={url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 flex items-center justify-center group">
               <PlayButton />
             </a>
           ) : (

@@ -7,8 +7,8 @@ import { DeckRenderModeProvider } from './render-mode'
 /**
  * The deck as the PDF export captures it: every page stacked, one
  * `<section data-pdf-slide>` per PDF page, and none of DeckShell's chrome —
- * no header, progress, footer nav, keyboard or parallax. The route screenshots
- * each section on its own (app/api/campaigns/[id]/pdf).
+ * no header, progress, footer nav, keyboard or parallax. The route prints it,
+ * each section on a page of its own size (app/api/campaigns/[id]/pdf).
  *
  * The root keeps DeckShell's class and brand-colour variables so every slide
  * renders with the same rules as on screen; only `.pdf-mode` rules differ.

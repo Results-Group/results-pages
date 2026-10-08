@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   deckExportAccess, deckPdfFingerprint, deckPdfPath, isDeckPdfCachePath,
-  deckPdfFileName, pdfContentDisposition, pageSizePt, linkRectToPdf,
+  deckPdfFileName, pdfContentDisposition, printPageCss,
 } from '@/lib/deck-pdf'
 import { remainingHeight } from '@/lib/deck-viewport'
 import { fileNameFromDisposition } from '@/lib/deck-pdf-client'
@@ -93,20 +93,16 @@ describe('deck PDF file name', () => {
   })
 })
 
-describe('screenshot → PDF page', () => {
-  it('one point per CSS pixel: a DPR-2 shot of a 1600×900 slide is a 1600×900 page', () => {
-    expect(pageSizePt(3200, 1800)).toEqual({ width: 1600, height: 900 })
-    // A taller slide gets a taller page, not a cropped or shrunk one.
-    expect(pageSizePt(3200, 2600)).toEqual({ width: 1600, height: 1300 })
+describe('printed pages', () => {
+  it('give every slide a page of its own size — a taller slide a taller page', () => {
+    const css = printPageCss(1600, [900, 1214.4])
+    expect(css).toContain('@page slide-0{size:1600px 900px;margin:0}')
+    // Rounded up: a page a fraction short spills the slide's last pixel row onto a page of its own.
+    expect(css).toContain('@page slide-1{size:1600px 1215px;margin:0}')
   })
 
-  it('flips a link box onto PDF’s bottom-left origin', () => {
-    expect(linkRectToPdf({ x: 100, y: 50, w: 200, h: 40 }, { width: 1600, height: 900 })).toEqual([100, 810, 300, 850])
-  })
-
-  it('clamps a link to the page, and drops one that is entirely off it', () => {
-    expect(linkRectToPdf({ x: -20, y: 880, w: 100, h: 60 }, { width: 1600, height: 900 })).toEqual([0, 0, 80, 20])
-    expect(linkRectToPdf({ x: 10, y: 950, w: 100, h: 40 }, { width: 1600, height: 900 })).toBeNull()
+  it('paint the deck background behind the page edge', () => {
+    expect(printPageCss(1600, [900])).toMatch(/html,body\{margin:0!important;padding:0!important;background:#090c0e\}/)
   })
 })
 

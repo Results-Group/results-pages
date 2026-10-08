@@ -1306,10 +1306,10 @@
 .campaign-pres .slide-index-item.is-chapter .slide-index-name{font-weight:800;color:var(--brand-cyan);letter-spacing:0.3px}
 
 /* ── PDF export (app/_deck/PdfDeck.tsx, app/api/campaigns/[id]/pdf) ──
-   The server's headless capture: every page stacked, each screenshotted on its
-   own. Each page is a full 1600×900 frame carrying its own background — the
+   The server's headless capture: every page stacked, each printed on a page
+   of its own. Each page is a full 1600×900 frame carrying its own background — the
    deck's fixed background layers would paint only once, behind page one.
-   Nothing moves: a screenshot taken mid-animation is a half-drawn slide. */
+   Nothing moves: a capture taken mid-animation is a half-drawn slide. */
 .campaign-pres.pdf-mode{min-height:0}
 .campaign-pres.pdf-mode *,
 .campaign-pres.pdf-mode *::before,

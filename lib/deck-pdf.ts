@@ -1,7 +1,7 @@
 // PDF export of a campaign deck (app/api/campaigns/[id]/pdf). The rules and
 // the arithmetic live here, free of browser and storage code, so the tests can
-// hold them: who may export, when a cached file is still the deck, and how a
-// screenshot becomes a page.
+// hold them: who may export, when a cached file is still the deck, and how the
+// printed pages are sized.
 
 import { createHash } from 'crypto'
 
@@ -11,12 +11,14 @@ import { createHash } from 'crypto'
  * commit is folded into the fingerprint too, so this is for local runs and for
  * an explicit "regenerate everything".
  */
-export const PDF_FORMAT_VERSION = 2
+export const PDF_FORMAT_VERSION = 3
 
 /** CSS viewport the deck is rendered at. A page is this wide, at least this tall. */
 export const PDF_VIEWPORT = { width: 1600, height: 900 } as const
-/** Device pixel ratio of the capture: 2 = retina-sharp text and images. */
-export const PDF_DPR = 2
+/** Images are re-encoded at this multiple of their displayed size: 2 = retina-sharp. */
+export const PDF_IMAGE_SCALE = 2
+/** JPEG quality of those images (canvas.toBlob, 0–1). */
+export const PDF_JPEG_QUALITY = 0.88
 
 export type ExportAccess =
   | { ok: true; staff: boolean }
@@ -110,31 +112,14 @@ export function pdfContentDisposition(fileName: string, slug: string): string {
 }
 
 /**
- * A page is the screenshot at its CSS size: one PDF point per CSS pixel, so the
- * deck prints at the size it is read on screen and the DPR-2 pixels make it
- * sharp when zoomed.
+ * Print CSS giving every slide a page of its own, exactly its size: one named
+ * @page per slide (`page: slide-<i>` is set on the slide itself). One CSS px
+ * per point, so a slide prints at the size it is read on screen; a slide
+ * taller than the screen gets a taller page instead of being cut or shrunk.
  */
-export function pageSizePt(imageWidthPx: number, imageHeightPx: number, dpr = PDF_DPR): { width: number; height: number } {
-  return { width: imageWidthPx / dpr, height: imageHeightPx / dpr }
-}
-
-export interface LinkBox { x: number; y: number; w: number; h: number }
-
-/**
- * A link's box, measured in CSS pixels from the slide's top-left, as a PDF
- * annotation rectangle [x1, y1, x2, y2] — PDF's origin is bottom-left, so y
- * flips. `scale` converts CSS px to points (page width ÷ slide width). Clamped
- * to the page; null when nothing of it is left.
- */
-export function linkRectToPdf(
-  box: LinkBox,
-  page: { width: number; height: number },
-  scale = 1,
-): [number, number, number, number] | null {
-  const x1 = Math.max(0, box.x * scale)
-  const x2 = Math.min(page.width, (box.x + box.w) * scale)
-  const top = Math.max(0, box.y * scale)
-  const bottom = Math.min(page.height, (box.y + box.h) * scale)
-  if (x2 - x1 < 1 || bottom - top < 1) return null
-  return [x1, page.height - bottom, x2, page.height - top]
+export function printPageCss(width: number, heights: number[]): string {
+  return [
+    'html,body{margin:0!important;padding:0!important;background:#090c0e}',
+    ...heights.map((h, i) => `@page slide-${i}{size:${width}px ${Math.max(1, Math.ceil(h))}px;margin:0}`),
+  ].join('\n')
 }

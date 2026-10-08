@@ -173,7 +173,6 @@ export default function LandingPageMockup({ url, caption }: { url?: string; capt
                     href={openHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    data-pdf-link
                     className="flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded shrink-0"
                     style={{ background: 'rgba(255,255,255,0.12)', color: '#fff' }}
                     title="פתח בטאב חדש"
