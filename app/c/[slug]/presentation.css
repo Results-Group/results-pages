@@ -70,17 +70,21 @@
    agency's mark on the deck, and tying it to brand_color made it disappear
    entirely for a client whose colour is black. */
 .campaign-pres .pres-header .brand{font-size:1.15rem;font-weight:900;letter-spacing:0.5px;background:linear-gradient(135deg,var(--results-cyan),var(--results-green));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.campaign-pres .pres-header .header-right{display:flex;align-items:center;gap:12px}
-/* The agency badge: white and client-independent, like the title beside it.
-   Nudged down so it sits below the header's centre line rather than level with
-   the campaign title. */
-.campaign-pres .pres-header .campaign-badge{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:24px;padding:5px 18px;font-size:0.78rem;color:#fff;letter-spacing:0.3px;margin-top:8px}
-.campaign-pres .pdf-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(243,213,109,0.06);border:1px solid rgba(243,213,109,0.15);border-radius:24px;padding:5px 18px;font-size:0.78rem;color:var(--brand-yellow);font-family:'Ping',sans-serif;cursor:pointer;transition:all 0.3s;white-space:nowrap}
-.campaign-pres .pdf-btn:hover:not(:disabled){background:rgba(243,213,109,0.12);box-shadow:0 0 20px rgba(243,213,109,0.1);border-color:rgba(243,213,109,0.3)}
+.campaign-pres .pres-header .header-right{display:flex;align-items:center;gap:10px}
+/* Header actions (share, PDF) and the agency badge are one row: the same
+   34px pill, centred on the same line. Mismatched heights, radii and a badge
+   nudged 8px down read as "too tight and not aligned" (client deck review,
+   2026-10-08). The badge is a label, not a button — no hover, and set a
+   little apart from the actions. */
+.campaign-pres .deck-action{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:34px;padding:0 16px;border-radius:999px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.88);font-family:'Ping',sans-serif;font-size:0.8rem;font-weight:700;line-height:1;white-space:nowrap;cursor:pointer;transition:background .2s,border-color .2s}
+.campaign-pres .deck-action svg{flex-shrink:0}
+.campaign-pres .deck-action:hover:not(:disabled){background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.26)}
+.campaign-pres .deck-action:focus-visible{outline:2px solid var(--brand-cyan);outline-offset:2px}
+.campaign-pres .pres-header .campaign-badge{display:inline-flex;align-items:center;height:34px;padding:0 16px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);font-size:0.78rem;color:#fff;letter-spacing:0.3px;line-height:1;white-space:nowrap;margin-inline-start:8px}
 .campaign-pres .pdf-btn:disabled{opacity:0.4;cursor:default}
 .campaign-pres .pdf-btn[aria-busy="true"]{opacity:0.75;cursor:progress}
 .campaign-pres .pdf-btn-wrap{position:relative;display:inline-flex}
-.campaign-pres .pdf-btn-spin{width:12px;height:12px;border:2px solid rgba(243,213,109,0.25);border-top-color:var(--brand-yellow);border-radius:50%;animation:pdf-btn-spin .8s linear infinite}
+.campaign-pres .pdf-btn-spin{width:12px;height:12px;border:2px solid rgba(255,255,255,0.25);border-top-color:currentColor;border-radius:50%;animation:pdf-btn-spin .8s linear infinite}
 @keyframes pdf-btn-spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion: reduce){.campaign-pres .pdf-btn-spin{animation-duration:2.4s}}
 /* Under the button, not beside it: the header has no room for a sentence. */
@@ -517,6 +521,7 @@
   .campaign-pres .pres-header{padding:10px 14px;gap:10px}
   .campaign-pres .pres-header .campaign-badge{display:none}
   .campaign-pres .pres-header .header-right{gap:8px;flex-shrink:0}
+  .campaign-pres .deck-action{height:32px;padding:0 12px;font-size:0.75rem}
   .campaign-pres .pres-header .brand{
     font-size:0.92rem;letter-spacing:0.2px;min-width:0;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;

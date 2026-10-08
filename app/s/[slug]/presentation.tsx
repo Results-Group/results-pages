@@ -51,7 +51,7 @@ export default function StrategyPresentation({
       headerTitle={`${clientName} — ${docName}`}
       variantClass="pos-deck"
       lang={lang}
-      headerExtra={<ShareButton title={`${clientName} — ${docName}`} lang={lang} />}
+      headerExtra={<ShareButton title={`${clientName} — ${docName}`} lang={lang} className="deck-action" />}
       hideFooterOn={i => slides[i].type === 'closing'}
       renderSlide={i => {
         const slide = slides[i]

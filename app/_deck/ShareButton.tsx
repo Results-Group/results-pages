@@ -32,7 +32,9 @@ export default function ShareButton({ title, lang = 'he', className }: { title: 
 
   return (
     <button type="button" onClick={share} className={className} aria-label={lang === 'en' ? 'Share' : 'שיתוף'}
-      style={{
+      // A deck header styles its buttons as one set (.deck-action); the inline
+      // look is for pages that don't.
+      style={className ? undefined : {
         display: 'inline-flex', alignItems: 'center', gap: 6,
         padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 700,
         background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)',

@@ -33,7 +33,7 @@ export default function PdfButton({ campaignId, fileName, lang = 'he' }: { campa
 
   return (
     <span className="pdf-btn-wrap">
-      <button type="button" className="pdf-btn" onClick={run} disabled={busy} aria-busy={busy}>
+      <button type="button" className="deck-action pdf-btn" onClick={run} disabled={busy} aria-busy={busy}>
         {busy ? (
           <span className="pdf-btn-spin" aria-hidden />
         ) : (

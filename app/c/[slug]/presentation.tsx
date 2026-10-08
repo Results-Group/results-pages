@@ -477,7 +477,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
       // The closing slide carries its own sign-off.
       hideFooterOn={i => deckSlides[i].type === 'closing'}
       headerExtra={<>
-        <ShareButton title={`${clientName} — ${campaignName}`} lang={lang} />
+        <ShareButton title={`${clientName} — ${campaignName}`} lang={lang} className="deck-action" />
         {/* No campaignId in the editor's full preview: nothing to export yet there. */}
         {campaignId && <PdfButton campaignId={campaignId} fileName={`${clientName} - ${campaignName}.pdf`} lang={lang} />}
         {showFeedback && feedbackSlides.length > 0 ? (
