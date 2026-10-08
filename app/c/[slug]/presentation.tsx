@@ -946,16 +946,22 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
       {assets.length > 0 && !isCarousel && (!plain || isLanding) && (
         <CaptionExpansionProvider>
         <div ref={gridRef} className={`assets-grid ${isStory ? 'story-grid' : isLanding ? 'landing-grid' : 'standard-grid'} count-${Math.min(assets.length, 4)}`}>
-          {assets.map((asset, i) => (
+          {assets.map((asset, i) => {
+            // A video is an asset with a video link, whatever its type: an image
+            // asset that later got a YouTube link kept type 'image' and its old
+            // graphic, so pressing play also opened that graphic in the
+            // lightbox, on top of the video (ziv-videos, 2026-10-08).
+            const enlargeable = asset.type !== 'video' && !(asset.url && parseVideoUrl(asset.url))
+            return (
             <div
               key={asset.id}
               className="mockup-wrapper rp-anim rp-up"
               onClick={() => {
                 const url = asset.file_path ? assetProxyUrl(asset.file_path) : (asset.public_url || '')
-                if (url && asset.type !== 'video') onAssetClick({ url, caption: activeCopyBody || asset.caption, slideKey: slide.key, assetId: asset.id })
+                if (url && enlargeable) onAssetClick({ url, caption: activeCopyBody || asset.caption, slideKey: slide.key, assetId: asset.id })
               }}
               style={{
-                cursor: asset.type !== 'video' ? 'pointer' : 'default',
+                cursor: enlargeable ? 'pointer' : 'default',
                 // Stagger without JS — Framer's rAF-driven variants left mockups
                 // below the fold stranded at opacity 0 when animations were paused.
                 animationDelay: `${Math.min(i, 6) * 0.08}s`,
@@ -969,7 +975,8 @@ function CreativesSlide({ slide, activeCopyIdx, onActiveCopyChange, onAssetClick
                 captionOverride={activeCopyBody}
               />
             </div>
-          ))}
+            )
+          })}
         </div>
         {/* Stories sit two-up even on phones; only a vertical stack needs the cue. */}
         {assets.length > 1 && !isStory && (
