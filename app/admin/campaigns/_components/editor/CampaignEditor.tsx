@@ -786,7 +786,7 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
             href={whatsappUpdateUrl({ title: doc.meta.campaignName.trim() || 'הקמפיין', url: `${typeof window !== 'undefined' ? window.location.origin : ''}/c/${slug}` })}
             target="_blank"
             rel="noopener noreferrer"
-            title="הלקוח כבר צפה בקמפיין. השינויים מופיעים אצלו מיד, והשקפים שהשתנו מסומנים אצלו כ'עודכן'."
+            title="הלקוח כבר צפה בקמפיין. השינויים מופיעים אצלו מיד — שלחו לו הודעה שיש מה לראות."
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
             style={{ background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.35)', color: '#25d366' }}
           >

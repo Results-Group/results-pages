@@ -27,7 +27,6 @@ const SocialCover = dynamic(() => import('./mockups/social-cover'), { loading: m
 import { CaptionExpansionProvider } from './mockups/AdCaption'
 import StatsSlide from './stats-slide'
 import MoreBelowCue from './more-below-cue'
-import { deckSnapshot, changedSlides, slideIdentity, seenStorageKey, parseSnapshot } from '@/lib/deck-changes'
 import { untitledCreativeLabels } from '@/lib/slide-labels'
 import { parseVideoUrl } from '@/lib/video-utils'
 import { assetProxyUrl } from '@/lib/asset-url'
@@ -92,34 +91,15 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   const coverSlide = slides.find(s => s.type === 'cover')
   const deckSlides = isReport ? slides.filter(s => s.type !== 'cover') : slides
 
-  // "Updated since your last visit" (lib/deck-changes.ts). Computed once per
-  // visit against the snapshot this browser stored last time, then the new
-  // snapshot is stored — so the marks hold for this whole visit and clear on
-  // the next. The ref keeps React's dev double-effect from comparing the deck
-  // with the snapshot it wrote a moment earlier.
-  const [changedIds, setChangedIds] = useState<Set<string>>(() => new Set())
-  const [changesDismissed, setChangesDismissed] = useState(false)
-  const snapshotDone = useRef(false)
-  useEffect(() => {
-    // The PDF capture is not a visit: it would mark nothing (a fresh browser
-    // has no snapshot) and must not store one either.
-    if (!campaignId || snapshotDone.current || pdfMode) return
-    snapshotDone.current = true
-    const current = deckSnapshot(deckSlides)
-    try {
-      const key = seenStorageKey(campaignId)
-      const changed = changedSlides(parseSnapshot(localStorage.getItem(key)), current)
-      if (changed.size) setChangedIds(changed)
-      localStorage.setItem(key, JSON.stringify({ at: new Date().toISOString(), slides: current }))
-    } catch { /* private mode / blocked storage: simply no marks */ }
-  }, [campaignId, deckSlides, pdfMode])
+  // There was an "updated since your last visit" banner, per-slide pill and
+  // slide-list mark here (lib/deck-changes.ts against a localStorage
+  // snapshot). Removed 2026-10-08 at the team's request — clients found it
+  // nagging. The snapshot itself still keys the PDF cache.
   // Untitled creative slides named by chapter + ad kind (lib/slide-labels.ts).
   // Story decks only: report decks already show the chapter as the tab.
   const storyLabels = isReport
     ? []
     : untitledCreativeLabels(deckSlides, m => (dict as Record<string, string>)[`public.slideKind.${m}`] ?? '', t('public.partOf'))
-  const changedIdx = deckSlides.map((s, i) => (changedIds.has(slideIdentity(s, i)) ? i : -1)).filter(i => i >= 0)
-  const isChanged = (i: number) => changedIds.has(slideIdentity(deckSlides[i], i))
 
   // Remember the reviewer's name locally so they type it once, ever
   const reviewerKey = campaignId ? `rp_reviewer_${campaignId}` : ''
@@ -337,19 +317,6 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
    */
   const renderSlide = (i: number, navigate?: (n: number) => void, copyIdx?: number) => (
       <>
-        {changedIdx.length > 0 && !changesDismissed && (() => {
-          const next = changedIdx.find(idx => idx > i) ?? (changedIdx[0] !== i ? changedIdx[0] : undefined)
-          return (
-            <div className="deck-updated-banner" role="status">
-              <span>{changedIdx.length === 1 ? t('public.updatedBannerOne') : t('public.updatedBanner').replace('{n}', String(changedIdx.length))}</span>
-              {next !== undefined && navigate && (
-                <button type="button" className="deck-updated-next" onClick={() => navigate(next)}>{t('public.updatedNext')}</button>
-              )}
-              <button type="button" className="deck-updated-close" onClick={() => setChangesDismissed(true)} aria-label={t('public.updatedDismiss')}>×</button>
-            </div>
-          )
-        })()}
-        {isChanged(i) && <div className="deck-updated-pill">{t('public.updatedSinceVisit')}</div>}
         {/* Report: the hero lockup opens the first tab, numbers right under
             it — the cover is not a tab of its own (source-report shape). */}
         {isReport && i === 0 && coverSlide && (
@@ -464,7 +431,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   return (
     <DeckShell
       count={deckSlides.length}
-      labelFor={i => { const l = storyLabels[i] || getSlideLabel(deckSlides[i]); return isChanged(i) ? `${l || `${t('public.slide')} ${i + 1}`} · ${t('public.updatedMark')}` : l }}
+      labelFor={i => storyLabels[i] || getSlideLabel(deckSlides[i])}
       isChapter={i => !isReport && deckSlides[i].type === 'divider' && !!deckSlides[i].title}
       headerTitle={`${clientName} — ${campaignName}`}
       brandColor={brandColor}
