@@ -97,9 +97,13 @@ export async function GET(req: NextRequest, { params }: Ctx) {
   if (limited) return limited
 
   const started = Date.now()
+  // Where the time went, for the log line — Vercel's CPU is far slower than a laptop's.
+  const marks: Record<string, number> = {}
+  const mark = (name: string) => { marks[name] = Date.now() - started }
   let browser: Browser | null = null
   try {
     browser = await launchBrowser()
+    mark('launch')
     const page = await browser.newPage()
     await page.setViewport({ ...PDF_VIEWPORT, deviceScaleFactor: PDF_DPR })
     await page.emulateMediaType('screen')
@@ -135,6 +139,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
       // Layout that reacts to the images and fonts above (mockup heights) settles.
       await new Promise(r => setTimeout(r, 400))
     }, IFRAME_WAIT_MS)
+    mark('ready')
 
     // Every page's link areas, in CSS px from that page's top-left.
     const links = await page.evaluate(() => {
@@ -159,8 +164,20 @@ export async function GET(req: NextRequest, { params }: Ctx) {
 
     for (let i = 0; i < sections.length; i++) {
       if (Date.now() - started > RENDER_BUDGET_MS) {
-        throw new Error(`Deck PDF over budget at slide ${i + 1}/${sections.length}`)
+        throw new Error(`Deck PDF over budget at slide ${i + 1}/${sections.length} (${JSON.stringify(marks)})`)
       }
+      // Only this slide on the page while it is shot. A shot of an element
+      // below the fold makes Chrome rasterise the whole document, and on
+      // Vercel — software rendering, no GPU — a 21-slide deck's page took
+      // ~9s a shot and ran out of time at slide 12 (2026-10-08). Two frames
+      // let the mockups' resize observers settle after the swap.
+      await page.evaluate((idx: number) => new Promise<void>(resolve => {
+        document.querySelectorAll<HTMLElement>('[data-pdf-slide]').forEach((el, k) => {
+          el.style.display = k === idx ? '' : 'none'
+        })
+        window.scrollTo(0, 0)
+        requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 50)))
+      }), i)
       const shot = await sections[i].screenshot({ type: 'jpeg', quality: JPEG_QUALITY })
       const image = await pdf.embedJpg(shot)
       const size = pageSizePt(image.width, image.height)
@@ -181,9 +198,10 @@ export async function GET(req: NextRequest, { params }: Ctx) {
       if (annots.length) pdfPage.node.set(PDFName.of('Annots'), pdf.context.obj(annots))
     }
 
+    mark('shots')
     const bytes = await pdf.save()
     logger.info('deck pdf rendered', {
-      campaignId: campaign.id, pages: sections.length, bytes: bytes.length, ms: Date.now() - started,
+      campaignId: campaign.id, pages: sections.length, bytes: bytes.length, ms: Date.now() - started, ...marks,
     })
 
     // The cache is an optimisation: a failed upload still hands over the file.
@@ -196,7 +214,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
 
     return pdfResponse(bytes, disposition, 'miss')
   } catch (err) {
-    captureException(err, { route: 'GET /api/campaigns/[id]/pdf', id, ms: Date.now() - started })
+    captureException(err, { route: 'GET /api/campaigns/[id]/pdf', id, ms: Date.now() - started, ...marks })
     return NextResponse.json({ error: RENDER_FAILED }, { status: 500 })
   } finally {
     // Chromium doesn't idle cheaply; always kill it (see the landing-page route).
