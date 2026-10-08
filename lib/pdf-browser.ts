@@ -17,6 +17,13 @@ const CHROMIUM_PACK_URL =
 
 export async function launchBrowser(): Promise<Browser> {
   if (process.env.VERCEL) {
+    // chromium-min unpacks the shared libraries Chromium needs (libnss3 and
+    // friends, its al2023 bundle) only when it recognises AWS Lambda on Node
+    // 20/22 — by AWS_EXECUTION_ENV or AWS_LAMBDA_JS_RUNTIME, which Vercel's
+    // runtime does not set. Without them every launch failed with "libnss3.so:
+    // cannot open shared object file" (2026-10-08). It reads the variable when
+    // the module loads, so this must come before the import below.
+    process.env.AWS_LAMBDA_JS_RUNTIME ??= 'nodejs22.x'
     // Dynamic import so the local `npm run dev` process doesn't try to unpack
     // the 50 MB chromium tarball just to boot.
     const chromium = (await import('@sparticuz/chromium-min')).default
