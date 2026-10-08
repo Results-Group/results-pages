@@ -432,6 +432,30 @@ export async function deleteCampaignAssets(campaignId: string) {
   }
 }
 
+// ── Deck PDF cache (app/api/campaigns/[id]/pdf) ──
+// Flat under the campaign's folder (lib/deck-pdf.ts:deckPdfPath), so
+// deleteCampaignAssets — which lists one level — purges it with the rest.
+
+export async function saveDeckPdf(path: string, bytes: Uint8Array): Promise<void> {
+  // Blob, not the raw bytes — see compressAndUploadImage.
+  const { error } = await supabase.storage.from(ASSETS_BUCKET).upload(path, new Blob([bytes as BlobPart], { type: 'application/pdf' }), {
+    contentType: 'application/pdf',
+    upsert: true,
+    cacheControl: '31536000',
+  })
+  if (error) throw new Error(`Deck PDF upload failed: ${error.message}`)
+}
+
+/** Removes the campaign's older deck PDFs — each edit renders a new one. */
+export async function pruneDeckPdfs(campaignId: string, keepPath: string): Promise<void> {
+  const prefix = `campaigns/${campaignId}`
+  const { data } = await supabase.storage.from(ASSETS_BUCKET).list(prefix, { limit: 100, search: 'deck-' })
+  const stale = (data || [])
+    .map(f => `${prefix}/${f.name}`)
+    .filter(p => p !== keepPath && /\/deck-[0-9a-f]{16}\.pdf$/.test(p))
+  if (stale.length > 0) await supabase.storage.from(ASSETS_BUCKET).remove(stale)
+}
+
 // ── Enrich campaign with public URLs ──
 
 export function enrichCampaignUrls(campaign: Campaign): Campaign {

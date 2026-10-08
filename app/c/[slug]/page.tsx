@@ -1,13 +1,10 @@
 import { notFound } from 'next/navigation'
 import { cookies, headers } from 'next/headers'
 import { Metadata } from 'next'
-import { getCampaignBySlug, enrichCampaignUrls, normalizeCopies } from '@/lib/campaigns'
-import type { CampaignSection } from '@/lib/campaigns'
-import { getClientById } from '@/lib/clients'
+import { getCampaignBySlug } from '@/lib/campaigns'
 import { getSession, canStaffViewResource } from '@/lib/auth'
-import { verifyAccessToken } from '@/lib/content-access'
-import { assetProxyUrl } from '@/lib/asset-url'
-import { buildCampaignSlides } from '@/lib/slides'
+import { verifyAccessToken, verifyRenderToken } from '@/lib/content-access'
+import { buildDeckForCampaign } from '@/lib/campaign-deck'
 import CampaignPresentation from './presentation'
 import PasswordGate from './password-gate'
 import MaintenancePage from './maintenance'
@@ -108,7 +105,13 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
   // role is NOT enough, or an editor in workspace A reads workspace B's
   // password-protected decks and drafts.
   const isEditorOrAdmin = await canStaffViewResource(rawCampaign.workspace_id)
-  const isPreview = sp.preview === '1' && isEditorOrAdmin
+  // The PDF export's own headless browser (app/api/campaigns/[id]/pdf). The
+  // route already checked the requester may see this deck, and signed that into
+  // the token: it opens the password gate and stays out of the view count, and
+  // opens a draft only when the requester was staff. A bad or stale token
+  // changes nothing — the URL then renders exactly like the plain deck.
+  const render = typeof sp.pdf === 'string' ? await verifyRenderToken(sp.pdf, rawCampaign.id) : null
+  const isPreview = (sp.preview === '1' && isEditorOrAdmin) || !!render?.staff
 
   if (rawCampaign.status === 'draft' && !isPreview) {
     return <ContentUnavailable variant="not_published" />
@@ -128,7 +131,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     return <ContentUnavailable variant="expired" />
   }
 
-  if (rawCampaign.password && !isEditorOrAdmin) {
+  if (rawCampaign.password && !isEditorOrAdmin && !render) {
     const cookieStore = await cookies()
     const accessToken = cookieStore.get(`cmp_${rawCampaign.id}`)?.value
     const tokenValid = accessToken ? await verifyAccessToken(accessToken, rawCampaign.id, rawCampaign.password) : false
@@ -139,7 +142,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
 
   // A real client view: every gate passed and there is no staff session.
   // Fire-and-forget — tracking must never slow or break the render.
-  if (!session) {
+  if (!session && !render) {
     const hdrs = await headers()
     recordDeckView({
       content_type: 'campaign',
@@ -149,35 +152,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     }).catch(() => {})
   }
 
-  const campaign = enrichCampaignUrls(rawCampaign)
-
-  // Effective branding: campaign logo overrides, else inherit the client's logo/color
-  let effectiveLogoPath = campaign.logo_path
-  let brandColor: string | null = null
-  if (campaign.client_id) {
-    const client = await getClientById(campaign.client_id)
-    if (client) {
-      brandColor = client.brand_color
-      if (!effectiveLogoPath) effectiveLogoPath = client.logo_path
-    }
-  }
-  const clientLogoUrl = effectiveLogoPath ? assetProxyUrl(effectiveLogoPath) : null
-  // The cover eyebrow reads as an English date line (e.g. "July 20, 2026"),
-  // not a Hebrew one — it sits alongside the English brand lockup.
-  const formattedDate = new Date(campaign.created_at).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric',
-  })
-
-  const slides = buildCampaignSlides({
-    client: campaign.client,
-    campaignName: campaign.campaign_name,
-    concept: campaign.concept,
-    copies: normalizeCopies(campaign.copies),
-    clientLogoUrl,
-    date: formattedDate,
-    sections: (campaign.sections || []) as CampaignSection[],
-    closingTitle: campaign.closing_title,
-  })
+  const { campaign, slides, brandColor } = await buildDeckForCampaign(rawCampaign)
 
   return (
     <CampaignPresentation
@@ -186,6 +161,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
       campaignName={campaign.campaign_name}
       brandColor={brandColor}
       campaignId={campaign.id}
+      pdfMode={!!render}
       // Client-facing approval/commenting is intentionally off: the deck is a
       // presentation, and feedback is collected outside it. Flip to `true` to
       // bring back the approval bar, progress counter and pinned comments.

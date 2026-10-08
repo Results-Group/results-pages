@@ -78,6 +78,13 @@
 .campaign-pres .pdf-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(243,213,109,0.06);border:1px solid rgba(243,213,109,0.15);border-radius:24px;padding:5px 18px;font-size:0.78rem;color:var(--brand-yellow);font-family:'Ping',sans-serif;cursor:pointer;transition:all 0.3s;white-space:nowrap}
 .campaign-pres .pdf-btn:hover:not(:disabled){background:rgba(243,213,109,0.12);box-shadow:0 0 20px rgba(243,213,109,0.1);border-color:rgba(243,213,109,0.3)}
 .campaign-pres .pdf-btn:disabled{opacity:0.4;cursor:default}
+.campaign-pres .pdf-btn[aria-busy="true"]{opacity:0.75;cursor:progress}
+.campaign-pres .pdf-btn-wrap{position:relative;display:inline-flex}
+.campaign-pres .pdf-btn-spin{width:12px;height:12px;border:2px solid rgba(243,213,109,0.25);border-top-color:var(--brand-yellow);border-radius:50%;animation:pdf-btn-spin .8s linear infinite}
+@keyframes pdf-btn-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.campaign-pres .pdf-btn-spin{animation-duration:2.4s}}
+/* Under the button, not beside it: the header has no room for a sentence. */
+.campaign-pres .pdf-btn-error{position:absolute;top:calc(100% + 8px);inset-inline-end:0;z-index:60;width:max-content;max-width:260px;background:#2a1215;border:1px solid rgba(248,113,113,0.4);color:#fecaca;border-radius:10px;padding:8px 12px;font-size:0.75rem;line-height:1.4;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
 
 /* Approval progress (header) */
 .campaign-pres .approval-progress{display:flex;align-items:center;gap:8px;background:rgba(var(--brand-rgb),0.06);border:1px solid rgba(var(--brand-rgb),0.15);border-radius:24px;padding:4px 6px 4px 14px}
@@ -607,25 +614,6 @@
   .campaign-pres .approve-all-btn{font-size:0.66rem;padding:4px 9px}
   .campaign-pres .approval-done-banner{bottom:78px;font-size:0.78rem;padding:10px 14px}
   .campaign-pres .approval-btn{min-width:0;padding:12px 12px}
-}
-
-/* ── Print ── */
-@media print{
-  body.printing-all-slides .campaign-pres .pres-header,
-  body.printing-all-slides .campaign-pres .floating-dock,
-  body.printing-all-slides .campaign-pres .slide-footer-nav,
-  body.printing-all-slides .campaign-pres .pres-footer,
-  body.printing-all-slides .campaign-pres .story-progress{display:none !important}
-  body.printing-all-slides .campaign-pres .bg-noise,
-  body.printing-all-slides .campaign-pres .bg-grid,
-  body.printing-all-slides .campaign-pres .ambient-light,
-  body.printing-all-slides .campaign-pres .ambient-light-2,
-  body.printing-all-slides .campaign-pres .ambient-light-3{display:none !important}
-  body.printing-all-slides .campaign-pres{background:#090c0e !important}
-  body.printing-all-slides .campaign-pres .pres-main{padding:0 !important;max-width:100% !important}
-  body.printing-all-slides *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
-  body.printing-all-slides .campaign-pres .approval-bar{display:none !important}
-  @page{size:landscape;margin:0}
 }
 
 /* ── Client approval bar ── */
@@ -1269,7 +1257,6 @@
 @keyframes cue-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
 @media (prefers-reduced-motion: reduce){.campaign-pres .more-below-cue svg{animation:none}}
 @media print{.campaign-pres .more-below-cue{display:none}}
-body.printing-all-slides .campaign-pres .more-below-cue{display:none}
 
 
 /* ── "Updated since your last visit" (lib/deck-changes.ts) ──
@@ -1299,7 +1286,6 @@ body.printing-all-slides .campaign-pres .more-below-cue{display:none}
   .campaign-pres .deck-updated-next{min-height:36px}
 }
 @media print{.campaign-pres .deck-updated-banner,.campaign-pres .deck-updated-pill{display:none}}
-body.printing-all-slides .campaign-pres .deck-updated-banner,body.printing-all-slides .campaign-pres .deck-updated-pill{display:none}
 
 /* iOS reads two quick taps on the same spot as double-tap-to-zoom. Tapping
    "next" twice to skip a slide zoomed the whole deck in instead, and ate
@@ -1318,3 +1304,34 @@ body.printing-all-slides .campaign-pres .deck-updated-banner,body.printing-all-s
 .campaign-pres .slide-index-item.is-chapter{margin-top:6px;border-top:1px solid rgba(255,255,255,0.06);padding-top:12px}
 .campaign-pres .slide-index-item.is-chapter:first-child{margin-top:0;border-top:0;padding-top:8px}
 .campaign-pres .slide-index-item.is-chapter .slide-index-name{font-weight:800;color:var(--brand-cyan);letter-spacing:0.3px}
+
+/* ── PDF export (app/_deck/PdfDeck.tsx, app/api/campaigns/[id]/pdf) ──
+   The server's headless capture: every page stacked, each screenshotted on its
+   own. Each page is a full 1600×900 frame carrying its own background — the
+   deck's fixed background layers would paint only once, behind page one.
+   Nothing moves: a screenshot taken mid-animation is a half-drawn slide. */
+.campaign-pres.pdf-mode{min-height:0}
+.campaign-pres.pdf-mode *,
+.campaign-pres.pdf-mode *::before,
+.campaign-pres.pdf-mode *::after{animation:none !important;transition:none !important}
+/* Its draw-in animation is what normally takes the dash offset to 0. */
+.campaign-pres.pdf-mode .stats-chart-trend-line{stroke-dashoffset:0}
+.campaign-pres.pdf-mode .more-below-cue,
+.campaign-pres.pdf-mode .deck-updated-banner,
+.campaign-pres.pdf-mode .deck-updated-pill,
+.campaign-pres.pdf-mode .approval-bar,
+/* The PDF shows the first copy variant only — a switcher there can't switch. */
+.campaign-pres.pdf-mode .copy-switch,
+.campaign-pres.pdf-mode .slide-footer-nav{display:none !important}
+.campaign-pres.pdf-mode .pdf-page{
+  position:relative;width:1600px;min-height:900px;
+  display:flex;flex-direction:column;justify-content:center;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 92% -10%,rgba(var(--brand-rgb),0.07) 0%,transparent 45%),
+    radial-gradient(circle at 5% 110%,rgba(91,140,219,0.05) 0%,transparent 45%),
+    linear-gradient(rgba(64,225,211,0.02) 1px,transparent 1px) 0 0/80px 80px,
+    linear-gradient(90deg,rgba(64,225,211,0.02) 1px,transparent 1px) 0 0/80px 80px,
+    var(--bg-dark);
+}
+.campaign-pres.pdf-mode .pdf-page .pres-main{width:100%;padding:56px 48px}

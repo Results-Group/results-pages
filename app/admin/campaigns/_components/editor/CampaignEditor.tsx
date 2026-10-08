@@ -8,8 +8,9 @@ import dynamic from 'next/dynamic'
 import {
   ArrowRight, Copy, Check, ExternalLink, Eye, EyeOff, Monitor, Smartphone,
   Undo2, Redo2, Save, Send, Loader2, CheckCircle2, MessageSquare, X,
-  ChevronLeft, ChevronRight, SlidersHorizontal, Plus,
+  ChevronLeft, ChevronRight, SlidersHorizontal, Plus, FileDown,
 } from 'lucide-react'
+import { downloadDeckPdf } from '@/lib/deck-pdf-client'
 import { assetProxyUrl } from '@/lib/asset-url'
 import { compressImageClient, isImageFile, MAX_FILE_BYTES } from '@/lib/image-compress'
 import { buildCampaignSlides, isReportSections } from '@/lib/slides'
@@ -88,6 +89,7 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
   const [savedThisSession, setSavedThisSession] = useState(false)
   const clientHasSeen = (initial.viewStats?.count ?? 0) > 0
   const [copied, setCopied] = useState(false)
+  const [pdfBusy, setPdfBusy] = useState(false)
   const [toasts, setToasts] = useState<Toast[]>([])
   const [feedback, setFeedback] = useState<Record<string, { status: 'approved' | 'rejected' | 'pending'; comment: string | null; author: string | null }>>({})
   const [showApprovals, setShowApprovals] = useState(false)
@@ -665,6 +667,22 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
     setTimeout(() => setCopied(false), 2000)
   }
 
+  // The PDF is rendered from the saved campaign, so a pending autosave goes
+  // first — otherwise the file misses the edit made a second ago.
+  async function exportPdf() {
+    if (!campaignId || pdfBusy) return
+    setPdfBusy(true)
+    try {
+      if (autosavePending) await save(undefined, { silent: true })
+      const name = [doc.meta.client, doc.meta.campaignName].map(s => s.trim()).filter(Boolean).join(' - ') || slug || 'deck'
+      await downloadDeckPdf(campaignId, `${name}.pdf`)
+    } catch (err) {
+      toast(err instanceof Error && err.message ? err.message : 'יצירת ה-PDF נכשלה, נסו שוב', 'error')
+    } finally {
+      setPdfBusy(false)
+    }
+  }
+
   // ── Full-deck preview slides ──
   const previewSlides = useMemo(() => buildCampaignSlides({
     client: doc.meta.client || 'שם לקוח',
@@ -774,6 +792,15 @@ export default function CampaignEditor({ initial }: { mode: 'new' | 'edit'; init
           >
             <MessageSquare className="w-3.5 h-3.5" /> הלקוח כבר צפה — שלח עדכון
           </a>
+        )}
+        {slug && campaignId && (
+          // The first export of a version renders the whole deck — up to a minute.
+          <button onClick={exportPdf} disabled={pdfBusy} title="הורדת המצגת כ-PDF, עמוד לכל שקף"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 disabled:cursor-progress"
+            style={{ background: 'var(--admin-hover-bg)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-secondary)', opacity: pdfBusy ? 0.75 : 1 }}>
+            {pdfBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
+            {pdfBusy ? 'מכין PDF…' : 'ייצוא PDF'}
+          </button>
         )}
         {slug && (
           <button onClick={copyLink} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"

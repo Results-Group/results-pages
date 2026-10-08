@@ -12,7 +12,8 @@ import dynamic from 'next/dynamic'
 // tab's content, and deferring it would delay exactly what the client came
 // to see. Fixed-height placeholders keep slides from jumping while a chunk
 // lands.
-const mockupLoading = () => <div style={{ minHeight: 320 }} />
+// data-mockup-loading: the PDF export waits until none is left on the page.
+const mockupLoading = () => <div data-mockup-loading style={{ minHeight: 320 }} />
 const InstagramFeedMockup = dynamic(() => import('./mockups/instagram-feed'), { loading: mockupLoading })
 const InstagramStoryMockup = dynamic(() => import('./mockups/instagram-story'), { loading: mockupLoading })
 const InstagramReelsMockup = dynamic(() => import('./mockups/instagram-reels'), { loading: mockupLoading })
@@ -31,7 +32,9 @@ import { untitledCreativeLabels } from '@/lib/slide-labels'
 import { parseVideoUrl } from '@/lib/video-utils'
 import { assetProxyUrl } from '@/lib/asset-url'
 import ShareButton from '@/app/_deck/ShareButton'
+import PdfButton from '@/app/_deck/PdfButton'
 import DeckShell from '@/app/_deck/DeckShell'
+import PdfDeck from '@/app/_deck/PdfDeck'
 import { CoverSlide, ClosingSlide } from '@/app/_deck/cover-slide'
 import he from '@/lib/i18n/he'
 import en from '@/lib/i18n/en'
@@ -44,13 +47,15 @@ interface Props {
   campaignId?: string
   feedbackEnabled?: boolean
   lang?: 'he' | 'en'
+  /** The PDF export's capture (app/_deck/PdfDeck): every slide stacked, nothing interactive. */
+  pdfMode?: boolean
 }
 
 type FeedbackStatus = 'approved' | 'rejected' | 'pending'
 interface SlideFeedback { slide_key: string; status: FeedbackStatus; comment: string | null; author: string | null }
 interface SlidePin { id: string; slide_key: string; asset_id: string | null; x: number; y: number; comment: string | null; author: string | null; resolved: boolean }
 
-export default function CampaignPresentation({ slides, clientName, campaignName, brandColor, campaignId, feedbackEnabled, lang = 'he' }: Props) {
+export default function CampaignPresentation({ slides, clientName, campaignName, brandColor, campaignId, feedbackEnabled, lang = 'he', pdfMode = false }: Props) {
   const dict = lang === 'en' ? en : he
   const t = (key: keyof typeof he) => dict[key] ?? he[key] ?? key
   const [lightboxAsset, setLightboxAsset] = useState<{ url: string; caption?: string; slideKey?: string; assetId?: string } | null>(null)
@@ -96,7 +101,9 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   const [changesDismissed, setChangesDismissed] = useState(false)
   const snapshotDone = useRef(false)
   useEffect(() => {
-    if (!campaignId || snapshotDone.current) return
+    // The PDF capture is not a visit: it would mark nothing (a fresh browser
+    // has no snapshot) and must not store one either.
+    if (!campaignId || snapshotDone.current || pdfMode) return
     snapshotDone.current = true
     const current = deckSnapshot(deckSlides)
     try {
@@ -105,7 +112,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
       if (changed.size) setChangedIds(changed)
       localStorage.setItem(key, JSON.stringify({ at: new Date().toISOString(), slides: current }))
     } catch { /* private mode / blocked storage: simply no marks */ }
-  }, [campaignId, deckSlides])
+  }, [campaignId, deckSlides, pdfMode])
   // Untitled creative slides named by chapter + ad kind (lib/slide-labels.ts).
   // Story decks only: report decks already show the chapter as the tab.
   const storyLabels = isReport
@@ -324,6 +331,136 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
   const groupOf = (index: number) =>
     groups?.find(g => g.indices[0] === index && g.indices.length > 1)
 
+  /**
+   * One slide's content. Shared by the live deck (DeckShell) and the PDF
+   * capture (PdfDeck); `copyIdx` pins the copy variant the PDF shows.
+   */
+  const renderSlide = (i: number, navigate?: (n: number) => void, copyIdx?: number) => (
+      <>
+        {changedIdx.length > 0 && !changesDismissed && (() => {
+          const next = changedIdx.find(idx => idx > i) ?? (changedIdx[0] !== i ? changedIdx[0] : undefined)
+          return (
+            <div className="deck-updated-banner" role="status">
+              <span>{changedIdx.length === 1 ? t('public.updatedBannerOne') : t('public.updatedBanner').replace('{n}', String(changedIdx.length))}</span>
+              {next !== undefined && navigate && (
+                <button type="button" className="deck-updated-next" onClick={() => navigate(next)}>{t('public.updatedNext')}</button>
+              )}
+              <button type="button" className="deck-updated-close" onClick={() => setChangesDismissed(true)} aria-label={t('public.updatedDismiss')}>×</button>
+            </div>
+          )
+        })()}
+        {isChanged(i) && <div className="deck-updated-pill">{t('public.updatedSinceVisit')}</div>}
+        {/* Report: the hero lockup opens the first tab, numbers right under
+            it — the cover is not a tab of its own (source-report shape). */}
+        {isReport && i === 0 && coverSlide && (
+          <div className="report-hero">
+            <CoverSlide
+              clientName={coverSlide.title}
+              headline={coverSlide.subtitle || t('public.coverFallbackHeadline')}
+              eyebrow={coverSlide.date || t('public.coverFallbackEyebrow')}
+              logoUrl={coverSlide.logoUrl}
+              variant="report"
+            />
+          </div>
+        )}
+        {deckSlides[i].type === 'cover' && (
+          <CoverSlide
+            clientName={deckSlides[i].title}
+            headline={deckSlides[i].subtitle || t('public.coverFallbackHeadline')}
+            eyebrow={deckSlides[i].date || t('public.coverFallbackEyebrow')}
+            logoUrl={deckSlides[i].logoUrl}
+            variant="default"
+          />
+        )}
+        {deckSlides[i].type === 'concept' && <ConceptSlide slide={deckSlides[i]} />}
+        {deckSlides[i].type === 'divider' && (
+          <>
+            <DividerSlide slide={deckSlides[i]} index={i} />
+            {/* The launch group's overview, to the source report's shape:
+                the main film embedded under its accent label, then a card
+                per creative linking into its sub-tab. */}
+            {(() => {
+              const g = groupOf(i)
+              if (!g || !navigate) return null
+              const mainIdx = g.indices.find(idx => (deckSlides[idx].assets || []).some(a => a.url))
+              const mainAsset = mainIdx !== undefined ? (deckSlides[mainIdx].assets || []).find(a => a.url) : undefined
+              const mainInfo = mainAsset?.url ? parseVideoUrl(mainAsset.url) : null
+              return (
+                <div className="launch-overview rp-anim rp-up rp-d3">
+                  {mainAsset && (
+                    <div className="launch-main">
+                      <div className="launch-main-label">{deckSlides[mainIdx as number].title || mainAsset.caption}</div>
+                      <div className="showcase-frame is-video">
+                        <VideoPlayer url={mainAsset.url || ''} embedUrl={mainInfo?.embedUrl} platform={mainInfo?.platform || 'other'} />
+                      </div>
+                    </div>
+                  )}
+                  <div className="launch-chips">
+                    {g.indices.slice(1).map(idx => {
+                      const mt = deckSlides[idx].mockupType
+                      const isFilm = mt === 'video' || mt === 'instagram_reels'
+                      return (
+                        <button key={idx} className="launch-chip" onClick={() => navigate(idx)}>
+                          <span className="launch-chip-lbl">
+                            {/* A camera on a graphics pane read as a video link —
+                                the icon matches what the sub-tab holds. */}
+                            {isFilm ? (
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" /></svg>
+                            ) : (
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
+                            )}
+                            {getSlideLabel(deckSlides[idx]) || `${t('public.slide')} ${idx + 1}`}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })()}
+          </>
+        )}
+        {deckSlides[i].type === 'distribution' && (
+          <DistributionSlide
+            plan={deckSlides[i].plan}
+            title={deckSlides[i].title}
+            description={deckSlides[i].content}
+            lang={lang}
+          />
+        )}
+        {deckSlides[i].type === 'stats' && (
+          <StatsSlide
+            stats={deckSlides[i].stats}
+            title={deckSlides[i].title}
+            description={deckSlides[i].content}
+            lang={lang}
+          />
+        )}
+        {deckSlides[i].type === 'cover_mockup' && (
+          <SocialCover
+            kind={deckSlides[i].mockupType as 'facebook_cover' | 'youtube_cover'}
+            profile={deckSlides[i].profile}
+            title={deckSlides[i].title}
+            description={deckSlides[i].content}
+          />
+        )}
+        {deckSlides[i].type === 'creatives' && (
+          <CreativesSlide slide={deckSlides[i]} activeCopyIdx={copyIdx ?? activeCopyIdx} onActiveCopyChange={setActiveCopyIdx} onAssetClick={setLightboxAsset} lang={lang} plain={isReport} />
+        )}
+        {deckSlides[i].type === 'closing' && (
+          <ClosingSlide title={deckSlides[i].title} clientName={deckSlides[i].subtitle} />
+        )}
+      </>
+  )
+
+  if (pdfMode) {
+    // One page per slide, with the first copy variant. A page per variant
+    // ran a 27-ad deck to 112 pages, 63MB and past the function's time limit;
+    // the other variants stay in the live deck.
+    const pages = deckSlides.map((_, i) => renderSlide(i, undefined, 0))
+    return <PdfDeck pages={pages} brandColor={brandColor} variantClass={isReport ? 'nav-tabs' : undefined} />
+  }
+
   return (
     <DeckShell
       count={deckSlides.length}
@@ -341,6 +478,8 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
       hideFooterOn={i => deckSlides[i].type === 'closing'}
       headerExtra={<>
         <ShareButton title={`${clientName} — ${campaignName}`} lang={lang} />
+        {/* No campaignId in the editor's full preview: nothing to export yet there. */}
+        {campaignId && <PdfButton campaignId={campaignId} fileName={`${clientName} - ${campaignName}.pdf`} lang={lang} />}
         {showFeedback && feedbackSlides.length > 0 ? (
         <div className={`approval-progress${allApproved ? ' complete' : ''}`}>
           <span className="approval-progress-count">
@@ -355,123 +494,7 @@ export default function CampaignPresentation({ slides, clientName, campaignName,
         </div>
         ) : null}
       </>}
-      renderSlide={(i, navigate) => (
-        <>
-          {changedIdx.length > 0 && !changesDismissed && (() => {
-            const next = changedIdx.find(idx => idx > i) ?? (changedIdx[0] !== i ? changedIdx[0] : undefined)
-            return (
-              <div className="deck-updated-banner" role="status">
-                <span>{changedIdx.length === 1 ? t('public.updatedBannerOne') : t('public.updatedBanner').replace('{n}', String(changedIdx.length))}</span>
-                {next !== undefined && navigate && (
-                  <button type="button" className="deck-updated-next" onClick={() => navigate(next)}>{t('public.updatedNext')}</button>
-                )}
-                <button type="button" className="deck-updated-close" onClick={() => setChangesDismissed(true)} aria-label={t('public.updatedDismiss')}>×</button>
-              </div>
-            )
-          })()}
-          {isChanged(i) && <div className="deck-updated-pill">{t('public.updatedSinceVisit')}</div>}
-          {/* Report: the hero lockup opens the first tab, numbers right under
-              it — the cover is not a tab of its own (source-report shape). */}
-          {isReport && i === 0 && coverSlide && (
-            <div className="report-hero">
-              <CoverSlide
-                clientName={coverSlide.title}
-                headline={coverSlide.subtitle || t('public.coverFallbackHeadline')}
-                eyebrow={coverSlide.date || t('public.coverFallbackEyebrow')}
-                logoUrl={coverSlide.logoUrl}
-                variant="report"
-              />
-            </div>
-          )}
-          {deckSlides[i].type === 'cover' && (
-            <CoverSlide
-              clientName={deckSlides[i].title}
-              headline={deckSlides[i].subtitle || t('public.coverFallbackHeadline')}
-              eyebrow={deckSlides[i].date || t('public.coverFallbackEyebrow')}
-              logoUrl={deckSlides[i].logoUrl}
-              variant="default"
-            />
-          )}
-          {deckSlides[i].type === 'concept' && <ConceptSlide slide={deckSlides[i]} />}
-          {deckSlides[i].type === 'divider' && (
-            <>
-              <DividerSlide slide={deckSlides[i]} index={i} />
-              {/* The launch group's overview, to the source report's shape:
-                  the main film embedded under its accent label, then a card
-                  per creative linking into its sub-tab. */}
-              {(() => {
-                const g = groupOf(i)
-                if (!g || !navigate) return null
-                const mainIdx = g.indices.find(idx => (deckSlides[idx].assets || []).some(a => a.url))
-                const mainAsset = mainIdx !== undefined ? (deckSlides[mainIdx].assets || []).find(a => a.url) : undefined
-                const mainInfo = mainAsset?.url ? parseVideoUrl(mainAsset.url) : null
-                return (
-                  <div className="launch-overview rp-anim rp-up rp-d3">
-                    {mainAsset && (
-                      <div className="launch-main">
-                        <div className="launch-main-label">{deckSlides[mainIdx as number].title || mainAsset.caption}</div>
-                        <div className="showcase-frame is-video">
-                          <VideoPlayer url={mainAsset.url || ''} embedUrl={mainInfo?.embedUrl} platform={mainInfo?.platform || 'other'} />
-                        </div>
-                      </div>
-                    )}
-                    <div className="launch-chips">
-                      {g.indices.slice(1).map(idx => {
-                        const mt = deckSlides[idx].mockupType
-                        const isFilm = mt === 'video' || mt === 'instagram_reels'
-                        return (
-                          <button key={idx} className="launch-chip" onClick={() => navigate(idx)}>
-                            <span className="launch-chip-lbl">
-                              {/* A camera on a graphics pane read as a video link —
-                                  the icon matches what the sub-tab holds. */}
-                              {isFilm ? (
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" /></svg>
-                              ) : (
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
-                              )}
-                              {getSlideLabel(deckSlides[idx]) || `${t('public.slide')} ${idx + 1}`}
-                            </span>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )
-              })()}
-            </>
-          )}
-          {deckSlides[i].type === 'distribution' && (
-            <DistributionSlide
-              plan={deckSlides[i].plan}
-              title={deckSlides[i].title}
-              description={deckSlides[i].content}
-              lang={lang}
-            />
-          )}
-          {deckSlides[i].type === 'stats' && (
-            <StatsSlide
-              stats={deckSlides[i].stats}
-              title={deckSlides[i].title}
-              description={deckSlides[i].content}
-              lang={lang}
-            />
-          )}
-          {deckSlides[i].type === 'cover_mockup' && (
-            <SocialCover
-              kind={deckSlides[i].mockupType as 'facebook_cover' | 'youtube_cover'}
-              profile={deckSlides[i].profile}
-              title={deckSlides[i].title}
-              description={deckSlides[i].content}
-            />
-          )}
-          {deckSlides[i].type === 'creatives' && (
-            <CreativesSlide slide={deckSlides[i]} activeCopyIdx={activeCopyIdx} onActiveCopyChange={setActiveCopyIdx} onAssetClick={setLightboxAsset} lang={lang} plain={isReport} />
-          )}
-          {deckSlides[i].type === 'closing' && (
-            <ClosingSlide title={deckSlides[i].title} clientName={deckSlides[i].subtitle} />
-          )}
-        </>
-      )}
+      renderSlide={(i, navigate) => renderSlide(i, navigate)}
       renderBelowSlide={i => (showFeedback && isApprovable(deckSlides[i]) ? (
         <ApprovalBar
           key={deckSlides[i].key}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useDeckRenderMode } from '@/app/_deck/render-mode'
 import { getVideoThumbnail, getYouTubeFallbackThumbnail, videoFrameRatio, isDriveVideo, DRIVE_PLAYER_MIN_HEIGHT } from '@/lib/video-utils'
 
 /**
@@ -25,6 +26,9 @@ export default function VideoPlayer({
   aspectRatio?: string
 }) {
   const [showEmbed, setShowEmbed] = useState(false)
+  // PDF export: no embed to play, so the poster links to the video instead
+  // (data-pdf-link turns it into a clickable area of the page).
+  const { pdf } = useDeckRenderMode()
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(() => getVideoThumbnail(url))
   // Social video ads are often square or vertical. Forcing 16:9 cropped ~44% off
   // a 1:1 creative, so the poster's own ratio drives the slot until it plays.
@@ -68,7 +72,7 @@ export default function VideoPlayer({
                 src={thumbnailUrl}
                 alt="Video thumbnail"
                 className="absolute inset-0 w-full h-full object-cover"
-                loading="lazy"
+                loading={pdf ? 'eager' : 'lazy'}
                 onLoad={e => {
                   const img = e.currentTarget
                   if (img.naturalWidth && img.naturalHeight) setPosterRatio(img.naturalWidth / img.naturalHeight)
@@ -82,12 +86,12 @@ export default function VideoPlayer({
             </>
           )}
 
-          {embedUrl ? (
+          {embedUrl && !pdf ? (
             <button onClick={() => setShowEmbed(true)} className="absolute inset-0 flex items-center justify-center group" aria-label="Play video">
               <PlayButton />
             </button>
           ) : url ? (
-            <a href={url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 flex items-center justify-center group">
+            <a href={url} target="_blank" rel="noopener noreferrer" data-pdf-link className="absolute inset-0 flex items-center justify-center group">
               <PlayButton />
             </a>
           ) : (

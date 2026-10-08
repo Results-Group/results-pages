@@ -70,3 +70,39 @@ export async function verifyAccessToken(token: string, resourceId: string, passw
     return false
   }
 }
+
+/**
+ * How long the PDF route's own headless browser has to load the deck. The
+ * token never leaves the server — it rides in the URL the route navigates to —
+ * so it only has to outlive one render.
+ */
+const RENDER_TOKEN_TTL_MS = 2 * 60 * 1000
+
+/**
+ * A ticket for the server's headless browser to render a deck for PDF export
+ * (app/api/campaigns/[id]/pdf): it opens the password gate, keeps the render
+ * out of the client's view count, and — only when `staff` — opens a draft too.
+ * `purpose` keeps it from doubling as an access token, and an access token
+ * (which has no `purpose`) from passing as this.
+ */
+export async function signRenderToken(resourceId: string, opts: { staff: boolean }): Promise<string> {
+  const payload = JSON.stringify({ id: resourceId, purpose: 'pdf', staff: opts.staff, exp: Date.now() + RENDER_TOKEN_TTL_MS })
+  const b64 = btoa(payload)
+  const sig = await hmacSign(b64)
+  return `${b64}.${sig}`
+}
+
+export async function verifyRenderToken(token: string, resourceId: string): Promise<{ staff: boolean } | null> {
+  try {
+    const dotIdx = token.lastIndexOf('.')
+    if (dotIdx < 1) return null
+    const b64 = token.slice(0, dotIdx)
+    if (!(await hmacVerify(b64, token.slice(dotIdx + 1)))) return null
+    const parsed = JSON.parse(atob(b64))
+    if (parsed.purpose !== 'pdf' || parsed.id !== resourceId) return null
+    if (typeof parsed.exp !== 'number' || Date.now() > parsed.exp) return null
+    return { staff: parsed.staff === true }
+  } catch {
+    return null
+  }
+}

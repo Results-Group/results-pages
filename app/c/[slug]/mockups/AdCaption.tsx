@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useMemo, useState } from 'react'
+import { useDeckRenderMode } from '@/app/_deck/render-mode'
 
 /**
  * Ad copy exactly as the advertiser typed it — line breaks and blank lines
@@ -40,11 +41,13 @@ export default function AdCaption({
 }) {
   const shared = useContext(CaptionExpansionContext)
   const [localExpanded, setLocalExpanded] = useState(false)
+  // A PDF can't be clicked open, so it carries the whole copy, every time.
+  const { pdf } = useDeckRenderMode()
 
-  const expanded = shared ? shared.expanded : localExpanded
+  const expanded = pdf || (shared ? shared.expanded : localExpanded)
   const toggle = shared ? shared.toggle : () => setLocalExpanded(v => !v)
 
-  const isLong = text.length > collapseChars
+  const isLong = text.length > collapseChars && !pdf
   // Trim to the last whitespace before the limit so we never cut mid-word.
   const collapsed = isLong ? text.slice(0, collapseChars).replace(/\s+\S*$/, '') : text
   const shown = expanded || !isLong ? text : collapsed

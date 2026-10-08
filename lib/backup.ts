@@ -3,6 +3,7 @@ import { gzipSync } from 'node:zlib'
 import { createClient } from '@supabase/supabase-js'
 import { supabase } from './supabase'
 import { snapshotsToPrune } from './backup-retention'
+import { isDeckPdfCachePath } from './deck-pdf'
 export { snapshotsToPrune } from './backup-retention'
 
 /**
@@ -177,7 +178,12 @@ export async function listAllObjects(): Promise<StorageObject[]> {
   // and no object is downloaded twice in one run; the manifest upsert dedupes
   // again on its own key as the last line of defence.
   const unique = new Map<string, StorageObject>()
-  for (const o of all) unique.set(`${o.bucket}/${o.path}`, o)
+  for (const o of all) {
+    // Deck PDFs are a cache, rebuilt from the campaign on demand — tens of MB
+    // each that would otherwise be copied again after every edit.
+    if (o.bucket === 'campaign-assets' && isDeckPdfCachePath(o.path)) continue
+    unique.set(`${o.bucket}/${o.path}`, o)
+  }
   return [...unique.values()]
 }
 

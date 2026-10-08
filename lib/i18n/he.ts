@@ -482,6 +482,8 @@ const he = {
   'public.copyLabel': 'בחרו נוסח לתצוגה',
   'public.preparing': 'מכין...',
   'public.exportPdf': 'ייצוא PDF',
+  'public.pdfPreparing': 'מכין PDF…',
+  'public.pdfError': 'יצירת ה-PDF נכשלה, נסו שוב',
   'public.previous': 'הקודם',
   'public.next': 'הבא',
   'public.goToSlide': 'מעבר לשקף',

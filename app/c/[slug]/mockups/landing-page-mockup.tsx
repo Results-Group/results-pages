@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { ExternalLink, Monitor, Smartphone } from 'lucide-react'
+import { remainingHeight, stackedSlideTop } from '@/lib/deck-viewport'
 
 /**
  * Landing-page mockup: the page embedded live in a MacBook or an iPhone frame,
@@ -60,8 +61,12 @@ export default function LandingPageMockup({ url, caption }: { url?: string; capt
       if (available <= 0) return
       // Height matters as much as width: a slide is one screen, and sizing off
       // width alone pushed the laptop's base and the phone below the fold.
-      const top = el.getBoundingClientRect().top
-      const heightBudget = Math.max(220, window.innerHeight - top - FOOTER_RESERVE)
+      const heightBudget = Math.max(220, remainingHeight({
+        viewportH: window.innerHeight,
+        elTop: el.getBoundingClientRect().top,
+        slideTop: stackedSlideTop(el),
+        reserve: FOOTER_RESERVE,
+      }))
       if (device === 'mobile') {
         setWidth(Math.min(available, PHONE_MAX, heightBudget * (PHONE_VW / PHONE_VH)))
       } else {
@@ -130,6 +135,8 @@ export default function LandingPageMockup({ url, caption }: { url?: string; capt
                   <iframe
                     src={trimmed}
                     title="Mobile landing preview"
+                    data-pdf-iframe
+                    onLoad={e => { e.currentTarget.dataset.pdfLoaded = '1' }}
                     loading="lazy"
                     referrerPolicy="no-referrer"
                     scrolling="no"
@@ -166,6 +173,7 @@ export default function LandingPageMockup({ url, caption }: { url?: string; capt
                     href={openHref}
                     target="_blank"
                     rel="noopener noreferrer"
+                    data-pdf-link
                     className="flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded shrink-0"
                     style={{ background: 'rgba(255,255,255,0.12)', color: '#fff' }}
                     title="פתח בטאב חדש"
@@ -195,6 +203,8 @@ export default function LandingPageMockup({ url, caption }: { url?: string; capt
                 <iframe
                   src={trimmed}
                   title="Desktop landing preview"
+                  data-pdf-iframe
+                  onLoad={e => { e.currentTarget.dataset.pdfLoaded = '1' }}
                   loading="lazy"
                   referrerPolicy="no-referrer"
                   scrolling="no"

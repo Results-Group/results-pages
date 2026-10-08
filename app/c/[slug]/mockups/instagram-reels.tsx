@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import VideoPlayer from './VideoPlayer'
 import { useLogoNeedsDarkBackdrop } from './useLogoContrast'
+import { useDeckRenderMode } from '@/app/_deck/render-mode'
+import { remainingHeight, stackedSlideTop } from '@/lib/deck-viewport'
 import type { ReactNode } from 'react'
 
 /** Never smaller than the frame used before this was made fluid. */
@@ -34,6 +36,7 @@ export default function InstagramReels({
   caption?: string
 }) {
   const logoNeedsDark = useLogoNeedsDarkBackdrop(logoUrl)
+  const { pdf } = useDeckRenderMode()
   const wrapRef = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(MIN_W)
 
@@ -47,7 +50,7 @@ export default function InstagramReels({
     const measure = () => {
       const vh = window.visualViewport?.height || window.innerHeight || 0
       if (!vh) return
-      const available = vh - el.getBoundingClientRect().top - CHROME_RESERVE
+      const available = remainingHeight({ viewportH: vh, elTop: el.getBoundingClientRect().top, slideTop: stackedSlideTop(el), reserve: CHROME_RESERVE })
       const next = Math.round(Math.min(MAX_W, Math.max(MIN_W, (available * 9) / 16)))
       // Resizing this element moves nothing above it, but the guard keeps the
       // observer from ping-ponging on sub-pixel changes.
@@ -94,7 +97,10 @@ export default function InstagramReels({
 
             {/* Top / bottom scrims so overlays stay legible over any footage */}
             <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
-            <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-black/85 via-black/40 to-transparent pointer-events-none" />
+            {/* In the PDF the whole caption rises over the footage (and its play
+                button), so the scrim dims the whole frame — as Instagram does
+                behind an opened caption. */}
+            <div className={`absolute inset-x-0 bottom-0 ${pdf && caption ? 'top-0 via-black/65 to-black/35' : 'h-44 via-black/40 to-transparent'} bg-gradient-to-t from-black/85 pointer-events-none`} />
 
             {/* Notch */}
             <div className="absolute top-0 inset-x-0 flex justify-center pt-2 z-20 pointer-events-none">
@@ -163,7 +169,8 @@ export default function InstagramReels({
                 <span dir="ltr" className="px-2 py-[3px] rounded-md text-[11px] font-semibold border border-white/80 text-white shrink-0">Follow</span>
               </div>
               {caption && (
-                <p className="text-white text-[13px] leading-snug line-clamp-3 mb-2 whitespace-pre-line drop-shadow-md" dir="auto">
+                // The PDF can't be tapped open, so its caption is the whole copy.
+                <p className={`text-white text-[13px] leading-snug ${pdf ? '' : 'line-clamp-3 '}mb-2 whitespace-pre-line drop-shadow-md`} dir="auto">
                   {caption}
                 </p>
               )}

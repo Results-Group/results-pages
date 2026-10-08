@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { signAccessToken, verifyAccessToken } from '@/lib/content-access'
+import { signAccessToken, verifyAccessToken, signRenderToken, verifyRenderToken } from '@/lib/content-access'
 
 const REPORT = 'report-123'
 const OTHER = 'report-456'
@@ -39,5 +39,41 @@ describe('content access tokens', () => {
   it('works for resources that have no password', async () => {
     const token = await signAccessToken(REPORT, null)
     expect(await verifyAccessToken(token, REPORT, null)).toBe(true)
+  })
+})
+
+describe('PDF render tokens', () => {
+  it('lets the PDF capture in, carrying whether the requester was staff', async () => {
+    expect(await verifyRenderToken(await signRenderToken(REPORT, { staff: true }), REPORT)).toEqual({ staff: true })
+    expect(await verifyRenderToken(await signRenderToken(REPORT, { staff: false }), REPORT)).toEqual({ staff: false })
+  })
+
+  it('does not open a different deck', async () => {
+    const token = await signRenderToken(REPORT, { staff: true })
+    expect(await verifyRenderToken(token, OTHER)).toBeNull()
+  })
+
+  it('expires after a couple of minutes', async () => {
+    const token = await signRenderToken(REPORT, { staff: true })
+    const realNow = Date.now
+    Date.now = () => realNow() + 3 * 60 * 1000
+    try {
+      expect(await verifyRenderToken(token, REPORT)).toBeNull()
+    } finally {
+      Date.now = realNow
+    }
+  })
+
+  it('and an access token are not interchangeable', async () => {
+    // An access cookie must not open drafts; a render token must not pass as a password.
+    expect(await verifyRenderToken(await signAccessToken(REPORT, 'hunter2'), REPORT)).toBeNull()
+    expect(await verifyAccessToken(await signRenderToken(REPORT, { staff: true }), REPORT, 'hunter2')).toBe(false)
+  })
+
+  it('rejects a tampered payload', async () => {
+    const token = await signRenderToken(REPORT, { staff: false })
+    const [, sig] = token.split('.')
+    const forged = btoa(JSON.stringify({ id: REPORT, purpose: 'pdf', staff: true, exp: Date.now() + 60_000 }))
+    expect(await verifyRenderToken(`${forged}.${sig}`, REPORT)).toBeNull()
   })
 })

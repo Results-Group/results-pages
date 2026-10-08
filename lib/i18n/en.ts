@@ -484,6 +484,8 @@ const en: Record<TranslationKey, string> = {
   'public.copyLabel': 'Choose a version',
   'public.preparing': 'Preparing...',
   'public.exportPdf': 'Export PDF',
+  'public.pdfPreparing': 'Preparing PDF…',
+  'public.pdfError': 'Could not create the PDF, please try again',
   'public.previous': 'Previous',
   'public.next': 'Next',
   'public.goToSlide': 'Go to slide',
