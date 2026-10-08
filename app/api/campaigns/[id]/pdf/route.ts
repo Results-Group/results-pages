@@ -41,6 +41,7 @@ export const maxDuration = 120
 const RENDER_BUDGET_MS = 110_000
 /** A third-party landing page that never loads must not hold the whole export. */
 const IFRAME_WAIT_MS = 8_000
+const EMOJI_FONT_CSS = 'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=block'
 
 interface Ctx { params: Promise<{ id: string }> }
 
@@ -141,6 +142,44 @@ export async function GET(req: NextRequest, { params }: Ctx) {
       await new Promise(r => setTimeout(r, 400))
     }, IFRAME_WAIT_MS)
     mark('ready')
+
+    // Emoji (the Facebook mockups' reactions and Share/Comment/Like icons):
+    // the server's Chromium has no emoji font, and installing one into its
+    // font path was not picked up (2026-10-08). So each emoji gets a span set
+    // in Noto Color Emoji, loaded as a web font — only the glyphs used.
+    await page.addStyleTag({ url: EMOJI_FONT_CSS })
+    await page.addStyleTag({ content: `.pdf-emoji{font-family:'Noto Color Emoji'!important}` })
+    await page.evaluate(async () => {
+      const EMOJI = /\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*\uFE0F?/gu
+      const root = document.querySelector('.campaign-pres')
+      if (!root) return
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+      const nodes: Text[] = []
+      while (walker.nextNode()) {
+        const t = walker.currentNode as Text
+        EMOJI.lastIndex = 0
+        if (EMOJI.test(t.data)) nodes.push(t)
+      }
+      let used = ''
+      for (const t of nodes) {
+        const frag = document.createDocumentFragment()
+        let last = 0
+        for (const m of t.data.matchAll(EMOJI)) {
+          if (m.index > last) frag.append(t.data.slice(last, m.index))
+          const span = document.createElement('span')
+          span.className = 'pdf-emoji'
+          span.textContent = m[0]
+          frag.append(span)
+          used += m[0]
+          last = m.index + m[0].length
+        }
+        if (last < t.data.length) frag.append(t.data.slice(last))
+        t.replaceWith(frag)
+      }
+      if (used) await document.fonts.load(`16px "Noto Color Emoji"`, used).catch(() => [])
+      await document.fonts.ready
+    })
+    mark('emoji')
 
     // Chrome's PDF writer embeds a JPEG as it is but every other image —
     // our WebP creatives — as raw, losslessly packed pixels: a 21-slide deck
