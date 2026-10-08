@@ -8,12 +8,19 @@
 
 import 'server-only'
 import puppeteer, { type Browser } from 'puppeteer-core'
+import { logger } from './logger'
 
 // Sparticuz publishes matched Chromium tarballs per release; this URL must
 // stay in lockstep with the @sparticuz/chromium-min version pinned in
 // package.json (currently 131.0.1) — mismatches cause silent segfaults.
 const CHROMIUM_PACK_URL =
   'https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar'
+
+// The Chromium pack ships no emoji font: in the first deck PDFs the Facebook
+// mockups' reactions (😂❤️👍) and Share/Comment/Like icons were blank. Pinned
+// to a release so the glyphs can't change under a cached PDF.
+const EMOJI_FONT_URL =
+  'https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@v2.047/fonts/NotoColorEmoji.ttf'
 
 export async function launchBrowser(): Promise<Browser> {
   if (process.env.VERCEL) {
@@ -27,6 +34,11 @@ export async function launchBrowser(): Promise<Browser> {
     // Dynamic import so the local `npm run dev` process doesn't try to unpack
     // the 50 MB chromium tarball just to boot.
     const chromium = (await import('@sparticuz/chromium-min')).default
+    // Into ~/.fonts, where the pack's fontconfig looks; cached for the life of
+    // the instance. Emoji are a nicety — a failed download still renders.
+    await chromium.font(EMOJI_FONT_URL).catch(err => {
+      logger.warn('emoji font unavailable for headless Chrome', { error: err instanceof Error ? err.message : String(err) })
+    })
     return puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
